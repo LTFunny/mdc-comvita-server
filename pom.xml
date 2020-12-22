@@ -9,10 +9,10 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>com.aquilaflycloud</groupId>
-  <artifactId>mdc-server</artifactId>
+  <artifactId>mdc-comvita-server</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>mdc-server</name>
+  <name>mdc-comvita-server</name>
   <description>MDC大会员营销系统</description>
 
   <modules>
