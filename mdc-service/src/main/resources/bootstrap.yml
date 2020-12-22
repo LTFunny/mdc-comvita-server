@@ -1,0 +1,17 @@
+server:
+  port: 1343
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: mdc-server
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+        file-extension: yaml
+        shared-dataids: afc-common.yaml
+        refreshable-dataids: afc-common.yaml

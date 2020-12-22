@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aquilaflycloud.mdc.mapper.MemberRewardRecordMapper">
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, member_id, reward_type, reward_value, `source`, remark, create_time,
+    tenant_id, sub_tenant_id, creator_id, creator_org_ids, creator_name, creator_org_name, app_key
+  </sql>
+
+  <select id="normalSelectRank" resultType="com.aquilaflycloud.mdc.result.member.RewardRankResult">
+    select a.*
+    from
+    (
+      select *, sum( reward_value ) as total_reward
+      from
+      (
+        select * from member_reward_record
+        ${ew.customSqlSegment}
+        order by create_time desc
+      ) c
+      group by member_id
+      order by total_reward desc
+    ) a
+    order by
+    a.total_reward desc, a.create_time
+  </select>
+
+  <select id="selectRank" resultType="com.aquilaflycloud.mdc.result.member.RewardRankResult">
+    select a.*
+    from
+    (
+      select *, sum( reward_value ) as total_reward
+      from
+      (
+        select * from member_reward_record
+        ${ew.customSqlSegment}
+        order by create_time desc
+      ) c
+      group by member_id
+      order by total_reward desc
+    ) a
+    order by
+    a.total_reward desc, a.create_time
+  </select>
+</mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aquilaflycloud.mdc.mapper.MemberSignRecordMapper">
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id,member_id,phone_number,app_id,open_id,user_id,nick_name,avatar_url,reward_value_content,create_time,tenant_id,sub_tenant_id,app_key
+  </sql>
+
+  <select id="selectPageByMemberParam" resultType="com.aquilaflycloud.mdc.result.member.MemberSignInfoResult">
+    select a.*, count(1) total_sign
+    from (
+        select * from member_sign_record order by create_time desc limit 0, #{limitCount}
+    ) a
+    ${ew.customSqlSegment}
+  </select>
+
+  <select id="selectContinueSignCount" resultType="com.aquilaflycloud.mdc.result.member.MemberSignContinueResult">
+    select
+      member_id,
+      min( dates ) as min_date,
+      max( dates ) as max_date,
+      max( countday ) continue_count,
+      group_concat( dates ) dates
+    from
+      (
+      select
+        member_id,
+        dates,
+        @countday := ( case when ( @last_uid := member_id and datediff ( dates, @last_date ) = 1 ) then ( @countday + 1 ) else 1 end ) as countday,
+        ( @group_id := ( @group_id + if ( @countday = 1, 1, 0 ) ) ) as group_id,
+        @last_uid := member_id as last_uid,
+        @last_date := dates as last_date
+      from
+        ( select member_id, date_format( create_time, '%Y-%m-%d' ) as dates from member_sign_record
+    <where>
+        tenant_id = #{record.tenantId}
+      <if test="record.appId != null and record.appId != ''">
+        and app_id = #{record.appId}
+      </if>
+      <if test="record.memberId != null">
+        and member_id = #{record.memberId}
+      </if>
+      <if test="record.subTenantId != null">
+        and sub_tenant_id = #{record.subTenantId}
+      </if>
+    </where>
+          order by member_id, date_format( create_time, '%y-%m-%d' ) ) as t1,
+        ( select @countday := 0, @group_id := 0, @last_uid := '', @last_date := '' ) as t2
+      ) as t3
+        ${ew.customSqlSegment}
+  </select>
+</mapper>

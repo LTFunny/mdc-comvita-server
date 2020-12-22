@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.aquilaflycloud</groupId>
+    <artifactId>mdc-server</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>mdc-service</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>mdc-service</name>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <java.version>1.8</java.version>
+    <spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
+    <!-- nacos spring cloud版本号 -->
+    <spring-cloud-alibaba-nacos.version>2.1.1.RELEASE</spring-cloud-alibaba-nacos.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.gitee.sop</groupId>
+      <artifactId>sop-service-common</artifactId>
+      <version>3.1.5-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.aquilaflycloud</groupId>
+      <artifactId>auth-common</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.aquilaflycloud</groupId>
+      <artifactId>ajbcloud-sdk</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.aquilaflycloud</groupId>
+      <artifactId>easypay-sdk</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.aquilaflycloud</groupId>
+      <artifactId>mdc-interface</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.aquilaflycloud</groupId>
+      <artifactId>org-interface</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-openfeign</artifactId>
+    </dependency>
+
+    <!-- 使用nacos注册中心
+       版本 0.2.x.RELEASE 对应的是 Spring Boot 2.x 版本，版本 0.1.x.RELEASE 对应的是 Spring Boot 1.x 版本。
+       https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-alibaba-nacos-discovery
+    -->
+    <dependency>
+      <groupId>com.alibaba.cloud</groupId>
+      <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+      <version>${spring-cloud-alibaba-nacos.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.alibaba.cloud</groupId>
+      <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+      <version>${spring-cloud-alibaba-nacos.version}</version>
+    </dependency>
+    <!-- 注册中心end -->
+
+    <!-- 阿里云调度任务 -->
+    <dependency>
+      <groupId>com.aliyun.schedulerx</groupId>
+      <artifactId>schedulerx2-spring-boot-starter</artifactId>
+      <version>1.1.4.RELEASE</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.binarywang</groupId>
+      <artifactId>weixin-java-open</artifactId>
+      <version>3.9.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.binarywang</groupId>
+      <artifactId>weixin-java-pay</artifactId>
+      <version>3.9.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.alipay.sdk</groupId>
+      <artifactId>alipay-sdk-java</artifactId>
+      <version>4.10.0.ALL</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.alipay.sdk</groupId>
+      <artifactId>alipay-easysdk</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>p6spy</groupId>
+      <artifactId>p6spy</artifactId>
+      <version>3.8.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- 增加钉钉告警-->
+    <dependency>
+      <groupId>com.aliyun</groupId>
+      <artifactId>alibaba-dingtalk-service-sdk</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+
+    <!-- 添加OpenCV依赖 -->
+    <dependency>
+      <groupId>org.openpnp</groupId>
+      <artifactId>opencv</artifactId>
+      <version>3.4.2-2</version>
+    </dependency>
+
+    <!-- 友盟OpenApi依赖 -->
+    <dependency>
+      <groupId>com.umeng</groupId>
+      <artifactId>umeng</artifactId>
+      <version>1.1.2</version>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <finalName>mdc-server</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <!-- 打包时跳过测试 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.12.4</version>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

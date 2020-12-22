@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aquilaflycloud.mdc.mapper.ShopCommentInfoMapper">
+    <select id="getStarRatingTopInfo"
+            resultType="com.aquilaflycloud.mdc.result.shop.ShopCommentStarRatingSortInfo"
+            parameterType="java.lang.String">
+        SELECT b.shop_name AS shopFullName, IFNULL(ROUND( IFNULL(( SUM( all_score ) + SUM( taste_score ) + SUM( environment_score ) + SUM( service_score ))/( COUNT(*)* 4 ), 0 ), 2), 0) AS average
+            FROM shop_comment_info a
+            LEFT JOIN shop_info b ON a.shop_id=b.id
+        WHERE a.is_delete = '0' AND a.state = '1' AND b.is_delete = '0' AND ${_parameter}
+        GROUP BY a.shop_id ORDER BY average DESC LIMIT 10
+    </select>
+
+    <select id="getStarRatingLastInfo"
+            resultType="com.aquilaflycloud.mdc.result.shop.ShopCommentStarRatingSortInfo"
+            parameterType="java.lang.String">
+        SELECT b.shop_name AS shopFullName, IFNULL(ROUND( IFNULL(( SUM( all_score ) + SUM( taste_score ) + SUM( environment_score ) + SUM( service_score ))/( COUNT(*)* 4 ), 0 ), 2 ), 0) AS average
+            FROM shop_comment_info a
+            LEFT JOIN shop_info b ON a.shop_id=b.id
+        WHERE a.is_delete = '0' AND a.state = '1' AND b.is_delete = '0' AND ${_parameter}
+        GROUP BY a.shop_id ORDER BY average LIMIT 10
+    </select>
+    <select id="getShopInfoStarRatingAvg"
+            resultType="com.aquilaflycloud.mdc.result.shop.ShopCommentStarRatingAvgResult"
+            parameterType="java.util.List">
+        SELECT IFNULL(ROUND( IFNULL(SUM( all_score )/COUNT(*), 0 ) ), 0) AS average,
+            shop_id AS shopId
+            FROM shop_comment_info
+        WHERE is_delete = '0' AND state = '1' AND shop_id IN
+            <foreach item="item" collection="list" separator="," open="(" close=")" index="">
+                #{item}
+            </foreach>
+        GROUP BY shop_id
+    </select>
+</mapper>

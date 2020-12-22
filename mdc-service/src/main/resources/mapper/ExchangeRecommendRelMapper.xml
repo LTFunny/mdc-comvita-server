@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aquilaflycloud.mdc.mapper.ExchangeRecommendRelMapper">
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, goods_id, recommend_type, recommend_order, create_time, last_update_time, tenant_id,
+    sub_tenant_id, creator_id, creator_name, creator_org_ids, creator_org_names, last_operator_id,
+    last_operator_name, app_key
+  </sql>
+
+  <select id="selectPageRecommend" resultType="com.aquilaflycloud.mdc.result.exchange.RecommendGoodsResult">
+    select
+    a.id recommend_id, a.recommend_type, a.recommend_order, a.create_time, a.last_update_time, a.tenant_id,
+    a.sub_tenant_id, a.creator_id, a.creator_name, a.creator_org_ids, a.creator_org_names, a.last_operator_id,
+    a.last_operator_name, a.app_key,
+    b.id, b.goods_code, b.goods_type, b.goods_name, b.goods_imgs, b.goods_detail, b.goods_remark, b.goods_service, b.rel_id,
+    b.rel_content, b.reward_type, b.single_reward, b.single_price, b.market_price, b.inventory, b.exchange_limit, b.exchange_count,
+    b.refund_type, b.refund_expired, b.express_price, b.shelve_type, b.shelve_time, b.audit_state, b.audit_remark, b.state,
+    b.is_delete
+    from exchange_recommend_rel a inner join exchange_goods b on a.goods_id = b.id
+    ${ew.customSqlSegment}
+  </select>
+</mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aquilaflycloud.mdc.mapper.ShopInfoMapper">
+
+    <select id="selectPageInfo" resultType="com.aquilaflycloud.mdc.model.shop.ShopInfo">
+        SELECT a.* FROM (
+            SELECT * FROM shop_info WHERE
+            is_delete='0'
+            <if test="param3.isCenturyShop != null">
+                AND is_century_shop=#{param3.isCenturyShop.type}
+            </if>
+            <if test="param3.isRecommend != null">
+                AND is_recommend=#{param3.isRecommend.type}
+            </if>
+            <if test="param3.categoryId != null">
+                AND category_id=#{param3.categoryId}
+            </if>
+            <if test="param3.shopFullName != null and param3.shopFullName != ''">
+                AND shop_full_name LIKE CONCAT('%',#{param3.shopFullName},'%')
+            </if>
+            <if test="param3.shopName != null and param3.shopName != ''">
+                AND shop_name LIKE CONCAT('%',#{param3.shopName},'%')
+            </if>
+            <if test="param2 != null and param2 != ''">
+                AND ${param2}
+            </if>
+        ) a
+        LEFT JOIN
+        (SELECT CASE
+	        WHEN #{param3.sortEnum.type}='1' THEN
+		        ROUND(IFNULL((SUM(all_score) + SUM(taste_score) + SUM(environment_score) + SUM(service_score))/(COUNT(*)*4),0), 2)
+		    WHEN #{param3.sortEnum.type}='2' THEN
+		        ROUND(IFNULL(SUM(all_score)/COUNT(*),0), 2)
+            WHEN #{param3.sortEnum.type}='3' THEN
+                ROUND(IFNULL(SUM(taste_score)/COUNT(*),0), 2)
+            WHEN #{param3.sortEnum.type}='4' THEN
+                ROUND(IFNULL(SUM(environment_score)/COUNT(*),0), 2)
+	    ELSE
+		    ROUND(IFNULL(SUM(service_score)/COUNT(*),0), 2)
+        END AS score, shop_id FROM shop_comment_info WHERE state='1' AND is_delete='0' GROUP BY shop_id) b
+    ON a.id=b.shop_id
+        <choose>
+            <when test="param3.isRecommend != null">
+                ORDER BY a.detail_click_count DESC, score DESC, a.create_time DESC
+            </when>
+            <otherwise>
+                ORDER BY score DESC, a.create_time DESC
+            </otherwise>
+        </choose>
+    </select>
+</mapper>
