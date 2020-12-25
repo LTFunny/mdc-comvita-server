@@ -29,13 +29,13 @@ public class TicketChannelInfoApi {
     private TicketChannelInfoService ticketChannelInfoService;
 
     @ApiOperation(value = "获取渠道信息", notes = "获取渠道信息")
-    @ApiMapping(value = "mdc.ticket.channelInfo.getChannelInfo", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.ticket.channelInfo.getChannelInfo", method = RequestMethod.POST)
     public TicketChannelInfoByIdResult getChannelInfo(ChannelInfoGetParam param) {
         return ticketChannelInfoService.getChannelInfo(param);
     }
 
     @ApiOperation(value = "查询最新推荐id", notes = "查询最新推荐id")
-    @ApiMapping(value = "mdc.ticket.channelInfo.getRefId", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.ticket.channelInfo.getRefId", method = RequestMethod.POST)
     public ChannelInfoRefIdResult getRefId(ChannelInfoRefIdParam param) {
         return ticketChannelInfoService.getRefId(param);
     }

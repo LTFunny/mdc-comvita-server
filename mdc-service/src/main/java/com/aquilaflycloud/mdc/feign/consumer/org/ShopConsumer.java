@@ -9,6 +9,6 @@ import org.springframework.cloud.openfeign.FeignClient;
  * @author zengqingjie
  * @date 2020-04-17
  */
-@FeignClient("org-server")
+@FeignClient("org-comvita-server")
 public interface ShopConsumer extends IShopProvider {
 }

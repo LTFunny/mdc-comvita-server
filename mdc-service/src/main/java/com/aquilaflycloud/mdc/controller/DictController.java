@@ -29,21 +29,21 @@ public class DictController {
 
     @ApiOperation(value = "查询字典", notes = "查询字典", response = EnumProperty.class, responseContainer = "List")
     @PreAuthorize("hasAuthority('mdc:dict:list')")
-    @ApiMapping(value = "backend.mdc.dict.info.list", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.mdccomvita.dict.info.list", method = RequestMethod.POST, permission = true)
     public Collection<Enum> list(DictListParam param) {
         return bizEnumService.listEnums(param);
     }
 
     @ApiOperation(value = "把字典加入数据权限控制", notes = "把字典加入数据权限控制")
     @PreAuthorize("hasAuthority('mdc:dict:manage')")
-    @ApiMapping(value = "backend.mdc.dict.dataAuth.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.dict.dataAuth.add", method = RequestMethod.POST, permission = true)
     public void add(DictNameParam param) {
         bizEnumService.addDataAuth(param);
     }
 
     @ApiOperation(value = "把字典剔除数据权限控制", notes = "把字典剔除数据权限控制")
     @PreAuthorize("hasAuthority('mdc:dict:manage')")
-    @ApiMapping(value = "backend.mdc.dict.dataAuth.delete", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.dict.dataAuth.delete", method = RequestMethod.POST, permission = true)
     public void delete(DictNameParam param) {
         bizEnumService.deleteDataAuth(param);
     }

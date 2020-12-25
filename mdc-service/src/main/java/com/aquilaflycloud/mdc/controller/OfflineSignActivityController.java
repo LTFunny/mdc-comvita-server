@@ -29,42 +29,42 @@ public class OfflineSignActivityController {
 
     @ApiOperation(value = "获取打卡活动列表(分页)", notes = "获取打卡活动列表(分页)")
     @PreAuthorize("hasAuthority('mdc:offlineSign:list')")
-    @ApiMapping(value = "backend.mdc.offlineSign.info.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.offlineSign.info.page", method = RequestMethod.POST, permission = true)
     public IPage<OfflineSignActivity> pageSign(SignPageParam param) {
         return offlineSignActivityService.pageSign(param);
     }
 
     @ApiOperation(value = "获取打卡活动详情", notes = "获取打卡活动详情")
     @PreAuthorize("hasAuthority('mdc:offlineSign:get')")
-    @ApiMapping(value = "backend.mdc.offlineSign.info.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.offlineSign.info.get", method = RequestMethod.POST, permission = true)
     public SignResult getSign(SignGetParam param) {
         return offlineSignActivityService.getSign(param);
     }
 
     @ApiOperation(value = "新增打卡活动", notes = "新增打卡活动")
     @PreAuthorize("hasAuthority('mdc:offlineSign:add')")
-    @ApiMapping(value = "backend.mdc.offlineSign.info.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.offlineSign.info.add", method = RequestMethod.POST, permission = true)
     public void addSign(SignAddParam param) {
         offlineSignActivityService.addSign(param);
     }
 
     @ApiOperation(value = "编辑打卡活动", notes = "编辑打卡活动")
     @PreAuthorize("hasAuthority('mdc:offlineSign:edit')")
-    @ApiMapping(value = "backend.mdc.offlineSign.info.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.offlineSign.info.edit", method = RequestMethod.POST, permission = true)
     public void editSign(SignEditParam param) {
         offlineSignActivityService.editSign(param);
     }
 
     @ApiOperation(value = "启用/停用打卡活动", notes = "编辑打卡活动状态,启用/停用")
     @PreAuthorize("hasAuthority('mdc:offlineSign:edit')")
-    @ApiMapping(value = "backend.mdc.offlineSign.state.toggle", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.offlineSign.state.toggle", method = RequestMethod.POST, permission = true)
     public void toggleSignState(SignGetParam param) {
         offlineSignActivityService.toggleState(param);
     }
 
     @ApiOperation(value = "获取打卡记录列表(分页)", notes = "获取打卡记录列表(分页)")
     @PreAuthorize("hasAuthority('mdc:offlineSignRecord:list')")
-    @ApiMapping(value = "backend.mdc.offlineSign.record.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.offlineSign.record.page", method = RequestMethod.POST, permission = true)
     public IPage<OfflineSignRecordResult> pageRecord(RecordPageParam param) {
         return offlineSignActivityService.pageRecord(param);
     }

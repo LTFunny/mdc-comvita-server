@@ -30,70 +30,70 @@ public class ApplyActivityController {
 
     @ApiOperation(value = "获取报名活动列表(分页)", notes = "获取报名活动列表(分页)")
     @PreAuthorize("hasAuthority('mdc:apply:list')")
-    @ApiMapping(value = "backend.mdc.apply.info.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.apply.info.page", method = RequestMethod.POST, permission = true)
     public IPage<ApplyResult> pageApply(ApplyPageParam param) {
         return applyActivityService.pageApply(param);
     }
 
     @ApiOperation(value = "获取报名活动详情", notes = "获取报名活动详情")
     @PreAuthorize("hasAuthority('mdc:apply:get')")
-    @ApiMapping(value = "backend.mdc.apply.info.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.apply.info.get", method = RequestMethod.POST, permission = true)
     public ApplyDetailResult getApply(ApplyGetParam param) {
         return applyActivityService.getApply(param);
     }
 
     @ApiOperation(value = "新增报名活动", notes = "新增报名活动")
     @PreAuthorize("hasAuthority('mdc:apply:add')")
-    @ApiMapping(value = "backend.mdc.apply.info.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.apply.info.add", method = RequestMethod.POST, permission = true)
     public void addApply(ApplyAddParam param) {
         applyActivityService.addApply(param);
     }
 
     @ApiOperation(value = "编辑报名活动", notes = "编辑报名活动")
     @PreAuthorize("hasAuthority('mdc:apply:edit')")
-    @ApiMapping(value = "backend.mdc.apply.info.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.apply.info.edit", method = RequestMethod.POST, permission = true)
     public void editApply(ApplyEditParam param) {
         applyActivityService.editApply(param);
     }
 
     @ApiOperation(value = "是否置顶报名活动", notes = "编辑报名活动置顶状态,是/否")
     @PreAuthorize("hasAuthority('mdc:apply:edit')")
-    @ApiMapping(value = "backend.mdc.apply.top.toggle", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.apply.top.toggle", method = RequestMethod.POST, permission = true)
     public void toggleApplyTop(ApplyGetParam param) {
         applyActivityService.toggleTop(param);
     }
 
     @ApiOperation(value = "启用/停用报名活动", notes = "编辑报名活动状态,启用/停用")
     @PreAuthorize("hasAuthority('mdc:apply:edit')")
-    @ApiMapping(value = "backend.mdc.apply.state.toggle", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.apply.state.toggle", method = RequestMethod.POST, permission = true)
     public void toggleApplyState(ApplyGetParam param) {
         applyActivityService.toggleState(param);
     }
 
     @ApiOperation(value = "获取活动报名概况统计", notes = "获取活动报名概况统计")
     @PreAuthorize("hasAuthority('mdc:apply:list')")
-    @ApiMapping(value = "backend.mdc.apply.statistics.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.apply.statistics.get", method = RequestMethod.POST, permission = true)
     public StatisticsResult getStatistics() {
         return applyActivityService.getStatistics();
     }
 
     @ApiOperation(value = "审批报名记录", notes = "审批报名记录")
     @PreAuthorize("hasAuthority('mdc:applyRecord:audit')")
-    @ApiMapping(value = "backend.mdc.apply.record.audit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.apply.record.audit", method = RequestMethod.POST, permission = true)
     public void auditRecord(RecordAuditParam param) {
         applyActivityService.auditRecord(param);
     }
 
     @ApiOperation(value = "批量审批报名记录", notes = "批量审批报名记录")
     @PreAuthorize("hasAuthority('mdc:applyRecord:audit')")
-    @ApiMapping(value = "backend.mdc.apply.record.batchAudit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.apply.record.batchAudit", method = RequestMethod.POST, permission = true)
     public void batchAuditRecord(RecordBatchAuditParam param) {
         applyActivityService.batchAuditRecord(param);
     }
 
     @ApiOperation(value = "获取报名记录列表(分页)", notes = "获取报名记录列表(分页)")
     @PreAuthorize("hasAuthority('mdc:applyRecord:list')")
-    @ApiMapping(value = "backend.mdc.apply.record.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.apply.record.page", method = RequestMethod.POST, permission = true)
     public IPage<ApplyMemberRecord> pageRecord(RecordPageParam param) {
         return applyActivityService.pageRecord(param);
     }

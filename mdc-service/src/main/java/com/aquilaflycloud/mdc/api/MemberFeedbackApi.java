@@ -23,7 +23,7 @@ public class MemberFeedbackApi {
     private MemberFeedbackService memberFeedbackService;
 
     @ApiOperation(value = "添加意见反馈", notes = "添加意见反馈")
-    @ApiMapping(value = "mdc.feedback.info.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.feedback.info.add", method = RequestMethod.POST)
     public void add(MemberFeedbackAddParam param) {
         memberFeedbackService.add(param);
     }

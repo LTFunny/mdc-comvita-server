@@ -34,7 +34,7 @@ public class FileManageController {
     private SystemFileService systemFileService;
 
     @ApiOperation(value = "文件上传", notes = "文件上传,返回文件路径")
-    @ApiMapping(value = "backend.mdc.file.info.upload", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.file.info.upload", method = RequestMethod.POST, permission = true)
     public BaseResult<String> upload(FileUploadParam param) {
         try {
             MultipartFile multipartFile = param.getFile();
@@ -47,14 +47,14 @@ public class FileManageController {
     }
 
     @ApiOperation(value = "Excel导出", notes = "Excel文件导出下载")
-    @ApiMapping(value = "backend.mdc.file.excel.download", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.file.excel.download", method = RequestMethod.POST, permission = true)
     public BaseResult<String> downloadExcel(ExcelDownloadParam param) {
         return systemFileService.downloadExcel(param);
     }
 
     @ApiOperation(value = "查询Excel导出记录", notes = "查询Excel导出记录")
     @PreAuthorize("hasAuthority('mdc:system:excelList')")
-    @ApiMapping(value = "backend.mdc.file.excel.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.file.excel.page", method = RequestMethod.POST, permission = true)
     public IPage<SystemExportLog> pageExcelLog(ExcelPageParam param) {
         return systemFileService.pageExcelLog(param);
     }

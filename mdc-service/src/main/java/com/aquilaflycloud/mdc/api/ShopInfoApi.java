@@ -28,13 +28,13 @@ public class ShopInfoApi {
     private ShopInfoService shopInfoService;
 
     @ApiOperation(value = "获取商铺信息列表", notes = "获取商铺信息列表")
-    @ApiMapping(value = "mdc.shop.info.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.shop.info.page", method = RequestMethod.POST)
     public IPage<ShopInfoResult> page(ShopInfoPageApiParam param) {
         return shopInfoService.pageShopInfo(param);
     }
 
     @ApiOperation(value = "根据id获取商铺信息", notes = "根据id获取商铺信息")
-    @ApiMapping(value = "mdc.shop.info.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.shop.info.get", method = RequestMethod.POST)
     public ShopInfoGetResult getShopInfo(ShopInfoGetApiParam param) {
         return shopInfoService.getShopInfos(param);
     }

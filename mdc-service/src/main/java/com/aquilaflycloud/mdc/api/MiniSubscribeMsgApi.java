@@ -24,7 +24,7 @@ public class MiniSubscribeMsgApi {
     private WechatMiniProgramSubscribeMessageService wechatMiniProgramSubscribeMessageService;
 
     @ApiOperation(value = "小程序订阅消息模板id列表", notes = "小程序订阅消息模板id列表")
-    @ApiMapping(value = "mdc.wechat.messageTmplId.list", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.wechat.messageTmplId.list", method = RequestMethod.POST)
     public List<String> listTmplId(MiniMessageTmplIdListParam param) {
         return wechatMiniProgramSubscribeMessageService.listTmplId(param);
     }

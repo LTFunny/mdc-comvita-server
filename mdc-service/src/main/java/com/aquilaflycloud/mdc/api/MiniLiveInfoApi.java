@@ -26,7 +26,7 @@ public class MiniLiveInfoApi {
     private WechatMiniLiveService wechatMiniLiveService;
 
     @ApiOperation(value = "小程序直播间列表(分页)", notes = "小程序直播间列表(分页)")
-    @ApiMapping(value = "mdc.wechat.miniLive.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.wechat.miniLive.page", method = RequestMethod.POST)
     public IPage<WechatMiniLiveInfoResult> pageLive(PageParam<WechatMiniLiveInfo> param) {
         return wechatMiniLiveService.pageLive(param);
     }

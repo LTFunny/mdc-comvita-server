@@ -27,13 +27,13 @@ public class ShopCommentInfoApi {
     private ShopCommentInfoService shopCommentInfoService;
 
     @ApiOperation(value = "获取评论信息(分页)", notes = "获取评论信息(分页)")
-    @ApiMapping(value = "mdc.shop.comment.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.shop.comment.page", method = RequestMethod.POST)
     public IPage<ShopCommentInfo> page(ShopCommentInfoPageApiParam param) {
         return shopCommentInfoService.getPageCommentInfo(param);
     }
 
     @ApiOperation(value = "添加评论信息", notes = "添加评论信息")
-    @ApiMapping(value = "mdc.shop.comment.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.shop.comment.add", method = RequestMethod.POST)
     public void add(ShopCommentInfoAddApiParam param) {
         shopCommentInfoService.addCommentInfo(param);
     }

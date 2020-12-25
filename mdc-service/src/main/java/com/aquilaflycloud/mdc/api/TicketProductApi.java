@@ -27,13 +27,13 @@ public class TicketProductApi {
     private TicketProductInfoService ticketProductInfoService;
 
     @ApiOperation(value = "微信小程序购票页面获取所有产品信息", notes = "微信小程序购票页面获取所有产品信息")
-    @ApiMapping(value = "mdc.ticket.productInfo.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.ticket.productInfo.get", method = RequestMethod.POST)
     public WechatGetProductInfoResult wechatGetProductInfo(WechatGetProductInfoParam param) {
         return ticketProductInfoService.wechatGetProductInfo(param);
     }
 
     @ApiOperation(value = "通过id获取产品详情", notes = "通过id获取产品详情")
-    @ApiMapping(value = "mdc.ticket.productInfo.getById", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.ticket.productInfo.getById", method = RequestMethod.POST)
     public TicketProductInfoDetailResult wechatGetProductInfoById(ProductInfoGetByIdParam param) {
         return ticketProductInfoService.wechatGetProductInfoById(param);
     }

@@ -32,21 +32,21 @@ public class TicketInterfaceAccountInfoController {
 
     @ApiOperation("获取景区账号关联列表")
     @PreAuthorize("hasAuthority('mdc:ticket:interfaceAccount:list')")
-    @ApiMapping(value = "backend.mdc.ticket.interfaceAccount.list", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.ticket.interfaceAccount.list", method = RequestMethod.POST, permission = true)
     public List<TicketInterfaceAccountInfoRelationResult> list(InterfaceAccountInfoListParam param) {
         return ticketInterfaceAccountInfoService.list(param);
     }
 
     @ApiOperation("添加景区账号关联信息")
     @PreAuthorize("hasAuthority('mdc:ticket:interfaceAccount:add')")
-    @ApiMapping(value = "backend.mdc.ticket.interfaceAccount.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.ticket.interfaceAccount.add", method = RequestMethod.POST, permission = true)
     public TicketInterfaceAccountInfoRelationResult add(InterfaceAccountInfoAddParam param) {
         return ticketInterfaceAccountInfoService.add(param);
     }
 
     @ApiOperation("编辑景区账号关联信息")
     @PreAuthorize("hasAuthority('mdc:ticket:interfaceAccount:edit')")
-    @ApiMapping(value = "backend.mdc.ticket.interfaceAccount.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.ticket.interfaceAccount.edit", method = RequestMethod.POST, permission = true)
     public TicketInterfaceAccountInfoRelationResult edit(InterfaceAccountInfoEditParam param) {
         return ticketInterfaceAccountInfoService.edit(param);
     }

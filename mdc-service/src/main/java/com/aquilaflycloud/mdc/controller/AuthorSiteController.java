@@ -27,7 +27,7 @@ public class AuthorSiteController {
 
     @ApiOperation(value = "查询授权号列表", notes = "查询授权号列表")
     @PreAuthorize("hasAuthority('mdc:author:list')")
-    @ApiMapping(value = "backend.mdc.author.site.list", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.author.site.list", method = RequestMethod.POST, permission = true)
     public List<AuthorSite> listAuthor(AuthorSiteListParam param) {
         return authorSiteService.listAuthor(param);
     }

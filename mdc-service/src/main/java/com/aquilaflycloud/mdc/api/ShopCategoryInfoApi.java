@@ -26,7 +26,7 @@ public class ShopCategoryInfoApi {
     private ShopCategoryInfoService shopCategoryInfoService;
 
     @ApiOperation(value = "获取商铺分类信息列表", notes = "获取商铺分类信息列表")
-    @ApiMapping(value = "mdc.shop.category.list", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.shop.category.list", method = RequestMethod.POST)
     public List<ShopCategoryInfo> listShopCategoryInfo(ShopCategoryInfoListApiParam param) {
         return shopCategoryInfoService.listShopCategoryInfo(param);
     }

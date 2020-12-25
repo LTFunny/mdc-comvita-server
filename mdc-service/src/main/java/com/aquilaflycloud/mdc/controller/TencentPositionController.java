@@ -25,7 +25,7 @@ import java.util.List;
 public class TencentPositionController {
 
     @ApiOperation(value = "查询地址列表", notes = "根据关键词查询地址列表")
-    @ApiMapping(value = "backend.mdc.tencentPosition.suggestion.list", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.tencentPosition.suggestion.list", method = RequestMethod.POST, permission = true)
     public List<SuggestionListResp> list(SuggestionListParam param) {
         SuggestionListReq req = new SuggestionListReq();
         BeanUtil.copyProperties(param, req, CopyOptions.create().ignoreError());

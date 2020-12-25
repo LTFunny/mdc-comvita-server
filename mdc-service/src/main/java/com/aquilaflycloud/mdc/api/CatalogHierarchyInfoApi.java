@@ -25,7 +25,7 @@ public class CatalogHierarchyInfoApi {
     private CatalogHierarchyInfoService catalogHierarchyInfoService;
 
     @ApiOperation(value = "获取分类层级信息列表", notes = "获取分类层级信息列表")
-    @ApiMapping(value = "mdc.catalog.hierarchy.list", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.catalog.hierarchy.list", method = RequestMethod.POST)
     public List<CatalogHierarchyNodeInfo> listCatalogHierarchyInfo(CatalogHierarchyInfoListParam param) {
         param.setFilterSign(true);
         return catalogHierarchyInfoService.listCatalogHierarchyInfo(param);

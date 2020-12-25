@@ -31,35 +31,35 @@ public class MissionController {
 
     @ApiOperation(value = "查询任务列表", notes = "查询任务列表")
     @PreAuthorize("hasAuthority('mdc:mission:list')")
-    @ApiMapping(value = "backend.mdc.mission.info.list", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.mission.info.list", method = RequestMethod.POST, permission = true)
     public List<MissionInfo> listMission() {
         return missionService.listMission();
     }
 
     @ApiOperation(value = "获取任务详情", notes = "获取任务详情")
     @PreAuthorize("hasAuthority('mdc:mission:get')")
-    @ApiMapping(value = "backend.mdc.mission.info.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.mission.info.get", method = RequestMethod.POST, permission = true)
     public MissionInfoResult getMission(MissionGetParam param) {
         return missionService.getMission(param);
     }
 
     @ApiOperation(value = "新增任务", notes = "新增任务")
     @PreAuthorize("hasAuthority('mdc:mission:add')")
-    @ApiMapping(value = "backend.mdc.mission.info.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.mission.info.add", method = RequestMethod.POST, permission = true)
     public void addMission(MissionAddParam param) {
         missionService.addMission(param);
     }
 
     @ApiOperation(value = "编辑任务", notes = "编辑任务")
     @PreAuthorize("hasAuthority('mdc:mission:edit')")
-    @ApiMapping(value = "backend.mdc.mission.info.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.mission.info.edit", method = RequestMethod.POST, permission = true)
     public void editMission(MissionEditParam param) {
         missionService.editMission(param);
     }
 
     @ApiOperation(value = "启用/停用任务", notes = "启用/停用任务")
     @PreAuthorize("hasAuthority('mdc:mission:edit')")
-    @ApiMapping(value = "backend.mdc.mission.info.toggle", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.mission.info.toggle", method = RequestMethod.POST, permission = true)
     public void toggleMission(MissionGetParam param) {
         missionService.toggleMission(param);
     }

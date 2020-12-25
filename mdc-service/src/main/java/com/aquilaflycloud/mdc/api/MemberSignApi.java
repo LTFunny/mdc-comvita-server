@@ -25,13 +25,13 @@ public class MemberSignApi {
     private MemberSignService memberSignService;
 
     @ApiOperation(value = "查询会员签到详情", notes = "查询会员签到详情")
-    @ApiMapping(value = "mdc.sign.info.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.sign.info.get", method = RequestMethod.POST)
     public MemberSignDescInfoResult getSignInfo() {
         return memberSignService.getSignInfo();
     }
 
     @ApiOperation(value = "会员签到", notes = "会员签到")
-    @ApiMapping(value = "mdc.sign.info.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.sign.info.add", method = RequestMethod.POST)
     public MemberSignAddResult addSignInfo() {
         return memberSignService.addSignInfo();
     }

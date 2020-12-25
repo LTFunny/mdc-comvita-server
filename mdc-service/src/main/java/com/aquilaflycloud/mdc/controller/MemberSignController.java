@@ -34,28 +34,28 @@ public class MemberSignController {
 
     @ApiOperation(value = "查询签到记录", notes = "查询签到记录(会员去重)")
     @PreAuthorize("hasAuthority('mdc:sign:list')")
-    @ApiMapping(value = "backend.mdc.sign.memberRecord.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.sign.memberRecord.page", method = RequestMethod.POST, permission = true)
     public IPage<MemberSignInfoResult> pageMemberRecord(MemberSignPageParam param) {
         return memberSignService.pageMemberRecord(param);
     }
 
     @ApiOperation(value = "查询签到详细记录", notes = "查询签到详细记录")
     @PreAuthorize("hasAuthority('mdc:sign:list')")
-    @ApiMapping(value = "backend.mdc.sign.record.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.sign.record.page", method = RequestMethod.POST, permission = true)
     public IPage<MemberSignResult> pageRecord(MemberSignPageParam param) {
         return memberSignService.pageRecord(param);
     }
 
     @ApiOperation(value = "获取签到数分析", notes = "获取签到数分析")
     @PreAuthorize("hasAuthority('mdc:sign:list')")
-    @ApiMapping(value = "backend.mdc.sign.countAnalysis.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.sign.countAnalysis.get", method = RequestMethod.POST, permission = true)
     public List<MemberSignAnalysisResult> getSignCountAnalysis(MemberSignAnalysisParam param) {
         return memberSignService.getSignCountAnalysis(param);
     }
 
     @ApiOperation(value = "获取连续签到数分析", notes = "获取连续签到数分析")
     @PreAuthorize("hasAuthority('mdc:sign:list')")
-    @ApiMapping(value = "backend.mdc.sign.continueAnalysis.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.sign.continueAnalysis.get", method = RequestMethod.POST, permission = true)
     public List<MemberSignContinueAnalysisResult> getContinueSignCountAnalysis(MemberSignContinueAnalysisParam param) {
         return memberSignService.getContinueSignCountAnalysis(param);
     }

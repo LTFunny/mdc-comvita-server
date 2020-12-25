@@ -18,7 +18,7 @@ public class RichtextDescriptionApi {
     private RichtextDescriptionService richtextDescriptionService;
 
     @ApiOperation(value = "获取富文本描述信息", notes = "获取富文本描述信息")
-    @ApiMapping(value = "mdc.richtext.description.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.richtext.description.get", method = RequestMethod.POST)
     public RichtextDescriptionInfo get(RichtextDescriptionGetParam param) {
         return richtextDescriptionService.getByType(param);
     }

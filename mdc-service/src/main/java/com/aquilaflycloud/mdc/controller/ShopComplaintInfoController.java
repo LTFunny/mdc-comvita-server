@@ -29,35 +29,35 @@ public class ShopComplaintInfoController {
 
     @ApiOperation(value = "查询用户投诉信息(分页)", notes = "查询用户投诉信息(分页)")
     @PreAuthorize("hasAuthority('mdc:shop:complaint:info:page')")
-    @ApiMapping(value = "backend.mdc.shop.complaint.info.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.shop.complaint.info.page", method = RequestMethod.POST, permission = true)
     public IPage<ShopComplaintInfo> page(ShopComplaintInfoPageParam param) {
         return shopComplaintInfoService.page(param);
     }
 
     @ApiOperation(value = "查询用户投诉详情", notes = "查询用户投诉详情")
     @PreAuthorize("hasAuthority('mdc:shop:complaint:info:get')")
-    @ApiMapping(value = "backend.mdc.shop.complaint.info.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.shop.complaint.info.get", method = RequestMethod.POST, permission = true)
     public ShopComplaintInfo get(ShopComplaintInfoGetParam param) {
         return shopComplaintInfoService.get(param);
     }
 
     @ApiOperation(value = "更新用户投诉", notes = "更新用户投诉")
     @PreAuthorize("hasAuthority('mdc:shop:complaint:info:edit')")
-    @ApiMapping(value = "backend.mdc.shop.complaint.info.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.shop.complaint.info.edit", method = RequestMethod.POST, permission = true)
     public void edit(ShopComplaintInfoEditParam param) {
         shopComplaintInfoService.edit(param);
     }
 
     @ApiOperation(value = "删除用户投诉", notes = "删除用户投诉")
     @PreAuthorize("hasAuthority('mdc:shop:complaint:info:delete')")
-    @ApiMapping(value = "backend.mdc.shop.complaint.info.delete", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.shop.complaint.info.delete", method = RequestMethod.POST, permission = true)
     public void delete(ShopComplaintInfoDeleteParam param) {
         shopComplaintInfoService.delete(param);
     }
 
     @ApiOperation(value = "投诉统计", notes = "投诉统计")
     @PreAuthorize("hasAuthority('mdc:shop:complaint:info:page')")
-    @ApiMapping(value = "backend.mdc.shop.complaint.info.statistics", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.shop.complaint.info.statistics", method = RequestMethod.POST, permission = true)
     public ShopComplaintStatisticsResult statistics(ShopComplaintStatisticsParam param) {
         return shopComplaintInfoService.statistics(param);
     }

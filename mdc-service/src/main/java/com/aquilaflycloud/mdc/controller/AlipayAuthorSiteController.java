@@ -29,49 +29,49 @@ public class AlipayAuthorSiteController {
 
     @ApiOperation(value = "查询授权号列表(分页)", notes = "查询授权号列表(分页)")
     @PreAuthorize("hasAuthority('mdc:alipay:authorSiteList')")
-    @ApiMapping(value = "backend.mdc.alipay.author.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.alipay.author.page", method = RequestMethod.POST, permission = true)
     public IPage<AlipayAuthorSite> pageAuthor(AlipayAuthorSitePageParam param) {
         return alipayAuthorSiteService.pageAuthor(param);
     }
 
     @ApiOperation(value = "获取预授权链接", notes = "获取预授权链接,可供第三方授权")
     @PreAuthorize("hasAuthority('mdc:alipay:authorSiteSave')")
-    @ApiMapping(value = "backend.mdc.alipay.preAuthUrl.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.alipay.preAuthUrl.get", method = RequestMethod.POST, permission = true)
     public BaseResult<String> getPreAuthUrl(AlipayPreAuthUrlGetParam param) {
         return alipayAuthorSiteService.getPreAuthUrl(param);
     }
 
     @ApiOperation(value = "新增授权应用", notes = "新增授权应用")
     @PreAuthorize("hasAuthority('mdc:alipay:authorSiteSave')")
-    @ApiMapping(value = "backend.mdc.alipay.author.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.alipay.author.add", method = RequestMethod.POST, permission = true)
     public void addAuthor(AlipayAuthorSiteAddParam param) {
         alipayAuthorSiteService.addAuthor(param);
     }
 
     @ApiOperation(value = "编辑授权应用", notes = "编辑授权应用")
     @PreAuthorize("hasAuthority('mdc:alipay:authorSiteSave')")
-    @ApiMapping(value = "backend.mdc.alipay.author.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.alipay.author.edit", method = RequestMethod.POST, permission = true)
     public void editAuthor(AlipayAuthorSiteEditParam param) {
         alipayAuthorSiteService.editAuthor(param);
     }
 
     @ApiOperation(value = "删除授权应用", notes = "删除授权应用")
     @PreAuthorize("hasAuthority('mdc:alipay:authorSiteSave')")
-    @ApiMapping(value = "backend.mdc.alipay.author.delete", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.alipay.author.delete", method = RequestMethod.POST, permission = true)
     public void deleteAuthor(AlipayAuthorSiteGetParam param) {
         alipayAuthorSiteService.deleteAuthor(param);
     }
 
     @ApiOperation(value = "更新第三方授权生活号", notes = "更新第三方授权生活号")
     @PreAuthorize("hasAuthority('mdc:alipay:authorSiteSave')")
-    @ApiMapping(value = "backend.mdc.alipay.authorPublicInfo.update", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.alipay.authorPublicInfo.update", method = RequestMethod.POST, permission = true)
     public void updatePublicInfo(AlipayAuthorSiteGetParam param) {
         alipayAuthorSiteService.updatePublicInfo(param);
     }
 
     @ApiOperation(value = "获取授权页面URL", notes = "获取授权页面URL,根据参数生成Oauth2链接,通过此链接可获取支付宝userId等参数")
     @PreAuthorize("hasAuthority('mdc:alipay:authorSiteSave')")
-    @ApiMapping(value = "backend.mdc.alipay.oauth2Url.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.alipay.oauth2Url.get", method = RequestMethod.POST, permission = true)
     public BaseResult<String> getOauth2Url(AlipayOauth2UrlGetParam param) {
         return new BaseResult<String>().setResult(alipayAuthorSiteService.getOauth2Url(param));
     }

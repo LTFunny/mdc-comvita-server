@@ -29,14 +29,14 @@ public class SystemEnumController {
 
     @ApiOperation(value = "查询字典枚举(分页)", notes = "查询字典枚举(分页)")
     @PreAuthorize("hasAuthority('mdc:system:enumList')")
-    @ApiMapping(value = "backend.mdc.enum.info.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.enum.info.page", method = RequestMethod.POST, permission = true)
     public IPage<SystemEnum> page(EnumListParam param) {
         return systemEnumService.page(param);
     }
 
     @ApiOperation(value = "增加字典枚举", notes = "增加字典枚举")
     @PreAuthorize("hasAuthority('mdc:system:enumAdd')")
-    @ApiMapping(value = "backend.mdc.enum.info.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.enum.info.add", method = RequestMethod.POST, permission = true)
     public void add(EnumAddParam param) {
         systemEnumService.add(param);
     }

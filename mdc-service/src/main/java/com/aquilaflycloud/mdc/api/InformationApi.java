@@ -26,13 +26,13 @@ public class InformationApi {
     private InformationService informationService;
 
     @ApiOperation(value = "获取资讯列表", notes = "获取资讯列表")
-    @ApiMapping(value = "mdc.information.info.list", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.information.info.list", method = RequestMethod.POST)
     public List<Information> listInformation(InfoListParam param) {
         return informationService.listInformation(param);
     }
 
     @ApiOperation(value = "获取单个资讯(最新最重要)", notes = "获取单个资讯(最新最重要)")
-    @ApiMapping(value = "mdc.information.importantest.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.information.importantest.get", method = RequestMethod.POST)
     public Information getImportantestInfo(InfoListParam param) {
         return informationService.getImportantestInfo(param);
     }

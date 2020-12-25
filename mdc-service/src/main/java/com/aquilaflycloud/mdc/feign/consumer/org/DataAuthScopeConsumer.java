@@ -9,6 +9,6 @@ import org.springframework.cloud.openfeign.FeignClient;
  * @author star
  * @date 2019-11-22
  */
-@FeignClient("org-server")
+@FeignClient("org-comvita-server")
 public interface DataAuthScopeConsumer extends IDataAuthScopeProvider {
 }

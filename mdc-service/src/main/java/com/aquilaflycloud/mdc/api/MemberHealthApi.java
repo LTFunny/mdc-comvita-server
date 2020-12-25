@@ -26,19 +26,19 @@ public class MemberHealthApi {
     private MemberHealthService memberHealthService;
 
     @ApiOperation(value = "获取会员防疫信息", notes = "获取会员防疫信息")
-    @ApiMapping(value = "mdc.member.health.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.health.get", method = RequestMethod.POST)
     public MemberHealthRecord getHealth() {
         return memberHealthService.getHealth();
     }
 
     @ApiOperation(value = "记录会员防疫信息", notes = "记录会员防疫信息")
-    @ApiMapping(value = "mdc.member.health.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.health.add", method = RequestMethod.POST)
     public void addHealth(HealthAddParam param) {
         memberHealthService.addHealth(param);
     }
 
     @ApiOperation(value = "快捷记录会员防疫信息", notes = "快捷记录会员防疫信息(使用最后信息记录)")
-    @ApiMapping(value = "mdc.member.health.quickAdd", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.health.quickAdd", method = RequestMethod.POST)
     public void quickAddHealth(HealthQuickAddParam param) {
         memberHealthService.quickAddHealth(param);
     }

@@ -26,19 +26,19 @@ public class ShopComplaintInfoApi {
     private ShopComplaintInfoService shopComplaintInfoService;
 
     @ApiOperation(value = "获取投诉信息(分页)", notes = "获取投诉信息(分页)")
-    @ApiMapping(value = "mdc.shop.complaint.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.shop.complaint.page", method = RequestMethod.POST)
     public IPage<ShopComplaintInfo> page(ShopComplaintInfoPageApiParam param) {
         return shopComplaintInfoService.getPageComplaintInfo(param);
     }
 
     @ApiOperation(value = "添加投诉信息", notes = "添加投诉信息")
-    @ApiMapping(value = "mdc.shop.complaint.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.shop.complaint.add", method = RequestMethod.POST)
     public void add(ShopComplaintInfoAddApiParam param) {
         shopComplaintInfoService.addComplaintInfo(param);
     }
 
     @ApiOperation(value = "获取投诉信息", notes = "获取投诉信息")
-    @ApiMapping(value = "mdc.shop.complaint.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.shop.complaint.get", method = RequestMethod.POST)
     public ShopComplaintInfo get(ShopComplaintInfoGetParam param) {
         return shopComplaintInfoService.get(param);
     }

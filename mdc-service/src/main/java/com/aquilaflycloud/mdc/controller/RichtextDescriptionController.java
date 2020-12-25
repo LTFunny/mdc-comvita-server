@@ -27,14 +27,14 @@ public class RichtextDescriptionController {
 
     @ApiOperation(value = "根据类型获取对应的描述信息", notes = "根据类型获取对应的描述信息")
     @PreAuthorize("hasAuthority('mdc:richtext:info:getByType')")
-    @ApiMapping(value = "backend.mdc.richtext.info.getByType", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.richtext.info.getByType", method = RequestMethod.POST, permission = true)
     public RichtextDescriptionInfo getByType(RichtextDescriptionGetParam param) {
         return richtextDescriptionService.getByType(param);
     }
 
     @ApiOperation(value = "更新或添加描述信息", notes = "更新或添加描述信息")
     @PreAuthorize("hasAuthority('mdc:richtext:info:edit')")
-    @ApiMapping(value = "backend.mdc.richtext.info.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.richtext.info.edit", method = RequestMethod.POST, permission = true)
     public RichtextDescriptionInfo edit(RichtextDescriptionEditParam param) {
         return richtextDescriptionService.edit(param);
     }

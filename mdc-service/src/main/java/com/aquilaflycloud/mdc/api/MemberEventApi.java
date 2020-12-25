@@ -32,7 +32,7 @@ public class MemberEventApi {
     }
 
     @ApiOperation(value = "记录广告分享", notes = "记录广告分享,返回分享数")
-    @ApiMapping(value = "mdc.member.adShare.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.adShare.add", method = RequestMethod.POST)
     public BaseResult<Long> addAdShare(MemberEventAddParam param) {
         MemberEventParam eventParam = new MemberEventParam();
         eventParam.setBusinessId(param.getBusinessId());
@@ -42,7 +42,7 @@ public class MemberEventApi {
     }
 
     @ApiOperation(value = "记录欢乐抽奖分享", notes = "记录欢乐抽奖分享,返回分享数")
-    @ApiMapping(value = "mdc.member.lotteryShare.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.lotteryShare.add", method = RequestMethod.POST)
     public BaseResult<Long> addLotteryShare(MemberEventAddParam param) {
         MemberEventParam eventParam = new MemberEventParam();
         eventParam.setBusinessId(param.getBusinessId());
@@ -52,7 +52,7 @@ public class MemberEventApi {
     }
 
     /*@ApiOperation(value="记录打卡有礼分享", notes = "记录打卡有礼分享,返回分享数")
-    @ApiMapping(value = "mdc.member.offlineSignShare.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.offlineSignShare.add", method = RequestMethod.POST)
     public BaseResult<Long> addOfflineSignShare(MemberEventAddParam param) {
         MemberEventParam eventParam = new MemberEventParam();
         eventParam.setBusinessId(param.getBusinessId());
@@ -62,7 +62,7 @@ public class MemberEventApi {
     }*/
 
     @ApiOperation(value = "记录活动报名分享", notes = "记录活动报名分享,返回分享数")
-    @ApiMapping(value = "mdc.member.applyShare.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.applyShare.add", method = RequestMethod.POST)
     public BaseResult<Long> addApplyShare(MemberEventAddParam param) {
         MemberEventParam eventParam = new MemberEventParam();
         eventParam.setBusinessId(param.getBusinessId());
@@ -72,7 +72,7 @@ public class MemberEventApi {
     }
 
     @ApiOperation(value = "记录最新推荐分享", notes = "记录最新推荐分享,返回分享数")
-    @ApiMapping(value = "mdc.member.recommendShare.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.recommendShare.add", method = RequestMethod.POST)
     public BaseResult<Long> addRecommendShare(MemberEventAddParam param) {
         MemberEventParam eventParam = new MemberEventParam();
         eventParam.setBusinessId(param.getBusinessId());
@@ -82,7 +82,7 @@ public class MemberEventApi {
     }
 
     @ApiOperation(value = "记录景区信息分享", notes = "记录景区信息分享,返回分享数")
-    @ApiMapping(value = "mdc.member.scenicSpotsShare.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.scenicSpotsShare.add", method = RequestMethod.POST)
     public BaseResult<Long> addScenicSpotsShare(MemberEventAddParam param) {
         MemberEventParam eventParam = new MemberEventParam();
         eventParam.setBusinessId(param.getBusinessId());
@@ -92,7 +92,7 @@ public class MemberEventApi {
     }
 
     @ApiOperation(value = "记录商品分享", notes = "记录商品分享,返回分享数")
-    @ApiMapping(value = "mdc.member.goodsShare.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.goodsShare.add", method = RequestMethod.POST)
     public BaseResult<Long> addGoodsShare(MemberEventAddParam param) {
         MemberEventParam eventParam = new MemberEventParam();
         eventParam.setBusinessId(param.getBusinessId());
@@ -102,7 +102,7 @@ public class MemberEventApi {
     }
 
     @ApiOperation(value = "记录广告点击", notes = "记录广告点击,返回点击数")
-    @ApiMapping(value = "mdc.member.adClick.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.adClick.add", method = RequestMethod.POST)
     public BaseResult<Long> addAdClick(MemberEventAddParam param) {
         MemberEventParam eventParam = new MemberEventParam();
         eventParam.setBusinessId(param.getBusinessId());
@@ -112,7 +112,7 @@ public class MemberEventApi {
     }
 
     @ApiOperation(value = "记录最新推荐点击", notes = "记录最新推荐点击,返回点击数")
-    @ApiMapping(value = "mdc.member.recommendClick.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.member.recommendClick.add", method = RequestMethod.POST)
     public BaseResult<Long> addRecommendClick(MemberEventAddParam param) {
         MemberEventParam eventParam = new MemberEventParam();
         eventParam.setBusinessId(param.getBusinessId());

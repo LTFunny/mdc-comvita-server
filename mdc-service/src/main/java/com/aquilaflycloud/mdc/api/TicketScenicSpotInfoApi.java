@@ -25,7 +25,7 @@ public class TicketScenicSpotInfoApi {
     private TicketScenicSpotInfoService ticketScenicSpotInfoService;
 
     @ApiOperation(value = "小程序根据类型获取景区信息", notes = "小程序根据类型获取景区信息")
-    @ApiMapping(value = "mdc.ticket.scenicspotinfo.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.ticket.scenicspotinfo.get", method = RequestMethod.POST)
     public TicketScenicSpotInfoResult getScenicSpotInfo(ScenicSpotInfoGetParam param) {
         return ticketScenicSpotInfoService.getScenicSpotInfo(param);
     }

@@ -24,7 +24,7 @@ public class WechatQrcodeMsgApi {
     private WechatAuthorSiteService wechatAuthorSiteService;
 
     @ApiOperation(value = "生成可扫码奖励的小票二维码", notes = "生成可扫码奖励的小票二维码")
-    @ApiMapping(value = "mdc.wechat.qrCodeMsgForScan.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "comvita.wechat.qrCodeMsgForScan.add", method = RequestMethod.POST, permission = true)
     public BaseResult<String> addQrCodeMsgForScan(QrCodeMsgForScanAddParam param) {
         return wechatAuthorSiteService.addQrCodeMsgForScan(param);
     }

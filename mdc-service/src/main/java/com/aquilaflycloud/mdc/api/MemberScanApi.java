@@ -30,25 +30,25 @@ public class MemberScanApi {
     private MemberScanService memberScanService;
 
     @ApiOperation(value = "消费扫码获取奖励", notes = "消费扫码获取奖励")
-    @ApiMapping(value = "mdc.scan.info.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.scan.info.add", method = RequestMethod.POST)
     public MemberScanResult addScanInfo(ScanInfoAddParam param) {
         return memberScanService.addScanInfo(param);
     }
 
     @ApiOperation(value = "消费回调获取奖励", notes = "消费扫码获取奖励")
-    @ApiMapping(value = "mdc.scan.consume.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "comvita.scan.consume.add", method = RequestMethod.POST, permission = true)
     public void addConsume(ConsumeAddParam param) {
         memberScanService.addConsume(param);
     }
 
     @ApiOperation(value = "获取拍照积分记录(分页)", notes = "获取拍照积分记录(分页)")
-    @ApiMapping(value = "mdc.consumption.ticket.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.consumption.ticket.page", method = RequestMethod.POST)
     public IPage<MemberScanRecord> pageInfo(MemberConsumptionTicketPageInfoParam param) {
         return memberScanService.pageInfo(param);
     }
 
     @ApiOperation(value = "添加拍照积分记录", notes = "添加拍照积分记录")
-    @ApiMapping(value = "mdc.consumption.ticket.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.consumption.ticket.add", method = RequestMethod.POST)
     public void addConsumptionTicketnfo(MemberConsumptionTicketAddInfoParam param) {
         memberScanService.addConsumptionTicketnfo(param);
     }

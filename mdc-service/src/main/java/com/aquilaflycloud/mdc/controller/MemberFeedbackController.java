@@ -29,21 +29,21 @@ public class MemberFeedbackController {
 
     @ApiOperation(value = "分页查询意见反馈", notes = "分页查询意见反馈")
     @PreAuthorize("hasAuthority('mdc:memberFeedback:page')")
-    @ApiMapping(value = "backend.mdc.member.feedback.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.feedback.page", method = RequestMethod.POST, permission = true)
     public IPage<MemberFeedbackInfo> page(MemberFeedbackPageParam param) {
         return memberFeedbackService.page(param);
     }
 
     @ApiOperation(value = "查询意见反馈详情", notes = "查询意见反馈详情")
     @PreAuthorize("hasAuthority('mdc:memberFeedback:get')")
-    @ApiMapping(value = "backend.mdc.member.feedback.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.feedback.get", method = RequestMethod.POST, permission = true)
     public MemberFeedbackInfo get(MemberFeedbackGetParam param) {
         return memberFeedbackService.get(param);
     }
 
     @ApiOperation(value = "更新反馈备注", notes = "更新反馈备注")
     @PreAuthorize("hasAuthority('mdc:memberFeedback:edit')")
-    @ApiMapping(value = "backend.mdc.member.feedback.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.feedback.edit", method = RequestMethod.POST, permission = true)
     public void edit(MemberFeedbackEditParam param) {
         memberFeedbackService.edit(param);
     }

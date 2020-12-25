@@ -26,7 +26,7 @@ public class MemberAttributesAnalysisController {
 
     @ApiOperation(value = "会员属性分析", notes = "会员属性分析")
     @PreAuthorize("hasAuthority('mdc:memberAttr:analysis')")
-    @ApiMapping(value = "backend.mdc.member.attributes.analysis", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.attributes.analysis", method = RequestMethod.POST, permission = true)
     public MemberAttributesAnalysisResult memberAttributesAnalysis(MemberAttributesAnalysisParam param) {
         return memberService.memberAttributesAnalysis(param);
     }

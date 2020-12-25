@@ -28,14 +28,14 @@ public class MemberDailyDataInfoController {
 
     @ApiOperation(value = "会员增长分析", notes = "会员增长分析")
     @PreAuthorize("hasAuthority('mdc:memberDaily:grow')")
-    @ApiMapping(value = "backend.mdc.member.daily.grow", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.daily.grow", method = RequestMethod.POST, permission = true)
     public MemberGrowResult memberDailyGrow(MemberGrowParam param) {
         return memberDailyDataInfoService.memberGrow(param);
     }
 
     @ApiOperation(value = "用户访问分析", notes = "用户访问分析")
     @PreAuthorize("hasAuthority('mdc:memberDaily:times')")
-    @ApiMapping(value = "backend.mdc.member.daily.times", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.daily.times", method = RequestMethod.POST, permission = true)
     public MemberVisitTimesResult memberDailyVisitTimes(MemberVisitTimesParam param) {
         return memberDailyDataInfoService.memberVisitTimes(param);
     }

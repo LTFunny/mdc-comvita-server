@@ -29,42 +29,42 @@ public class MemberGradeController {
 
     @ApiOperation(value = "查询会员等级列表", notes = "查询会员等级列表")
     @PreAuthorize("hasAuthority('mdc:memberGrade:list')")
-    @ApiMapping(value = "backend.mdc.member.grade.list", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.grade.list", method = RequestMethod.POST, permission = true)
     public List<MemberGradeResult> listMemberGrade(MemberGradeListParam param) {
         return memberGradeService.listMemberGrade(param);
     }
 
     @ApiOperation(value = "获取会员等级", notes = "获取会员等级")
     @PreAuthorize("hasAuthority('mdc:memberGrade:get')")
-    @ApiMapping(value = "backend.mdc.member.grade.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.grade.get", method = RequestMethod.POST, permission = true)
     public MemberGrade getMemberGrade(MemberGradeGetParam param) {
         return memberGradeService.getMemberGrade(param);
     }
 
     @ApiOperation(value = "批量删除并新增会员等级", notes = "批量删除并新增会员等级")
     @PreAuthorize("hasAuthority('mdc:memberGrade:add')")
-    @ApiMapping(value = "backend.mdc.member.grade.batchAdd", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.grade.batchAdd", method = RequestMethod.POST, permission = true)
     public void batchAddMemberGrade(MemberGradeBatchAddParam param) {
         memberGradeService.batchAddMemberGrade(param);
     }
 
     @ApiOperation(value = "新增会员等级", notes = "新增会员等级")
     @PreAuthorize("hasAuthority('mdc:memberGrade:add')")
-    @ApiMapping(value = "backend.mdc.member.grade.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.grade.add", method = RequestMethod.POST, permission = true)
     public void addMemberGrade(MemberGradeAddParam param) {
         memberGradeService.addMemberGrade(param);
     }
 
     @ApiOperation(value = "编辑会员等级", notes = "编辑会员等级")
     @PreAuthorize("hasAuthority('mdc:memberGrade:edit')")
-    @ApiMapping(value = "backend.mdc.member.grade.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.grade.edit", method = RequestMethod.POST, permission = true)
     public void editMemberGrade(MemberGradeEditParam param) {
         memberGradeService.editMemberGrade(param);
     }
 
     @ApiOperation(value = "删除会员等级", notes = "删除会员等级")
     @PreAuthorize("hasAuthority('mdc:memberGrade:delete')")
-    @ApiMapping(value = "backend.mdc.member.grade.delete", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.grade.delete", method = RequestMethod.POST, permission = true)
     public void deleteMemberGrade(MemberGradeGetParam param) {
         memberGradeService.deleteMemberGrade(param);
     }

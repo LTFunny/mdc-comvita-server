@@ -34,31 +34,31 @@ public class ApplyActivityApi {
     private ApplyActivityService applyActivityService;
 
     @ApiOperation(value = "获取报名活动列表", notes = "获取报名活动列表")
-    @ApiMapping(value = "mdc.apply.info.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.apply.info.page", method = RequestMethod.POST)
     public IPage<ApplyResult> pageApplyActivity(ApplyPageParam param) {
         return applyActivityService.pageApplyActivity(param);
     }
 
     @ApiOperation(value = "获取报名活动详情", notes = "获取报名活动详情")
-    @ApiMapping(value = "mdc.apply.info.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.apply.info.get", method = RequestMethod.POST)
     public ApplyActivityDetailResult getApplyActivity(ApplyGetParam param) {
         return applyActivityService.getApplyActivity(param);
     }
 
     @ApiOperation(value = "新增报名记录", notes = "新增报名记录,会员报名活动")
-    @ApiMapping(value = "mdc.apply.record.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.apply.record.add", method = RequestMethod.POST)
     public void addApplyRecord(RecordAddParam param) {
         applyActivityService.addApplyRecord(param);
     }
 
     @ApiOperation(value = "获取报名记录列表", notes = "获取报名记录列表")
-    @ApiMapping(value = "mdc.apply.record.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.apply.record.page", method = RequestMethod.POST)
     public IPage<ApplyMemberRecord> pageApplyRecord(ApplyRecordPageParam param) {
         return applyActivityService.pageApplyRecord(param);
     }
 
     @ApiOperation(value = "获取报名活动记录列表", notes = "获取报名活动记录列表")
-    @ApiMapping(value = "mdc.apply.memberRecord.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.apply.memberRecord.page", method = RequestMethod.POST)
     public IPage<ApplyMemberRecordResult> pageApplyMemberRecord(PageParam<ApplyMemberRecord> param) {
         return applyActivityService.pageApplyMemberRecord(param);
     }

@@ -28,13 +28,13 @@ public class AdApi {
     private AdService adService;
 
     @ApiOperation(value = "获取广告列表", notes = "获取广告列表")
-    @ApiMapping(value = "mdc.ad.info.list", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.ad.info.list", method = RequestMethod.POST)
     public List<AdInfoResult> listAd(AdListParam param) {
         return adService.listAd(param);
     }
 
     @ApiOperation(value = "获取广告详情", notes = "获取广告详情")
-    @ApiMapping(value = "mdc.ad.info.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.ad.info.get", method = RequestMethod.POST)
     public AdInfo get(AdGetParam param) {
         return adService.getAdInfo(param);
     }

@@ -27,49 +27,49 @@ public class InformationController {
 
     @ApiOperation(value = "获取资讯列表(分页)", notes = "获取资讯列表(分页)")
     @PreAuthorize("hasAuthority('mdc:info:list')")
-    @ApiMapping(value = "backend.mdc.information.info.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.information.info.page", method = RequestMethod.POST, permission = true)
     public IPage<Information> pageInfo(InfoPageParam param) {
         return informationService.pageInfo(param);
     }
 
     @ApiOperation(value = "获取资讯", notes = "获取资讯")
     @PreAuthorize("hasAuthority('mdc:info:get')")
-    @ApiMapping(value = "backend.mdc.information.info.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.information.info.get", method = RequestMethod.POST, permission = true)
     public Information getInfo(InfoGetParam param) {
         return informationService.getInfo(param);
     }
 
     @ApiOperation(value = "获取单个资讯", notes = "获取单个资讯")
     @PreAuthorize("hasAuthority('mdc:info:get')")
-    @ApiMapping(value = "backend.mdc.information.importantest.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.information.importantest.get", method = RequestMethod.POST, permission = true)
     public Information getInfoOne(InfoOneGetParam param) {
         return informationService.getInfo(param);
     }
 
     @ApiOperation(value = "新增资讯", notes = "新增资讯")
     @PreAuthorize("hasAuthority('mdc:info:add')")
-    @ApiMapping(value = "backend.mdc.information.info.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.information.info.add", method = RequestMethod.POST, permission = true)
     public void addInfo(InfoAddParam param) {
         informationService.addInfo(param);
     }
 
     @ApiOperation(value = "编辑资讯", notes = "编辑资讯")
     @PreAuthorize("hasAuthority('mdc:info:edit')")
-    @ApiMapping(value = "backend.mdc.information.info.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.information.info.edit", method = RequestMethod.POST, permission = true)
     public void editInfo(InfoEditParam param) {
         informationService.editInfo(param);
     }
 
     @ApiOperation(value = "启用/停用资讯", notes = "启用/停用资讯")
     @PreAuthorize("hasAuthority('mdc:info:edit')")
-    @ApiMapping(value = "backend.mdc.information.info.toggle", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.information.info.toggle", method = RequestMethod.POST, permission = true)
     public void toggleInfo(InfoGetParam param) {
         informationService.toggleInfo(param);
     }
 
     @ApiOperation(value = "删除资讯", notes = "删除资讯")
     @PreAuthorize("hasAuthority('mdc:info:delete')")
-    @ApiMapping(value = "backend.mdc.information.info.delete", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.information.info.delete", method = RequestMethod.POST, permission = true)
     public void deleteInfo(InfoGetParam param) {
         informationService.deleteInfo(param);
     }

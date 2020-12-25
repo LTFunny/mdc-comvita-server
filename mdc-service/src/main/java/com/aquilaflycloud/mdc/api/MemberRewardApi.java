@@ -30,19 +30,19 @@ public class MemberRewardApi {
     private MemberRewardService memberRewardService;
 
     @ApiOperation(value = "查询会员奖励排名", notes = "查询会员奖励排名")
-    @ApiMapping(value = "mdc.reward.rank.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.reward.rank.get", method = RequestMethod.POST)
     public MemberRewardRankResult getRewardRank(MemberRewardRankGetParam param) {
         return memberRewardService.getRewardRank(param);
     }
 
     @ApiOperation(value = "获取会员奖励汇总", notes = "获取会员奖励汇总")
-    @ApiMapping(value = "mdc.reward.summary.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.reward.summary.get", method = RequestMethod.POST)
     public MemberSummaryRewardResult getSummaryReward(MemberSummaryRewardGetParam param) {
         return memberRewardService.getSummaryReward(param);
     }
 
     @ApiOperation(value = "查询会员奖励记录列表", notes = "查询会员奖励记录列表")
-    @ApiMapping(value = "mdc.reward.record.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.reward.record.page", method = RequestMethod.POST)
     public IPage<MemberRewardRecord> pageMemberReward(MemberRewardPageParam param) {
         return memberRewardService.pageMemberReward(param);
     }

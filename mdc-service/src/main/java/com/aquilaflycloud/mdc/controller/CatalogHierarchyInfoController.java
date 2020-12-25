@@ -30,35 +30,35 @@ public class CatalogHierarchyInfoController {
 
     @ApiOperation(value = "分页分类层级信息", notes = "分页分类层级信息")
     @PreAuthorize("hasAuthority('mdc:catalogHierarchy:page')")
-    @ApiMapping(value = "backend.mdc.catalog.hierarchy.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.catalog.hierarchy.page", method = RequestMethod.POST, permission = true)
     public IPage<CatalogHierarchyPageInfo> page(CatalogHierarchyInfoPageParam param) {
         return catalogHierarchyInfoService.page(param);
     }
 
     @ApiOperation(value = "添加分类层级信息", notes = "添加分类层级信息")
     @PreAuthorize("hasAuthority('mdc:catalogHierarchy:add')")
-    @ApiMapping(value = "backend.mdc.catalog.hierarchy.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.catalog.hierarchy.add", method = RequestMethod.POST, permission = true)
     public void addCatalogHierarchyInfo(CatalogHierarchyInfoAddParam param) {
         catalogHierarchyInfoService.addCatalogHierarchyInfo(param);
     }
 
     @ApiOperation(value = "编辑分类层级信息", notes = "编辑分类层级信息")
     @PreAuthorize("hasAuthority('mdc:catalogHierarchy:edit')")
-    @ApiMapping(value = "backend.mdc.catalog.hierarchy.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.catalog.hierarchy.edit", method = RequestMethod.POST, permission = true)
     public void editCatalogHierarchyInfo(CatalogHierarchyInfoEditParam param) {
         catalogHierarchyInfoService.editCatalogHierarchyInfo(param);
     }
 
     @ApiOperation(value = "删除分类层级信息", notes = "删除分类层级信息")
     @PreAuthorize("hasAuthority('mdc:catalogHierarchy:delete')")
-    @ApiMapping(value = "backend.mdc.catalog.hierarchy.delete", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.catalog.hierarchy.delete", method = RequestMethod.POST, permission = true)
     public void deleteCatalogHierarchyInfo(CatalogHierarchyInfoDeleteParam param) {
         catalogHierarchyInfoService.deleteCatalogHierarchyInfo(param);
     }
 
     @ApiOperation(value = "获取分类层级信息列表", notes = "获取分类层级信息列表")
     @PreAuthorize("hasAuthority('mdc:catalogHierarchy:list')")
-    @ApiMapping(value = "backend.mdc.catalog.hierarchy.list", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.catalog.hierarchy.list", method = RequestMethod.POST, permission = true)
     public List<CatalogHierarchyNodeInfo> listCatalogHierarchyInfo(CatalogHierarchyInfoListParam param) {
         return catalogHierarchyInfoService.listCatalogHierarchyInfo(param);
     }

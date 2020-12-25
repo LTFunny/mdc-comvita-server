@@ -24,7 +24,7 @@ public class ConfigApi {
     private ClientConfigService clientConfigService;
 
     @ApiOperation(value = "获取客户端配置值", notes = "获取客户端配置值")
-    @ApiMapping(value = "mdc.client.configItem.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.client.configItem.get", method = RequestMethod.POST)
     public BaseResult getItem(ClientItemGetParam param) {
         return clientConfigService.getItem(param);
     }

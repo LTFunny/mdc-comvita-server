@@ -31,28 +31,28 @@ public class ExchangeRecommendController {
 
     @ApiOperation(value = "兑换商品推荐列表查询(分页)", notes = "兑换商品推荐列表查询(分页)")
     @PreAuthorize("hasAuthority('mdc:exchangeRecommend:list')")
-    @ApiMapping(value = "backend.mdc.exchange.recommend.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.recommend.page", method = RequestMethod.POST, permission = true)
     public IPage<RecommendGoodsResult> pageRecommend(RecommendGoodsPageParam param) {
         return exchangeService.pageRecommend(param);
     }
 
     @ApiOperation(value = "新增推荐商品", notes = "新增推荐商品")
     @PreAuthorize("hasAuthority('mdc:exchangeRecommend:add')")
-    @ApiMapping(value = "backend.mdc.exchange.recommend.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.recommend.add", method = RequestMethod.POST, permission = true)
     public void addRecommend(RecommendGoodsAddParam param) {
         exchangeService.addRecommend(param);
     }
 
     @ApiOperation(value = "修改推荐商品", notes = "修改推荐商品")
     @PreAuthorize("hasAuthority('mdc:exchangeRecommend:edit')")
-    @ApiMapping(value = "backend.mdc.exchange.recommend.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.recommend.edit", method = RequestMethod.POST, permission = true)
     public void editRecommend(RecommendGoodsEditParam param) {
         exchangeService.editRecommend(param);
     }
 
     @ApiOperation(value = "删除推荐商品", notes = "删除推荐商品")
     @PreAuthorize("hasAuthority('mdc:exchangeRecommend:delete')")
-    @ApiMapping(value = "backend.mdc.exchange.recommend.delete", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.recommend.delete", method = RequestMethod.POST, permission = true)
     public void deleteRecommend(RecommendGoodsDeleteParam param) {
         exchangeService.deleteRecommend(param);
     }

@@ -30,42 +30,42 @@ public class MemberController {
 
     @ApiOperation(value = "查询会员列表(分页)", notes = "根据条件查询会员列表(分页)")
     @PreAuthorize("hasAuthority('mdc:member:list')")
-    @ApiMapping(value = "backend.mdc.member.info.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.info.page", method = RequestMethod.POST, permission = true)
     public IPage<MemberInfo> pageMemberInfo(MemberPageParam param) {
         return memberService.pageMemberInfo(param);
     }
 
     @ApiOperation(value = "查询会员详情", notes = "查询会员详情")
     @PreAuthorize("hasAuthority('mdc:member:get')")
-    @ApiMapping(value = "backend.mdc.member.info.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.info.get", method = RequestMethod.POST, permission = true)
     public MemberDetailResult getMemberDetailInfo(MemberGetParam param) {
         return memberService.getMemberDetailInfo(param);
     }
 
     @ApiOperation(value = "新增会员信息", notes = "新增会员信息")
     @PreAuthorize("hasAuthority('mdc:member:add')")
-    @ApiMapping(value = "backend.mdc.member.info.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.info.add", method = RequestMethod.POST, permission = true)
     public void addMemberInfo(MemberAddParam param) {
         memberService.addMemberInfo(param);
     }
 
     @ApiOperation(value = "公众号粉丝同步", notes = "公众号粉丝同步")
     @PreAuthorize("hasAuthority('mdc:member:sync')")
-    @ApiMapping(value = "backend.mdc.member.wechatFans.sync", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.wechatFans.sync", method = RequestMethod.POST, permission = true)
     public void syncWechatFans(MemberSyncParam param) {
         memberService.syncWechatFans(param);
     }
 
     @ApiOperation(value = "查询公众号粉丝列表(分页)", notes = "根据条件查询公众号粉丝列表(分页)")
     @PreAuthorize("hasAuthority('mdc:member:list')")
-    @ApiMapping(value = "backend.mdc.member.wechatFans.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.wechatFans.page", method = RequestMethod.POST, permission = true)
     public IPage<WechatFansInfo> pageWechatFans(WechatFansPageParam param) {
         return memberService.pageWechatFans(param);
     }
 
     @ApiOperation(value = "批量导入会员信息", notes = "批量导入会员信息")
     @PreAuthorize("hasAuthority('mdc:member:batchAdd')")
-    @ApiMapping(value = "backend.mdc.member.info.batchAdd", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.member.info.batchAdd", method = RequestMethod.POST, permission = true)
     public void batchAddMemberInfo(MemberBatchAddParam param) {
         memberService.batchAddMemberInfo(param);
     }

@@ -33,35 +33,35 @@ public class WechatMaterialController {
 
     @ApiOperation(value = "微信公众号图文素材列表(分页)", notes = "微信公众号图文素材列表(分页)")
     @PreAuthorize("hasAuthority('mdc:wechat:materialList')")
-    @ApiMapping(value = "backend.mdc.wechat.materialNews.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.wechat.materialNews.page", method = RequestMethod.POST, permission = true)
     public IPage<WxMpMaterialNewsBatchGetResult.WxMaterialNewsBatchGetNewsItem> pageMaterialNews(MaterialListParam param) {
         return wechatMaterialService.pageMaterialNews(param);
     }
 
     @ApiOperation(value = "微信公众号其他素材列表(分页)", notes = "微信公众号其他素材列表(分页)")
     @PreAuthorize("hasAuthority('mdc:wechat:materialList')")
-    @ApiMapping(value = "backend.mdc.wechat.material.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.wechat.material.page", method = RequestMethod.POST, permission = true)
     public IPage<WxMpMaterialFileBatchGetResult.WxMaterialFileBatchGetNewsItem> pageMaterial(MaterialListParam param) {
         return wechatMaterialService.pageMaterial(param);
     }
 
     @ApiOperation(value = "微信公众号图文素材", notes = "微信公众号图文素材")
     @PreAuthorize("hasAuthority('mdc:wechat:materialGet')")
-    @ApiMapping(value = "backend.mdc.wechat.materialNews.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.wechat.materialNews.get", method = RequestMethod.POST, permission = true)
     public WxMpMaterialNews getMaterialNews(MaterialGetParam param) {
         return wechatMaterialService.getMaterialNews(param);
     }
 
     @ApiOperation(value = "微信公众号视频素材", notes = "微信公众号视频素材")
     @PreAuthorize("hasAuthority('mdc:wechat:materialGet')")
-    @ApiMapping(value = "backend.mdc.wechat.materialVideo.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.wechat.materialVideo.get", method = RequestMethod.POST, permission = true)
     public WxMpMaterialVideoInfoResult getMaterialVideo(MaterialGetParam param) {
         return wechatMaterialService.getMaterialVideo(param);
     }
 
     @ApiOperation(value = "微信公众号其他素材", notes = "微信公众号其他素材")
     @PreAuthorize("hasAuthority('mdc:wechat:materialGet')")
-    @ApiMapping(value = "backend.mdc.wechat.material.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.wechat.material.get", method = RequestMethod.POST, permission = true)
     public BaseResult<String> getMaterial(MaterialGetParam param) {
         return wechatMaterialService.getMaterial(param);
     }

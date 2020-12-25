@@ -26,7 +26,7 @@ public class WechatPayConfigApi {
     private WechatPayService wechatPayService;
 
     @ApiOperation(value = "获取商圈号", notes = "获取商圈号")
-    @ApiMapping(value = "mdc.wechat.mchid.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.wechat.mchid.get", method = RequestMethod.POST)
     public BaseResult<String> getMchid() {
         String appId = MdcUtil.getOtherAppId();
         WxPayConfig payConfig = wechatPayService.getPayConfig(appId);

@@ -26,7 +26,7 @@ public class WechatMiniLiveController {
 
     @ApiOperation(value = "全量加载直播间列表", notes = "全量加载直播间列表")
     @PreAuthorize("hasAuthority('mdc:wechat:liveListLoad')")
-    @ApiMapping(value = "backend.mdc.wechat.miniLive.load", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.wechat.miniLive.load", method = RequestMethod.POST, permission = true)
     public void list(WechatAuthorSiteGetParam param) {
         wechatMiniLiveService.loadLiveInfo(param);
     }

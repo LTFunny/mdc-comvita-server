@@ -26,7 +26,7 @@ public class MissionApi {
     private MissionService missionService;
 
     @ApiOperation(value = "获取会员任务记录列表(分页)", notes = "获取会员任务记录列表(分页)")
-    @ApiMapping(value = "mdc.mission.record.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.mission.record.page", method = RequestMethod.POST)
     public IPage<MissionRecordResult> pageRecord(PageParam<MissionMemberRecord> param) {
         return missionService.pageRecord(param);
     }

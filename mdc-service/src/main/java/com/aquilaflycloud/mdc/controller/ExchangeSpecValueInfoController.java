@@ -32,21 +32,21 @@ public class ExchangeSpecValueInfoController {
 
     @ApiOperation(value = "分页规格和规格值", notes = "分页规格和规格值")
     @PreAuthorize("hasAuthority('mdc:exchangeSpecValue:list')")
-    @ApiMapping(value = "backend.mdc.exchange.specValue.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.specValue.page", method = RequestMethod.POST, permission = true)
     public IPage<ExchangeSpecValueInfo> page(ExchangeSpecValuePageParam param) {
         return exchangeSpecValueInfoService.page(param);
     }
 
     @ApiOperation(value = "规格和规格值添加", notes = "规格和规格值添加")
     @PreAuthorize("hasAuthority('mdc:exchangeSpecValue:add')")
-    @ApiMapping(value = "backend.mdc.exchange.specValue.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.specValue.add", method = RequestMethod.POST, permission = true)
     public ExchangeSpecValueInfo add(ExchangeSpecValueAddParam param) {
         return exchangeSpecValueInfoService.add(param);
     }
 
     @ApiOperation(value = "获取规格和规格值信息", notes = "获取规格和规格值信息")
     @PreAuthorize("hasAuthority('mdc:exchangeSpecValue:get')")
-    @ApiMapping(value = "backend.mdc.exchange.specValue.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.specValue.get", method = RequestMethod.POST, permission = true)
     public ExchangeSpecValueInfo get(ExchangeSpecValueGetParam param) {
         return exchangeSpecValueInfoService.get(param);
     }

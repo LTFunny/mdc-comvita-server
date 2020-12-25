@@ -32,28 +32,28 @@ public class TicketScenicSpotInfoController {
 
     @ApiOperation("获取景区信息列表")
     @PreAuthorize("hasAuthority('mdc:ticket:scenicspotinfo:page')")
-    @ApiMapping(value = "backend.mdc.ticket.scenicspotinfo.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.ticket.scenicspotinfo.page", method = RequestMethod.POST, permission = true)
     public IPage<TicketScenicSpotInfo> listScenicSpotInfo(ScenicSpotInfoListParam param) {
         return ticketScenicSpotInfoService.listScenicSpotInfo(param);
     }
 
     @ApiOperation("获取景区信息")
     @PreAuthorize("hasAuthority('mdc:ticket:scenicspotinfo:get')")
-    @ApiMapping(value = "backend.mdc.ticket.scenicspotinfo.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.ticket.scenicspotinfo.get", method = RequestMethod.POST, permission = true)
     public TicketScenicSpotInfoResult getScenicSpotInfo(ScenicSpotInfoGetParam param) {
         return ticketScenicSpotInfoService.getScenicSpotInfo(param);
     }
 
     @ApiOperation("保存景区信息")
     @PreAuthorize("hasAuthority('mdc:ticket:scenicspotinfo:save')")
-    @ApiMapping(value = "backend.mdc.ticket.scenicspotinfo.save", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.ticket.scenicspotinfo.save", method = RequestMethod.POST, permission = true)
     public TicketScenicSpotInfo saveScenicSpotInfo(ScenicSpotInfoSaveParam param) {
         return ticketScenicSpotInfoService.saveScenicSpotInfo(param);
     }
 
     @ApiOperation("根据景区id更新指定可看部门ids和账号")
     @PreAuthorize("hasAuthority('mdc:ticket:scenicspotinfo:updateById')")
-    @ApiMapping(value = "backend.mdc.ticket.scenicspotinfo.updateById", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.ticket.scenicspotinfo.updateById", method = RequestMethod.POST, permission = true)
     public int updateById(ScenicSpotInfoUpdateByIdParam param) {
         return ticketScenicSpotInfoService.updateById(param);
     }

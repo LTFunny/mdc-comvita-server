@@ -30,56 +30,56 @@ public class LotteryActivityController {
 
     @ApiOperation(value = "获取抽奖活动列表(分页)", notes = "获取抽奖活动列表(分页)")
     @PreAuthorize("hasAuthority('mdc:lottery:list')")
-    @ApiMapping(value = "backend.mdc.lottery.info.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.lottery.info.page", method = RequestMethod.POST, permission = true)
     public IPage<LotteryActivity> pageLottery(LotteryPageParam param) {
         return lotteryActivityService.pageLottery(param);
     }
 
     @ApiOperation(value = "获取抽奖活动详情", notes = "获取抽奖活动详情")
     @PreAuthorize("hasAuthority('mdc:lottery:get')")
-    @ApiMapping(value = "backend.mdc.lottery.info.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.lottery.info.get", method = RequestMethod.POST, permission = true)
     public LotteryResult getLottery(LotteryGetParam param) {
         return lotteryActivityService.getLottery(param);
     }
 
     @ApiOperation(value = "新增抽奖活动", notes = "新增抽奖活动")
     @PreAuthorize("hasAuthority('mdc:lottery:add')")
-    @ApiMapping(value = "backend.mdc.lottery.info.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.lottery.info.add", method = RequestMethod.POST, permission = true)
     public void addLottery(LotteryAddParam param) {
         lotteryActivityService.addLottery(param);
     }
 
     @ApiOperation(value = "编辑抽奖活动", notes = "编辑抽奖活动")
     @PreAuthorize("hasAuthority('mdc:lottery:edit')")
-    @ApiMapping(value = "backend.mdc.lottery.info.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.lottery.info.edit", method = RequestMethod.POST, permission = true)
     public void editLottery(LotteryEditParam param) {
         lotteryActivityService.editLottery(param);
     }
 
     @ApiOperation(value = "启用/停用抽奖活动", notes = "编辑抽奖活动状态,启用/停用")
     @PreAuthorize("hasAuthority('mdc:lottery:edit')")
-    @ApiMapping(value = "backend.mdc.lottery.state.toggle", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.lottery.state.toggle", method = RequestMethod.POST, permission = true)
     public void toggleLotteryState(LotteryGetParam param) {
         lotteryActivityService.toggleState(param);
     }
 
     @ApiOperation(value = "发布抽奖活动", notes = "发布抽奖活动")
     @PreAuthorize("hasAuthority('mdc:lottery:edit')")
-    @ApiMapping(value = "backend.mdc.lottery.info.release", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.lottery.info.release", method = RequestMethod.POST, permission = true)
     public void releaseLottery(LotteryGetParam param) {
         lotteryActivityService.releaseLottery(param);
     }
 
     @ApiOperation(value = "获取抽奖活动概况统计", notes = "获取抽奖活动概况统计")
     @PreAuthorize("hasAuthority('mdc:lottery:list')")
-    @ApiMapping(value = "backend.mdc.lottery.statistics.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.lottery.statistics.get", method = RequestMethod.POST, permission = true)
     public StatisticsResult getStatistics() {
         return lotteryActivityService.getStatistics();
     }
 
     @ApiOperation(value = "获取抽奖记录列表(分页)", notes = "获取抽奖记录列表(分页)")
     @PreAuthorize("hasAuthority('mdc:lotteryRecord:list')")
-    @ApiMapping(value = "backend.mdc.lottery.record.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.lottery.record.page", method = RequestMethod.POST, permission = true)
     public IPage<LotteryMemberRecord> pageRecord(RecordPageParam param) {
         return lotteryActivityService.pageRecord(param);
     }

@@ -31,49 +31,49 @@ public class SystemAccountController {
 
     @ApiOperation(value = "查询第三方账号列表", notes = "查询第三方账号列表")
     @PreAuthorize("hasAuthority('mdc:system:accountList')")
-    @ApiMapping(value = "backend.mdc.system.account.list", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.system.account.list", method = RequestMethod.POST, permission = true)
     public List<SystemAccountConfig> listAccount(AccountListParam param) {
         return systemAccountService.listAccount(param);
     }
 
     @ApiOperation(value = "获取腾讯位置服务账号", notes = "获取腾讯位置服务账号")
     @PreAuthorize("hasAuthority('mdc:system:accountGet')")
-    @ApiMapping(value = "backend.mdc.system.tencentPositionAccount.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.system.tencentPositionAccount.get", method = RequestMethod.POST, permission = true)
     public TencentPositionAccountResult getTencentPositionAccount() {
         return systemAccountService.getTencentPositionAccount();
     }
 
     @ApiOperation(value = "保存腾讯位置服务账号", notes = "保存腾讯位置服务账号")
     @PreAuthorize("hasAuthority('mdc:system:accountSave')")
-    @ApiMapping(value = "backend.mdc.system.tencentPositionAccount.save", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.system.tencentPositionAccount.save", method = RequestMethod.POST, permission = true)
     public void saveTencentPositionAccount(TencentPositionAccountSaveParam param) {
         systemAccountService.saveTencentPositionAccount(param);
     }
 
     @ApiOperation(value = "获取惠云支付账号", notes = "获取惠云支付账号")
     @PreAuthorize("hasAuthority('mdc:system:accountGet')")
-    @ApiMapping(value = "backend.mdc.system.easyPayAccount.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.system.easyPayAccount.get", method = RequestMethod.POST, permission = true)
     public EasyPayAccountResult getEasyPayAccount(EasyPayAccountGetParam param) {
         return systemAccountService.getEasyPayAccount(param);
     }
 
     @ApiOperation(value = "保存惠云支付账号", notes = "保存惠云支付账号")
     @PreAuthorize("hasAuthority('mdc:system:accountSave')")
-    @ApiMapping(value = "backend.mdc.system.easyPayAccount.save", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.system.easyPayAccount.save", method = RequestMethod.POST, permission = true)
     public void saveEasyPayAccount(EasyPayAccountSaveParam param) {
         systemAccountService.saveEasyPayAccount(param);
     }
 
     @ApiOperation(value = "获取安居宝账号", notes = "获取安居宝账号")
     @PreAuthorize("hasAuthority('mdc:system:accountGet')")
-    @ApiMapping(value = "backend.mdc.system.ajbCloudAccount.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.system.ajbCloudAccount.get", method = RequestMethod.POST, permission = true)
     public AjbCloudAccountResult getAjbCloudAccount() {
         return systemAccountService.getAjbCloudAccount();
     }
 
     @ApiOperation(value = "保存安居宝账号", notes = "保存安居宝账号")
     @PreAuthorize("hasAuthority('mdc:system:accountSave')")
-    @ApiMapping(value = "backend.mdc.system.ajbCloudAccount.save", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.system.ajbCloudAccount.save", method = RequestMethod.POST, permission = true)
     public void saveAjbCloudAccount(AjbCloudAccountSaveParam param) {
         systemAccountService.saveAjbCloudAccount(param);
     }

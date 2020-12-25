@@ -33,49 +33,49 @@ public class ExchangeCatalogController {
 
     @ApiOperation(value = "兑换商品分类列表查询(分页)", notes = "兑换商品分类列表查询(分页)")
     @PreAuthorize("hasAuthority('mdc:exchangeCatalog:list')")
-    @ApiMapping(value = "backend.mdc.exchange.catalog.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.catalog.page", method = RequestMethod.POST, permission = true)
     public IPage<CatalogResult> pageCatalog(CatalogPageParam param) {
         return catalogService.pageExchangeCatalog(param);
     }
 
     @ApiOperation(value = "兑换商品分类列表", notes = "兑换商品分类列表")
     @PreAuthorize("hasAuthority('mdc:exchangeCatalog:list')")
-    @ApiMapping(value = "backend.mdc.exchange.catalog.list", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.catalog.list", method = RequestMethod.POST, permission = true)
     public List<CatalogInfo> listCatalog() {
         return catalogService.listExchangeCatalogInfo();
     }
 
     @ApiOperation(value = "新增兑换商品分类", notes = "新增兑换商品分类")
     @PreAuthorize("hasAuthority('mdc:exchangeCatalog:add')")
-    @ApiMapping(value = "backend.mdc.exchange.catalog.add", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.catalog.add", method = RequestMethod.POST, permission = true)
     public void addCatalog(CatalogAddParam param) {
         catalogService.addExchangeCatalog(param);
     }
 
     @ApiOperation(value = "编辑兑换商品分类", notes = "编辑兑换商品分类")
     @PreAuthorize("hasAuthority('mdc:exchangeCatalog:edit')")
-    @ApiMapping(value = "backend.mdc.exchange.catalog.edit", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.catalog.edit", method = RequestMethod.POST, permission = true)
     public void editCatalog(CatalogEditParam param) {
         catalogService.editExchangeCatalog(param);
     }
 
     @ApiOperation(value = "停用/启用兑换商品分类", notes = "停用/启用兑换商品分类")
     @PreAuthorize("hasAuthority('mdc:exchangeCatalog:edit')")
-    @ApiMapping(value = "backend.mdc.exchange.catalog.toggle", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.catalog.toggle", method = RequestMethod.POST, permission = true)
     public void toggleCatalog(CatalogGetParam param) {
         catalogService.toggleCatalog(param);
     }
 
     @ApiOperation(value = "获取兑换商品分类", notes = "获取兑换商品分类")
     @PreAuthorize("hasAuthority('mdc:exchangeCatalog:get')")
-    @ApiMapping(value = "backend.mdc.exchange.catalog.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.catalog.get", method = RequestMethod.POST, permission = true)
     public CatalogInfo getCatalog(CatalogGetParam param) {
         return catalogService.getCatalog(param);
     }
 
     @ApiOperation(value = "删除兑换商品分类", notes = "删除兑换商品分类")
     @PreAuthorize("hasAuthority('mdc:exchangeCatalog:delete')")
-    @ApiMapping(value = "backend.mdc.exchange.catalog.delete", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.exchange.catalog.delete", method = RequestMethod.POST, permission = true)
     public void deleteCatalog(CatalogGetParam param) {
         catalogService.deleteExchangeCatalog(param);
     }

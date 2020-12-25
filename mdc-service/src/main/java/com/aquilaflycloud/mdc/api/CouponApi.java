@@ -32,49 +32,49 @@ public class CouponApi {
     private CouponInfoService couponInfoService;
 
     @ApiOperation(value = "优惠券分类列表查询", notes = "会员优惠券分类列表查询")
-    @ApiMapping(value = "mdc.coupon.catalog.list", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.coupon.catalog.list", method = RequestMethod.POST)
     public List<CatalogInfo> listCouponCatalog() {
         return catalogService.listCouponCatalog();
     }
 
     @ApiOperation(value = "优惠券列表查询(分页)", notes = "优惠券列表查询(分页)")
-    @ApiMapping(value = "mdc.coupon.info.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.coupon.info.page", method = RequestMethod.POST)
     public IPage<CouponInfoResult> pageCoupon(CouponInfoPageParam param) {
         return couponInfoService.pageCouponInfo(param);
     }
 
     @ApiOperation(value = "获取优惠券详情", notes = "获取优惠券详情")
-    @ApiMapping(value = "mdc.coupon.info.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.coupon.info.get", method = RequestMethod.POST)
     public CouponInfoResult getCoupon(CouponGetParam param) {
         return couponInfoService.getCouponInfo(param);
     }
 
     @ApiOperation(value = "领取优惠券", notes = "领取优惠券(返回记录id)")
-    @ApiMapping(value = "mdc.coupon.rel.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.coupon.rel.add", method = RequestMethod.POST)
     public BaseResult<String> addRel(CouponGetParam param) {
         return couponInfoService.addRel(param);
     }
 
     @ApiOperation(value = "会员优惠券记录查询(分页)", notes = "会员优惠券记录查询(分页)")
-    @ApiMapping(value = "mdc.coupon.rel.page", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.coupon.rel.page", method = RequestMethod.POST)
     public IPage<CouponMemberRel> pageCouponRel(CouponInfoRelPageParam param) {
         return couponInfoService.pageCouponInfoRel(param);
     }
 
     @ApiOperation(value = "获取会员优惠券详情", notes = "获取会员优惠券详情")
-    @ApiMapping(value = "mdc.coupon.rel.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.coupon.rel.get", method = RequestMethod.POST)
     public CouponMemberRel getCouponRel(CouponRelGetParam param) {
         return couponInfoService.getCouponInfoRel(param);
     }
 
     @ApiOperation(value = "核销会员优惠券", notes = "核销会员优惠券")
-    @ApiMapping(value = "mdc.coupon.rel.use", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "comvita.coupon.rel.use", method = RequestMethod.POST, permission = true)
     public CouponMemberRel useCouponRel(CouponMemberRelUseParam param) {
         return couponInfoService.useCouponRel(param);
     }
 
     @ApiOperation(value = "商铺获取优惠券", notes = "商铺获取优惠券")
-    @ApiMapping(value = "mdc.exchange.goods.pageShopCoupon", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.exchange.goods.pageShopCoupon", method = RequestMethod.POST)
     public IPage<CouponInfoResult> pageShopCoupon(CouponInfoShopPageParam param) {
         return couponInfoService.pageShopCoupon(param);
     }

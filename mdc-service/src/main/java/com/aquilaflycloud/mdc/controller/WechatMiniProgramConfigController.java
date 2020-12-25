@@ -30,28 +30,28 @@ public class WechatMiniProgramConfigController {
 
     @ApiOperation(value = "查询小程序代码模板配置列表", notes = "查询小程序代码模板配置列表")
     @PreAuthorize("hasAuthority('mdc:wechat:codeConfigList')")
-    @ApiMapping(value = "backend.mdc.wechat.codeConfig.list", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.wechat.codeConfig.list", method = RequestMethod.POST, permission = true)
     public List<WechatMiniProgramTemplateConfig> list(CodeConfigListParam param) {
         return wechatMiniProgramConfigService.list(param);
     }
 
     @ApiOperation(value = "查询小程序代码模板配置", notes = "查询小程序代码模板配置")
     @PreAuthorize("hasAuthority('mdc:wechat:codeConfigList')")
-    @ApiMapping(value = "backend.mdc.wechat.codeConfig.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.wechat.codeConfig.get", method = RequestMethod.POST, permission = true)
     public WechatMiniProgramTemplateConfig getConfig(CodeConfigGetParam param) {
         return wechatMiniProgramConfigService.getConfig(param);
     }
 
     @ApiOperation(value = "删除小程序代码模板配置", notes = "删除小程序代码模板配置")
     @PreAuthorize("hasAuthority('mdc:wechat:codeConfigDelete')")
-    @ApiMapping(value = "backend.mdc.wechat.codeConfig.delete", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.wechat.codeConfig.delete", method = RequestMethod.POST, permission = true)
     public void deleteConfig(CodeConfigGetParam param) {
         wechatMiniProgramConfigService.deleteConfig(param);
     }
 
     @ApiOperation(value = "保存小程序代码模板配置", notes = "保存小程序代码模板配置")
     @PreAuthorize("hasAuthority('mdc:wechat:codeConfigSave')")
-    @ApiMapping(value = "backend.mdc.wechat.codeConfig.save", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.wechat.codeConfig.save", method = RequestMethod.POST, permission = true)
     public void saveConfig(CodeConfigSaveParam param) {
         wechatMiniProgramConfigService.saveConfig(param);
     }

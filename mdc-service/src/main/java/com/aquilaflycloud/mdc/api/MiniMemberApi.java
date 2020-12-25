@@ -24,43 +24,43 @@ public class MiniMemberApi {
     private MemberService memberService;
 
     @ApiOperation(value = "小程序会员登录", notes = "登录成功返回memberSession")
-    @ApiMapping(value = "mdc.mini.member.login", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.mini.member.login", method = RequestMethod.POST)
     public BaseResult<String> loginMiniMember(MiniMemberLoginParam param) {
         return memberService.loginMiniMember(param);
     }
 
     @ApiOperation(value = "小程序会员授权", notes = "小程序会员授权后更新信息")
-    @ApiMapping(value = "mdc.mini.member.authorize", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.mini.member.authorize", method = RequestMethod.POST)
     public void authorizeMiniMember(MiniMemberAuthorizeParam param) {
         memberService.authorizeMiniMember(param);
     }
 
     @ApiOperation(value = "小程序手机号获取", notes = "小程序会员授权后获取手机号")
-    @ApiMapping(value = "mdc.mini.phone.get", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.mini.phone.get", method = RequestMethod.POST)
     public BaseResult<String> getMiniPhone(MiniPhoneGetParam param) {
         return memberService.getMiniPhone(param);
     }
 
     @ApiOperation(value = "小程序手机号获取并修改", notes = "小程序手机号获取并修改")
-    @ApiMapping(value = "mdc.mini.phone.edit", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.mini.phone.edit", method = RequestMethod.POST)
     public BaseResult<String> editMiniPhone(MiniPhoneGetParam param) {
         return memberService.editMiniPhone(param);
     }
 
     @ApiOperation(value = "小程序插件会员新增", notes = "登录成功返回插件会员pluginMemberId")
-    @ApiMapping(value = "mdc.mini.pluginMember.add", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.mini.pluginMember.add", method = RequestMethod.POST)
     public BaseResult<Long> addMiniPluginMember(MiniPluginMemberAddParam param) {
         return memberService.addMiniPluginMember(param);
     }
 
     @ApiOperation(value = "小程序插件会员注册", notes = "登录成功返回memberSession")
-    @ApiMapping(value = "mdc.mini.pluginMember.register", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.mini.pluginMember.register", method = RequestMethod.POST)
     public BaseResult<String> registerMiniPluginMember(MiniPluginMemberRegisterParam param) {
         return memberService.registerMiniPluginMember(param);
     }
 
     @ApiOperation(value = "小程序系统信息保存", notes = "保存小程序wx.getSystemInfoSync返回信息")
-    @ApiMapping(value = "mdc.mini.device.save", method = RequestMethod.POST)
+    @ApiMapping(value = "comvita.mini.device.save", method = RequestMethod.POST)
     public void saveMiniDevice(MiniDeviceSaveParam param) {
         memberService.saveMiniDevice(param);
     }
