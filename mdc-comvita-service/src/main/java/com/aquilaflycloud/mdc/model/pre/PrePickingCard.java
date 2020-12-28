@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -43,7 +44,7 @@ public class PrePickingCard implements Serializable {
      */
     @TableField(value = "picking_state")
     @ApiModelProperty(value = "状态 (1-未销售、2-已售卖、3-已预约、4-已核销、5-已作废)")
-    private Integer pickingState;
+    private PickingCardStateEnum pickingState;
 
     /**
      * 创建时间
