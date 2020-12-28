@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.controller;
 
 import com.aquilaflycloud.mdc.model.pre.PrePickingCard;
 import com.aquilaflycloud.mdc.param.pre.PrePickingCardPageParam;
+import com.aquilaflycloud.mdc.result.pre.PrePickingCardAnalysisResult;
 import com.aquilaflycloud.mdc.service.PrePickingCardService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -30,6 +31,13 @@ public class PrePickingCardController {
     @ApiMapping(value = "backend.comvita.pre.picking.card.page", method = RequestMethod.POST, permission = true)
     public IPage<PrePickingCard> page(PrePickingCardPageParam param) {
         return prePickingCardService.page(param);
+    }
+
+    @ApiOperation(value = "提货卡概况信息", notes = "提货卡概况信息")
+    @PreAuthorize("hasAuthority('mdc:pre:picking:card:page')")
+    @ApiMapping(value = "backend.comvita.pre.picking.card.analysis", method = RequestMethod.POST, permission = true)
+    public PrePickingCardAnalysisResult analysis() {
+        return prePickingCardService.analysis();
     }
 
 
