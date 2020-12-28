@@ -16,8 +16,8 @@
   <description>MDC大会员营销系统</description>
 
   <modules>
-    <module>mdc-interface</module>
-    <module>mdc-service</module>
+    <module>mdc-comvita-interface</module>
+    <module>mdc-comvita-service</module>
   </modules>
 
   <repositories>

@@ -8,10 +8,10 @@
     <version>0.0.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>mdc-interface</artifactId>
+  <artifactId>mdc-comvita-interface</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>mdc-interface</name>
+  <name>mdc-comvita-interface</name>
 
   <dependencies>
     <dependency>

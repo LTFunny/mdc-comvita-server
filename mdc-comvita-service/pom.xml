@@ -8,9 +8,9 @@
     <version>0.0.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>mdc-service</artifactId>
+  <artifactId>mdc-comvita-service</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>mdc-service</name>
+  <name>mdc-comvita-service</name>
 
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
@@ -43,12 +43,12 @@
     </dependency>
     <dependency>
       <groupId>com.aquilaflycloud</groupId>
-      <artifactId>mdc-interface</artifactId>
+      <artifactId>mdc-comvita-interface</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.aquilaflycloud</groupId>
-      <artifactId>org-interface</artifactId>
+      <artifactId>org-comvita-interface</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
