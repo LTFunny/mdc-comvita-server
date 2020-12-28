@@ -19,7 +19,7 @@ public class OrderPayParam implements Serializable {
     @NotNull(message = "订单id不能为空")
     private Long orderId;
 
-    @ApiModelProperty(value = "支付类型(WECHAT_MINI, ALIPAY)", required = true)
+    @ApiModelProperty(value = "支付类型(WECHAT_MINI)", required = true)
     @NotNull(message = "支付类型不能为空")
     private PayType payType;
 }

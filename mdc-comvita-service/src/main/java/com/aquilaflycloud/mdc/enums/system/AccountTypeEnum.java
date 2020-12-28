@@ -15,7 +15,6 @@ public enum AccountTypeEnum {
     // 第三方账号类型
     TENCENTPOSITION(1, "腾讯位置服务"),
     EASYPAY(2, "惠云支付系统"),
-    AJBCLOUD(3, "安居宝停车系统"),
     ;
 
     AccountTypeEnum(int type, String name) {

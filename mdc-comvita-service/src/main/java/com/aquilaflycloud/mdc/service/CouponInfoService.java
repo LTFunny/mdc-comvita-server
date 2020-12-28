@@ -6,8 +6,6 @@ import com.aquilaflycloud.mdc.enums.common.CreateSourceEnum;
 import com.aquilaflycloud.mdc.enums.coupon.CouponModeEnum;
 import com.aquilaflycloud.mdc.enums.coupon.ReceiveSourceEnum;
 import com.aquilaflycloud.mdc.enums.coupon.VerificateModeEnum;
-import com.aquilaflycloud.mdc.extra.alipay.notify.AlipayCashVoucherNotify;
-import com.aquilaflycloud.mdc.extra.alipay.notify.AlipayCashVoucherPay;
 import com.aquilaflycloud.mdc.model.coupon.CouponInfo;
 import com.aquilaflycloud.mdc.model.coupon.CouponMemberRel;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
@@ -34,18 +32,6 @@ public interface CouponInfoService {
     CouponInfo editCoupon(CouponEditParam param, CreateSourceEnum createSource, CouponModeEnum couponModeEnum);
 
     void editCoupon(CouponEditParam param);
-
-    void addCoupon(AlipayCouponAddParam param);
-
-    void editCoupon(AlipayCouponEditParam param);
-
-    BaseResult<String> activeCoupon(AlipayCouponActiveParam param);
-
-    Long updateThirdCouponStatus(AlipayCashVoucherPay notify);
-
-    void updateThirdCouponStatus(CouponInfo couponInfo);
-
-    void updateThirdCouponRelStatus(AlipayCashVoucherNotify notify);
 
     void toggleState(CouponGetParam param);
 

@@ -6,10 +6,8 @@ import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.dataAuth.constant.DataAuthConstant;
 import com.aquilaflycloud.mdc.constant.MdcConstant;
 import com.aquilaflycloud.mdc.enums.system.ConfigTypeEnum;
-import com.aquilaflycloud.mdc.mapper.AlipayAuthorSiteMapper;
 import com.aquilaflycloud.mdc.mapper.WechatAuthorSiteMapper;
 import com.aquilaflycloud.mdc.message.AuthorSiteErrorEnum;
-import com.aquilaflycloud.mdc.model.alipay.AlipayAuthorSite;
 import com.aquilaflycloud.mdc.model.wechat.WechatAuthorSite;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -36,9 +34,6 @@ public class AuthorSiteParamAspect {
     @Resource
     private WechatAuthorSiteMapper wechatAuthorSiteMapper;
 
-    @Resource
-    private AlipayAuthorSiteMapper alipayAuthorSiteMapper;
-
     @Pointcut("@annotation(com.gitee.sop.servercommon.annotation.ApiMapping)")
     public void paramPointcut() {
     }
@@ -60,13 +55,6 @@ public class AuthorSiteParamAspect {
                         Integer count = wechatAuthorSiteMapper.selectCount(Wrappers.<WechatAuthorSite>lambdaQuery()
                                 .eq(WechatAuthorSite::getAppId, appId)
                         );
-                        if (count <= 0) {
-                            throw AuthorSiteErrorEnum.AUTHOR_SITE_ERROR_10101.getErrorMeta().getException();
-                        }
-                    }
-                } else {
-                    if (!MdcConstant.UNIVERSAL_APP_ID.equals(appId)) {
-                        Integer count = alipayAuthorSiteMapper.selectCount(Wrappers.<AlipayAuthorSite>lambdaQuery().eq(AlipayAuthorSite::getAppId, appId));
                         if (count <= 0) {
                             throw AuthorSiteErrorEnum.AUTHOR_SITE_ERROR_10101.getErrorMeta().getException();
                         }

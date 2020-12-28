@@ -15,9 +15,6 @@ public class ExchangeOrderPageResult extends ExchangeOrder {
     @ApiModelProperty(value = "优惠券信息")
     private GoodsCouponResult coupon;
 
-    @ApiModelProperty(value = "停车券信息")
-    private GoodsParkingCouponResult parkingCoupon;
-
     @ApiModelProperty(value = "商品图片列表")
     private List<String> goodsImgList;
 }

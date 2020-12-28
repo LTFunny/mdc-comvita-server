@@ -16,9 +16,6 @@ public enum SiteSourceEnum {
     UNIVERSAL(0, "通用应用"),
     WECAHATPUBLIC(1, "微信公众号"),
     WECAHATMINI(2, "微信小程序"),
-    ALIPAYPUBLIC(3, "支付宝生活号"),
-    ALIPAYTINY(4, "支付宝小程序"),
-    ALIPAYAPP(5, "支付宝网页&移动应用"),
     ;
 
     SiteSourceEnum(int type, String name) {

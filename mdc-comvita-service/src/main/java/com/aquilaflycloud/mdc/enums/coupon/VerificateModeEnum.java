@@ -15,7 +15,6 @@ public enum VerificateModeEnum {
     // 优惠券核销方式类型
     POINTOFSALES(1, "POS机核销"),
     CONSUMECODE(2, "核销码核销"),
-    ALIPAY(3, "支付宝核销"),
     ;
 
     VerificateModeEnum(int type, String name) {

@@ -266,13 +266,6 @@ public class CouponInfo implements Serializable {
     private CreateSourceEnum createSource;
 
     /**
-     * 支付宝pid
-     */
-    @TableField(value = "alipay_pid")
-    @ApiModelProperty(value = "支付宝pid")
-    private String alipayPid;
-
-    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)

@@ -53,7 +53,7 @@ public class OrderAddParam implements Serializable {
     @ApiModelProperty(value = "收货详细地址")
     private String receiveAddress;
 
-    @ApiModelProperty(value = "支付类型(WECHAT_MINI, ALIPAY)", required = true)
+    @ApiModelProperty(value = "支付类型(WECHAT_MINI)", required = true)
     @NotNull(message = "支付类型不能为空")
     private PayType payType;
 

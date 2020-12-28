@@ -398,9 +398,7 @@ public class MdcUtil {
             }
         }
         SourceEnum source = memberInfo.getSource();
-        if (source == SourceEnum.SHH || source == SourceEnum.TINY) {
-            return memberInfo.getAliAppId();
-        } else if (source == SourceEnum.GZH || source == SourceEnum.MINI) {
+        if (source == SourceEnum.GZH || source == SourceEnum.MINI) {
             return memberInfo.getWxAppId();
         }
         return StrUtil.isNotBlank(memberInfo.getAliAppId()) ? memberInfo.getAliAppId() : memberInfo.getWxAppId();
@@ -421,10 +419,7 @@ public class MdcUtil {
         dynaBeanSafeSet(bean, "nickName", memberInfo.getNickName());
         dynaBeanSafeSet(bean, "avatarUrl", memberInfo.getAvatarUrl());
         SourceEnum source = memberInfo.getSource();
-        if (source == SourceEnum.SHH || source == SourceEnum.TINY) {
-            dynaBeanSafeSet(bean, "appId", memberInfo.getAliAppId());
-            dynaBeanSafeSet(bean, "userId", memberInfo.getUserId());
-        } else if (source == SourceEnum.GZH || source == SourceEnum.MINI) {
+        if (source == SourceEnum.GZH || source == SourceEnum.MINI) {
             dynaBeanSafeSet(bean, "appId", memberInfo.getWxAppId());
             dynaBeanSafeSet(bean, "openId", memberInfo.getOpenId());
         }
@@ -446,11 +441,8 @@ public class MdcUtil {
                     .collect(Collectors.toList()), ",");
             String designateOrgNames = CollUtil.join(pShopInfoList.stream().map(PShopInfo::getName).filter(StrUtil::isNotBlank)
                     .collect(Collectors.toList()), ",");
-            String alipayPid = CollUtil.join(pShopInfoList.stream().map(PShopInfo::getAlipayAccount).filter(StrUtil::isNotBlank)
-                    .collect(Collectors.toList()), ",");
             dynaBeanSafeSet(bean, "designateOrgIds", designateOrgIds);
             dynaBeanSafeSet(bean, "designateOrgNames", designateOrgNames);
-            dynaBeanSafeSet(bean, "alipayPid", alipayPid);
         }
         return bean.getBean();
     }

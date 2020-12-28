@@ -11,9 +11,6 @@ public class MemberOtherGetParam {
     @ApiModelProperty(value = "是否获取未使用优惠券数量(默认false)")
     private Boolean getCouponCount = false;
 
-    @ApiModelProperty(value = "是否获取未使用停车券数量(默认false)")
-    private Boolean getParkingCouponCount = false;
-
     @ApiModelProperty(value = "等级奖励类型(member.RewardTypeEnum)")
     private RewardTypeEnum gradeType;
 

@@ -15,7 +15,7 @@ public enum GoodsTypeEnum {
     // 商品类型
     PHYSICAL(1, "配送类-实物商品"),
     COUPON(2, "核销类-优惠券"),
-    PARKING(3, "核销类-停车券");
+    ;
 
     GoodsTypeEnum(int type, String name) {
         this.type = type;

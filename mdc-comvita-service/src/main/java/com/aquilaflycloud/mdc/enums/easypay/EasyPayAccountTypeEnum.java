@@ -14,8 +14,6 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 public enum EasyPayAccountTypeEnum {
     // 支付账号类型
     QUERY(0, "查询支付账号"),
-    TICKET(1, "购票支付账号"),
-    PARKING(2, "停车支付账号"),
     EXCHANGE(3, "兑换商城支付账号"),
     ;
 

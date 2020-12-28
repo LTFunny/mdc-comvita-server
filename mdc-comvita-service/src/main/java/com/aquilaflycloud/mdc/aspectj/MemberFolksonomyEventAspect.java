@@ -53,10 +53,6 @@ public class MemberFolksonomyEventAspect {
                         businessId = paramJson.getLong("businessId");
                         break;
                     }
-                    case "mdc.ticket.orderInfo.create": {
-                        businessId = paramJson.getLong("scenicSpotId");
-                        break;
-                    }
                     default:
                 }
                 if (businessId != null) {

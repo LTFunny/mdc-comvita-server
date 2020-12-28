@@ -15,8 +15,6 @@ public enum SourceEnum {
     // 会员来源类型
     GZH(1, "公众号"),
     MINI(2, "微信小程序"),
-    SHH(3, "生活号"),
-    TINY(4, "支付宝小程序"),
     MANUAL(5, "手工录入"),
     IMPORT(6, "导入"),
     EXTRA(7, "外部系统"),

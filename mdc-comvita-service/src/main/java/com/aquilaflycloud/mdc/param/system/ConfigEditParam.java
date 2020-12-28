@@ -25,9 +25,6 @@ public class ConfigEditParam {
     @ApiModelProperty(value = "配置值")
     private String configValue;
 
-    @ApiModelProperty(value = "支付宝直联支付配置")
-    private AlipayDirectPayConfigParam alipayDirectPayConfig;
-
     @ApiModelProperty(value = "微信直联支付配置")
     private WechatDirectPayConfigParam wechatDirectPayConfig;
 
@@ -39,15 +36,6 @@ public class ConfigEditParam {
 
     @ApiModelProperty(value = "配置说明")
     private String remark;
-
-    @Data
-    private class AlipayDirectPayConfigParam {
-        @ApiModelProperty(value = "支付宝直联支付是否生效")
-        private Boolean effective;
-
-        @ApiModelProperty(value = "支付宝服务商id")
-        private String sysServiceProviderId;
-    }
 
     @Data
     public class WechatDirectPayConfigParam {

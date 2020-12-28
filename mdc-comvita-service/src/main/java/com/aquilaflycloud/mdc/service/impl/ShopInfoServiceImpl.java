@@ -8,11 +8,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
-import com.alipay.api.response.AlipayOpenAppQrcodeCreateResponse;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.shop.*;
-import com.aquilaflycloud.mdc.extra.alipay.service.AlipayOpenPlatformService;
 import com.aquilaflycloud.mdc.extra.wechat.service.WechatOpenPlatformService;
 import com.aquilaflycloud.mdc.feign.consumer.org.ShopConsumer;
 import com.aquilaflycloud.mdc.mapper.ShopCommentInfoMapper;
@@ -71,9 +69,6 @@ public class ShopInfoServiceImpl implements ShopInfoService {
 
     @Resource
     private ShopCommentInfoService shopCommentInfoService;
-
-    @Resource
-    private AlipayOpenPlatformService alipayOpenPlatformService;
 
     @Resource
     private WechatOpenPlatformService wechatOpenPlatformService;
@@ -219,16 +214,8 @@ public class ShopInfoServiceImpl implements ShopInfoService {
                         if (null != url && StringUtils.isNotBlank(url)) {
                             item.setQrCode(url);
                         }
-                    } else {
-                        //循环生成二维码url
-                        AlipayOpenAppQrcodeCreateResponse alipayOpenAppQrcode = alipayOpenPlatformService.createAlipayOpenAppQrcode(param.getAppId(), param.getUrlParam() + "?id=" + item.getId().toString(), "id=" + item.getId().toString(), param.getDescribe());
-                        if (null != alipayOpenAppQrcode && StringUtils.isNotBlank(alipayOpenAppQrcode.getQrCodeUrl())) {
-                            item.setQrCode(alipayOpenAppQrcode.getQrCodeUrl());
-                        }
                     }
-
                 }
-
                 int insertCount = shopInfoMapper.normalInsertAllBatch(insertList);
             }
 
@@ -244,11 +231,6 @@ public class ShopInfoServiceImpl implements ShopInfoService {
                             String url = wechatOpenPlatformService.miniCodeUnLimitGet(new MiniProgramQrCodeUnLimitGetParam().setAppId(param.getAppId()).setScene("id=" + item.getId().toString()).setPagePath(param.getUrlParam()));
                             if (null != url && StringUtils.isNotBlank(url)) {
                                 item.setQrCode(url);
-                            }
-                        } else {
-                            AlipayOpenAppQrcodeCreateResponse alipayOpenAppQrcode = alipayOpenPlatformService.createAlipayOpenAppQrcode(param.getAppId(), param.getUrlParam() + "?id=" + item.getId().toString(), "id=" + item.getId().toString(), param.getDescribe());
-                            if (null != alipayOpenAppQrcode && StringUtils.isNotBlank(alipayOpenAppQrcode.getQrCodeUrl())) {
-                                item.setQrCode(alipayOpenAppQrcode.getQrCodeUrl());
                             }
                         }
                     }

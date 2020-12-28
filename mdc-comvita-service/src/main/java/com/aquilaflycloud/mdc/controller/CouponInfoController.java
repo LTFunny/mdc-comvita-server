@@ -53,27 +53,6 @@ public class CouponInfoController {
         couponInfoService.editCoupon(param);
     }
 
-    @ApiOperation(value = "新增支付宝优惠券", notes = "新增支付宝优惠券")
-    @PreAuthorize("hasAuthority('mdc:alipayCoupon:add')")
-    @ApiMapping(value = "backend.comvita.coupon.alipay.add", method = RequestMethod.POST, permission = true)
-    public void addAlipayCoupon(AlipayCouponAddParam param) {
-        couponInfoService.addCoupon(param);
-    }
-
-    @ApiOperation(value = "编辑支付宝优惠券", notes = "编辑支付宝优惠券")
-    @PreAuthorize("hasAuthority('mdc:alipayCoupon:edit')")
-    @ApiMapping(value = "backend.comvita.coupon.alipay.edit", method = RequestMethod.POST, permission = true)
-    public void editAlipayCoupon(AlipayCouponEditParam param) {
-        couponInfoService.editCoupon(param);
-    }
-
-    @ApiOperation(value = "激活支付宝优惠券", notes = "编辑支付宝优惠券")
-    @PreAuthorize("hasAuthority('mdc:alipayCoupon:active')")
-    @ApiMapping(value = "backend.comvita.coupon.alipay.active", method = RequestMethod.POST, permission = true)
-    public BaseResult<String> activeAlipayCoupon(AlipayCouponActiveParam param) {
-        return couponInfoService.activeCoupon(param);
-    }
-
     @ApiOperation(value = "启用/停用优惠券", notes = "启用/停用优惠券")
     @PreAuthorize("hasAuthority('mdc:coupon:edit')")
     @ApiMapping(value = "backend.comvita.coupon.info.toggle", method = RequestMethod.POST, permission = true)

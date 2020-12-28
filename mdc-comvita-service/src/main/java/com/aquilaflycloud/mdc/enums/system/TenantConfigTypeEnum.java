@@ -13,7 +13,6 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
 public enum TenantConfigTypeEnum {
     // 租户配置类型
-    ALIPAYDIRECTPAY(1, "支付宝直联支付"),
     WECHATDIRECTPAY(2, "微信直联支付"),
     AUTHORUNIVERSAL(3, "通用应用显示"),
     UNIFIEDMEMBER(4, "统一会员"),

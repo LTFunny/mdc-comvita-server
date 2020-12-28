@@ -2,7 +2,6 @@ package com.aquilaflycloud.mdc.service;
 
 import com.aquilaflycloud.mdc.model.system.SystemAccountConfig;
 import com.aquilaflycloud.mdc.param.system.*;
-import com.aquilaflycloud.mdc.result.system.AjbCloudAccountResult;
 import com.aquilaflycloud.mdc.result.system.EasyPayAccountResult;
 import com.aquilaflycloud.mdc.result.system.TencentPositionAccountResult;
 
@@ -20,15 +19,5 @@ public interface SystemAccountService {
     TencentPositionAccountResult getTencentPositionAccount();
 
     void saveTencentPositionAccount(TencentPositionAccountSaveParam param);
-
-    EasyPayAccountResult getEasyPayAccount(EasyPayAccountGetParam param);
-
-    void saveEasyPayAccount(EasyPayAccountSaveParam param);
-
-    SystemAccountConfig getAjbCloudAccountByParkCode(String parkCode);
-
-    AjbCloudAccountResult getAjbCloudAccount();
-
-    void saveAjbCloudAccount(AjbCloudAccountSaveParam param);
 }
 

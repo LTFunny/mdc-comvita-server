@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 public enum CouponModeEnum {
     // 优惠券模式类型
     NORMAL(1, "原生券"),
-    ALIPAY(2, "支付宝券"),
     ;
 
     CouponModeEnum(int type, String name) {

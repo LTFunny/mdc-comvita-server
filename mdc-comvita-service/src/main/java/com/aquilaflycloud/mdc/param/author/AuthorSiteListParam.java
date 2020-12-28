@@ -20,11 +20,11 @@ public class AuthorSiteListParam extends AuthParam {
     @ApiModelProperty(value="授权类型(author.SiteSourceEnum)")
     private SiteSourceEnum source;
 
-    @ApiModelProperty(value = "应用类型(WECHAT, ALIPAY)")
+    @ApiModelProperty(value = "应用类型(WECHAT)")
     private AuthorType type;
 
     public enum AuthorType {
-        // 微信授权应用类型
-        WECHAT, ALIPAY
+        // 授权应用类型
+        WECHAT
     }
 }

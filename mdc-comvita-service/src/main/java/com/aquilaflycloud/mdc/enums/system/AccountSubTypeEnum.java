@@ -14,8 +14,6 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 public enum AccountSubTypeEnum {
     // 第三方账号子类型
     EASYPAYQUERY(2, 0, "支付查询"),
-    EASYPAYTICKET(2, 1, "购票支付"),
-    EASYPAYPARKING(2, 2, "停车缴费"),
     EASYPAYEXCHANGE(2, 3, "兑换商城"),
     ;
 

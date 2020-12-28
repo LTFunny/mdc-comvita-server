@@ -15,7 +15,6 @@ public enum AdPlacementEnum {
     // 广告位置类型
     BANNER(1, "首页推荐"),
     POPUPS(2, "首页弹窗"),
-    PARKING(3, "停车缴费"),
     ;
 
     AdPlacementEnum(int type, String name) {

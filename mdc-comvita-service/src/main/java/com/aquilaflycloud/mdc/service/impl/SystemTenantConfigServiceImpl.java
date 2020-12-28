@@ -41,11 +41,6 @@ public class SystemTenantConfigServiceImpl implements SystemTenantConfigService 
         }
         SystemTenantConfigResult result = Convert.convert(SystemTenantConfigResult.class, config);
         switch (config.getConfigType()) {
-            case ALIPAYDIRECTPAY: {
-                AlipayDirectPayConfig alipayDirectPayConfig = JSONUtil.toBean(config.getConfigValue(), AlipayDirectPayConfig.class);
-                result.setAlipayDirectPayConfig(alipayDirectPayConfig);
-                break;
-            }
             case WECHATDIRECTPAY: {
                 WechatDirectPayConfig wechatDirectPayConfig = JSONUtil.toBean(config.getConfigValue(), WechatDirectPayConfig.class);
                 result.setWechatDirectPayConfig(wechatDirectPayConfig);
@@ -90,13 +85,6 @@ public class SystemTenantConfigServiceImpl implements SystemTenantConfigService 
         SystemTenantConfig config = new SystemTenantConfig();
         BeanUtil.copyProperties(param, config);
         switch (param.getConfigType()) {
-            case ALIPAYDIRECTPAY: {
-                AlipayDirectPayConfig alipayDirectPayConfig = new AlipayDirectPayConfig();
-                BeanUtil.copyProperties(param.getAlipayDirectPayConfig(), alipayDirectPayConfig);
-                alipayDirectPayConfig.setEffective(BooleanUtil.isTrue(alipayDirectPayConfig.getEffective()));
-                config.setConfigValue(JSONUtil.toJsonStr(alipayDirectPayConfig));
-                break;
-            }
             case WECHATDIRECTPAY: {
                 WechatDirectPayConfig wechatDirectPayConfig = new WechatDirectPayConfig();
                 BeanUtil.copyProperties(param.getWechatDirectPayConfig(), wechatDirectPayConfig);
@@ -135,12 +123,6 @@ public class SystemTenantConfigServiceImpl implements SystemTenantConfigService 
         SystemTenantConfig update = new SystemTenantConfig();
         BeanUtil.copyProperties(param, update);
         switch (config.getConfigType()) {
-            case ALIPAYDIRECTPAY: {
-                AlipayDirectPayConfig alipayDirectPayConfig = JSONUtil.toBean(config.getConfigValue(), AlipayDirectPayConfig.class);
-                BeanUtil.copyProperties(param.getAlipayDirectPayConfig(), alipayDirectPayConfig, CopyOptions.create().ignoreNullValue());
-                update.setConfigValue(JSONUtil.toJsonStr(alipayDirectPayConfig));
-                break;
-            }
             case WECHATDIRECTPAY: {
                 WechatDirectPayConfig wechatDirectPayConfig = JSONUtil.toBean(config.getConfigValue(), WechatDirectPayConfig.class);
                 BeanUtil.copyProperties(param.getWechatDirectPayConfig(), wechatDirectPayConfig, CopyOptions.create().ignoreNullValue());

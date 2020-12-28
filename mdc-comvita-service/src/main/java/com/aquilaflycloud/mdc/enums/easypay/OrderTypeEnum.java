@@ -13,8 +13,6 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
 public enum OrderTypeEnum {
     // 订单类型
-    TICKET(1, "购票订单"),
-    PARKING(2, "停车订单"),
     EXCHANGE(3, "兑换商城订单"),
     ;
 

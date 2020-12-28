@@ -7,21 +7,13 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
-import com.alipay.api.response.AlipayMarketingCashvoucherTemplateCreateResponse;
-import com.alipay.api.response.AlipayMarketingCashvoucherTemplateModifyResponse;
-import com.alipay.api.response.AlipayMarketingVoucherSendResponse;
-import com.alipay.api.response.AlipayMarketingVoucherTemplatedetailQueryResponse;
 import com.aquilaflycloud.auth.enums.UserTypeEnum;
 import com.aquilaflycloud.dataAuth.common.AuthParam;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
-import com.aquilaflycloud.dataAuth.constant.DataAuthConstant;
 import com.aquilaflycloud.mdc.component.event.AfterCommitEvent;
 import com.aquilaflycloud.mdc.component.event.AfterRollbackEvent;
 import com.aquilaflycloud.mdc.enums.catalog.CatalogBusinessTypeEnum;
@@ -30,18 +22,9 @@ import com.aquilaflycloud.mdc.enums.common.CreateSourceEnum;
 import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.coupon.*;
 import com.aquilaflycloud.mdc.enums.exchange.GoodsTypeEnum;
-import com.aquilaflycloud.mdc.enums.system.ConfigTypeEnum;
-import com.aquilaflycloud.mdc.extra.alipay.notify.AlipayCashVoucherNotify;
-import com.aquilaflycloud.mdc.extra.alipay.notify.AlipayCashVoucherPay;
-import com.aquilaflycloud.mdc.extra.alipay.request.VoucherSendRequest;
-import com.aquilaflycloud.mdc.extra.alipay.request.VoucherTemplateCreateRequest;
-import com.aquilaflycloud.mdc.extra.alipay.request.VoucherTemplateDetailQueryRequest;
-import com.aquilaflycloud.mdc.extra.alipay.request.VoucherTemplateModifyRequest;
-import com.aquilaflycloud.mdc.extra.alipay.service.AlipayOpenPlatformService;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.catalog.CatalogInfo;
 import com.aquilaflycloud.mdc.model.catalog.CatalogRel;
-import com.aquilaflycloud.mdc.model.coupon.CouponAlipayRecord;
 import com.aquilaflycloud.mdc.model.coupon.CouponInfo;
 import com.aquilaflycloud.mdc.model.coupon.CouponMemberRel;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
@@ -59,7 +42,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.gitee.sop.servercommon.bean.ServiceContext;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,11 +72,7 @@ public class CouponInfoServiceImpl implements CouponInfoService {
     @Resource
     private CouponMemberRelMapper couponMemberRelMapper;
     @Resource
-    private CouponAlipayRecordMapper couponAlipayRecordMapper;
-    @Resource
     private ExchangeService exchangeService;
-    @Resource
-    private AlipayOpenPlatformService alipayOpenPlatformService;
 
     private CouponInfo stateHandler(CouponInfo couponInfo, Integer... withhold) {
         if (couponInfo == null) {
@@ -366,11 +344,7 @@ public class CouponInfoServiceImpl implements CouponInfoService {
         couponInfo.setReceiveCount(0);
         couponInfo.setVerificateCount(0);
         couponInfo.setCouponMode(couponMode);
-        if (couponMode == CouponModeEnum.ALIPAY) {
-            couponInfo.setState(CouponStateEnum.UNACTIVATION);
-        } else {
-            couponInfo.setState(CouponStateEnum.NORMAL);
-        }
+        couponInfo.setState(CouponStateEnum.NORMAL);
         MdcUtil.setOrganInfo(couponInfo);
         int count = couponInfoMapper.insert(couponInfo);
         if (count <= 0) {
@@ -382,9 +356,6 @@ public class CouponInfoServiceImpl implements CouponInfoService {
     @Transactional
     @Override
     public void addCoupon(CouponAddParam param) {
-        if (param.getCouponType() == CouponTypeEnum.ALIPAYCASHVOUCHER) {
-            throw new ServiceException("优惠券类型有误");
-        }
         CouponInfo couponInfo = addCoupon(param, CreateSourceEnum.NORMAL, CouponModeEnum.NORMAL);
         //关联优惠券分类
         List<CatalogRel> relList = new ArrayList<>();
@@ -546,263 +517,6 @@ public class CouponInfoServiceImpl implements CouponInfoService {
         RedisUtil.redis().expire("couponInventory", 30, TimeUnit.DAYS);
     }
 
-    @Transactional
-    @Override
-    public void addCoupon(AlipayCouponAddParam param) {
-        CouponAddParam addParam = new CouponAddParam();
-        BeanUtil.copyProperties(param, addParam);
-        addParam.setReceiveType(ReceiveTypeEnum.CUSTOM);
-        addParam.setCouponRemark(JSONUtil.toJsonStr(param.getCouponRemarkList()));
-        if (addParam.getCouponType() != CouponTypeEnum.ALIPAYCASHVOUCHER) {
-            throw new ServiceException("优惠券类型有误");
-        }
-        CouponInfo couponInfo = addCoupon(addParam, CreateSourceEnum.NORMAL, CouponModeEnum.ALIPAY);
-        //关联优惠券分类
-        List<CatalogRel> relList = new ArrayList<>();
-        for (Long catalogId : param.getCatalogIdList()) {
-            CatalogRel rel = new CatalogRel();
-            rel.setBusinessId(couponInfo.getId());
-            rel.setBusinessType(CatalogBusinessTypeEnum.COUPON);
-            rel.setCatalogId(catalogId);
-            relList.add(rel);
-        }
-        int relCount = catalogRelMapper.insertAllBatch(relList);
-        if (relCount <= 0) {
-            throw new ServiceException("关联优惠券分类失败");
-        }
-        RedisUtil.zSetRedis().add("couponInventory", couponInfo.getId(), couponInfo.getInventory());
-        RedisUtil.redis().expire("couponInventory", 30, TimeUnit.DAYS);
-    }
-
-    @Transactional
-    @Override
-    public void editCoupon(AlipayCouponEditParam param) {
-        RedisUtil.transactionalLock("changeCoupon" + param.getId());
-        CouponEditParam editParam = new CouponEditParam();
-        BeanUtil.copyProperties(param, editParam);
-        editParam.setCouponRemark(CollUtil.isNotEmpty(param.getCouponRemarkList()) ? JSONUtil.toJsonStr(param.getCouponRemarkList()) : null);
-        CouponInfo couponInfo = couponInfoMapper.selectById(param.getId());
-        couponInfo = stateHandler(couponInfo);
-        if (couponInfo.getState() != CouponStateEnum.UNACTIVATION) {
-            if (couponInfo.getState() == CouponStateEnum.EXPIRED) {
-                throw new ServiceException("优惠券已结束,不可修改");
-            }
-            Map<String, Object> paramMap = BeanUtil.beanToMap(param, false, true);
-            for (String key : paramMap.keySet()) {
-                if (StrUtil.equalsAny(key, "id", "receiveEndTime")) {
-                    continue;
-                }
-                if (!StrUtil.equalsAny(key, "id", "receiveEndTime", "catalogIdList", "couponRemarkList") ||
-                        (StrUtil.equals(key, "catalogIdList") && CollUtil.isNotEmpty(param.getCatalogIdList()))
-                        || (StrUtil.equals(key, "couponRemarkList") && CollUtil.isNotEmpty(param.getCouponRemarkList()))) {
-                    throw new ServiceException("激活状态只可更改领取结束时间");
-                }
-            }
-        }
-        couponInfo = editCoupon(editParam, CreateSourceEnum.NORMAL, CouponModeEnum.ALIPAY);
-        if (CollUtil.isNotEmpty(param.getCatalogIdList())) {
-            catalogRelMapper.delete(Wrappers.<CatalogRel>lambdaQuery()
-                    .eq(CatalogRel::getBusinessType, CatalogBusinessTypeEnum.COUPON)
-                    .eq(CatalogRel::getBusinessId, param.getId())
-            );
-            List<CatalogRel> relList = new ArrayList<>();
-            for (Long catalogId : param.getCatalogIdList()) {
-                CatalogRel rel = new CatalogRel();
-                rel.setBusinessId(param.getId());
-                rel.setBusinessType(CatalogBusinessTypeEnum.COUPON);
-                rel.setCatalogId(catalogId);
-                relList.add(rel);
-            }
-            int relCount = catalogRelMapper.insertAllBatch(relList);
-            if (relCount <= 0) {
-                throw new ServiceException("关联优惠券分类失败");
-            }
-        }
-        VoucherTemplateModifyRequest request = new VoucherTemplateModifyRequest();
-        CouponAlipayRecord record = couponAlipayRecordMapper.selectOne(Wrappers.<CouponAlipayRecord>lambdaQuery()
-                .eq(CouponAlipayRecord::getTemplateId, couponInfo.getCouponThirdId())
-        );
-        if (record != null) {
-            request.setAppId(record.getAppId());
-            request.setOutBizNo(MdcUtil.getSnowflakeIdStr());
-            request.setPublishStartTime(param.getReceiveStartTime() != null ? DateUtil.date(param.getReceiveStartTime()).toString() : DateUtil.date(couponInfo.getReceiveStartTime()).toString());
-            request.setPublishEndTime(param.getReceiveEndTime() != null ? DateUtil.date(param.getReceiveEndTime()).toString() : DateUtil.date(couponInfo.getReceiveEndTime()).toString());
-            request.setSlogan(StrUtil.isNotBlank(param.getCouponName()) ? param.getCouponName() : couponInfo.getCouponName());
-            request.setTemplateId(couponInfo.getCouponThirdId());
-            EffectiveTypeEnum effectiveType = param.getEffectiveType();
-            if (effectiveType == null) {
-                effectiveType = couponInfo.getEffectiveType();
-            }
-            JSONObject validPeriod = new JSONObject();
-            if (effectiveType == EffectiveTypeEnum.DATERANGE) {
-                validPeriod.set("type", "ABSOLUTE");
-                validPeriod.set("start", DateUtil.date(param.getEffectiveStartTime() != null ? param.getEffectiveStartTime() : couponInfo.getEffectiveStartTime()));
-                validPeriod.set("end", DateUtil.date(param.getEffectiveEndTime() != null ? param.getEffectiveEndTime() : couponInfo.getEffectiveEndTime()));
-            } else if (effectiveType == EffectiveTypeEnum.AFTERDAYS) {
-                validPeriod.set("type", "RELATIVE");
-                validPeriod.set("unit", "DAY");
-                validPeriod.set("duration", param.getEffectiveDays() != null ? param.getEffectiveDays() : couponInfo.getEffectiveDays());
-            }
-            request.setVoucherValidPeriod(validPeriod.toString());
-            AlipayMarketingCashvoucherTemplateModifyResponse response = alipayOpenPlatformService.modifyVoucherTemplate(request);
-            if (!StrUtil.equalsAny(response.getStatus(), "I", "S")) {
-                throw new ServiceException("修改支付宝优惠券失败");
-            }
-            CouponAlipayRecord update = new CouponAlipayRecord();
-            update.setId(record.getId());
-            update.setPublishStartTime(DateUtil.parse(request.getPublishStartTime()));
-            update.setPublishEndTime(DateUtil.parse(request.getPublishEndTime()));
-            update.setVoucherValidPeriod(request.getVoucherValidPeriod());
-            couponAlipayRecordMapper.updateById(update);
-        }
-        int surplusInventory = couponInfo.getInventory() - getTotalReceiveCount(couponInfo.getId());
-        RedisUtil.zSetRedis().add("couponInventory", couponInfo.getId(), surplusInventory);
-        RedisUtil.redis().expire("couponInventory", 30, TimeUnit.DAYS);
-    }
-
-    @Transactional
-    @Override
-    public BaseResult<String> activeCoupon(AlipayCouponActiveParam param) {
-        CouponInfo couponInfo = couponInfoMapper.selectById(param.getCouponId());
-        if (couponInfo == null) {
-            throw new ServiceException("优惠券不存在");
-        }
-        if (couponInfo.getCouponMode() != CouponModeEnum.ALIPAY) {
-            throw new ServiceException("优惠券不是支付宝优惠券");
-        }
-        if (couponInfo.getState() != CouponStateEnum.UNACTIVATION) {
-            throw new ServiceException("优惠券已激活");
-        }
-        VoucherTemplateCreateRequest request = new VoucherTemplateCreateRequest();
-        request.setAmount(couponInfo.getCouponValue().toString());
-        request.setBrandName(couponInfo.getCouponName());
-        request.setFloorAmount(couponInfo.getTargetPrice().toString());
-        request.setFundAccount(param.getFundAccount());
-        String notifyUrl = StrBuilder.create().append(MdcUtil.getConfigValue(ConfigTypeEnum.OPEN_API_DOMAIN_NAME))
-                .append("/rest/").append(MdcUtil.getServerName()).append("/alipay/cashVoucherTemplate/notify").toString();
-        request.setNotifyUri(notifyUrl);
-        request.setOutBizNo(MdcUtil.getSnowflakeIdStr());
-        request.setPublishEndTime(DateUtil.date(couponInfo.getReceiveEndTime()).toString());
-        request.setPublishStartTime(DateUtil.date(couponInfo.getReceiveStartTime()).toString());
-        String redirectUrl = StrBuilder.create().append(MdcUtil.getConfigValue(ConfigTypeEnum.OPEN_API_DOMAIN_NAME))
-                .append("/rest/").append(MdcUtil.getServerName()).append("/alipay/cashVoucherTemplate/pay").toString();
-        request.setRedirectUri(redirectUrl);
-        if (StrUtil.isNotBlank(couponInfo.getAlipayPid())) {
-            JSONObject pid = new JSONObject();
-            pid.set("PID", couponInfo.getAlipayPid());
-            request.setRuleConf(pid.toString());
-        }
-        request.setVoucherDescription(couponInfo.getCouponRemark());
-        request.setVoucherQuantity(couponInfo.getInventory().longValue());
-        request.setVoucherType("FIX_VOUCHER");
-        request.setVoucherUseScene("ALIPAY_COMMON");
-        JSONObject validPeriod = new JSONObject();
-        if (couponInfo.getEffectiveType() == EffectiveTypeEnum.DATERANGE) {
-            validPeriod.set("type", "ABSOLUTE");
-            validPeriod.set("start", DateUtil.date(couponInfo.getEffectiveStartTime()).toString());
-            validPeriod.set("end", DateUtil.date(couponInfo.getEffectiveEndTime()).toString());
-        } else if (couponInfo.getEffectiveType() == EffectiveTypeEnum.AFTERDAYS) {
-            validPeriod.set("type", "RELATIVE");
-            validPeriod.set("unit", "DAY");
-            validPeriod.set("duration", couponInfo.getEffectiveDays());
-        }
-        request.setVoucherValidPeriod(validPeriod.toString());
-        request.setAppId(param.getAppId());
-        AlipayMarketingCashvoucherTemplateCreateResponse response = alipayOpenPlatformService.createVoucherTemplate(request);
-        CouponAlipayRecord record = new CouponAlipayRecord();
-        BeanUtil.copyProperties(request, record);
-        BeanUtil.copyProperties(response, record);
-        record.setCouponId(couponInfo.getId());
-        couponAlipayRecordMapper.insert(record);
-        return new BaseResult<String>().setResult(response.getConfirmUri());
-    }
-
-    @Override
-    public Long updateThirdCouponStatus(AlipayCashVoucherPay notify) {
-        CouponAlipayRecord record = couponAlipayRecordMapper.normalSelectOne(Wrappers.<CouponAlipayRecord>lambdaQuery()
-                .eq(CouponAlipayRecord::getFundOrderNo, notify.getAuthNo())
-                .eq(CouponAlipayRecord::getOutBizNo, notify.getOutRequestNo())
-        );
-        //设置此次请求租户id
-        ServiceContext.getCurrentContext().set(DataAuthConstant.TENANT_ID, record.getTenantId());
-        ServiceContext.getCurrentContext().set(DataAuthConstant.SUB_TENANT_ID, record.getSubTenantId());
-        Long couponId = null;
-        if (record != null) {
-            couponId = record.getCouponId();
-            CouponInfo couponInfo = couponInfoMapper.selectById(couponId);
-            updateThirdCouponStatus(couponInfo);
-        }
-        return couponId;
-    }
-
-    @Override
-    public void updateThirdCouponStatus(CouponInfo couponInfo) {
-        if (couponInfo == null) {
-            throw new ServiceException("优惠券不存在");
-        }
-        if (couponInfo.getCouponMode() == CouponModeEnum.ALIPAY) {
-            List<CouponAlipayRecord> recordList = couponAlipayRecordMapper.selectList(Wrappers.<CouponAlipayRecord>lambdaQuery()
-                    .eq(CouponAlipayRecord::getCouponId, couponInfo.getId())
-            );
-            AlipayMarketingVoucherTemplatedetailQueryResponse response;
-            String templateId = null;
-            for (CouponAlipayRecord record : recordList) {
-                VoucherTemplateDetailQueryRequest request = new VoucherTemplateDetailQueryRequest();
-                request.setAppId(record.getAppId());
-                request.setTemplateId(record.getTemplateId());
-                response = alipayOpenPlatformService.queryVoucherTemplate(request);
-                couponAlipayRecordMapper.update(null, Wrappers.<CouponAlipayRecord>lambdaUpdate()
-                        .set(CouponAlipayRecord::getStatus, response.getStatus())
-                        .set(CouponAlipayRecord::getVoucherName, response.getVoucherName())
-                        .set(CouponAlipayRecord::getTotalAmount, response.getTotalAmount())
-                        .set(CouponAlipayRecord::getPublishCount, response.getPublishCount())
-                        .set(CouponAlipayRecord::getPublishAmount, response.getPublishAmount())
-                        .set(CouponAlipayRecord::getUsedCount, response.getUsedCount())
-                        .set(CouponAlipayRecord::getUsedAmount, response.getUsedAmount())
-                        .set(CouponAlipayRecord::getRecycleAmount, response.getRecycleAmount())
-                        .eq(CouponAlipayRecord::getId, record.getId())
-                );
-                if (StrUtil.equalsAny(response.getStatus(), "S", "E")) {
-                    templateId = record.getTemplateId();
-                }
-            }
-            if (StrUtil.isNotBlank(templateId)) {
-                couponInfoMapper.update(null, Wrappers.<CouponInfo>lambdaUpdate()
-                        .set(CouponInfo::getCouponThirdId, templateId)
-                        .set(CouponInfo::getState, CouponStateEnum.NORMAL)
-                        .eq(CouponInfo::getId, couponInfo.getId())
-                );
-            }
-        }
-    }
-
-    @Override
-    public void updateThirdCouponRelStatus(AlipayCashVoucherNotify notify) {
-        CouponMemberRel rel = couponMemberRelMapper.normalSelectOne(Wrappers.<CouponMemberRel>lambdaQuery()
-                .eq(CouponMemberRel::getRelThirdId, notify.getVoucherId())
-        );
-        //设置此次请求租户id
-        ServiceContext.getCurrentContext().set(DataAuthConstant.TENANT_ID, rel.getTenantId());
-        ServiceContext.getCurrentContext().set(DataAuthConstant.SUB_TENANT_ID, rel.getSubTenantId());
-        couponMemberRelMapper.update(null, Wrappers.<CouponMemberRel>lambdaUpdate()
-                .set(CouponMemberRel::getVerificateMode, VerificateModeEnum.ALIPAY)
-                .set(CouponMemberRel::getVerificateState, VerificateStateEnum.CONSUMED)
-                .set(CouponMemberRel::getVerificateTime, notify.getBizTime())
-                .set(CouponMemberRel::getVerificaterThirdId, notify.getPartnerId())
-                .set(CouponMemberRel::getVerificaterThirdName, notify.getPartnerName())
-                .eq(CouponMemberRel::getRelThirdId, notify.getVoucherId())
-        );
-        //更新优惠券数量
-        updateCount(rel.getCouponId(), true);
-        RedisUtil.syncLoad("changeCoupon" + rel.getCouponId(), () -> {
-            increaseTotalVerificateCount(rel.getCouponId(), 1);
-            return null;
-        });
-        //更新优惠券领取缓存
-        CouponMemberRel newRel = couponMemberRelMapper.selectById(rel.getId());
-        changeMemberRelList(newRel.getCouponId(), newRel.getMemberId(), newRel);
-    }
-
     @Override
     public void toggleState(CouponGetParam param) {
         RedisUtil.syncLoad("changeCoupon" + param.getId(), () -> {
@@ -841,11 +555,6 @@ public class CouponInfoServiceImpl implements CouponInfoService {
         couponInfo = stateHandler(couponInfo);
         CouponResult result = new CouponResult();
         BeanUtil.copyProperties(couponInfo, result);
-        //第三方优惠券更新状态
-        if (couponInfo.getCouponMode() != CouponModeEnum.NORMAL && couponInfo.getState() == CouponStateEnum.UNACTIVATION
-                && StrUtil.isBlank(couponInfo.getCouponThirdId())) {
-            updateThirdCouponStatus(couponInfo);
-        }
         List<Long> catalogIdList = catalogRelMapper.selectList(Wrappers.<CatalogRel>lambdaQuery()
                 .select(CatalogRel::getCatalogId)
                 .eq(CatalogRel::getBusinessType, CatalogBusinessTypeEnum.COUPON)
@@ -1239,19 +948,6 @@ public class CouponInfoServiceImpl implements CouponInfoService {
             }
         }
         List<CouponMemberRel> relList = new ArrayList<>();
-        String appId = null;
-        if (couponInfo.getCouponMode() == CouponModeEnum.ALIPAY) {
-            if (StrUtil.isBlank(memberInfo.getUserId())) {
-                throw new ServiceException("该会员不能领取支付宝优惠券");
-            }
-            CouponAlipayRecord record = couponAlipayRecordMapper.selectOne(Wrappers.<CouponAlipayRecord>lambdaQuery()
-                    .eq(CouponAlipayRecord::getTemplateId, couponInfo.getCouponThirdId())
-            );
-            if (record == null) {
-                throw new ServiceException("支付宝优惠券信息有误");
-            }
-            appId = record.getAppId();
-        }
         for (int i = 0; i < receiveCount; i++) {
             CouponMemberRel rel = new CouponMemberRel();
             BeanUtil.copyProperties(couponInfo, rel, CopyOptions.create().setIgnoreProperties(MdcUtil.getIgnoreNames()));
@@ -1269,16 +965,7 @@ public class CouponInfoServiceImpl implements CouponInfoService {
             }
             rel.setReceiveSource(receiveSource);
             rel.setReceiveSourceId(receiveSourceId);
-            if (rel.getCouponMode() == CouponModeEnum.ALIPAY && StrUtil.isAllNotBlank(appId, memberInfo.getUserId())) {
-                VoucherSendRequest request = new VoucherSendRequest();
-                request.setAppId(appId);
-                request.setOutBizNo(MdcUtil.getSnowflakeIdStr());
-                request.setTemplateId(rel.getCouponThirdId());
-                request.setUserId(memberInfo.getUserId());
-                request.setMemo(rel.getCouponName());
-                AlipayMarketingVoucherSendResponse response = alipayOpenPlatformService.sendVoucher(request);
-                rel.setRelThirdId(response.getVoucherId());
-            } else if (rel.getCouponMode() == CouponModeEnum.NORMAL) {
+            if (rel.getCouponMode() == CouponModeEnum.NORMAL) {
                 String time = Convert.toStr(DateTime.now().getTime());
                 String random = RandomUtil.randomNumbers(4);
                 String memberIdStr = Convert.toStr(memberInfo.getId());

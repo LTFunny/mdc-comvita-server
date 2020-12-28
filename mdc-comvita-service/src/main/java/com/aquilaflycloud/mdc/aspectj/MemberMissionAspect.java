@@ -50,7 +50,6 @@ public class MemberMissionAspect {
     private final static String[] LOGIN_METHOD = new String[]{
             "mdc.member.info.register",
             "mdc.member.info.login",
-            "mdc.tiny.member.login",
             "mdc.mini.member.login",
     };
 
@@ -59,7 +58,6 @@ public class MemberMissionAspect {
             "mdc.folksonomy.memberRel.add",
             "mdc.member.phoneNumber.edit",
             "mdc.member.phone.edit",
-            "mdc.tiny.phone.edit",
             "mdc.sign.info.add",
             "mdc.coupon.rel.add",
             "mdc.coupon.rel.use",
@@ -93,8 +91,7 @@ public class MemberMissionAspect {
                         break;
                     }
                     case "mdc.member.phoneNumber.edit":
-                    case "mdc.member.phone.edit":
-                    case "mdc.tiny.phone.edit": {
+                    case "mdc.member.phone.edit": {
                         missionService.checkMission(memberId, MissionTypeEnum.BINDINGPHONE);
                         break;
                     }

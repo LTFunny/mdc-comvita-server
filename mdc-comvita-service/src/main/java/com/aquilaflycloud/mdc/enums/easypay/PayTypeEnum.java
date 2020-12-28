@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 public enum PayTypeEnum {
     // 发起支付方式类型
     EASYPAY(1, "惠云支付"),
-    ALIPAY(2, "支付宝直联支付"),
     WECHATPAY(3, "微信直联支付"),
     ;
 

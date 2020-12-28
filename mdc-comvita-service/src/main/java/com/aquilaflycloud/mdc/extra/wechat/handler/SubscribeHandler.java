@@ -1,16 +1,10 @@
 package com.aquilaflycloud.mdc.extra.wechat.handler;
 
-import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.aquilaflycloud.mdc.enums.wechat.QrcodeHandlerTypeEnum;
 import com.aquilaflycloud.mdc.mapper.WechatAuthorSiteQrcodeMsgMapper;
 import com.aquilaflycloud.mdc.model.wechat.WechatAuthorSiteQrcodeMsg;
-import com.aquilaflycloud.mdc.result.member.MemberScanResult;
-import com.aquilaflycloud.mdc.result.member.MemberScanRewardResult;
 import com.aquilaflycloud.mdc.result.wechat.*;
-import com.aquilaflycloud.mdc.service.MemberScanService;
 import com.aquilaflycloud.mdc.service.MemberService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
@@ -38,8 +32,6 @@ import java.util.Map;
 public class SubscribeHandler implements WxMpMessageHandler {
     @Resource
     private MemberService memberService;
-    @Resource
-    private MemberScanService memberScanService;
     @Resource
     private WechatAuthorSiteQrcodeMsgMapper wechatAuthorSiteQrcodeMsgMapper;
 
@@ -96,25 +88,6 @@ public class SubscribeHandler implements WxMpMessageHandler {
                     .eq(WechatAuthorSiteQrcodeMsg::getAppId, appId)
                     .eq(WechatAuthorSiteQrcodeMsg::getSceneString, valueKey));
             if (msg != null) {
-                if (msg.getHandlerType() == QrcodeHandlerTypeEnum.SCANCONSUME) {
-                    JSONObject jsonObject = JSONUtil.parseObj(msg.getHandlerContent());
-                    String content;
-                    try {
-                        MemberScanResult result = memberScanService.addQrcodeScanConsume(valueKey, wxMessage.getFromUser(), jsonObject.getStr("miniAppId"));
-                        StrBuilder reward = StrBuilder.create();
-                        for (MemberScanRewardResult rewardResult : result.getRewardList()) {
-                            reward.append(String.valueOf(rewardResult.getCanReward())).append(rewardResult.getRewardType().getName()).append("，");
-                        }
-                        String rewardStr = StrUtil.subBefore(reward.toString(), "，", true);
-                        content = StrUtil.format(jsonObject.getStr("success"), rewardStr);
-                    } catch (ServiceException e) {
-                        content = StrUtil.format(jsonObject.getStr("failed"), e.getMessage());
-                    }
-                    return WxMpXmlOutMessage.TEXT().content(content)
-                            .fromUser(wxMessage.getToUser())
-                            .toUser(wxMessage.getFromUser())
-                            .build();
-                }
                 switch (msg.getMsgType()) {
                     case TEXT: {
                         QrcodeMsgTextResult result = JSONUtil.toBean(msg.getMsgContent(), QrcodeMsgTextResult.class);

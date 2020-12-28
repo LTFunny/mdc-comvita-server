@@ -13,15 +13,7 @@ import com.aquilaflycloud.mdc.param.easypay.RefundParam;
 public interface EasyPayService {
     Boolean checkOrder(EasypayPaymentRecord record);
 
-    String orderTicket(OrderParam param);
-
-    String orderParking(OrderParam param);
-
     String orderExchange(OrderParam param);
-
-    void refundTicketOrder(RefundParam param);
-
-    void refundParkingOrder(RefundParam param);
 
     void refundExchangeOrder(RefundParam param);
 

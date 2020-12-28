@@ -13,32 +13,18 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.alipay.api.response.AlipaySystemOauthTokenResponse;
-import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.dataAuth.constant.DataAuthConstant;
-import com.aquilaflycloud.mdc.enums.alipay.CountryCodeEnum;
 import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.coupon.VerificateStateEnum;
 import com.aquilaflycloud.mdc.enums.member.*;
-import com.aquilaflycloud.mdc.enums.parking.ConsumeStateEnum;
-import com.aquilaflycloud.mdc.enums.parking.EffectiveTypeEnum;
 import com.aquilaflycloud.mdc.enums.system.TenantConfigTypeEnum;
-import com.aquilaflycloud.mdc.extra.alipay.response.TinyPhoneNumberResponse;
-import com.aquilaflycloud.mdc.extra.alipay.response.TinyRunDataResponse;
-import com.aquilaflycloud.mdc.extra.alipay.service.AlipayOpenPlatformService;
 import com.aquilaflycloud.mdc.extra.wechat.service.WechatOpenPlatformService;
 import com.aquilaflycloud.mdc.extra.wechat.util.WechatFactoryUtil;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.message.MemberErrorEnum;
-import com.aquilaflycloud.mdc.model.alipay.AlipayAuthorSite;
 import com.aquilaflycloud.mdc.model.coupon.CouponMemberRel;
-import com.aquilaflycloud.mdc.model.member.MemberExtraInfo;
-import com.aquilaflycloud.mdc.model.member.MemberFace;
-import com.aquilaflycloud.mdc.model.member.MemberGrade;
-import com.aquilaflycloud.mdc.model.member.MemberInfo;
-import com.aquilaflycloud.mdc.model.member.MemberUnifiedInfo;
-import com.aquilaflycloud.mdc.model.parking.ParkingCouponMemberRel;
+import com.aquilaflycloud.mdc.model.member.*;
 import com.aquilaflycloud.mdc.model.wechat.WechatAuthorSite;
 import com.aquilaflycloud.mdc.model.wechat.WechatFansInfo;
 import com.aquilaflycloud.mdc.model.wechat.WechatMiniProgramDeviceInfo;
@@ -95,13 +81,9 @@ public class MemberServiceImpl implements MemberService {
     @Resource
     private CouponMemberRelMapper couponMemberRelMapper;
     @Resource
-    private ParkingCouponMemberRelMapper parkingCouponMemberRelMapper;
-    @Resource
     private MemberGradeService memberGradeService;
     @Resource
     private WechatOpenPlatformService wechatOpenPlatformService;
-    @Resource
-    private AlipayOpenPlatformService alipayOpenPlatformService;
     @Resource
     private MemberRewardService memberRewardService;
     @Resource
@@ -188,11 +170,6 @@ public class MemberServiceImpl implements MemberService {
                     }
                     break;
                 }
-                case TINY:
-                case SHH: {
-                    memberDetail.setAliAppName(alipayOpenPlatformService.getAlipayAuthorSiteByAppId(member.getAliAppId()).getAppName());
-                    break;
-                }
                 default:
             }
             memberDetailList.add(memberDetail);
@@ -254,15 +231,6 @@ public class MemberServiceImpl implements MemberService {
                         .ge(CouponMemberRel::getEffectiveEndTime, now)
                 );
                 result.setCouponCount(couponCount);
-            }
-            if (param.getGetParkingCouponCount()) {
-                int parkingCouponCount = parkingCouponMemberRelMapper.selectCount(Wrappers.<ParkingCouponMemberRel>lambdaQuery()
-                        .eq(ParkingCouponMemberRel::getMemberId, memberInfo.getId())
-                        .eq(ParkingCouponMemberRel::getConsumeState, ConsumeStateEnum.NOTCONSUME)
-                        .and(i -> i.gt(ParkingCouponMemberRel::getEffectiveEndTime, now)
-                                .or().eq(ParkingCouponMemberRel::getEffectiveType, EffectiveTypeEnum.EVERLASTING))
-                );
-                result.setParkingCouponCount(parkingCouponCount);
             }
             RewardTypeEnum totalType = getRewardType(param.getTotalType(), appId, "totalType");
             if (totalType != null) {
@@ -948,109 +916,6 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    @Override
-    public BaseResult<String> loginTinyMember(TinyMemberLoginParam param) {
-        String otherAppId = MdcUtil.getOtherAppId();
-        AlipayAuthorSite site = alipayOpenPlatformService.getAlipayAuthorSiteByAppId(otherAppId);
-        if (site == null) {
-            throw new ServiceException("授权号不存在");
-        }
-        AlipaySystemOauthTokenResponse response = alipayOpenPlatformService.getSystemOauthToken(otherAppId, param.getAuthCode());
-        String hashKey = otherAppId + "_" + response.getUserId();
-        RMapCache<String, MemberInfo> map = RedisUtil.redisson().getMapCache("tinyMemberRMap");
-        MemberInfo memberInfo = map.get(hashKey);
-        if (memberInfo == null) {
-            memberInfo = RedisUtil.syncLoad("saveMember_" + otherAppId + response.getUserId(), () -> {
-                MemberInfo member = memberInfoMapper.selectOne(Wrappers.<MemberInfo>lambdaQuery()
-                        .eq(MemberInfo::getAliAppId, otherAppId).eq(MemberInfo::getUserId, response.getUserId()));
-                if (member == null) {
-                    member = new MemberInfo();
-                    member.setAliAppId(otherAppId);
-                    member.setUserId(response.getUserId());
-                    member.setSource(SourceEnum.TINY);
-                    member.setIsAuth(WhetherEnum.NO);
-                    member.setNeedMerge(WhetherEnum.NO);
-                    member.setLastOperationTime(DateTime.now());
-                    int count = memberInfoMapper.insert(member);
-                    if (count > 0) {
-                        member = memberInfoMapper.selectById(member.getId());
-                    } else {
-                        throw new ServiceException("登录失败");
-                    }
-                }
-                return member;
-            });
-        }
-        updateLastTime(memberInfo.getId());
-        updateMemberWithCode(memberInfo);
-        map.put(hashKey, memberInfo, 10, TimeUnit.MINUTES);
-        String memberSession = login2Session(memberInfo, response.getAccessToken());
-        return new BaseResult<String>().setResult(memberSession);
-    }
-
-    @Override
-    public void authorizeTinyMember(TinyMemberAuthorizeParam param) {
-        MemberInfo member = MdcUtil.getRequireCurrentMember();
-        AlipayUserInfo userInfo = param.getUserInfo();
-        MemberInfo memberInfo = new MemberInfo();
-        memberInfo.setIsAuth(WhetherEnum.YES);
-        DateTime now = DateTime.now();
-        if (member.getAuthTime() == null) {
-            memberInfo.setAuthTime(now);
-        }
-        memberInfo.setLastAuthTime(now);
-        memberInfo.setAuthTime(DateTime.now());
-        memberInfo.setNeedMerge(WhetherEnum.NO);
-        memberInfo.setAvatarUrl(userInfo.getAvatar());
-        memberInfo.setCountry(userInfo.getCountryCode());
-        CountryCodeEnum countryCode = EnumUtil.fromStringQuietly(CountryCodeEnum.class, userInfo.getProvince());
-        if (countryCode != null) {
-            memberInfo.setProvince(countryCode.getName());
-        }
-        memberInfo.setCity(userInfo.getCity());
-        memberInfo.setNickName(userInfo.getNickName());
-        memberInfo.setSex(StrUtil.isBlank(userInfo.getGender()) ? SexEnum.UNKNOWN : StrUtil.equalsIgnoreCase("M", userInfo.getGender()) ? SexEnum.MALE : SexEnum.FEMALE);
-        memberInfo.setAliContent(JSONUtil.toJsonStr(userInfo));
-        int count = memberInfoMapper.update(memberInfo, Wrappers.<MemberInfo>lambdaUpdate()
-                .eq(MemberInfo::getAliAppId, member.getAliAppId())
-                .eq(MemberInfo::getUserId, member.getUserId())
-        );
-        if (count > 0) {
-            memberInfo = memberInfoMapper.selectOne(Wrappers.<MemberInfo>lambdaQuery()
-                    .eq(MemberInfo::getAliAppId, member.getAliAppId())
-                    .eq(MemberInfo::getUserId, member.getUserId())
-            );
-            String hashKey = memberInfo.getAliAppId() + "_" + memberInfo.getUserId();
-            RMapCache<String, MemberInfo> map = RedisUtil.redisson().getMapCache("tinyMemberRMap");
-            map.put(hashKey, memberInfo, 10, TimeUnit.MINUTES);
-            login2Session(memberInfo);
-        } else {
-            throw new ServiceException("授权失败");
-        }
-    }
-
-    @Override
-    public BaseResult<String> getTinyRun(TinyEncryptionGetParam param) {
-        MemberInfo memberInfo = MdcUtil.getRequireCurrentMember();
-        TinyRunDataResponse response = alipayOpenPlatformService.getTinyRunData(memberInfo.getAliAppId(), param.getResponse());
-        return new BaseResult<String>().setResult(response.getCount());
-    }
-
-    @Override
-    public BaseResult<String> getTinyPhone(TinyEncryptionGetParam param) {
-        MemberInfo memberInfo = MdcUtil.getRequireCurrentMember();
-        TinyPhoneNumberResponse response = alipayOpenPlatformService.getTinyPhoneNumber(memberInfo.getAliAppId(), param.getResponse());
-        return new BaseResult<String>().setResult(response.getMobile());
-    }
-
-    @Override
-    public BaseResult<String> editTinyPhone(TinyEncryptionGetParam param) {
-        MemberInfo memberInfo = MdcUtil.getRequireCurrentMember();
-        TinyPhoneNumberResponse response = alipayOpenPlatformService.getTinyPhoneNumber(memberInfo.getAliAppId(), param.getResponse());
-        editPhone(memberInfo, response.getMobile());
-        return new BaseResult<String>().setResult(response.getMobile());
-    }
-
     private WechatFansInfo parseWechatFans(WechatAuthorSite site, WxMpUser wxMpUser) {
         WechatFansInfo wechatFansInfo = new WechatFansInfo();
         wechatFansInfo.setIsAuth(WhetherEnum.YES);
@@ -1176,40 +1041,6 @@ public class MemberServiceImpl implements MemberService {
         } else {
             throw new ServiceException("同步中请勿重复操作");
         }
-    }
-
-    private MemberInfo parseMember(AlipayAuthorSite site, AlipayUserInfoShareResponse aliUser) {
-        MemberInfo memberInfo = new MemberInfo();
-        memberInfo.setIsAuth(WhetherEnum.YES);
-        memberInfo.setNeedMerge(WhetherEnum.NO);
-        memberInfo.setAliAppId(site.getAppId());
-        memberInfo.setUserId(aliUser.getUserId());
-        memberInfo.setAvatarUrl(aliUser.getAvatar());
-        memberInfo.setProvince(aliUser.getProvince());
-        memberInfo.setCity(aliUser.getCity());
-        memberInfo.setNickName(aliUser.getNickName());
-        memberInfo.setSex(StrUtil.isBlank(aliUser.getGender()) ? SexEnum.UNKNOWN : StrUtil.equalsIgnoreCase("M", aliUser.getGender()) ? SexEnum.MALE : SexEnum.FEMALE);
-        memberInfo.setAliContent(JSONUtil.toJsonStr(aliUser));
-        memberInfo.setSource(SourceEnum.SHH);
-        return memberInfo;
-    }
-
-    @Override
-    public void addShareMember(String appId, AlipayUserInfoShareResponse aliUser) {
-        AlipayAuthorSite site = alipayOpenPlatformService.getAlipayAuthorSiteByAppId(appId);
-        if (site == null) {
-            throw new ServiceException("授权号不存在");
-        }
-        //设置此次请求租户id
-        MdcUtil.getTtlExecutorService().submit(() -> {
-            ServiceContext.getCurrentContext().set(DataAuthConstant.TENANT_ID, site.getTenantId());
-            ServiceContext.getCurrentContext().set(DataAuthConstant.SUB_TENANT_ID, site.getSubTenantId());
-            MemberInfo memberInfo = parseMember(site, aliUser);
-            int count = saveMember(memberInfo);
-            if (count <= 0) {
-                throw new ServiceException("保存生活号会员失败");
-            }
-        });
     }
 
     @Override

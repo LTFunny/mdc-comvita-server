@@ -1,7 +1,7 @@
 package com.aquilaflycloud.mdc.param.easypay;
 
-import com.aquilafly.easypay.enums.FrpCodeEnum;
 import com.aquilaflycloud.common.AnotherFieldHasValue;
+import com.aquilaflycloud.mdc.enums.easypay.FrpCodeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;

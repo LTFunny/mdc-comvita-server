@@ -8,5 +8,5 @@ package com.aquilaflycloud.mdc.enums.easypay;
  */
 public enum PayType {
     // 支付类型
-    WECHAT_MINI, ALIPAY
+    WECHAT_MINI
 }

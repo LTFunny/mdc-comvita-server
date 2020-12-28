@@ -10,7 +10,6 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.json.JSONUtil;
-import com.aquilafly.easypay.enums.FrpCodeEnum;
 import com.aquilaflycloud.auth.enums.UserTypeEnum;
 import com.aquilaflycloud.dataAuth.constant.DataAuthConstant;
 import com.aquilaflycloud.mdc.component.event.AfterCommitEvent;
@@ -20,15 +19,12 @@ import com.aquilaflycloud.mdc.enums.common.AuditStateEnum;
 import com.aquilaflycloud.mdc.enums.common.CreateSourceEnum;
 import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.coupon.*;
+import com.aquilaflycloud.mdc.enums.easypay.FrpCodeEnum;
 import com.aquilaflycloud.mdc.enums.easypay.OrderTypeEnum;
 import com.aquilaflycloud.mdc.enums.easypay.PayType;
 import com.aquilaflycloud.mdc.enums.easypay.PaymentTypeEnum;
 import com.aquilaflycloud.mdc.enums.exchange.*;
 import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
-import com.aquilaflycloud.mdc.enums.parking.ConsumeStateEnum;
-import com.aquilaflycloud.mdc.enums.parking.EffectiveTypeEnum;
-import com.aquilaflycloud.mdc.enums.parking.InventoryTypeEnum;
-import com.aquilaflycloud.mdc.enums.parking.LimitTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.catalog.CatalogInfo;
 import com.aquilaflycloud.mdc.model.catalog.CatalogRel;
@@ -38,19 +34,13 @@ import com.aquilaflycloud.mdc.model.easypay.EasypayPaymentRecord;
 import com.aquilaflycloud.mdc.model.easypay.EasypayRefundRecord;
 import com.aquilaflycloud.mdc.model.exchange.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
-import com.aquilaflycloud.mdc.model.parking.ParkingCoupon;
-import com.aquilaflycloud.mdc.model.parking.ParkingCouponMemberRel;
 import com.aquilaflycloud.mdc.param.coupon.CouponAddParam;
 import com.aquilaflycloud.mdc.param.coupon.CouponEditParam;
 import com.aquilaflycloud.mdc.param.coupon.CouponGetParam;
 import com.aquilaflycloud.mdc.param.easypay.OrderParam;
 import com.aquilaflycloud.mdc.param.easypay.RefundParam;
 import com.aquilaflycloud.mdc.param.exchange.*;
-import com.aquilaflycloud.mdc.param.parking.CouponMemberRelAddParam;
-import com.aquilaflycloud.mdc.param.parking.CouponRecordAddParam;
-import com.aquilaflycloud.mdc.param.parking.CouponRecordInventoryAddParam;
 import com.aquilaflycloud.mdc.result.exchange.*;
-import com.aquilaflycloud.mdc.result.parking.CouponLimit;
 import com.aquilaflycloud.mdc.service.*;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.util.RedisUtil;
@@ -105,11 +95,7 @@ public class ExchangeServiceImpl implements ExchangeService {
     @Resource
     private CouponMemberRelMapper couponMemberRelMapper;
     @Resource
-    private ParkingCouponMemberRelMapper parkingCouponMemberRelMapper;
-    @Resource
     private CouponInfoService couponInfoService;
-    @Resource
-    private ParkingCouponService parkingCouponService;
     @Resource
     private MemberRewardService memberRewardService;
     @Resource
@@ -167,8 +153,7 @@ public class ExchangeServiceImpl implements ExchangeService {
                     /*int cacheCount = getCacheCount(exchangeGoods.getId());
                     exchangeGoods.setExchangeCount(exchangeGoods.getExchangeCount() + cacheCount);*/
                     int exchangeCount = 0;
-                    if (ObjectUtil.equal(exchangeGoods.getGoodsType(), GoodsTypeEnum.COUPON)
-                            || ObjectUtil.equal(exchangeGoods.getGoodsType(), GoodsTypeEnum.PARKING)) {
+                    if (ObjectUtil.equal(exchangeGoods.getGoodsType(), GoodsTypeEnum.COUPON)) {
                         //统计停车券或者优惠券
                         exchangeCount = getTotalExchangeCount(exchangeGoods.getId());
                     } else if (ObjectUtil.equal(exchangeGoods.getGoodsType(), GoodsTypeEnum.PHYSICAL)) {
@@ -184,7 +169,6 @@ public class ExchangeServiceImpl implements ExchangeService {
 
                     }
                     if (ObjectUtil.equal(exchangeGoods.getGoodsType(), GoodsTypeEnum.COUPON)
-                            || ObjectUtil.equal(exchangeGoods.getGoodsType(), GoodsTypeEnum.PARKING)
                             || (ObjectUtil.equal(exchangeGoods.getGoodsType(), GoodsTypeEnum.PHYSICAL) && ObjectUtil.isNull(skuId))) {
                         //实物商品、优惠券和停车场总库存判断
                         if (exchangeGoods.getInventory() <= exchangeCount) {
@@ -442,8 +426,6 @@ public class ExchangeServiceImpl implements ExchangeService {
 
             if (goods.getGoodsType() == GoodsTypeEnum.COUPON) {
                 result.setCoupon(JSONUtil.toBean(goods.getRelContent(), GoodsCouponResult.class));
-            } else if (goods.getGoodsType() == GoodsTypeEnum.PARKING) {
-                result.setParkingCoupon(JSONUtil.toBean(goods.getRelContent(), GoodsParkingCouponResult.class));
             } else if (goods.getGoodsType() == GoodsTypeEnum.PHYSICAL) {
                 //设置实物商品最高和最低价格
                 if (null != skuInfos && skuInfos.size() > 0) {
@@ -468,7 +450,7 @@ public class ExchangeServiceImpl implements ExchangeService {
     @Override
     public void addGoods(GoodsAddParam param) {
         //优惠券和停车券判断
-        if (param.getGoodsType().equals(GoodsTypeEnum.COUPON) || param.getGoodsType().equals(GoodsTypeEnum.PARKING)) {
+        if (param.getGoodsType().equals(GoodsTypeEnum.COUPON)) {
             if (Convert.toInt(param.getSingleReward(), 0) == 0 && param.getSinglePrice().compareTo(BigDecimal.ZERO) == 0) {
                 throw new ServiceException("单件奖励值和单件金额不能同时为0");
             }
@@ -553,33 +535,6 @@ public class ExchangeServiceImpl implements ExchangeService {
                 BeanUtil.copyProperties(param.getCoupon(), couponResult);
                 relContent = JSONUtil.toJsonStr(couponResult);
                 auditState = couponInfo.getAuditState();
-                break;
-            }
-            case PARKING: {
-                if (BeanUtil.isEmpty(param.getParkingCoupon())) {
-                    throw new ServiceException("停车券信息不能为空");
-                }
-                CouponRecordAddParam couponRecordAddParam = new CouponRecordAddParam();
-                BeanUtil.copyProperties(param.getParkingCoupon(), couponRecordAddParam);
-                couponRecordAddParam.setCouponName(param.getGoodsName());
-                couponRecordAddParam.setInventoryType(InventoryTypeEnum.AMOUNT);
-                couponRecordAddParam.setInventoryIncrease(NumberUtil.toBigDecimal(param.getInventory()));
-                if (param.getExchangeLimit() == 0) {
-                    couponRecordAddParam.setReceiveLimitType(LimitTypeEnum.UNLIMITED);
-                } else {
-                    couponRecordAddParam.setReceiveLimitType(LimitTypeEnum.CUSTOM);
-                    CouponLimit limit = new CouponLimit();
-                    limit.setLimitType(CouponLimit.LimitType.PERSON).setLimitCountType(CouponLimit.LimitCountType.AMOUNT)
-                            .setLimitCount(NumberUtil.toBigDecimal(param.getExchangeLimit())).setLimitRange(CouponLimit.LimitRange.LASTING);
-                    couponRecordAddParam.setReceiveLimitContent(limit);
-                }
-                couponRecordAddParam.setUseLimitType(LimitTypeEnum.UNLIMITED);
-                couponRecordAddParam.setDesignateOrgIds(param.getDesignateOrgIds());
-                relId = parkingCouponService.addCouponRecord(couponRecordAddParam, CreateSourceEnum.EXCHANGE);
-                GoodsParkingCouponResult couponResult = new GoodsParkingCouponResult();
-                BeanUtil.copyProperties(param.getParkingCoupon(), couponResult);
-                relContent = JSONUtil.toJsonStr(couponResult);
-                auditState = AuditStateEnum.PENDING;
                 break;
             }
             case PHYSICAL: {
@@ -667,7 +622,7 @@ public class ExchangeServiceImpl implements ExchangeService {
                 throw new ServiceException("关联商品分类失败");
             }
 
-            if (param.getGoodsType().equals(GoodsTypeEnum.COUPON) || param.getGoodsType().equals(GoodsTypeEnum.PARKING)) {
+            if (param.getGoodsType().equals(GoodsTypeEnum.COUPON)) {
                 RedisUtil.zSetRedis().add("goodsInventory", goods.getId(), goods.getInventory());
                 RedisUtil.redis().expire("goodsInventory", 30, TimeUnit.DAYS);
             } else if (param.getGoodsType().equals(GoodsTypeEnum.PHYSICAL)) {
@@ -716,12 +671,12 @@ public class ExchangeServiceImpl implements ExchangeService {
                     RedisUtil.transactionalLock("changeExchangeGoods" + param.getId() + exchangeGoodsSkuInfo.getId());
                 }
             }
-        } else if (ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.COUPON) || ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.PARKING)) {
+        } else if (ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.COUPON)) {
             RedisUtil.transactionalLock("changeExchangeGoods" + param.getId());
         }
 
         //根据商品类型判断单件奖励值和单件金额是否同时为0
-        if (ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.COUPON) || ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.PARKING)) {
+        if (ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.COUPON)) {
             if (Convert.toInt(param.getSingleReward(), 0) == 0 && Convert.toInt(goods.getSingleReward(), 0) == 0
                     && Convert.toBigDecimal(param.getSinglePrice(), BigDecimal.ZERO).compareTo(BigDecimal.ZERO) == 0
                     && Convert.toBigDecimal(goods.getSinglePrice(), BigDecimal.ZERO).compareTo(BigDecimal.ZERO) == 0) {
@@ -772,42 +727,6 @@ public class ExchangeServiceImpl implements ExchangeService {
                     auditState = couponInfo.getAuditState();
                     GoodsCouponResult couponResult = JSONUtil.toBean(goods.getRelContent(), GoodsCouponResult.class);
                     BeanUtil.copyProperties(param.getCoupon(), couponResult, CopyOptions.create().ignoreNullValue());
-                    relContent = JSONUtil.toJsonStr(couponResult);
-                }
-                break;
-            }
-            case PARKING: {
-                if (!BeanUtil.isEmpty(param.getParkingCoupon()) || !StrUtil.isAllBlank(param.getGoodsName(), param.getDesignateOrgIds())
-                        || param.getInventoryIncrease() != null || param.getExchangeLimit() != null) {
-                    if (param.getInventoryIncrease() != null && param.getInventoryIncrease() > 0) {
-                        if (goods.getAuditState() == AuditStateEnum.PENDING) {
-                            throw new ServiceException("商品审核中不可修改库存");
-                        }
-                        CouponRecordInventoryAddParam addParam = new CouponRecordInventoryAddParam();
-                        addParam.setCouponId(relId);
-                        addParam.setInventoryIncrease(NumberUtil.toBigDecimal(param.getInventoryIncrease()));
-                        parkingCouponService.addInventory(addParam, CreateSourceEnum.EXCHANGE);
-                        auditState = AuditStateEnum.PENDING;
-                    } else if (goods.getAuditState() == AuditStateEnum.APPROVE) {
-                        auditState = AuditStateEnum.APPROVE;
-                    }
-                    com.aquilaflycloud.mdc.param.parking.CouponEditParam couponEditParam = new com.aquilaflycloud.mdc.param.parking.CouponEditParam();
-                    BeanUtil.copyProperties(param.getParkingCoupon(), couponEditParam);
-                    couponEditParam.setId(relId);
-                    couponEditParam.setCouponName(param.getGoodsName());
-                    if (Convert.toInt(param.getExchangeLimit(), 0) == 0) {
-                        couponEditParam.setReceiveLimitType(LimitTypeEnum.UNLIMITED);
-                    } else {
-                        couponEditParam.setReceiveLimitType(LimitTypeEnum.CUSTOM);
-                        CouponLimit limit = new CouponLimit();
-                        limit.setLimitType(CouponLimit.LimitType.PERSON).setLimitCountType(CouponLimit.LimitCountType.AMOUNT)
-                                .setLimitCount(NumberUtil.toBigDecimal(param.getExchangeLimit())).setLimitRange(CouponLimit.LimitRange.LASTING);
-                        couponEditParam.setReceiveLimitContent(limit);
-                    }
-                    couponEditParam.setDesignateOrgIds(param.getDesignateOrgIds());
-                    parkingCouponService.editCoupon(couponEditParam, CreateSourceEnum.EXCHANGE);
-                    GoodsParkingCouponResult couponResult = JSONUtil.toBean(goods.getRelContent(), GoodsParkingCouponResult.class);
-                    BeanUtil.copyProperties(param.getParkingCoupon(), couponResult, CopyOptions.create().ignoreNullValue());
                     relContent = JSONUtil.toJsonStr(couponResult);
                 }
                 break;
@@ -875,25 +794,6 @@ public class ExchangeServiceImpl implements ExchangeService {
         }
 
         switch (goods.getGoodsType()) {
-            case COUPON:
-            case PARKING: {
-                int surplusInventory = goods.getInventory() - getTotalExchangeCount(goods.getId()) - getCacheCount(goods.getId(), null);
-                if (param.getInventoryIncrease() != null && param.getInventoryIncrease() > 0) {
-                    surplusInventory = surplusInventory + param.getInventoryIncrease();
-                    if (surplusInventory < 0) {
-                        throw new ServiceException("剩余库存不能小于0");
-                    }
-                    update.setInventory(goods.getInventory() + param.getInventoryIncrease());
-                }
-                update.setAuditState(auditState);
-                int count = exchangeGoodsMapper.update(update, updateWrapper);
-                if (count <= 0) {
-                    throw new ServiceException("修改商品失败");
-                }
-                RedisUtil.zSetRedis().add("goodsInventory", goods.getId(), surplusInventory);
-                RedisUtil.redis().expire("goodsInventory", 30, TimeUnit.DAYS);
-                break;
-            }
             case PHYSICAL: {
                 //存放数据库数据(skuId, ExchangeGoodsSkuInfo)
                 Map<Long, ExchangeGoodsSkuInfo> dbSkuInfosMap = new HashMap<>();
@@ -1004,13 +904,6 @@ public class ExchangeServiceImpl implements ExchangeService {
                     }
                     break;
                 }
-                case PARKING: {
-                    ParkingCoupon parkingCoupon = parkingCouponService.getCoupon(goods.getRelId());
-                    if (parkingCoupon.getState() != com.aquilaflycloud.mdc.enums.parking.CouponStateEnum.NORMAL) {
-                        state = GoodsStateEnum.INVALID;
-                    }
-                    break;
-                }
                 default:
             }
             if (state == GoodsStateEnum.INVALID) {
@@ -1030,8 +923,7 @@ public class ExchangeServiceImpl implements ExchangeService {
         goods = stateHandler(goods, null);
         ExchangeGoods finalGoods = goods;
         //判断优惠券和停车券是否失效
-        if (ObjectUtil.equal(GoodsTypeEnum.COUPON, goods.getGoodsType())
-                || ObjectUtil.equal(GoodsTypeEnum.PARKING, goods.getGoodsType())) {
+        if (ObjectUtil.equal(GoodsTypeEnum.COUPON, goods.getGoodsType())) {
             goods = RedisUtil.syncLoad("changeExchangeGoods" + param.getId(), () -> updateGoodsState(finalGoods));
         }
 
@@ -1058,19 +950,12 @@ public class ExchangeServiceImpl implements ExchangeService {
         );
         if (goods.getGoodsType() == GoodsTypeEnum.COUPON) {
             result.setCoupon(JSONUtil.toBean(goods.getRelContent(), GoodsCouponResult.class));
-        } else if (goods.getGoodsType() == GoodsTypeEnum.PARKING) {
-            result.setParkingCoupon(JSONUtil.toBean(goods.getRelContent(), GoodsParkingCouponResult.class));
         }
         result.setExchangeSuccessCount(successCount);
         //根据商品类型计算已兑换数量
         int totalExchangeCount = 0;
         List<ExchangeGoodsSkuInfo> skuInfos = new ArrayList<>();
         switch (goods.getGoodsType()) {
-            case COUPON:
-            case PARKING: {
-                totalExchangeCount = getTotalExchangeCount(goods.getId(), true);
-                break;
-            }
             case PHYSICAL: {
                 List<ExchangeGoodsSkuInfo> dbSkuInfos = exchangeGoodsSkuInfoMapper.selectList(Wrappers.<ExchangeGoodsSkuInfo>lambdaQuery()
                         .eq(ExchangeGoodsSkuInfo::getGoodsId, goods.getId())
@@ -1088,11 +973,6 @@ public class ExchangeServiceImpl implements ExchangeService {
         result.setExchangeCount(totalExchangeCount);
         int surplusInventory = 0;
         switch (goods.getGoodsType()) {
-            case COUPON:
-            case PARKING: {
-                surplusInventory = goods.getInventory() - totalExchangeCount - getCacheCount(goods.getId(), null);
-                break;
-            }
             case PHYSICAL: {
                 List<ExchangeGoodsSkuInfo> goodsSkuInfos = new ArrayList<>();
                 if (null != skuInfos && skuInfos.size() > 0) {
@@ -1113,11 +993,6 @@ public class ExchangeServiceImpl implements ExchangeService {
         switch (goods.getGoodsType()) {
             case COUPON: {
                 couponInfoService.getTotalReceiveCount(goods.getRelId(), true);
-                break;
-            }
-            case PARKING: {
-                parkingCouponService.getTotalDistributeWorth(goods.getRelId(), true);
-                parkingCouponService.getTotalDistributeCount(goods.getRelId(), true);
                 break;
             }
             case PHYSICAL: {
@@ -1379,8 +1254,6 @@ public class ExchangeServiceImpl implements ExchangeService {
         result.setOperateRecordList(operateRecordList);
         if (order.getGoodsType() == GoodsTypeEnum.COUPON) {
             result.setCoupon(JSONUtil.toBean(order.getRelContent(), GoodsCouponResult.class));
-        } else if (order.getGoodsType() == GoodsTypeEnum.PARKING) {
-            result.setParkingCoupon(JSONUtil.toBean(order.getRelContent(), GoodsParkingCouponResult.class));
         }
         return result;
     }
@@ -1473,11 +1346,6 @@ public class ExchangeServiceImpl implements ExchangeService {
         switch (order.getGoodsType()) {
             case COUPON: {
                 couponInfoService.revokedRel(ReceiveSourceEnum.EXCHANGE, order.getId(), CreateSourceEnum.EXCHANGE, false);
-                break;
-            }
-            case PARKING: {
-                parkingCouponService.revokedRel(com.aquilaflycloud.mdc.enums.parking.ReceiveSourceEnum.EXCHANGE,
-                        order.getId(), CreateSourceEnum.EXCHANGE);
                 break;
             }
             default:
@@ -1576,11 +1444,6 @@ public class ExchangeServiceImpl implements ExchangeService {
                         couponInfoService.revokedRel(ReceiveSourceEnum.EXCHANGE, order.getId(), CreateSourceEnum.EXCHANGE);
                         break;
                     }
-                    case PARKING: {
-                        parkingCouponService.revokedRel(com.aquilaflycloud.mdc.enums.parking.ReceiveSourceEnum.EXCHANGE,
-                                order.getId(), CreateSourceEnum.EXCHANGE);
-                        break;
-                    }
                 }
             }*/
         ExchangeOrder update = new ExchangeOrder();
@@ -1643,9 +1506,6 @@ public class ExchangeServiceImpl implements ExchangeService {
                 couponInfoService.revokedRel(ReceiveSourceEnum.EXCHANGE, order.getId(), CreateSourceEnum.EXCHANGE, true);
                 break;
             }
-            case PARKING: {
-                throw new ServiceException("停车券兑换订单不支持强制退款");
-            }
             default:
         }
         ExchangeOrder update = new ExchangeOrder();
@@ -1706,11 +1566,6 @@ public class ExchangeServiceImpl implements ExchangeService {
                 .eq(state == GoodsStateEnum.INVALID, ExchangeGoods::getState, state)
         ).convert(result -> {
             switch (result.getGoodsType()) {
-                case COUPON:
-                case PARKING: {
-                    result.setExchangeCount(getTotalExchangeCount(result.getId()));
-                    break;
-                }
                 case PHYSICAL: {
                     List<ExchangeGoodsSkuInfo> skuInfos = new ArrayList<>();
                     //设置实物商品价格
@@ -1820,8 +1675,6 @@ public class ExchangeServiceImpl implements ExchangeService {
 
             if (goods.getGoodsType() == GoodsTypeEnum.COUPON) {
                 result.setCoupon(JSONUtil.toBean(goods.getRelContent(), GoodsCouponResult.class));
-            } else if (goods.getGoodsType() == GoodsTypeEnum.PARKING) {
-                result.setParkingCoupon(JSONUtil.toBean(goods.getRelContent(), GoodsParkingCouponResult.class));
             } else if (goods.getGoodsType() == GoodsTypeEnum.PHYSICAL) {
                 //设置实物商品价格
                 if (null != skuInfos && skuInfos.size() > 0) {
@@ -1865,8 +1718,6 @@ public class ExchangeServiceImpl implements ExchangeService {
 //            result.setExchangeCount(getTotalExchangeCount(goods.getId()));
             if (goods.getGoodsType() == GoodsTypeEnum.COUPON) {
                 result.setCoupon(JSONUtil.toBean(goods.getRelContent(), GoodsCouponResult.class));
-            } else if (goods.getGoodsType() == GoodsTypeEnum.PARKING) {
-                result.setParkingCoupon(JSONUtil.toBean(goods.getRelContent(), GoodsParkingCouponResult.class));
             } else if (goods.getGoodsType() == GoodsTypeEnum.PHYSICAL) {
                 //设置实物商品价格
                 if (null != skuInfos && skuInfos.size() > 0) {
@@ -1890,11 +1741,6 @@ public class ExchangeServiceImpl implements ExchangeService {
 
         //根据类型统计总兑换数
         switch (goods.getGoodsType()) {
-            case COUPON:
-            case PARKING: {
-                result.setExchangeCount(getTotalExchangeCount(goods.getId()));
-                break;
-            }
             case PHYSICAL: {
                 List<ExchangeGoodsSkuInfo> skuInfos = exchangeGoodsSkuInfoMapper.selectList(Wrappers.<ExchangeGoodsSkuInfo>lambdaQuery()
                         .eq(ExchangeGoodsSkuInfo::getGoodsId, goods.getId())
@@ -1916,8 +1762,6 @@ public class ExchangeServiceImpl implements ExchangeService {
 
         if (goods.getGoodsType() == GoodsTypeEnum.COUPON) {
             result.setCoupon(JSONUtil.toBean(goods.getRelContent(), GoodsCouponResult.class));
-        } else if (goods.getGoodsType() == GoodsTypeEnum.PARKING) {
-            result.setParkingCoupon(JSONUtil.toBean(goods.getRelContent(), GoodsParkingCouponResult.class));
         }
         return result;
     }
@@ -1930,8 +1774,7 @@ public class ExchangeServiceImpl implements ExchangeService {
             throw new ServiceException("实物商品的skuId不能为空");
         }
         //根据商品类型判断库存
-        if (ObjectUtil.equal(exchangeGoods.getGoodsType(), GoodsTypeEnum.COUPON)
-                || ObjectUtil.equal(exchangeGoods.getGoodsType(), GoodsTypeEnum.PARKING)) {
+        if (ObjectUtil.equal(exchangeGoods.getGoodsType(), GoodsTypeEnum.COUPON)) {
             double d = RedisUtil.zSetRedis().incrementScore("goodsInventory", param.getGoodsId(), -param.getGoodsCount());
             if (d < 0) {
                 RedisUtil.zSetRedis().incrementScore("goodsInventory", param.getGoodsId(), param.getGoodsCount());
@@ -2016,8 +1859,7 @@ public class ExchangeServiceImpl implements ExchangeService {
         }
         //判断类型，显示不同提示
         if (goods.getState() != GoodsStateEnum.NORMAL &&
-                (ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.COUPON)
-                        || ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.PARKING))) {
+                (ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.COUPON))) {
             throw new ServiceException("商品已" + goods.getState().getName() + "不能兑换");
         } else if (goods.getState() != GoodsStateEnum.NORMAL && ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.PHYSICAL)) {
             throw new ServiceException("对应规格的商品已" + goods.getState().getName() + "不能兑换");
@@ -2025,8 +1867,7 @@ public class ExchangeServiceImpl implements ExchangeService {
 
         //判断是否为sku
         if (goods.getState() == GoodsStateEnum.NORMAL
-                && (ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.COUPON)
-                || ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.PARKING))) {
+                && (ObjectUtil.equal(goods.getGoodsType(), GoodsTypeEnum.COUPON))) {
             if (goods.getInventory() < totalExchangeCount) {
                 throw new ServiceException("商品库存不足");
             }
@@ -2148,15 +1989,6 @@ public class ExchangeServiceImpl implements ExchangeService {
                             ReceiveSourceEnum.EXCHANGE, order.getId(), CreateSourceEnum.EXCHANGE);
                     break;
                 }
-                case PARKING: {
-                    CouponMemberRelAddParam addParam = new CouponMemberRelAddParam();
-                    addParam.setCouponId(order.getRelId());
-                    addParam.setMemberId(memberInfo.getId());
-                    addParam.setCount(order.getGoodsCount());
-                    parkingCouponService.addCouponMemberRel(addParam, com.aquilaflycloud.mdc.enums.parking.ReceiveSourceEnum.EXCHANGE,
-                            order.getId(), CreateSourceEnum.EXCHANGE);
-                    break;
-                }
                 default:
             }
             //事务commit后更新商品表的兑换数
@@ -2180,10 +2012,6 @@ public class ExchangeServiceImpl implements ExchangeService {
         switch (payType) {
             case WECHAT_MINI: {
                 orderParam.setFrpCode(FrpCodeEnum.APPLET_PAY).setAppId(memberInfo.getWxAppId()).setOpenId(memberInfo.getOpenId());
-                break;
-            }
-            case ALIPAY: {
-                orderParam.setFrpCode(FrpCodeEnum.ALIPAY_NATIVE).setAppId(memberInfo.getAliAppId()).setUserId(memberInfo.getUserId());
                 break;
             }
             default:
@@ -2263,15 +2091,6 @@ public class ExchangeServiceImpl implements ExchangeService {
                 couponGetParam.setId(exchangeOrder.getRelId());
                 couponInfoService.addRel(couponGetParam, exchangeOrder.getGoodsCount(), memberInfo,
                         ReceiveSourceEnum.EXCHANGE, exchangeOrder.getId(), CreateSourceEnum.EXCHANGE);
-                break;
-            }
-            case PARKING: {
-                CouponMemberRelAddParam addParam = new CouponMemberRelAddParam();
-                addParam.setCouponId(exchangeOrder.getRelId());
-                addParam.setMemberId(exchangeOrder.getMemberId());
-                addParam.setCount(exchangeOrder.getGoodsCount());
-                parkingCouponService.addCouponMemberRel(addParam, com.aquilaflycloud.mdc.enums.parking.ReceiveSourceEnum.EXCHANGE,
-                        exchangeOrder.getId(), CreateSourceEnum.EXCHANGE);
                 break;
             }
             default:
@@ -2410,8 +2229,6 @@ public class ExchangeServiceImpl implements ExchangeService {
             }
             if (order.getGoodsType() == GoodsTypeEnum.COUPON) {
                 result.setCoupon(JSONUtil.toBean(order.getRelContent(), GoodsCouponResult.class));
-            } else if (order.getGoodsType() == GoodsTypeEnum.PARKING) {
-                result.setParkingCoupon(JSONUtil.toBean(order.getRelContent(), GoodsParkingCouponResult.class));
             }
             return result;
         });
@@ -2425,24 +2242,6 @@ public class ExchangeServiceImpl implements ExchangeService {
             if (rel.getVerificateState() == VerificateStateEnum.NOTCONSUME
                     && DateTime.now().isAfter(rel.getEffectiveEndTime())) {
                 rel.setVerificateState(VerificateStateEnum.EXPIRED);
-            }
-        }
-        return rel;
-    }
-
-    private ParkingCouponMemberRel stateHandler(ParkingCouponMemberRel rel) {
-        if (rel == null) {
-            throw new ServiceException("停车券记录不存在");
-        }
-        DateTime now = DateTime.now();
-        if (rel.getConsumeState() != ConsumeStateEnum.CONSUMED && rel.getConsumeState() != ConsumeStateEnum.REVOKED) {
-            if (rel.getEffectiveType() != EffectiveTypeEnum.EVERLASTING) {
-                if (rel.getEffectiveStartTime() != null && now.before(rel.getEffectiveStartTime())) {
-                    rel.setConsumeState(ConsumeStateEnum.NOTACTIVE);
-                }
-                if (rel.getEffectiveEndTime() != null && now.isAfter(rel.getEffectiveEndTime())) {
-                    rel.setConsumeState(ConsumeStateEnum.EXPIRED);
-                }
             }
         }
         return rel;
@@ -2462,8 +2261,6 @@ public class ExchangeServiceImpl implements ExchangeService {
         }
         if (order.getGoodsType() == GoodsTypeEnum.COUPON) {
             result.setCoupon(JSONUtil.toBean(order.getRelContent(), GoodsCouponResult.class));
-        } else if (order.getGoodsType() == GoodsTypeEnum.PARKING) {
-            result.setParkingCoupon(JSONUtil.toBean(order.getRelContent(), GoodsParkingCouponResult.class));
         }
         EasypayPaymentRecord paymentRecord = easypayPaymentRecordMapper.selectOne(Wrappers.<EasypayPaymentRecord>lambdaQuery()
                 .eq(EasypayPaymentRecord::getOrderType, OrderTypeEnum.EXCHANGE)
@@ -2484,15 +2281,9 @@ public class ExchangeServiceImpl implements ExchangeService {
                 .eq(CouponMemberRel::getReceiveSourceId, order.getId())
                 .eq(CouponMemberRel::getCreateSource, CreateSourceEnum.EXCHANGE)
         ).stream().map(this::stateHandler).collect(Collectors.toList());
-        List<ParkingCouponMemberRel> parkingCouponRelList = parkingCouponMemberRelMapper.selectList(Wrappers.<ParkingCouponMemberRel>lambdaQuery()
-                .eq(ParkingCouponMemberRel::getReceiveSource, com.aquilaflycloud.mdc.enums.parking.ReceiveSourceEnum.EXCHANGE)
-                .eq(ParkingCouponMemberRel::getReceiveSourceId, order.getId())
-                .eq(ParkingCouponMemberRel::getCreateSource, CreateSourceEnum.EXCHANGE)
-        ).stream().map(this::stateHandler).collect(Collectors.toList());
         result.setPaymentRecord(paymentRecord);
         result.setRefundRecord(refundRecord);
         result.setCouponRelList(couponRelList);
-        result.setParkingCouponRelList(parkingCouponRelList);
         long second = getOvertime() * 60 - DateUtil.between(DateTime.now(), order.getCreateTime(), DateUnit.SECOND, true);
         result.setEffectiveSecond(second < 0 ? 0 : second);
         return result;
@@ -2596,11 +2387,6 @@ public class ExchangeServiceImpl implements ExchangeService {
             switch (order.getGoodsType()) {
                 case COUPON: {
                     couponInfoService.revokedRel(ReceiveSourceEnum.EXCHANGE, order.getId(), CreateSourceEnum.EXCHANGE, false);
-                    break;
-                }
-                case PARKING: {
-                    parkingCouponService.revokedRel(com.aquilaflycloud.mdc.enums.parking.ReceiveSourceEnum.EXCHANGE,
-                            order.getId(), CreateSourceEnum.EXCHANGE);
                     break;
                 }
                 default:

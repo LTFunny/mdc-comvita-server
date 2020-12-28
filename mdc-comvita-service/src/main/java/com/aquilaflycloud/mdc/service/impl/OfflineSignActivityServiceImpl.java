@@ -7,12 +7,10 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.alipay.api.response.AlipayOpenAppQrcodeCreateResponse;
 import com.aquilaflycloud.dataAuth.common.PageParam;
 import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.sign.LimitTypeEnum;
 import com.aquilaflycloud.mdc.enums.sign.SignStateEnum;
-import com.aquilaflycloud.mdc.extra.alipay.service.AlipayOpenPlatformService;
 import com.aquilaflycloud.mdc.extra.wechat.service.WechatOpenPlatformService;
 import com.aquilaflycloud.mdc.mapper.CouponMemberRelMapper;
 import com.aquilaflycloud.mdc.mapper.OfflineSignActivityMapper;
@@ -63,8 +61,6 @@ public class OfflineSignActivityServiceImpl implements OfflineSignActivityServic
     private MemberRewardService memberRewardService;
     @Resource
     private ClientConfigService clientConfigService;
-    @Resource
-    private AlipayOpenPlatformService alipayOpenPlatformService;
     @Resource
     private WechatOpenPlatformService wechatOpenPlatformService;
 
@@ -195,14 +191,10 @@ public class OfflineSignActivityServiceImpl implements OfflineSignActivityServic
         String path = clientConfigService.getItemByName(param.getAppId(), "offlineSignPage");
         path = Convert.toStr(path, "pages/home/home");
         String queryParam = "id=" + id + "&scan=true";
-        String codeUrl;
+        String codeUrl = null;
         if (StrUtil.startWith(param.getAppId(), "wx")) {
             codeUrl = wechatOpenPlatformService.miniCodeUnLimitGet(new MiniProgramQrCodeUnLimitGetParam().setAppId(param.getAppId())
                     .setScene(queryParam).setPagePath(path));
-        } else {
-            AlipayOpenAppQrcodeCreateResponse response = alipayOpenPlatformService.createAlipayOpenAppQrcode(param.getAppId(),
-                    path + "?" + queryParam, queryParam, sign.getSignName());
-            codeUrl = response.getQrCodeUrl();
         }
         sign.setCodeUrl(codeUrl);
         int count = offlineSignActivityMapper.insert(sign);

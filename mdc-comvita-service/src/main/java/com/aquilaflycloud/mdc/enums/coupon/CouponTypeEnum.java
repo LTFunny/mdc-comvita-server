@@ -17,7 +17,6 @@ public enum CouponTypeEnum {
     REDUCTION(1,2, "满减券"),
     UNLIMITED(1,3, "代金券"),
     OTHER(1,4, "兑换券"),
-    ALIPAYCASHVOUCHER(2,101, "现金抵价券"),
     ;
 
     CouponTypeEnum(int parent, int type, String name) {

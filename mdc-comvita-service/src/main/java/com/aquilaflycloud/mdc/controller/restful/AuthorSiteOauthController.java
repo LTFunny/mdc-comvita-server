@@ -3,12 +3,8 @@ package com.aquilaflycloud.mdc.controller.restful;
 import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
-import com.alipay.api.response.AlipaySystemOauthTokenResponse;
-import com.alipay.api.response.AlipayUserInfoShareResponse;
-import com.aquilaflycloud.mdc.enums.alipay.AlipayOauth2ScopeEnum;
 import com.aquilaflycloud.mdc.enums.system.ConfigTypeEnum;
 import com.aquilaflycloud.mdc.enums.wechat.Oauth2ScopeEnum;
-import com.aquilaflycloud.mdc.extra.alipay.service.AlipayOpenPlatformService;
 import com.aquilaflycloud.mdc.extra.wechat.service.WechatOpenPlatformService;
 import com.aquilaflycloud.mdc.service.MemberService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
@@ -45,12 +41,6 @@ public class AuthorSiteOauthController {
     private MemberService memberService;
     @Resource
     private WechatOpenPlatformService wechatOpenPlatformService;
-    @Resource
-    private AlipayOpenPlatformService alipayOpenPlatformService;
-
-    public static void main(String[] args) {
-        System.out.println();
-    }
 
     @RequestMapping(value = "wechatAuthorSiteOauthUrl", method = RequestMethod.GET)
     public void wechatAuthorSiteOauthUrl(@RequestParam(required = false) String encryptParam, HttpServletRequest request, HttpServletResponse response) {
@@ -147,98 +137,6 @@ public class AuthorSiteOauthController {
             } catch (WxErrorException e) {
                 log.error("获取AccessToken失败: " + e.getError().getErrorMsg());
                 e.printStackTrace();
-            } catch (IOException e) {
-                log.error("重定向失败:" + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @RequestMapping(value = "alipayAuthorSiteOauthUrl", method = RequestMethod.GET)
-    public void alipayAuthorSiteOauthUrl(@RequestParam(required = false) String encryptParam, HttpServletRequest request, HttpServletResponse response) {
-        StrBuilder url = StrBuilder.create();
-        String scopeType;
-        String appId;
-        Map<String, String> params = new HashMap<>();
-        if (StrUtil.isNotBlank(encryptParam) && !StrUtil.isNullOrUndefined(encryptParam)) {
-            String paramArray = MdcUtil.getCryption(Long.valueOf(encryptParam));
-            for (String param : StrUtil.split(paramArray, ";")) {
-                if (StrUtil.isNotBlank(param)) {
-                    String[] p = StrUtil.split(param, "=");
-                    params.put(p[0], p[1]);
-                }
-            }
-            url.append(URLUtil.decode(params.get("url"), "utf-8"));
-            scopeType = params.get("scopeType");
-            appId = params.get("appId");
-            params.remove("url");
-            Map<String, String> otherParams = getParams(request);
-            otherParams.remove("encryptParam");
-            params.putAll(otherParams);
-        } else {
-            url.append(URLUtil.decode(request.getParameter("url"), "utf-8"));
-            scopeType = request.getParameter("scopeType");
-            appId = request.getParameter("appId");
-            params = getParams(request);
-        }
-        if (StrUtil.isBlank(appId) || StrUtil.isBlank(scopeType)) {
-            return;
-        }
-        // 真实的回调URL放入缓存中不对外暴露，也避免支付宝端对回调地址不支持#号与多参数的场景
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            if (url.toString().contains("?")) {
-                url.append("&").append(entry.getKey()).append("=").append(URLUtil.encode(entry.getValue(), "utf-8"));
-            } else {
-                url.append("?").append(entry.getKey()).append("=").append(URLUtil.encode(entry.getValue(), "utf-8"));
-            }
-        }
-        String paramKey = MdcUtil.getSnowflakeIdStr();
-        RedisUtil.valueRedis().set(paramKey, url.toString(), 5, TimeUnit.MINUTES); // 缓存五分钟
-        url.clear().append(paramKey);
-        String scope = scopeType.toLowerCase();
-        String redirectUrl = StrBuilder.create().append(MdcUtil.getConfigValue(ConfigTypeEnum.OPEN_API_DOMAIN_NAME))
-                .append("/rest/").append(MdcUtil.getServerName()).append("/alipayAuthorSiteOauthReturnUrl").toString();
-        String resUrl = alipayOpenPlatformService.oauth2buildAuthorizationUrl(appId, redirectUrl, scope, url.toString());
-        log.info("支付宝授权地址:" + resUrl);
-        try {
-            response.sendRedirect(resUrl);
-        } catch (IOException e) {
-            log.error("重定向失败:" + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    @RequestMapping(value = "alipayAuthorSiteOauthReturnUrl", method = RequestMethod.GET)
-    public void alipayAuthorSiteOauthReturnUrl(@RequestParam("auth_code") String code, @RequestParam String state,
-                                               @RequestParam(name = "app_id") String appId, @RequestParam(name = "scope") String scopeType,
-                                               HttpServletResponse response) {
-        log.info("支付宝授权回调参数:code=" + code + ";" + "url=" + state);
-        // 解密回调URL
-        String url = RedisUtil.<String>valueRedis().get(state);
-        log.info("回调URL:" + url);
-        if (StrUtil.isNotBlank(appId)) {
-            // 获取用户openId
-            try {
-                AlipaySystemOauthTokenResponse tokenResponse = alipayOpenPlatformService.getSystemOauthToken(appId, code);
-                // 获取信息并添加会员
-                if (scopeType.contains(AlipayOauth2ScopeEnum.auth_user.name())) {
-                    AlipayUserInfoShareResponse shareResponse = alipayOpenPlatformService.getUserInfoShare(appId, tokenResponse.getAccessToken());
-                    memberService.addShareMember(appId, shareResponse);
-                } else if (scopeType.contains(AlipayOauth2ScopeEnum.auth_base.name())) {
-                    //暂不保存无用户信息会员
-                    //memberService.addShareMember(appId, accessToken.getOpenId(), accessToken.getUnionId());
-                }
-                String userId = tokenResponse.getUserId();
-                // 判断支付宝授权是否成功
-                if (StrUtil.isNotBlank(userId)) {
-                    if (url.contains("?")) {
-                        url += "&userId=" + userId;
-                    } else {
-                        url += "?userId=" + userId;
-                    }
-                }
-                log.info("支付宝授权回调:url=" + url);
-                response.sendRedirect(url);
             } catch (IOException e) {
                 log.error("重定向失败:" + e.getMessage());
                 e.printStackTrace();

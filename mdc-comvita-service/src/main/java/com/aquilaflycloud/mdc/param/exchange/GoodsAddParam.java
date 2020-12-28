@@ -25,7 +25,6 @@ import java.util.List;
  */
 @AnotherFieldHasValue.List({
         @AnotherFieldHasValue(fieldName = "goodsType", fieldValue = "COUPON", notNullFieldName = "coupon", message = "优惠券信息不能为空"),
-        @AnotherFieldHasValue(fieldName = "goodsType", fieldValue = "PARKING", notNullFieldName = "parkingCoupon", message = "停车券信息不能为空"),
         @AnotherFieldHasValue(fieldName = "singleReward", notNullFieldName = "rewardType", message = "奖励类型不能为空"),
         @AnotherFieldHasValue(fieldName = "shelveType", fieldValue = "REGULAR", notNullFieldName = "shelveTime", message = "上架时间不能为空"),
 
@@ -34,7 +33,6 @@ import java.util.List;
         @AnotherFieldHasValue(fieldName = "goodsType", fieldValue = "PHYSICAL", notNullFieldName = "skuAddInfos", message = "商品sku信息不能为空"),
         @AnotherFieldHasValue(fieldName = "goodsType", fieldValue = "PHYSICAL", notNullFieldName = "goodsSpecValueAddInfos", message = "商品规格配置信息"),
         @AnotherFieldHasValue(fieldName = "goodsType", fieldValue = "COUPON", notNullFieldName = "inventory", message = "库存不能为空"),
-        @AnotherFieldHasValue(fieldName = "goodsType", fieldValue = "PARKING", notNullFieldName = "inventory", message = "库存不能为空"),
 })
 @Data
 public class GoodsAddParam implements Serializable {
@@ -115,10 +113,6 @@ public class GoodsAddParam implements Serializable {
     @ApiModelProperty(value = "优惠券信息")
     @Valid
     private GoodsCouponAddParam coupon;
-
-    @ApiModelProperty(value = "停车券信息")
-    @Valid
-    private GoodsParkingCouponAddParam parkingCoupon;
 
     @ApiModelProperty(value = "商品sku信息")
     @Valid

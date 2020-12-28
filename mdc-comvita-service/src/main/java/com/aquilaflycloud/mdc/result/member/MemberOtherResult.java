@@ -30,7 +30,4 @@ public class MemberOtherResult implements Serializable {
 
     @ApiModelProperty(value = "优惠券数")
     private Integer couponCount;
-
-    @ApiModelProperty(value = "停车券数")
-    private Integer parkingCouponCount;
 }

@@ -25,24 +25,18 @@ import com.aquilaflycloud.mdc.enums.system.ExportStateEnum;
 import com.aquilaflycloud.mdc.enums.system.ExportTypeEnum;
 import com.aquilaflycloud.mdc.mapper.MemberFileUploadRecordMapper;
 import com.aquilaflycloud.mdc.mapper.SystemExportLogMapper;
-import com.aquilaflycloud.mdc.message.MemberErrorEnum;
 import com.aquilaflycloud.mdc.model.member.MemberFileUploadRecord;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.system.SystemExportLog;
 import com.aquilaflycloud.mdc.param.coupon.CouponRelPageParam;
 import com.aquilaflycloud.mdc.param.exchange.OrderPageParam;
-import com.aquilaflycloud.mdc.param.member.MemberConsumptionTicketPageParam;
 import com.aquilaflycloud.mdc.param.member.MemberPageParam;
 import com.aquilaflycloud.mdc.param.member.RewardRecordPageParam;
-import com.aquilaflycloud.mdc.param.parking.CouponMemberRelPageParam;
-import com.aquilaflycloud.mdc.param.parking.RelTimePageParam;
 import com.aquilaflycloud.mdc.param.shop.ShopInfoListParam;
 import com.aquilaflycloud.mdc.param.system.*;
-import com.aquilaflycloud.mdc.param.ticket.*;
 import com.aquilaflycloud.mdc.result.system.SqlResult;
 import com.aquilaflycloud.mdc.service.*;
 import com.aquilaflycloud.mdc.util.MdcUtil;
-import com.aquilaflycloud.mdc.util.OpenCVUtil;
 import com.aquilaflycloud.result.OssResult;
 import com.aquilaflycloud.util.AliOssUtil;
 import com.aquilaflycloud.util.RedisUtil;
@@ -88,23 +82,13 @@ public class SystemFileServiceImpl implements SystemFileService {
     @Resource
     private SystemSqlInjectorService systemSqlInjectorService;
     @Resource
-    private TicketProductInfoService ticketProductInfoService;
-    @Resource
     private MemberService memberService;
-    @Resource
-    private TicketOrderInfoService ticketOrderInfoService;
-    @Resource
-    private TicketChannelInfoService ticketChannelInfoService;
     @Resource
     private ShopInfoService shopInfoService;
     @Resource
     private ExchangeService exchangeService;
     @Resource
     private CouponInfoService couponInfoService;
-    @Resource
-    private ParkingCouponService parkingCouponService;
-    @Resource
-    private MemberScanService memberScanService;
     @Resource
     private MemberRewardService memberRewardService;
 
@@ -126,31 +110,6 @@ public class SystemFileServiceImpl implements SystemFileService {
                 page = memberRewardService.page(exportParam);
                 break;
             }
-            case TICKET_REFUND_INFO: {
-                OrderRefundPageParam exportParam = buildParam(param.getExportParam(), OrderRefundPageParam.class);
-                page = ticketOrderInfoService.pageRefundOrder(exportParam);
-                break;
-            }
-            case TICKET_CHANNEL_SALE_INFO: {
-                ChannelSalesOrderInfoParam exportParam = buildParam(param.getExportParam(), ChannelSalesOrderInfoParam.class, "mdc:ticket:channelinfo:sales");
-                page = ticketChannelInfoService.channelSalesOrderInfo(exportParam);
-                break;
-            }
-            case TICKET_PRODUCT_SALE_INFO: {
-                ProductInfoSalesOrderParam exportParam = buildParam(param.getExportParam(), ProductInfoSalesOrderParam.class, "mdc:ticket:productInfo:sales");
-                page = ticketProductInfoService.salesProductOrderInfo(exportParam);
-                break;
-            }
-            case TICKET_PRODUCT_INFO_RECORD: {
-                OrderInfoPageParam exportParam = buildParam(param.getExportParam(), OrderInfoPageParam.class, "mdc:ticket:orderinfo:page");
-                page = ticketOrderInfoService.pageOrderInfo(exportParam);
-                break;
-            }
-            case TICKET_VERIFICATE_INFO: {
-                OrderVerificatePageParam exportParam = buildParam(param.getExportParam(), OrderVerificatePageParam.class, "mdc:ticket:verificate:list");
-                page = ticketOrderInfoService.pageVerificatedOrder(exportParam);
-                break;
-            }
             case SHOP_INFO: {
                 ShopInfoListParam exportParam = buildParam(param.getExportParam(), ShopInfoListParam.class, "mdc:system:shop:info:page");
                 page = shopInfoService.page(exportParam);
@@ -166,31 +125,6 @@ public class SystemFileServiceImpl implements SystemFileService {
                 page = couponInfoService.pageCouponRel(exportParam);
                 break;
             }
-            case PARKING_COUPON_REL: {
-                CouponMemberRelPageParam exportParam = buildParam(param.getExportParam(), CouponMemberRelPageParam.class, "mdc:parkingCouponMemberRel:list");
-                page = parkingCouponService.pageCouponMemberRel(exportParam);
-                break;
-            }
-            case PARKING_DETAIL_ANALYSIS: {
-                RelTimePageParam exportParam = buildParam(param.getExportParam(), RelTimePageParam.class, "mdc:parkingCouponMemberRel:list");
-                page = parkingCouponService.pageDetailAnalysis(exportParam);
-                break;
-            }
-            case PARKING_SUMMARY_ANALYSIS: {
-                RelTimePageParam exportParam = buildParam(param.getExportParam(), RelTimePageParam.class, "mdc:parkingCouponMemberRel:list");
-                page = parkingCouponService.pageSummaryAnalysis(exportParam);
-                break;
-            }
-            case PARKING_RECORD_ANALYSIS: {
-                RelTimePageParam exportParam = buildParam(param.getExportParam(), RelTimePageParam.class, "mdc:parkingCouponMemberRel:list");
-                page = parkingCouponService.pageRecordAnalysis(exportParam);
-                break;
-            }
-            case MEMBER_CONSUMPTION_TICKET_INFO: {
-                MemberConsumptionTicketPageParam exportParam = buildParam(param.getExportParam(), MemberConsumptionTicketPageParam.class, "mdc:memberTicket:page");
-                page = memberScanService.pageConsumptionTicket(exportParam);
-                break;
-            }
             default:
                 throw new ServiceException("导出类型有误" + param.getExportType());
         }
@@ -203,19 +137,7 @@ public class SystemFileServiceImpl implements SystemFileService {
             aliasMap = param.getExportAliasNames().stream().collect(Collectors.toMap(ExcelDownloadParam.AliasName::getField, ExcelDownloadParam.AliasName::getAlias));
         }
         switch (param.getExportType()) {
-            case TICKET_VERIFICATE_INFO: {
-                aliasMap = new HashMap<>();
-                aliasMap.put("lastUpdateTime", "最新核销时间");
-                aliasMap.put("outOrderNo", "订单号");
-                aliasMap.put("status", "订单状态");
-                aliasMap.put("createTime", "下单时间");
-                aliasMap.put("startDate", "游玩时间");
-                aliasMap.put("orderQty", "门票数量");
-                aliasMap.put("useQty", "已核销次数");
-                aliasMap.put("surplusVerificateNum", "剩余核销次数");
-                break;
-            }
-            case MEMBER_CONSUMPTION_TICKET_INFO: {
+            /*case MEMBER_CONSUMPTION_TICKET_INFO: {
                 aliasMap = new HashMap<>();
                 aliasMap.put("createTime", "提交时间");
                 aliasMap.put("nickName", "会员");
@@ -227,7 +149,7 @@ public class SystemFileServiceImpl implements SystemFileService {
                 aliasMap.put("lastUpdateTime", "审核时间");
                 aliasMap.put("auditName", "审核人");
                 break;
-            }
+            }*/
             default:
         }
         return aliasMap;
@@ -469,13 +391,6 @@ public class SystemFileServiceImpl implements SystemFileService {
                 MdcUtil.setMemberInfo(record, memberInfo);
                 memberFileUploadRecordMapper.insert(record);
             });
-            if (param.getBusinessType() == UploadBusinessTypeEnum.FACE) {
-                //判断是否人脸图片,否则返回错误码
-                int count = OpenCVUtil.getFaceCount(multipartFile.getBytes());
-                if (count != 1) {
-                    throw MemberErrorEnum.MEMBER_ERROR_10004.getErrorMeta().getException();
-                }
-            }
             return new BaseResult<String>().setResult(result.getUrl());
         } catch (IOException e) {
             e.printStackTrace();

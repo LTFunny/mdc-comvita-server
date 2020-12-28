@@ -1,6 +1,5 @@
 package com.aquilaflycloud.mdc.service;
 
-import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.model.member.MemberFace;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
@@ -60,16 +59,6 @@ public interface MemberService {
 
     void saveMiniDevice(MiniDeviceSaveParam param);
 
-    BaseResult<String> loginTinyMember(TinyMemberLoginParam param);
-
-    void authorizeTinyMember(TinyMemberAuthorizeParam param);
-
-    BaseResult<String> getTinyRun(TinyEncryptionGetParam param);
-
-    BaseResult<String> getTinyPhone(TinyEncryptionGetParam param);
-
-    BaseResult<String> editTinyPhone(TinyEncryptionGetParam param);
-
     void addSubscribeMember(String appId, WxMpUser wxMpUser);
 
     void addSubscribeMember(String appId, String openId, String unionId);
@@ -77,8 +66,6 @@ public interface MemberService {
     void editUnSubscribeMember(String openId);
 
     void batchAddSubscribeMember(String appId);
-
-    void addShareMember(String appId, AlipayUserInfoShareResponse aliUser);
 
     void editUnShareMember(String userId, String aliAppId);
 

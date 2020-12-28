@@ -104,10 +104,6 @@ public class GoodsEditParam implements Serializable {
     @Valid
     private GoodsCouponEditParam coupon;
 
-    @ApiModelProperty(value = "停车券信息")
-    @Valid
-    private GoodsParkingCouponEditParam parkingCoupon;
-
     @ApiModelProperty(value = "sku编辑信息")
     @Valid
     private List<ExchangeGoodsSkuEditInfo> skuEditInfos;
