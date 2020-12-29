@@ -29,29 +29,29 @@ public class PrePickingCardController {
     private PrePickingCardService prePickingCardService;
 
     @ApiOperation(value = "提货卡分页信息", notes = "提货卡分页信息")
-//    @PreAuthorize("hasAuthority('mdc:pre:picking:card:page')")
-    @ApiMapping(value = "backend.comvita.pre.picking.card.page", method = RequestMethod.POST)
+    @PreAuthorize("hasAuthority('mdc:pre:picking:card:page')")
+    @ApiMapping(value = "backend.comvita.pre.picking.card.page", method = RequestMethod.POST, permission = true)
     public IPage<PrePickingCard> page(PrePickingCardPageParam param) {
         return prePickingCardService.page(param);
     }
 
     @ApiOperation(value = "提货卡新增", notes = "提货卡新增")
-//    @PreAuthorize("hasAuthority('mdc:pre:picking:card:batchAdd')")
-    @ApiMapping(value = "backend.comvita.pre.picking.card.batchAdd", method = RequestMethod.POST)
+    @PreAuthorize("hasAuthority('mdc:pre:picking:card:batchAdd')")
+    @ApiMapping(value = "backend.comvita.pre.picking.card.batchAdd", method = RequestMethod.POST, permission = true)
     public void batchAdd(PrePickingCardBatchAddParam param) {
         prePickingCardService.batchAdd(param);
     }
 
     @ApiOperation(value = "提货卡作废", notes = "提货卡作废")
-//    @PreAuthorize("hasAuthority('mdc:pre:picking:card:update')")
-    @ApiMapping(value = "backend.comvita.pre.picking.card.update", method = RequestMethod.POST)
+    @PreAuthorize("hasAuthority('mdc:pre:picking:card:update')")
+    @ApiMapping(value = "backend.comvita.pre.picking.card.update", method = RequestMethod.POST, permission = true)
     public void update(PrePickingCardUpdateParam param) {
         prePickingCardService.update(param);
     }
 
     @ApiOperation(value = "提货卡概况信息", notes = "提货卡概况信息")
-//    @PreAuthorize("hasAuthority('mdc:pre:picking:card:page')")
-    @ApiMapping(value = "backend.comvita.pre.picking.card.analysis", method = RequestMethod.POST)
+    @PreAuthorize("hasAuthority('mdc:pre:picking:card:page')")
+    @ApiMapping(value = "backend.comvita.pre.picking.card.analysis", method = RequestMethod.POST, permission = true)
     public PrePickingCardAnalysisResult analysis() {
         return prePickingCardService.analysis();
     }
