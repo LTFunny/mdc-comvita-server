@@ -1,5 +1,5 @@
 server:
-  port: 1343
+  port: 4519
 
 spring:
   main:
