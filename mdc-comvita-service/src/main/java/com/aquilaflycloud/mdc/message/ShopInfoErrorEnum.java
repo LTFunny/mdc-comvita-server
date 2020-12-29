@@ -17,7 +17,7 @@ public enum ShopInfoErrorEnum {
     private ServiceErrorMeta errorMeta;
 
     ShopInfoErrorEnum(String subCode) {
-        this.errorMeta = new ServiceErrorMeta("mdc.shop_info_error_", subCode);
+        this.errorMeta = new ServiceErrorMeta("comvita.shop_info_error_", subCode);
     }
 
     public ServiceErrorMeta getErrorMeta() {

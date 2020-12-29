@@ -42,14 +42,14 @@ public class MemberFolksonomyEventAspect {
                 JSONObject paramJson = JSONUtil.parseObj(param);
                 Long businessId = null;
                 switch (annotation.value()[0]) {
-                    case "mdc.member.adShare.add":
-                    case "mdc.member.lotteryShare.add":
-                    case "mdc.member.offlineSignShare.add":
-                    case "mdc.member.applyShare.add":
-                    case "mdc.member.recommendShare.add":
-                    case "mdc.member.scenicSpotsShare.add":
-                    case "mdc.member.adClick.add":
-                    case "mdc.member.recommendClick.add": {
+                    case "comvita.member.adShare.add":
+                    case "comvita.member.lotteryShare.add":
+                    case "comvita.member.offlineSignShare.add":
+                    case "comvita.member.applyShare.add":
+                    case "comvita.member.recommendShare.add":
+                    case "comvita.member.scenicSpotsShare.add":
+                    case "comvita.member.adClick.add":
+                    case "comvita.member.recommendClick.add": {
                         businessId = paramJson.getLong("businessId");
                         break;
                     }

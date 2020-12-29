@@ -18,7 +18,7 @@ public enum LotteryErrorEnum {
     private ServiceErrorMeta errorMeta;
 
     LotteryErrorEnum(String subCode) {
-        this.errorMeta = new ServiceErrorMeta("mdc.lottery_error_", subCode);
+        this.errorMeta = new ServiceErrorMeta("comvita.lottery_error_", subCode);
     }
 
     public ServiceErrorMeta getErrorMeta() {

@@ -29,7 +29,7 @@ public enum MemberErrorEnum {
     private ServiceErrorMeta errorMeta;
 
     MemberErrorEnum(String subCode) {
-        this.errorMeta = new ServiceErrorMeta("mdc.member_error_", subCode);
+        this.errorMeta = new ServiceErrorMeta("comvita.member_error_", subCode);
     }
 
     public ServiceErrorMeta getErrorMeta() {

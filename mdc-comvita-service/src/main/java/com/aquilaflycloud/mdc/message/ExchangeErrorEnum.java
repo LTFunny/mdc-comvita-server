@@ -14,7 +14,7 @@ public enum ExchangeErrorEnum {
     private ServiceErrorMeta errorMeta;
 
     ExchangeErrorEnum(String subCode) {
-        this.errorMeta = new ServiceErrorMeta("mdc.exchange_error_", subCode);
+        this.errorMeta = new ServiceErrorMeta("comvita.exchange_error_", subCode);
     }
 
     public ServiceErrorMeta getErrorMeta() {

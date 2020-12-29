@@ -46,21 +46,21 @@ public class MemberBusinessEventAspect {
         ApiMapping annotation = getAnnotation(joinPoint);
         if (annotation != null && result != null) {
             switch (annotation.value()[0]) {
-                case "mdc.ad.info.list": {
+                case "comvita.ad.info.list": {
                     result = addNum(result, BusinessTypeEnum.AD, EventTypeEnum.SHOW);
                     break;
                 }
-                case "mdc.recommendation.info.get": {
+                case "comvita.recommendation.info.get": {
                     result = addNum(result, BusinessTypeEnum.RECOMMEND, EventTypeEnum.READ);
                     break;
                 }
-                case "mdc.apply.info.get": {
+                case "comvita.apply.info.get": {
                     result = addNum(result, BusinessTypeEnum.APPLY, EventTypeEnum.READ);
                     break;
                 }
-                case "mdc.apply.info.page":
-                case "backend.mdc.apply.info.page":
-                case "backend.mdc.apply.info.get": {
+                case "comvita.apply.info.page":
+                case "backend.comvita.apply.info.page":
+                case "backend.comvita.apply.info.get": {
                     result = getNum(result, BusinessTypeEnum.APPLY, EventTypeEnum.READ);
                     break;
                 }
