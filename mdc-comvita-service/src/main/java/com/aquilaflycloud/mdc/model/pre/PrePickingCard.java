@@ -130,4 +130,14 @@ public class PrePickingCard implements Serializable {
     private String appKey;
 
     private static final long serialVersionUID = 1L;
+
+    public PrePickingCard(Long id, String pickingCode, String password, PickingCardStateEnum pickingState) {
+        this.id = id;
+        this.pickingCode = pickingCode;
+        this.password = password;
+        this.pickingState = pickingState;
+    }
+
+    public PrePickingCard() {
+    }
 }
