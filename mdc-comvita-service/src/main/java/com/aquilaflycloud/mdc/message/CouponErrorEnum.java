@@ -14,7 +14,7 @@ public enum CouponErrorEnum {
     private ServiceErrorMeta errorMeta;
 
     CouponErrorEnum(String subCode) {
-        this.errorMeta = new ServiceErrorMeta("mdc.coupon_error_", subCode);
+        this.errorMeta = new ServiceErrorMeta("comvita.coupon_error_", subCode);
     }
 
     public ServiceErrorMeta getErrorMeta() {

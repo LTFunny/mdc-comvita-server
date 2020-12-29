@@ -22,7 +22,7 @@ public enum RewardErrorEnum {
     private ServiceErrorMeta errorMeta;
 
     RewardErrorEnum(String subCode) {
-        this.errorMeta = new ServiceErrorMeta("mdc.reward_error_", subCode);
+        this.errorMeta = new ServiceErrorMeta("comvita.reward_error_", subCode);
     }
 
     public ServiceErrorMeta getErrorMeta() {

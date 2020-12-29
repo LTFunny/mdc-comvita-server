@@ -17,7 +17,7 @@ public enum AuthorSiteErrorEnum {
     private ServiceErrorMeta errorMeta;
 
     AuthorSiteErrorEnum(String subCode) {
-        this.errorMeta = new ServiceErrorMeta("mdc.author_site_error_", subCode);
+        this.errorMeta = new ServiceErrorMeta("comvita.author_site_error_", subCode);
     }
 
     public ServiceErrorMeta getErrorMeta() {

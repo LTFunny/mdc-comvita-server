@@ -48,20 +48,20 @@ public class MemberMissionAspect {
     }
 
     private final static String[] LOGIN_METHOD = new String[]{
-            "mdc.member.info.register",
-            "mdc.member.info.login",
-            "mdc.mini.member.login",
+            "comvita.member.info.register",
+            "comvita.member.info.login",
+            "comvita.mini.member.login",
     };
 
     private final static String[] FINISH_METHOD = new String[]{
-            "mdc.member.info.edit",
-            "mdc.folksonomy.memberRel.add",
-            "mdc.member.phoneNumber.edit",
-            "mdc.member.phone.edit",
-            "mdc.sign.info.add",
-            "mdc.coupon.rel.add",
-            "mdc.coupon.rel.use",
-            "backend.mdc.coupon.rel.use",
+            "comvita.member.info.edit",
+            "comvita.folksonomy.memberRel.add",
+            "comvita.member.phoneNumber.edit",
+            "comvita.member.phone.edit",
+            "comvita.sign.info.add",
+            "comvita.coupon.rel.add",
+            "comvita.coupon.rel.use",
+            "backend.comvita.coupon.rel.use",
     };
 
     @Around(value = "resultPointcut()")
@@ -82,29 +82,29 @@ public class MemberMissionAspect {
                 Long memberId = MdcUtil.getCurrentMemberId();
                 //会员完成任务
                 switch (annotation.value()[0]) {
-                    case "mdc.member.info.edit": {
+                    case "comvita.member.info.edit": {
                         missionService.checkMission(memberId, MissionTypeEnum.COMPLETE);
                         break;
                     }
-                    case "mdc.folksonomy.memberRel.add": {
+                    case "comvita.folksonomy.memberRel.add": {
                         missionService.checkMission(memberId, MissionTypeEnum.FOLKSONOMY);
                         break;
                     }
-                    case "mdc.member.phoneNumber.edit":
-                    case "mdc.member.phone.edit": {
+                    case "comvita.member.phoneNumber.edit":
+                    case "comvita.member.phone.edit": {
                         missionService.checkMission(memberId, MissionTypeEnum.BINDINGPHONE);
                         break;
                     }
-                    case "mdc.sign.info.add": {
+                    case "comvita.sign.info.add": {
                         missionService.checkMission(memberId, MissionTypeEnum.TOTALSIGN);
                         break;
                     }
-                    case "mdc.coupon.rel.add": {
+                    case "comvita.coupon.rel.add": {
                         missionService.checkMission(memberId, MissionTypeEnum.RECEIVECOUPON);
                         break;
                     }
-                    case "mdc.coupon.rel.use":
-                    case "backend.mdc.coupon.rel.use": {
+                    case "comvita.coupon.rel.use":
+                    case "backend.comvita.coupon.rel.use": {
                         Object param = joinPoint.getArgs()[0];
                         JSONObject paramJson = JSONUtil.parseObj(param);
                         String verificateCode = paramJson.getStr("verificateCode");
