@@ -110,11 +110,18 @@ public class PreOrderGoods implements Serializable {
     private String reserveShop;
 
     /**
-     * 预约时间
+     * 预约开始时间
      */
-    @TableField(value = "reserve_time")
-    @ApiModelProperty(value = "预约时间")
-    private Date reserveTime;
+    @TableField(value = "reserve_start_time")
+    @ApiModelProperty(value = "预约开始时间")
+    private Date reserveStartTime;
+
+    /**
+     * 预约结束时间
+     */
+    @TableField(value = "reserve_end_time")
+    @ApiModelProperty(value = "预约结束时间")
+    private Date reserveEndTime;
 
     /**
      * 提货卡号
