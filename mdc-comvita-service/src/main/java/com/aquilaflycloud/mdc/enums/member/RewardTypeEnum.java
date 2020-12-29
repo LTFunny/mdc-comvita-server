@@ -15,7 +15,6 @@ public enum RewardTypeEnum {
     // 奖励类型
     GROWTH(1, "成长值"),
     SCORE(2, "积分"),
-    ACTIVE(3, "活跃值"),
     ;
 
     RewardTypeEnum(int type, String name) {

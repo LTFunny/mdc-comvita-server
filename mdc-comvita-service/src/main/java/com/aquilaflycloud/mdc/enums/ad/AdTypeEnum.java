@@ -20,8 +20,6 @@ public enum AdTypeEnum {
     MISSION(5, "活动任务"),*/
     APPLY(6, "活动报名"),
     RECOMMEND(7, "最新推荐"),
-    PUBLICARTICLE(8, "微信推文"),
-    CUSTOMPAGE(9, "自定义路径"),
     ;
 
     AdTypeEnum(int type, String name) {
