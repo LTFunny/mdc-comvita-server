@@ -61,7 +61,7 @@ public class OpenServiceConfiguration extends AlipayServiceConfiguration {
     public static class Swagger2 extends SwaggerSupport {
         @Override
         protected String getDocTitle() {
-            return "会员服务API";
+            return "康维他会员服务API";
         }
 
         @Override

@@ -13,7 +13,7 @@ import cn.hutool.core.util.ZipUtil;
 import com.aliyun.oss.model.OSSObject;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.common.StateEnum;
-import com.aquilaflycloud.mdc.extra.wechat.service.WechatOpenPlatformService;
+import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.MemberInfoMapper;
 import com.aquilaflycloud.mdc.mapper.MemberRegisterChannelMapper;
 import com.aquilaflycloud.mdc.mapper.MemberRegisterChannelRelMapper;
@@ -62,7 +62,7 @@ public class MemberChannelServiceImpl implements MemberChannelService {
     @Resource
     private MemberInfoMapper memberInfoMapper;
     @Resource
-    private WechatOpenPlatformService wechatOpenPlatformService;
+    private WechatMiniService wechatMiniService;
 
     @Override
     public IPage<RegisterChannelResult> pageRegisterChannel(RegisterChannelPageParam param) {
@@ -130,7 +130,7 @@ public class MemberChannelServiceImpl implements MemberChannelService {
             for (MemberRegisterChannel channel : channelList) {
                 if (StrUtil.isBlank(channel.getMiniCodeUrl())) {
                     try {
-                        File file = wechatOpenPlatformService.getWxOpenComponentService().getWxMaServiceByAppid(channel.getAppId())
+                        File file = wechatMiniService.getWxMaServiceByAppId(channel.getAppId())
                                 .getQrcodeService().createWxaCodeUnlimit(Convert.toStr(channel.getId()), channel.getPagePath());
                         String path = channel.getAppId() + "/" + channel.getPagePath().replace("/", ".");
                         OssResult ossResult = AliOssUtil.uploadFileReturn(path, StrUtil.appendIfMissing(channel.getChannelName() + "_" + DateTime.now().getTime(),

@@ -10,44 +10,35 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.StrBuilder;
-import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.dataAuth.constant.DataAuthConstant;
 import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.system.ConfigTypeEnum;
-import com.aquilaflycloud.mdc.enums.wechat.*;
-import com.aquilaflycloud.mdc.extra.wechat.service.WechatOpenPlatformService;
-import com.aquilaflycloud.mdc.extra.wechat.util.WechatFactoryUtil;
+import com.aquilaflycloud.mdc.enums.wechat.AnalysisTypeEnum;
+import com.aquilaflycloud.mdc.enums.wechat.QrcodeHandlerTypeEnum;
+import com.aquilaflycloud.mdc.enums.wechat.SiteSourceEnum;
+import com.aquilaflycloud.mdc.enums.wechat.SiteStateEnum;
+import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.wechat.*;
 import com.aquilaflycloud.mdc.param.wechat.*;
 import com.aquilaflycloud.mdc.result.wechat.WechatUserAnalysisSumResult;
 import com.aquilaflycloud.mdc.service.WechatAuthorSiteService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
-import com.aquilaflycloud.util.RedisUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.bean.ServiceContext;
 import com.gitee.sop.servercommon.exception.ServiceException;
-import me.chanjar.weixin.common.bean.WxJsapiSignature;
 import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.mp.bean.datacube.WxDataCubeUserCumulate;
-import me.chanjar.weixin.mp.bean.datacube.WxDataCubeUserSummary;
-import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
-import me.chanjar.weixin.mp.bean.template.WxMpTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -73,7 +64,7 @@ public class WechatAuthorSiteServiceImpl implements WechatAuthorSiteService {
     @Resource
     private WechatUserAnalysisMapper wechatUserAnalysisMapper;
     @Resource
-    private WechatOpenPlatformService wechatOpenPlatformService;
+    private WechatMiniService wechatMiniService;
 
     @Override
     public IPage<WechatAuthorSite> pageAuthor(WechatAuthorSitePageParam param) {
@@ -84,81 +75,6 @@ public class WechatAuthorSiteServiceImpl implements WechatAuthorSiteService {
                 .like(StrUtil.isNotBlank(param.getNickName()), WechatAuthorSite::getNickName, param.getNickName())
                 .orderByDesc(WechatAuthorSite::getCreateTime)
         );
-    }
-
-    @Override
-    public BaseResult<String> getPreAuthUrl(PreAuthUrlGetParam param) {
-        try {
-            //生成state把租户信息放进缓存
-            String state = MdcUtil.getSnowflakeIdStr();
-            RedisUtil.valueRedis().set(state, new JSONObject().set("tenantId", MdcUtil.getCurrentTenantId())
-                    .set("subTenantId", MdcUtil.getCurrentSubTenantId()), 1, TimeUnit.HOURS);
-            String redirectUrl = StrBuilder.create().append(MdcUtil.getConfigValue(ConfigTypeEnum.MDC_WECHAT_REDIRECT_URL))
-                    .append("/").append(state).toString();
-            String url;
-            String authType = null;
-            if (param.getAuthType() != null) {
-                switch (param.getAuthType()) {
-                    case PUBLIC: {
-                        authType = "1";
-                        break;
-                    }
-                    case MINI: {
-                        authType = "2";
-                        break;
-                    }
-                    default:
-                }
-            }
-            if (param.getIsMobile()) {
-                url = wechatOpenPlatformService.getWxOpenComponentService().getMobilePreAuthUrl(redirectUrl, authType, param.getAppId());
-            } else {
-                url = wechatOpenPlatformService.getWxOpenComponentService().getPreAuthUrl(redirectUrl, authType, param.getAppId());
-            }
-            return new BaseResult<String>().setResult(url);
-        } catch (WxErrorException e) {
-            e.printStackTrace();
-            throw new ServiceException(String.valueOf(e.getError().getErrorCode()), e.getError().getErrorMsg());
-        }
-    }
-
-    @Override
-    public void updateAuthor(WechatAuthorSiteGetParam param) {
-        int count = wechatAuthorSiteMapper.update(wechatOpenPlatformService.getAuthorizerInfo(param.getAppId()), Wrappers.<WechatAuthorSite>lambdaUpdate()
-                .eq(WechatAuthorSite::getAppId, param.getAppId())
-                .eq(WechatAuthorSite::getIsAgent, WhetherEnum.YES)
-        );
-        if (count <= 0) {
-            throw new ServiceException("更新失败");
-        }
-    }
-
-    @Override
-    @Transactional
-    public List<WechatAuthorSiteTemplate> loadTemplateList(WechatAuthorSiteGetParam param) {
-        try {
-            List<WxMpTemplate> list = wechatOpenPlatformService.getWxOpenComponentService()
-                    .getWxMpServiceByAppid(param.getAppId()).getTemplateMsgService().getAllPrivateTemplate();
-            List<WechatAuthorSiteTemplate> templates = new ArrayList<>();
-            for (WxMpTemplate mpTemplate : list) {
-                WechatAuthorSiteTemplate template = new WechatAuthorSiteTemplate();
-                template.setAppId(param.getAppId());
-                template.setTemplateCode(mpTemplate.getTemplateId());
-                template.setTitle(mpTemplate.getTitle());
-                template.setPrimaryIndustry(mpTemplate.getPrimaryIndustry());
-                template.setDeputyIndustry(mpTemplate.getDeputyIndustry());
-                template.setContent(mpTemplate.getContent());
-                template.setExample(mpTemplate.getExample());
-                templates.add(template);
-            }
-            if (templates.size() > 0) {
-                wechatAuthorSiteTemplateMapper.insertIgnoreAllBatch(templates);
-            }
-            return templates;
-        } catch (WxErrorException e) {
-            e.printStackTrace();
-            throw new ServiceException(String.valueOf(e.getError().getErrorCode()), e.getError().getErrorMsg());
-        }
     }
 
     @Override
@@ -186,16 +102,6 @@ public class WechatAuthorSiteServiceImpl implements WechatAuthorSiteService {
     }
 
     @Override
-    public WxJsapiSignature getJsapiSign(JsapiSignGetParam param) {
-        try {
-            return wechatOpenPlatformService.getWxOpenComponentService().getWxMpServiceByAppid(param.getAppId()).createJsapiSignature(param.getUrl());
-        } catch (WxErrorException e) {
-            e.printStackTrace();
-            throw new ServiceException(String.valueOf(e.getError().getErrorCode()), e.getError().getErrorMsg());
-        }
-    }
-
-    @Override
     public IPage<WechatAuthorSiteQrcodeMsg> pageQrCodeMsg(QrCodeMsgPageParam param) {
         return wechatAuthorSiteQrcodeMsgMapper.selectPage(param.page(), Wrappers.<WechatAuthorSiteQrcodeMsg>lambdaQuery()
                 .eq(WechatAuthorSiteQrcodeMsg::getHandlerType, QrcodeHandlerTypeEnum.NORMAL)
@@ -204,70 +110,6 @@ public class WechatAuthorSiteServiceImpl implements WechatAuthorSiteService {
                 .eq(param.getExpireType() != null, WechatAuthorSiteQrcodeMsg::getExpireType, param.getExpireType())
                 .eq(param.getMsgType() != null, WechatAuthorSiteQrcodeMsg::getMsgType, param.getMsgType())
         );
-    }
-
-    @Override
-    @Transactional
-    public void addQrCodeMsg(QrCodeMsgAddParam param) {
-        WxMpQrCodeTicket ticket;
-        String sceneString = param.getSceneString();
-        String ticketUrl, ticketShortUrl;
-        try {
-            if (param.getExpireType() == ExpireTypeEnum.EVERLASTING) {
-                ticket = wechatOpenPlatformService.getWxOpenComponentService().getWxMpServiceByAppid(param.getAppId()).getQrcodeService().qrCodeCreateLastTicket(sceneString);
-            } else {
-                ticket = wechatOpenPlatformService.getWxOpenComponentService().getWxMpServiceByAppid(param.getAppId()).getQrcodeService().qrCodeCreateTmpTicket(sceneString, param.getExpireSeconds());
-            }
-            ticketUrl = wechatOpenPlatformService.getWxOpenComponentService().getWxMpServiceByAppid(param.getAppId()).getQrcodeService().qrCodePictureUrl(ticket.getTicket());
-            ticketShortUrl = wechatOpenPlatformService.getWxOpenComponentService().getWxMpServiceByAppid(param.getAppId()).getQrcodeService().qrCodePictureUrl(ticket.getTicket(), true);
-        } catch (WxErrorException e) {
-            e.printStackTrace();
-            throw new ServiceException(String.valueOf(e.getError().getErrorCode()), e.getError().getErrorMsg());
-        }
-        WechatAuthorSiteQrcodeMsg qrcodeMsg = new WechatAuthorSiteQrcodeMsg();
-        BeanUtil.copyProperties(param, qrcodeMsg);
-        qrcodeMsg.setUrl(ticket.getUrl());
-        qrcodeMsg.setTicket(ticket.getTicket());
-        qrcodeMsg.setTicketUrl(ticketUrl);
-        qrcodeMsg.setTicketShortUrl(ticketShortUrl);
-        if (param.getExpireType() == ExpireTypeEnum.TEMPORARY) {
-            DateTime expireTime = DateTime.now().offset(DateField.SECOND, param.getExpireSeconds());
-            qrcodeMsg.setExpireTime(expireTime);
-        }
-        String msgContent = null;
-        switch (param.getMsgType()) {
-            case TEXT: {
-                msgContent = JSONUtil.toJsonStr(param.getMsgText());
-                break;
-            }
-            case IMAGE: {
-                msgContent = JSONUtil.toJsonStr(param.getMsgImage());
-                break;
-            }
-            case VOICE: {
-                msgContent = JSONUtil.toJsonStr(param.getMsgVoice());
-                break;
-            }
-            case VIDEO: {
-                msgContent = JSONUtil.toJsonStr(param.getMsgVideo());
-                break;
-            }
-            case MUSIC: {
-                msgContent = JSONUtil.toJsonStr(param.getMsgMusic());
-                break;
-            }
-            case NEWS: {
-                msgContent = JSONUtil.toJsonStr(param.getMsgNewsList());
-                break;
-            }
-            default:
-        }
-        qrcodeMsg.setMsgContent(msgContent);
-        qrcodeMsg.setHandlerType(QrcodeHandlerTypeEnum.NORMAL);
-        int count = wechatAuthorSiteQrcodeMsgMapper.insert(qrcodeMsg);
-        if (count <= 0) {
-            throw new ServiceException("新增消息失败");
-        }
     }
 
     @Override
@@ -331,113 +173,6 @@ public class WechatAuthorSiteServiceImpl implements WechatAuthorSiteService {
                 .groupBy(WechatUserAnalysis::getRefDate).orderByDesc(WechatUserAnalysis::getRefDate)).stream().map((map) ->
                 BeanUtil.fillBeanWithMap(map, new WechatUserAnalysisSumResult(), true,
                         CopyOptions.create().ignoreError())).collect(Collectors.toList());
-    }
-
-    @Override
-    public BaseResult<String> addQrCodeMsgForScan(QrCodeMsgForScanAddParam param) {
-        String appId = MdcUtil.getOtherAppId();
-        WxMpQrCodeTicket ticket;
-        String sceneString = param.getSceneString();
-        String ticketUrl, ticketShortUrl;
-        try {
-            ticket = wechatOpenPlatformService.getWxOpenComponentService().getWxMpServiceByAppid(param.getAppId()).getQrcodeService().qrCodeCreateTmpTicket(sceneString, param.getExpireSeconds());
-            ticketUrl = wechatOpenPlatformService.getWxOpenComponentService().getWxMpServiceByAppid(param.getAppId()).getQrcodeService().qrCodePictureUrl(ticket.getTicket());
-            ticketShortUrl = wechatOpenPlatformService.getWxOpenComponentService().getWxMpServiceByAppid(param.getAppId()).getQrcodeService().qrCodePictureUrl(ticket.getTicket(), true);
-        } catch (WxErrorException e) {
-            e.printStackTrace();
-            throw new ServiceException(String.valueOf(e.getError().getErrorCode()), e.getError().getErrorMsg());
-        }
-        WechatAuthorSiteQrcodeMsg qrcodeMsg = new WechatAuthorSiteQrcodeMsg();
-        BeanUtil.copyProperties(param, qrcodeMsg);
-        qrcodeMsg.setUrl(ticket.getUrl());
-        qrcodeMsg.setTicket(ticket.getTicket());
-        qrcodeMsg.setTicketUrl(ticketUrl);
-        qrcodeMsg.setTicketShortUrl(ticketShortUrl);
-        qrcodeMsg.setExpireType(ExpireTypeEnum.TEMPORARY);
-        qrcodeMsg.setHandlerType(QrcodeHandlerTypeEnum.SCANCONSUME);
-        qrcodeMsg.setMsgType(QrcodeMsgTypeEnum.TEXT);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.set("miniAppId", appId);
-        jsonObject.set("success", "恭喜你，刚刚获得{}。请点击【<a data-miniprogram-appid=\"" + appId + "\" data-miniprogram-path=\"pages/home/home\">正佳会员</a>】小程序了解更多惊喜哦");
-        jsonObject.set("failed", "兑换失败，原因：{}");
-        qrcodeMsg.setHandlerContent(jsonObject.toString());
-        DateTime expireTime = DateTime.now().offset(DateField.SECOND, param.getExpireSeconds());
-        qrcodeMsg.setExpireTime(expireTime);
-        int count = wechatAuthorSiteQrcodeMsgMapper.insert(qrcodeMsg);
-        if (count <= 0) {
-            throw new ServiceException("创建二维码失败");
-        }
-        return new BaseResult<String>().setResult(ticketUrl);
-    }
-
-    @Override
-    public void addWechatUserAnalysis(String appId, DateTime begin, DateTime end) {
-        List<WechatAuthorSite> siteList = wechatAuthorSiteMapper.normalSelectList(Wrappers.<WechatAuthorSite>lambdaQuery()
-                .eq(StrUtil.isNotBlank(appId), WechatAuthorSite::getAppId, appId)
-                .eq(WechatAuthorSite::getSource, SiteSourceEnum.PUBLIC)
-        );
-        begin = DateUtil.beginOfDay(begin);
-        end = DateUtil.beginOfDay(end);
-        DateTime now = DateUtil.beginOfDay(new DateTime());
-        if (end.isAfterOrEquals(now)) {
-            end = DateUtil.beginOfDay(DateUtil.yesterday());
-        }
-        for (WechatAuthorSite site : siteList) {
-            List<WechatUserAnalysis> analysisList = new ArrayList<>();
-            ServiceContext.getCurrentContext().set(DataAuthConstant.TENANT_ID, site.getTenantId());
-            ServiceContext.getCurrentContext().set(DataAuthConstant.SUB_TENANT_ID, site.getSubTenantId());
-            DateTime queryBegin = begin;
-            while (queryBegin.isBeforeOrEquals(end)) {
-                DateTime queryEnd = end;
-                if (queryBegin.offsetNew(DateField.DAY_OF_YEAR, 6).isBefore(end)) {
-                    queryEnd = queryBegin.offsetNew(DateField.DAY_OF_YEAR, 6);
-                }
-                analysisList.addAll(getAnalysis7Days(site.getAppId(), queryBegin, queryEnd));
-                queryBegin = queryBegin.offsetNew(DateField.DAY_OF_YEAR, 7);
-            }
-            if (analysisList.size() > 0) {
-                analysisList.sort((o1, o2) -> {
-                    if (!o1.getRefDate().equals(o2.getRefDate())) {
-                        return o1.getRefDate().compareTo(o2.getRefDate());
-                    } else {
-                        return o1.getUserSource().compareTo(o2.getUserSource());
-                    }
-                });
-                wechatUserAnalysisMapper.insertIgnoreAllBatch(analysisList);
-            }
-        }
-    }
-
-    private List<WechatUserAnalysis> getAnalysis7Days(String appId, DateTime begin, DateTime end) {
-        List<WechatUserAnalysis> analysisModels = new ArrayList<>();
-        try {
-            List<WxDataCubeUserSummary> summaryList = wechatOpenPlatformService.getWxOpenComponentService()
-                    .getWxMpServiceByAppid(appId).getDataCubeService().getUserSummary(begin, end);
-            List<WxDataCubeUserCumulate> cumulateList = wechatOpenPlatformService.getWxOpenComponentService()
-                    .getWxMpServiceByAppid(appId).getDataCubeService().getUserCumulate(begin, end);
-            for (WxDataCubeUserSummary summary : summaryList) {
-                WechatUserAnalysis model = new WechatUserAnalysis();
-                model.setAppId(appId);
-                model.setUserSource(EnumUtil.likeValueOf(UserSourceEnum.class, summary.getUserSource()));
-                model.setNewUser(summary.getNewUser());
-                model.setCancelUser(summary.getCancelUser());
-                model.setIncreaseUser(model.getNewUser() - model.getCancelUser());
-                model.setRefDate(new DateTime(summary.getRefDate()));
-                analysisModels.add(model);
-            }
-            for (WxDataCubeUserCumulate cumulate : cumulateList) {
-                WechatUserAnalysis model = new WechatUserAnalysis();
-                model.setAppId(appId);
-                model.setUserSource(UserSourceEnum.USERSOURCE999);
-                model.setCumulateUser(cumulate.getCumulateUser());
-                model.setRefDate(new DateTime(cumulate.getRefDate()));
-                analysisModels.add(model);
-            }
-        } catch (WxErrorException e) {
-            e.printStackTrace();
-            throw new ServiceException(String.valueOf(e.getError().getErrorCode()), e.getError().getErrorMsg());
-        }
-        return analysisModels;
     }
 
     @Override
@@ -553,7 +288,7 @@ public class WechatAuthorSiteServiceImpl implements WechatAuthorSiteService {
     private List<WechatMiniRetainAnalysis> getRetainAnalysis(String appId, DateTime begin, DateTime end, AnalysisTypeEnum analysisType) {
         List<WechatMiniRetainAnalysis> analysisList = new ArrayList<>();
         try {
-            WxMaAnalysisService wxMaAnalysisService = WechatFactoryUtil.getService(appId, "getAnalysisService", "18");
+            WxMaAnalysisService wxMaAnalysisService = wechatMiniService.getWxMaServiceByAppId(appId).getAnalysisService();
             WxMaRetainInfo wxMaRetainInfo;
             switch (analysisType) {
                 case DAILY: {
@@ -637,7 +372,7 @@ public class WechatAuthorSiteServiceImpl implements WechatAuthorSiteService {
     private List<WechatMiniVisitTrendAnalysis> getVisitTrendAnalysis(String appId, DateTime begin, DateTime end, AnalysisTypeEnum analysisType) {
         List<WechatMiniVisitTrendAnalysis> analysisList = new ArrayList<>();
         try {
-            WxMaAnalysisService wxMaAnalysisService = WechatFactoryUtil.getService(appId, "getAnalysisService", "18");
+            WxMaAnalysisService wxMaAnalysisService = wechatMiniService.getWxMaServiceByAppId(appId).getAnalysisService();
             List<WxMaVisitTrend> visitTrendList;
             switch (analysisType) {
                 case DAILY: {
@@ -692,7 +427,7 @@ public class WechatAuthorSiteServiceImpl implements WechatAuthorSiteService {
     private List<WechatMiniSummaryAnalysis> getDailySummaryAnalysis(String appId, DateTime begin, DateTime end) {
         List<WechatMiniSummaryAnalysis> analysisList = new ArrayList<>();
         try {
-            WxMaAnalysisService wxMaAnalysisService = WechatFactoryUtil.getService(appId, "getAnalysisService", "18");
+            WxMaAnalysisService wxMaAnalysisService = wechatMiniService.getWxMaServiceByAppId(appId).getAnalysisService();
             List<WxMaSummaryTrend> summaryTrendList = wxMaAnalysisService.getDailySummaryTrend(begin, end);
             for (WxMaSummaryTrend summaryTrend : summaryTrendList) {
                 WechatMiniSummaryAnalysis analysis = new WechatMiniSummaryAnalysis();
