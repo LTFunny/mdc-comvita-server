@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.member.SexEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -185,6 +186,20 @@ public class PreOrderInfo implements Serializable {
     @TableField(value = "buyer_address")
     @ApiModelProperty(value = "买家详细地址")
     private String buyerAddress;
+
+    /**
+     * 买家生日
+     */
+    @TableField(value = "buyer_birthday")
+    @ApiModelProperty(value = "买家生日")
+    private Date buyerBirthday;
+
+    /**
+     * 买家性别
+     */
+    @TableField(value = "buyer_sex")
+    @ApiModelProperty(value = "买家性别")
+    private SexEnum buyerSex;
 
     /**
      * 订单状态
