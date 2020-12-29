@@ -7,4 +7,5 @@ package com.aquilaflycloud.mdc.service;
  */
 public interface PreOrderInfoService{
 
+    int addStatConfirmOrder();
 }
