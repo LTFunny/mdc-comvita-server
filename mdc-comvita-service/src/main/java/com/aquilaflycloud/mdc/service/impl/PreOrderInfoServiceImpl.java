@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.aquilaflycloud.mdc.mapper.*;
@@ -124,6 +125,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         BeanUtil.copyProperties(param,preOrderInfo);
         if(param.getIsThrough() == 0){
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYRESERVATION);
+            preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.STAYRESERVATION);
         }
         int updateOrder = preOrderInfoMapper.updateById(preOrderInfo);
         if(updateOrder < 0){
@@ -203,6 +205,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         //List<String> stateList = preOrderInfoMapper.pickingCardGet(orderInfo.getId());
         //更改订单状态
         orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
+        orderInfo.setChildOrderState(ChildOrderInfoStateEnum.PARTRESERVATION);
         preOrderInfoMapper.updateById(orderInfo);
         //记录日志
         String content = preOrderGoods.getReserveName() +DateUtil.format(new Date(), "yyyy-MM-dd")+" 对" +
