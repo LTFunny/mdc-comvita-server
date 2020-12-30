@@ -26,5 +26,6 @@ public class PreConfirmOrderParam {
     @ApiModelProperty(value = "提货卡号")
     private List<PrePickingCard> prePickingCardList;
 
-
+    @ApiModelProperty(value = "不通过原因")
+    private String reason;
 }
