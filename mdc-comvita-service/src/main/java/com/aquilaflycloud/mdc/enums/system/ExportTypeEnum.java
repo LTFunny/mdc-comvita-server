@@ -19,6 +19,7 @@ public enum ExportTypeEnum {
     SHOP_INFO(8, "店铺信息"),
     EXCHANGE_ORDER(9, "兑换订单"),
     COUPON_REL(10, "优惠券记录"),
+    PRE_PICKING_CARD(11, "提留卡信息"),
     ;
 
     ExportTypeEnum(int type, String name) {

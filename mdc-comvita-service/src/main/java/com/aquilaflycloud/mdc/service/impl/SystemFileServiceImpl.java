@@ -32,6 +32,7 @@ import com.aquilaflycloud.mdc.param.coupon.CouponRelPageParam;
 import com.aquilaflycloud.mdc.param.exchange.OrderPageParam;
 import com.aquilaflycloud.mdc.param.member.MemberPageParam;
 import com.aquilaflycloud.mdc.param.member.RewardRecordPageParam;
+import com.aquilaflycloud.mdc.param.pre.PrePickingCardPageParam;
 import com.aquilaflycloud.mdc.param.shop.ShopInfoListParam;
 import com.aquilaflycloud.mdc.param.system.*;
 import com.aquilaflycloud.mdc.result.system.SqlResult;
@@ -91,6 +92,8 @@ public class SystemFileServiceImpl implements SystemFileService {
     private CouponInfoService couponInfoService;
     @Resource
     private MemberRewardService memberRewardService;
+    @Resource
+    private PrePickingCardService prePickingCardService;
 
     private IPage pageData(ExcelDownloadParam param) {
         IPage page;
@@ -123,6 +126,11 @@ public class SystemFileServiceImpl implements SystemFileService {
             case COUPON_REL: {
                 CouponRelPageParam exportParam = buildParam(param.getExportParam(), CouponRelPageParam.class, "mdc:couponRel:list");
                 page = couponInfoService.pageCouponRel(exportParam);
+                break;
+            }
+            case PRE_PICKING_CARD: {
+                PrePickingCardPageParam exportParam = buildParam(param.getExportParam(), PrePickingCardPageParam.class, "mdc:pre:picking:card:page");
+                page = prePickingCardService.page(exportParam);
                 break;
             }
             default:

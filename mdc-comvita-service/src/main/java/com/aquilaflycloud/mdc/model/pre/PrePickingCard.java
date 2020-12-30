@@ -29,21 +29,21 @@ public class PrePickingCard implements Serializable {
      * 卡号
      */
     @TableField(value = "picking_code")
-    @ApiModelProperty(value = "卡号")
+    @ApiModelProperty(value = "提货卡号")
     private String pickingCode;
 
     /**
      * 密码
      */
     @TableField(value = "`password`")
-    @ApiModelProperty(value = "密码")
+    @ApiModelProperty(value = "提货卡密码")
     private String password;
 
     /**
      * 状态 (1-未销售、2-已售卖、3-已预约、4-已核销、5-已作废)
      */
     @TableField(value = "picking_state")
-    @ApiModelProperty(value = "状态 (1-未销售、2-已售卖、3-已预约、4-已核销、5-已作废)")
+    @ApiModelProperty(value = "状态(pre.PickingCardStateEnum)(1-未销售、2-已售卖、3-已预约、4-已核销、5-已作废)")
     private PickingCardStateEnum pickingState;
 
     /**
@@ -130,4 +130,14 @@ public class PrePickingCard implements Serializable {
     private String appKey;
 
     private static final long serialVersionUID = 1L;
+
+    public PrePickingCard(Long id, String pickingCode, String password, PickingCardStateEnum pickingState) {
+        this.id = id;
+        this.pickingCode = pickingCode;
+        this.password = password;
+        this.pickingState = pickingState;
+    }
+
+    public PrePickingCard() {
+    }
 }
