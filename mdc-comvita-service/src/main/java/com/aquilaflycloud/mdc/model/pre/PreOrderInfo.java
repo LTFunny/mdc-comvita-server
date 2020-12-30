@@ -210,6 +210,20 @@ public class PreOrderInfo implements Serializable {
     private OrderInfoStateEnum orderState;
 
     /**
+     * 活动id
+     */
+    @TableField(value = "activity_info_id")
+    @ApiModelProperty(value = "活动id")
+    private Long activityInfoId;
+
+    /**
+     * 积分
+     */
+    @TableField(value = "score")
+    @ApiModelProperty(value = "积分")
+    private BigDecimal score;
+
+    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
