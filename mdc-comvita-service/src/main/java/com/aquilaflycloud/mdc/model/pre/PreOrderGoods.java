@@ -89,6 +89,13 @@ public class PreOrderGoods implements Serializable {
     private String goodsPicture;
 
     /**
+     * 预约人id(会员id)
+     */
+    @TableField(value = "reserve_id")
+    @ApiModelProperty(value = "预约人id(会员id)")
+    private Long reserveId;
+
+    /**
      * 预约人名称
      */
     @TableField(value = "reserve_name")
