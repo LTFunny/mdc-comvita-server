@@ -224,6 +224,13 @@ public class PreOrderInfo implements Serializable {
     private BigDecimal score;
 
     /**
+     * 不通过原因
+     */
+    @TableField(value = "reason")
+    @ApiModelProperty(value = "不通过原因")
+    private String reason;
+
+    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
