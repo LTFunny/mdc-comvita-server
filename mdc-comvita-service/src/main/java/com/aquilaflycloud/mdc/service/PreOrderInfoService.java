@@ -1,5 +1,7 @@
 package com.aquilaflycloud.mdc.service;
 
+import com.aquilaflycloud.mdc.param.pre.PreStayConfirmOrderParam;
+
 /**
  * @Author pengyongliang
  * @Date 2020/12/29 16:27
@@ -7,5 +9,5 @@ package com.aquilaflycloud.mdc.service;
  */
 public interface PreOrderInfoService{
 
-    int addStatConfirmOrder();
+    int addStatConfirmOrder(PreStayConfirmOrderParam param);
 }

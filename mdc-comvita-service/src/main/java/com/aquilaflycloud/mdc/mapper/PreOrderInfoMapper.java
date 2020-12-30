@@ -4,4 +4,6 @@ import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 public interface PreOrderInfoMapper extends BaseMapper<PreOrderInfo> {
+
+    String getMaxOrderCode();
 }
