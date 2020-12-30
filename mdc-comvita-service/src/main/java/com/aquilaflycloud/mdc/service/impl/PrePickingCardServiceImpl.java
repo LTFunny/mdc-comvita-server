@@ -1,10 +1,16 @@
 package com.aquilaflycloud.mdc.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
+import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.aquilaflycloud.mdc.mapper.PrePickingCardMapper;
 import com.aquilaflycloud.mdc.model.pre.PrePickingCard;
 import com.aquilaflycloud.mdc.param.pre.PrePickingCardBatchAddParam;
 import com.aquilaflycloud.mdc.param.pre.PrePickingCardPageParam;
 import com.aquilaflycloud.mdc.param.pre.PrePickingCardUpdateParam;
+import com.aquilaflycloud.mdc.param.pre.PrePickingCardValidationParam;
 import com.aquilaflycloud.mdc.result.pre.PrePickingCardAnalysisResult;
 import com.aquilaflycloud.mdc.service.PrePickingCardService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
@@ -219,7 +225,7 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
     public Boolean validationPickingCard(PrePickingCardValidationParam param) {
         PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
         .eq(PrePickingCard::getPickingCode,param.getPickingCode())
-        .eq(PrePickingCard::getPickingState,PickingCardStateEnum.NORMAL));
+        .eq(PrePickingCard::getPickingState,PickingCardStateEnum.NO_SALE));
         if(prePickingCard == null){
             throw new ServiceException("该卡号无法使用。");
         }
