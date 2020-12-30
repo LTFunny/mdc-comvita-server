@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTyoeEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -44,7 +45,7 @@ public class PreGoodsInfo implements Serializable {
      */
     @TableField(value = "goods_type")
     @ApiModelProperty(value = "商品类型(1-预售商品、2-赠品、3-普通商品)")
-    private Integer goodsType;
+    private OrderGoodsTyoeEnum goodsType;
 
     /**
      * 零售价
