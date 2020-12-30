@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.aquilaflycloud.mdc.enums.member.SexEnum;
+import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -208,6 +209,13 @@ public class PreOrderInfo implements Serializable {
     @TableField(value = "order_state")
     @ApiModelProperty(value = "订单状态")
     private OrderInfoStateEnum orderState;
+
+    /**
+     * 订单子状态
+     */
+    @TableField(value = "child_order_state")
+    @ApiModelProperty(value = "订单子状态")
+    private ChildOrderInfoStateEnum childOrderState;
 
     /**
      * 活动id
