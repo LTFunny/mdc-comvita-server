@@ -50,6 +50,20 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Resource
     private PreOrderGoodsMapper preOrderGoodsMapper;
 
+
+
+    public void orderOperateRecordLog(Long tenantId,String operatorName,Long orderId,String content){
+        //记录操作日志
+        PreOrderOperateRecord preOrderOperateRecord = new PreOrderOperateRecord();
+        preOrderOperateRecord.setTenantId(tenantId);
+        preOrderOperateRecord.setOperatorName(operatorName);
+        preOrderOperateRecord.setOrderId(orderId);
+        preOrderOperateRecord.setOperatorContent(content);
+        orderOperateRecordMapper.insert(preOrderOperateRecord);
+    }
+
+
+
     @Override
     public int addStatConfirmOrder(PreStayConfirmOrderParam param) {
         PreOrderInfo preOrderInfo = new PreOrderInfo();
@@ -67,15 +81,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if(orderInfo < 0){
             throw new ServiceException("生成待确认订单失败。");
         }
-        PreOrderOperateRecord preOrderOperateRecord = new PreOrderOperateRecord();
-        preOrderOperateRecord.setTenantId(preOrderInfo.getTenantId());
-        preOrderOperateRecord.setOrderId(preOrderInfo.getId());
         MemberInfo memberInfo = memberInfoMapper.normalSelectById(param.getMemberId());
-        if(memberInfo != null) {
-            preOrderOperateRecord.setOperatorName(memberInfo.getMemberName());
-        }
-        preOrderOperateRecord.setOperatorContent(memberInfo == null ? "" : memberInfo.getMemberName() + "通过扫码填写信息生成待确认订单");
-        orderOperateRecordMapper.insert(preOrderOperateRecord);
+        String content = memberInfo == null ? "" : memberInfo.getMemberName() + "通过扫码填写信息生成待确认订单";
+        orderOperateRecordLog(preOrderInfo.getTenantId(),memberInfo == null ? "" : memberInfo.getMemberName(),preOrderInfo.getId(),content);
         return orderInfo;
     }
 
@@ -108,7 +116,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     }
 
     @Override
-    public int validationConfirmOrder(PreConfirmOrderParam param) {
+    public void validationConfirmOrder(PreConfirmOrderParam param) {
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getId());
         if(null != preOrderInfo){
             throw new ServiceException("找不到此订单");
@@ -133,10 +141,12 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     throw new ServiceException("其中提货卡有误，无法提交。");
                 }
                 prePickingCard.setPickingState(PickingCardStateEnum.SALE);
+                //更改提货卡状态
                 int updateCard = prePickingCardMapper.updateById(prePickingCard);
                 if(updateCard < 0){
                     throw new ServiceException("提货卡更改状态失败。");
                 }
+                //订单明细
                 PreOrderGoods preOrderGoods = new PreOrderGoods();
                 preOrderGoods.setCardId(prePickingCard.getId());
                 preOrderGoods.setOrderId(preOrderInfo.getId());
@@ -145,6 +155,8 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 if(null != preActivityInfo){
                     PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
                     preOrderGoods.setGoodsId(preGoodsInfo.getId());
+                    preOrderGoods.setGoodsDescription(preGoodsInfo.getGoodsDescription());
+                    preOrderGoods.setGoodsPicture(preGoodsInfo.getGoodsPicture());
                     preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
                     preOrderGoods.setGoodsName(preGoodsInfo.getGoodsName());
                     preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
@@ -154,19 +166,50 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             });
         }
         preOrderGoodsMapper.insertAllBatch(orderGoodsList);
-        PreOrderOperateRecord preOrderOperateRecord = new PreOrderOperateRecord();
-        preOrderOperateRecord.setTenantId(preOrderInfo.getTenantId());
-        preOrderOperateRecord.setOperatorName(preOrderInfo.getGuideName());
-        preOrderOperateRecord.setOrderId(preOrderInfo.getId());
+        String content;
         if(param.getIsThrough() == 0){
-            preOrderOperateRecord.setOperatorContent("导购员：" + preOrderInfo.getGuideName()+ "对订单：" +
+            content = ("导购员：" + preOrderInfo.getGuideName()+ "对订单：" +
                     preOrderInfo.getOrderCode() + "进行了确认。");
         }else {
-            preOrderOperateRecord.setOperatorContent("导购员：" + preOrderInfo.getGuideName()+ "对订单：" +
+            content = ("导购员：" + preOrderInfo.getGuideName()+ "对订单：" +
                     preOrderInfo.getOrderCode() + "进行了不通过，不通过的原因为：" + preOrderInfo.getReason());
         }
-        orderOperateRecordMapper.insert(preOrderOperateRecord);
-        return updateOrder;
+        orderOperateRecordLog(preOrderInfo.getTenantId(),preOrderInfo.getGuideName(),preOrderInfo.getId(),content);
     }
+
+    @Override
+    public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
+        PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+                .eq(PrePickingCard::getPickingCode,param.getPickingCode())
+                .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
+        if(prePickingCard == null){
+            throw new ServiceException("提货卡状态异常，无法进行绑定");
+        }
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getCardId,prePickingCard.getId()));
+        if(preOrderGoods == null){
+            throw new ServiceException("订单明细未找到该提货卡关联的数据。");
+        }
+        BeanUtil.copyProperties(param,preOrderGoods);
+        PreOrderInfo orderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
+        preOrderGoods.setReserveId(orderInfo.getMemberId());
+        int updateOrderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+        if(updateOrderGoods < 0){
+            throw new ServiceException("预约失败。");
+        }
+        //更改提货卡状态
+        prePickingCard.setPickingState(PickingCardStateEnum.RESERVE);
+        prePickingCardMapper.updateById(prePickingCard);
+        //List<String> stateList = preOrderInfoMapper.pickingCardGet(orderInfo.getId());
+        //更改订单状态
+        orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
+        preOrderInfoMapper.updateById(orderInfo);
+        //记录日志
+        String content = preOrderGoods.getReserveName() +DateUtil.format(new Date(), "yyyy-MM-dd")+" 对" +
+                preOrderGoods.getGoodsName() + "进行了预约，提货卡为：" + preOrderGoods.getCardCode();
+        orderOperateRecordLog(orderInfo.getTenantId(),preOrderGoods.getReserveName(),orderInfo.getId(),content);
+    }
+
+
 
 }

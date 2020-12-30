@@ -21,6 +21,6 @@ public class PreOrderInfoPageParam extends PageAuthParam<PreOrderInfo> implement
     private OrderInfoStateEnum orderState;
 
     @ApiModelProperty(value = "导购员id", required = true)
-    @NotNull(message = "导购员id")
+    @NotNull(message = "导购员id不能为空")
     private Long guideId;
 }

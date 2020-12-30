@@ -2,9 +2,7 @@ package com.aquilaflycloud.mdc.api;
 
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
-import com.aquilaflycloud.mdc.param.pre.PreOrderInfoGetParam;
-import com.aquilaflycloud.mdc.param.pre.PreOrderInfoPageParam;
-import com.aquilaflycloud.mdc.param.pre.PreStayConfirmOrderParam;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PreOrderInfoGetResult;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -46,6 +44,17 @@ public class PreOrderInfoApi {
         return orderInfoService.getConfirmOrderInfo(param);
     }
 
+    @ApiOperation(value = "对订单进行确认", notes = "对订单进行确认")
+    @ApiMapping(value = "comvita.order.info.confirm.validation", method = RequestMethod.POST)
+    public void validationConfirmOrder(PreConfirmOrderParam param) {
+         orderInfoService.validationConfirmOrder(param);
+    }
+
+    @ApiOperation(value = "预约自提", notes = "预约自提")
+    @ApiMapping(value = "comvita.order.goods.reservation", method = RequestMethod.POST)
+    public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
+        orderInfoService.reservationOrderGoods(param);
+    }
 
 
 }

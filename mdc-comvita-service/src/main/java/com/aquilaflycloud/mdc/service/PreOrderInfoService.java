@@ -1,10 +1,7 @@
 package com.aquilaflycloud.mdc.service;
 
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
-import com.aquilaflycloud.mdc.param.pre.PreConfirmOrderParam;
-import com.aquilaflycloud.mdc.param.pre.PreOrderInfoGetParam;
-import com.aquilaflycloud.mdc.param.pre.PreOrderInfoPageParam;
-import com.aquilaflycloud.mdc.param.pre.PreStayConfirmOrderParam;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PreOrderInfoGetResult;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -43,7 +40,13 @@ public interface PreOrderInfoService{
      * @param param
      * @return
      */
-    int validationConfirmOrder(PreConfirmOrderParam param);
+    void validationConfirmOrder(PreConfirmOrderParam param);
 
+
+    /**
+     * 预约自提
+     * @param param
+     */
+    void reservationOrderGoods(PreReservationOrderGoodsParam param);
 
 }
