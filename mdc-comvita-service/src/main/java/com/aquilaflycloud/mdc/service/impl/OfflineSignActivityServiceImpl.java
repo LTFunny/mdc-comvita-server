@@ -11,7 +11,7 @@ import com.aquilaflycloud.dataAuth.common.PageParam;
 import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.sign.LimitTypeEnum;
 import com.aquilaflycloud.mdc.enums.sign.SignStateEnum;
-import com.aquilaflycloud.mdc.extra.wechat.service.WechatOpenPlatformService;
+import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.CouponMemberRelMapper;
 import com.aquilaflycloud.mdc.mapper.OfflineSignActivityMapper;
 import com.aquilaflycloud.mdc.mapper.OfflineSignMemberRecordMapper;
@@ -62,7 +62,7 @@ public class OfflineSignActivityServiceImpl implements OfflineSignActivityServic
     @Resource
     private ClientConfigService clientConfigService;
     @Resource
-    private WechatOpenPlatformService wechatOpenPlatformService;
+    private WechatMiniService wechatMiniService;
 
     private OfflineSignActivity stateHandler(OfflineSignActivity offlineSignActivity) {
         if (offlineSignActivity == null) {
@@ -193,7 +193,7 @@ public class OfflineSignActivityServiceImpl implements OfflineSignActivityServic
         String queryParam = "id=" + id + "&scan=true";
         String codeUrl = null;
         if (StrUtil.startWith(param.getAppId(), "wx")) {
-            codeUrl = wechatOpenPlatformService.miniCodeUnLimitGet(new MiniProgramQrCodeUnLimitGetParam().setAppId(param.getAppId())
+            codeUrl = wechatMiniService.miniCodeUnLimitGet(new MiniProgramQrCodeUnLimitGetParam().setAppId(param.getAppId())
                     .setScene(queryParam).setPagePath(path));
         }
         sign.setCodeUrl(codeUrl);

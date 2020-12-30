@@ -47,18 +47,6 @@ public class MiniMemberApi {
         return memberService.editMiniPhone(param);
     }
 
-    @ApiOperation(value = "小程序插件会员新增", notes = "登录成功返回插件会员pluginMemberId")
-    @ApiMapping(value = "comvita.mini.pluginMember.add", method = RequestMethod.POST)
-    public BaseResult<Long> addMiniPluginMember(MiniPluginMemberAddParam param) {
-        return memberService.addMiniPluginMember(param);
-    }
-
-    @ApiOperation(value = "小程序插件会员注册", notes = "登录成功返回memberSession")
-    @ApiMapping(value = "comvita.mini.pluginMember.register", method = RequestMethod.POST)
-    public BaseResult<String> registerMiniPluginMember(MiniPluginMemberRegisterParam param) {
-        return memberService.registerMiniPluginMember(param);
-    }
-
     @ApiOperation(value = "小程序系统信息保存", notes = "保存小程序wx.getSystemInfoSync返回信息")
     @ApiMapping(value = "comvita.mini.device.save", method = RequestMethod.POST)
     public void saveMiniDevice(MiniDeviceSaveParam param) {

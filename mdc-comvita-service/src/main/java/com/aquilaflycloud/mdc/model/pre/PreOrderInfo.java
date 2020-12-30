@@ -1,6 +1,8 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.member.SexEnum;
+import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -187,11 +189,46 @@ public class PreOrderInfo implements Serializable {
     private String buyerAddress;
 
     /**
+     * 买家生日
+     */
+    @TableField(value = "buyer_birthday")
+    @ApiModelProperty(value = "买家生日")
+    private Date buyerBirthday;
+
+    /**
+     * 买家性别
+     */
+    @TableField(value = "buyer_sex")
+    @ApiModelProperty(value = "买家性别")
+    private SexEnum buyerSex;
+
+    /**
      * 订单状态
      */
     @TableField(value = "order_state")
     @ApiModelProperty(value = "订单状态")
-    private Integer orderState;
+    private OrderInfoStateEnum orderState;
+
+    /**
+     * 活动id
+     */
+    @TableField(value = "activity_info_id")
+    @ApiModelProperty(value = "活动id")
+    private Long activityInfoId;
+
+    /**
+     * 积分
+     */
+    @TableField(value = "score")
+    @ApiModelProperty(value = "积分")
+    private BigDecimal score;
+
+    /**
+     * 不通过原因
+     */
+    @TableField(value = "reason")
+    @ApiModelProperty(value = "不通过原因")
+    private String reason;
 
     /**
      * 创建时间

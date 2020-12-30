@@ -49,13 +49,6 @@ public class MemberController {
         memberService.addMemberInfo(param);
     }
 
-    @ApiOperation(value = "公众号粉丝同步", notes = "公众号粉丝同步")
-    @PreAuthorize("hasAuthority('mdc:member:sync')")
-    @ApiMapping(value = "backend.comvita.member.wechatFans.sync", method = RequestMethod.POST, permission = true)
-    public void syncWechatFans(MemberSyncParam param) {
-        memberService.syncWechatFans(param);
-    }
-
     @ApiOperation(value = "查询公众号粉丝列表(分页)", notes = "根据条件查询公众号粉丝列表(分页)")
     @PreAuthorize("hasAuthority('mdc:member:list')")
     @ApiMapping(value = "backend.comvita.member.wechatFans.page", method = RequestMethod.POST, permission = true)

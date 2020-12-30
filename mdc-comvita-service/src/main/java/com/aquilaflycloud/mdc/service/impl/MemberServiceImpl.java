@@ -19,8 +19,7 @@ import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.coupon.VerificateStateEnum;
 import com.aquilaflycloud.mdc.enums.member.*;
 import com.aquilaflycloud.mdc.enums.system.TenantConfigTypeEnum;
-import com.aquilaflycloud.mdc.extra.wechat.service.WechatOpenPlatformService;
-import com.aquilaflycloud.mdc.extra.wechat.util.WechatFactoryUtil;
+import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.message.MemberErrorEnum;
 import com.aquilaflycloud.mdc.model.coupon.CouponMemberRel;
@@ -43,15 +42,12 @@ import com.gitee.sop.servercommon.bean.ServiceContext;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.mp.bean.result.WxMpUser;
-import me.chanjar.weixin.mp.bean.result.WxMpUserList;
 import org.redisson.api.RMapCache;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -83,7 +79,7 @@ public class MemberServiceImpl implements MemberService {
     @Resource
     private MemberGradeService memberGradeService;
     @Resource
-    private WechatOpenPlatformService wechatOpenPlatformService;
+    private WechatMiniService wechatMiniService;
     @Resource
     private MemberRewardService memberRewardService;
     @Resource
@@ -155,23 +151,6 @@ public class MemberServiceImpl implements MemberService {
         for (MemberInfo member : memberInfoList) {
             MemberDetailResult.MemberDetail memberDetail = new MemberDetailResult.MemberDetail();
             BeanUtil.copyProperties(member, memberDetail);
-            switch (member.getSource()) {
-                case GZH: {
-                    memberDetail.setAppName(wechatOpenPlatformService.getWechatAuthorSiteByAppId(member.getWxAppId()).getNickName());
-                    break;
-                }
-                case MINI: {
-                    memberDetail.setAppName(wechatOpenPlatformService.getWechatAuthorSiteByAppId(member.getWxAppId()).getNickName());
-                    WechatMiniProgramDeviceInfo deviceInfo = wechatMiniProgramDeviceInfoMapper.selectOne(Wrappers.<WechatMiniProgramDeviceInfo>lambdaQuery()
-                            .eq(WechatMiniProgramDeviceInfo::getMemberId, member.getId())
-                    );
-                    if (deviceInfo != null) {
-                        memberDetail.setModel(deviceInfo.getModel());
-                    }
-                    break;
-                }
-                default:
-            }
             memberDetailList.add(memberDetail);
         }
         result.setMemberDetailList(memberDetailList);
@@ -183,11 +162,6 @@ public class MemberServiceImpl implements MemberService {
         return memberInfoMapper.selectOne(Wrappers.<MemberInfo>lambdaQuery()
                 .eq(MemberInfo::getMemberCode, param.getMemberCode())
         );
-    }
-
-    @Override
-    public void syncWechatFans(MemberSyncParam param) {
-        batchAddSubscribeMember(param.getAppId());
     }
 
     @Override
@@ -693,12 +667,12 @@ public class MemberServiceImpl implements MemberService {
             throw new ServiceException("登录异常");
         }
         String otherAppId = MdcUtil.getOtherAppId();
-        WechatAuthorSite site = wechatOpenPlatformService.getWechatAuthorSiteByAppId(otherAppId);
+        WechatAuthorSite site = wechatMiniService.getWxAuthorByAppId(otherAppId);
         if (site == null) {
             throw new ServiceException("授权号不存在");
         }
         try {
-            WxMaJscode2SessionResult result = WechatFactoryUtil.getService(otherAppId, "jsCode2SessionInfo", "", param.getJsCode());
+            WxMaJscode2SessionResult result = wechatMiniService.getWxMaServiceByAppId(otherAppId).jsCode2SessionInfo(param.getJsCode());
             String hashKey = otherAppId + "_" + result.getOpenid();
             RMapCache<String, MemberInfo> map = RedisUtil.redisson().getMapCache("miniMemberRMap");
             MemberInfo memberInfo = map.get(hashKey);
@@ -745,13 +719,13 @@ public class MemberServiceImpl implements MemberService {
     public void authorizeMiniMember(MiniMemberAuthorizeParam param) {
         MemberInfoResult sessionKey = MdcUtil.getMiniSessionKey();
         String appId = sessionKey.getWxAppId();
-        boolean check = wechatOpenPlatformService.getWxOpenComponentService().getWxMaServiceByAppid(appId)
-                .getUserService().checkUserInfo(sessionKey.getSessionKey(), param.getRawData(), param.getSignature());
+        boolean check = wechatMiniService.getWxMaServiceByAppId(appId).getUserService()
+                .checkUserInfo(sessionKey.getSessionKey(), param.getRawData(), param.getSignature());
         if (check) {
             WxMaUserInfo userInfo;
             if (StrUtil.isNotBlank(param.getEncryptedData()) && StrUtil.isNotBlank(param.getIv())) {
-                userInfo = wechatOpenPlatformService.getWxOpenComponentService()
-                        .getWxMaServiceByAppid(appId).getUserService().getUserInfo(sessionKey.getSessionKey(), param.getEncryptedData(), param.getIv());
+                userInfo = wechatMiniService.getWxMaServiceByAppId(appId)
+                        .getUserService().getUserInfo(sessionKey.getSessionKey(), param.getEncryptedData(), param.getIv());
             } else {
                 userInfo = new WxMaUserInfo();
                 BeanUtil.copyProperties(param.getUserInfo(), userInfo);
@@ -797,8 +771,8 @@ public class MemberServiceImpl implements MemberService {
         MemberInfoResult sessionKey = MdcUtil.getMiniSessionKey();
         String appId = sessionKey.getWxAppId();
         try {
-            WxMaPhoneNumberInfo phoneNumberInfo = wechatOpenPlatformService.getWxOpenComponentService()
-                    .getWxMaServiceByAppid(appId).getUserService().getPhoneNoInfo(sessionKey.getSessionKey(), param.getEncryptedData(), param.getIv());
+            WxMaPhoneNumberInfo phoneNumberInfo = wechatMiniService.getWxMaServiceByAppId(appId)
+                    .getUserService().getPhoneNoInfo(sessionKey.getSessionKey(), param.getEncryptedData(), param.getIv());
             return new BaseResult<String>().setResult(phoneNumberInfo.getPhoneNumber());
         } catch (Exception e) {
             log.error("微信小程序接口解密手机号失败", e);
@@ -811,91 +785,14 @@ public class MemberServiceImpl implements MemberService {
         MemberInfoResult sessionKey = MdcUtil.getMiniSessionKey();
         String appId = sessionKey.getWxAppId();
         try {
-            WxMaPhoneNumberInfo phoneNumberInfo = wechatOpenPlatformService.getWxOpenComponentService()
-                    .getWxMaServiceByAppid(appId).getUserService().getPhoneNoInfo(sessionKey.getSessionKey(), param.getEncryptedData(), param.getIv());
+            WxMaPhoneNumberInfo phoneNumberInfo = wechatMiniService.getWxMaServiceByAppId(appId)
+                    .getUserService().getPhoneNoInfo(sessionKey.getSessionKey(), param.getEncryptedData(), param.getIv());
             editPhone(sessionKey, phoneNumberInfo.getPhoneNumber());
             return new BaseResult<String>().setResult(phoneNumberInfo.getPhoneNumber());
         } catch (Exception e) {
             log.error("微信小程序接口解密手机号失败", e);
             throw new ServiceException("获取小程序手机失败");
         }
-    }
-
-    @Override
-    public BaseResult<Long> addMiniPluginMember(MiniPluginMemberAddParam param) {
-        try {
-            WechatAuthorSite site = wechatOpenPlatformService.getWechatAuthorSiteByAppId(param.getPluginAppId());
-            WxMaJscode2SessionResult result = wechatOpenPlatformService.getWxOpenComponentService().getWxMaServiceByAppid(param.getPluginAppId()).jsCode2SessionInfo(param.getJsCode());
-            boolean check = wechatOpenPlatformService.getWxOpenComponentService().getWxMaServiceByAppid(param.getPluginAppId())
-                    .getUserService().checkUserInfo(result.getSessionKey(), param.getRawData(), param.getSignature());
-            if (check) {
-                WxMaUserInfo userInfo;
-                if (StrUtil.isNotBlank(param.getEncryptedData()) && StrUtil.isNotBlank(param.getIv())) {
-                    userInfo = wechatOpenPlatformService.getWxOpenComponentService().getWxMaServiceByAppid(param.getPluginAppId())
-                            .getUserService().getUserInfo(result.getSessionKey(), param.getEncryptedData(), param.getIv());
-                } else {
-                    userInfo = new WxMaUserInfo();
-                    BeanUtil.copyProperties(param.getUserInfo(), userInfo);
-                    userInfo.setOpenId(result.getOpenid());
-                    userInfo.setUnionId(result.getUnionid());
-                }
-                MemberInfo memberInfo = new MemberInfo();
-                memberInfo.setIsAuth(WhetherEnum.YES);
-                memberInfo.setNeedMerge(WhetherEnum.NO);
-                memberInfo.setWxAppId(param.getPluginAppId());
-                memberInfo.setOpenId(userInfo.getOpenId());
-                memberInfo.setUnionId(userInfo.getUnionId());
-                memberInfo.setNickName(userInfo.getNickName());
-                memberInfo.setAvatarUrl(userInfo.getAvatarUrl());
-                memberInfo.setSex(EnumUtil.likeValueOf(SexEnum.class, Convert.toInt(userInfo.getGender())));
-                memberInfo.setCountry(userInfo.getCountry());
-                memberInfo.setProvince(userInfo.getProvince());
-                memberInfo.setCity(userInfo.getCity());
-                memberInfo.setWxContent(JSONUtil.toJsonStr(userInfo));
-                memberInfo.setTenantId(site.getTenantId());
-                memberInfo.setSubTenantId(site.getSubTenantId());
-                Long memberId = RedisUtil.syncLoad("saveMember_" + param.getPluginAppId() + userInfo.getOpenId(), () -> {
-                    MemberInfo member = memberInfoMapper.normalSelectOne(Wrappers.<MemberInfo>lambdaQuery()
-                            .eq(MemberInfo::getWxAppId, param.getPluginAppId()).eq(MemberInfo::getOpenId, userInfo.getOpenId()));
-                    DateTime now = DateTime.now();
-                    memberInfo.setLastAuthTime(now);
-                    if (member == null) {
-                        memberInfo.setAuthTime(now);
-                        memberInfo.setLastAuthTime(now);
-                        memberInfoMapper.normalInsert(memberInfo);
-                    } else {
-                        memberInfo.setLastAuthTime(now);
-                        memberInfo.setId(member.getId());
-                        memberInfoMapper.normalUpdateById(memberInfo);
-                    }
-                    return memberInfo.getId();
-                });
-                return new BaseResult<Long>().setResult(memberId);
-            }
-            throw new ServiceException("注册小程序插件会员失败");
-        } catch (WxErrorException e) {
-            e.printStackTrace();
-            throw new ServiceException(String.valueOf(e.getError().getErrorCode()), e.getError().getErrorMsg());
-        }
-    }
-
-    @Override
-    public BaseResult<String> registerMiniPluginMember(MiniPluginMemberRegisterParam param) {
-        MemberInfo memberInfo = memberInfoMapper.selectById(param.getPluginMemberId());
-        if (memberInfo != null) {
-            MemberInfoResult memberInfoResult = MdcUtil.getMiniSessionKey();
-            //使用插件会员的信息插入新的会员
-            MemberInfo member = new MemberInfo();
-            BeanUtil.copyProperties(memberInfo, member);
-            member.setId(null);
-            member.setWxAppId(memberInfoResult.getWxAppId());
-            member.setOpenId(memberInfoResult.getOpenId());
-            member.setUnionId(memberInfoResult.getUnionId());
-            member.setIsAuth(WhetherEnum.YES);
-            saveMember(member);
-            return new BaseResult<String>().setResult(login2Session(member));
-        }
-        throw new ServiceException("注册失败");
     }
 
     @Override
@@ -913,146 +810,6 @@ public class MemberServiceImpl implements MemberService {
             if (count <= 0) {
                 throw new ServiceException("保存设备信息失败");
             }
-        }
-    }
-
-    private WechatFansInfo parseWechatFans(WechatAuthorSite site, WxMpUser wxMpUser) {
-        WechatFansInfo wechatFansInfo = new WechatFansInfo();
-        wechatFansInfo.setIsAuth(WhetherEnum.YES);
-        wechatFansInfo.setAuthTime(DateTime.now());
-        wechatFansInfo.setAppId(site.getAppId());
-        wechatFansInfo.setOpenId(wxMpUser.getOpenId());
-        wechatFansInfo.setUnionId(wxMpUser.getUnionId());
-        wechatFansInfo.setSource(SourceEnum.GZH);
-        wechatFansInfo.setNickName(wxMpUser.getNickname());
-        wechatFansInfo.setAvatarUrl(wxMpUser.getHeadImgUrl());
-        wechatFansInfo.setGender(EnumUtil.likeValueOf(SexEnum.class, wxMpUser.getSex()));
-        wechatFansInfo.setCountry(wxMpUser.getCountry());
-        wechatFansInfo.setProvince(wxMpUser.getProvince());
-        wechatFansInfo.setCity(wxMpUser.getCity());
-        if (wxMpUser.getSubscribeTime() != null) {
-            long subscribeTime = wxMpUser.getSubscribeTime() * 1000;
-            wechatFansInfo.setSubscribeTime(DateTime.of(subscribeTime));
-        }
-        wechatFansInfo.setSubscribeState(WhetherEnum.YES);
-        wechatFansInfo.setSubscribeScene(EnumUtil.likeValueOf(SubscribeSceneEnum.class, wxMpUser.getSubscribeScene()));
-        return wechatFansInfo;
-    }
-
-    @Override
-    public void addSubscribeMember(String appId, WxMpUser wxMpUser) {
-        WechatAuthorSite site = wechatOpenPlatformService.getWechatAuthorSiteByAppId(appId);
-        if (site == null) {
-            throw new ServiceException("授权号不存在");
-        }
-        WechatFansInfo wechatFansInfo = parseWechatFans(site, wxMpUser);
-        //设置此次请求租户id
-        ServiceContext.getCurrentContext().set(DataAuthConstant.TENANT_ID, site.getTenantId());
-        ServiceContext.getCurrentContext().set(DataAuthConstant.SUB_TENANT_ID, site.getSubTenantId());
-        wechatFansInfoMapper.insertIgnoreAllBatch(CollUtil.newArrayList(wechatFansInfo));
-    }
-
-    @Override
-    public void addSubscribeMember(String appId, String openId, String unionId) {
-        WechatAuthorSite site = wechatOpenPlatformService.getWechatAuthorSiteByAppId(appId);
-        if (site == null) {
-            throw new ServiceException("授权号不存在");
-        }
-        WechatFansInfo wechatFansInfo = new WechatFansInfo();
-        wechatFansInfo.setAppId(appId);
-        wechatFansInfo.setOpenId(openId);
-        wechatFansInfo.setUnionId(unionId);
-        wechatFansInfo.setIsAuth(WhetherEnum.NO);
-        wechatFansInfo.setSource(SourceEnum.GZH);
-        //设置此次请求租户id
-        ServiceContext.getCurrentContext().set(DataAuthConstant.TENANT_ID, site.getTenantId());
-        ServiceContext.getCurrentContext().set(DataAuthConstant.SUB_TENANT_ID, site.getSubTenantId());
-        int count = wechatFansInfoMapper.insertIgnoreAllBatch(CollUtil.newArrayList(wechatFansInfo));
-        if (count <= 0) {
-            throw new ServiceException("保存关注公众号会员失败");
-        }
-    }
-
-    @Override
-    public void editUnSubscribeMember(String openId) {
-        WechatFansInfo fansUpdate = new WechatFansInfo();
-        fansUpdate.setSubscribeState(WhetherEnum.NO);
-        fansUpdate.setIsAuth(WhetherEnum.NO);
-        fansUpdate.setUnsubscribeTime(DateTime.now());
-        int count = wechatFansInfoMapper.normalUpdate(fansUpdate, Wrappers.<WechatFansInfo>lambdaQuery()
-                .eq(WechatFansInfo::getOpenId, openId));
-        if (count <= 0) {
-            throw new ServiceException("取消关注公众号失败");
-        }
-        MemberInfo update = new MemberInfo();
-        update.setIsAuth(WhetherEnum.NO);
-        memberInfoMapper.normalUpdate(update, Wrappers.<MemberInfo>lambdaQuery()
-                .eq(MemberInfo::getOpenId, openId));
-    }
-
-    private final static Map<String, Future> FUTURE_MAP = new HashMap<>();
-
-    @Override
-    public void batchAddSubscribeMember(String appId) {
-        /*wechatFansInfoMapper.delete(Wrappers.<WechatFansInfo>lambdaQuery()
-                .eq(WechatFansInfo::getAppId, appId)
-        );*/
-        if (FUTURE_MAP.get(appId) == null || FUTURE_MAP.get(appId).isDone()) {
-            Future future = MdcUtil.getTtlExecutorService().submit(() -> {
-                WechatAuthorSite site = wechatOpenPlatformService.getWechatAuthorSiteByAppId(appId);
-                //设置此次请求租户id
-                ServiceContext.getCurrentContext().set(DataAuthConstant.TENANT_ID, site.getTenantId());
-                ServiceContext.getCurrentContext().set(DataAuthConstant.SUB_TENANT_ID, site.getSubTenantId());
-                log.info("====同步新增公众号[{}]历史粉丝会员====", site.getNickName());
-                try {
-                    String nextOpenIds = null;
-                    int count = 0;
-                    while (true) {
-                        WxMpUserList userList = wechatOpenPlatformService.getWxOpenComponentService()
-                                .getWxMpServiceByAppid(appId).getUserService().userList(nextOpenIds);
-                        if (userList.getOpenids().size() <= 0) {
-                            break;
-                        }
-                        int page = PageUtil.totalPage(userList.getOpenids().size(), 100);
-                        List<WechatFansInfo> fansInfoList = new ArrayList<>();
-                        for (int i = 0; i < page; i++) {
-                            fansInfoList.clear();
-                            List<String> newOpenIds = CollUtil.page(i, 100, userList.getOpenids());
-                            List<WxMpUser> list = wechatOpenPlatformService.getWxOpenComponentService()
-                                    .getWxMpServiceByAppid(appId).getUserService().userInfoList(newOpenIds);
-                            log.info("====成功获取{}位粉丝====", list.size());
-                            for (WxMpUser wxMpUser : list) {
-                                WechatFansInfo wechatFansInfo = parseWechatFans(site, wxMpUser);
-                                fansInfoList.add(wechatFansInfo);
-                            }
-                            count += wechatFansInfoMapper.insertIgnoreAllBatch(fansInfoList);
-                            log.info("====成功导入{}位粉丝====", count);
-                        }
-                        nextOpenIds = userList.getNextOpenid();
-                    }
-                    log.info("====新增会员数: {}====", count);
-                } catch (WxErrorException e) {
-                    log.error("====同步微信会员失败====", e);
-                } catch (Exception ex) {
-                    log.error("====同步微信粉丝失败====", ex);
-                }
-            });
-            FUTURE_MAP.put(appId, future);
-        } else {
-            throw new ServiceException("同步中请勿重复操作");
-        }
-    }
-
-    @Override
-    public void editUnShareMember(String userId, String aliAppId) {
-        MemberInfo update = new MemberInfo();
-        update.setIsAuth(WhetherEnum.NO);
-        int count = memberInfoMapper.normalUpdate(update, Wrappers.<MemberInfo>lambdaQuery()
-                .eq(MemberInfo::getUserId, userId)
-                .eq(MemberInfo::getAliAppId, aliAppId)
-        );
-        if (count <= 0) {
-            throw new ServiceException("取消关注生活号失败");
         }
     }
 

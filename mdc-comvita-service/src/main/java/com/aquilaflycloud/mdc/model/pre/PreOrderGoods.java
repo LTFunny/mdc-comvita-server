@@ -40,6 +40,13 @@ public class PreOrderGoods implements Serializable {
     private Long goodsId;
 
     /**
+     * 提货卡id
+     */
+    @TableField(value = "card_id")
+    @ApiModelProperty(value = "提货卡id")
+    private Long cardId;
+
+    /**
      * 商品编号
      */
     @TableField(value = "goods_code")
@@ -80,6 +87,97 @@ public class PreOrderGoods implements Serializable {
     @TableField(value = "goods_picture")
     @ApiModelProperty(value = "商品照片")
     private String goodsPicture;
+
+    /**
+     * 预约人id(会员id)
+     */
+    @TableField(value = "reserve_id")
+    @ApiModelProperty(value = "预约人id(会员id)")
+    private Long reserveId;
+
+    /**
+     * 预约人名称
+     */
+    @TableField(value = "reserve_name")
+    @ApiModelProperty(value = "预约人名称")
+    private String reserveName;
+
+    /**
+     * 预约人电话
+     */
+    @TableField(value = "reserve_phone")
+    @ApiModelProperty(value = "预约人电话")
+    private String reservePhone;
+
+    /**
+     * 预约门店
+     */
+    @TableField(value = "reserve_shop")
+    @ApiModelProperty(value = "预约门店")
+    private String reserveShop;
+
+    /**
+     * 预约开始时间
+     */
+    @TableField(value = "reserve_start_time")
+    @ApiModelProperty(value = "预约开始时间")
+    private Date reserveStartTime;
+
+    /**
+     * 预约结束时间
+     */
+    @TableField(value = "reserve_end_time")
+    @ApiModelProperty(value = "预约结束时间")
+    private Date reserveEndTime;
+
+    /**
+     * 提货卡号
+     */
+    @TableField(value = "card_code")
+    @ApiModelProperty(value = "提货卡号")
+    private String cardCode;
+
+    /**
+     * 提货卡密码
+     */
+    @TableField(value = "card_psw")
+    @ApiModelProperty(value = "提货卡密码")
+    private String cardPsw;
+
+    /**
+     * 提货时间
+     */
+    @TableField(value = "take_time")
+    @ApiModelProperty(value = "提货时间")
+    private Date takeTime;
+
+    /**
+     * 核销人id
+     */
+    @TableField(value = "verificater_id")
+    @ApiModelProperty(value = "核销人id")
+    private Long verificaterId;
+
+    /**
+     * 核销人名称
+     */
+    @TableField(value = "verificater_name")
+    @ApiModelProperty(value = "核销人名称")
+    private String verificaterName;
+
+    /**
+     * 核销人所属部门ids
+     */
+    @TableField(value = "verificater_org_ids")
+    @ApiModelProperty(value = "核销人所属部门ids")
+    private String verificaterOrgIds;
+
+    /**
+     * 核销人所属部门名称
+     */
+    @TableField(value = "verificater_org_names")
+    @ApiModelProperty(value = "核销人所属部门名称")
+    private String verificaterOrgNames;
 
     /**
      * 创建时间

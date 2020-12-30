@@ -77,7 +77,7 @@
 
     <dependency>
       <groupId>com.github.binarywang</groupId>
-      <artifactId>weixin-java-open</artifactId>
+      <artifactId>weixin-java-miniapp</artifactId>
       <version>3.9.0</version>
     </dependency>
 

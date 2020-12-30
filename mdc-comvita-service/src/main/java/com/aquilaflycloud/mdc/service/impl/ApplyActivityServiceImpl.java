@@ -18,7 +18,7 @@ import com.aquilaflycloud.mdc.enums.common.AuditStateEnum;
 import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
-import com.aquilaflycloud.mdc.extra.wechat.util.WechatFactoryUtil;
+import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.ApplyActivityMapper;
 import com.aquilaflycloud.mdc.mapper.ApplyMemberRecordMapper;
 import com.aquilaflycloud.mdc.mapper.WechatMiniProgramMessageMapper;
@@ -69,6 +69,8 @@ public class ApplyActivityServiceImpl implements ApplyActivityService {
     private WechatMiniProgramMessageMapper wechatMiniProgramMessageMapper;
     @Resource
     private FolksonomyService folksonomyService;
+    @Resource
+    private WechatMiniService wechatMiniService;
 
     private ApplyActivity stateHandler(ApplyActivity applyActivity) {
         if (applyActivity == null) {
@@ -579,7 +581,7 @@ public class ApplyActivityServiceImpl implements ApplyActivityService {
                 for (Map.Entry<String, List<MiniMemberInfo>> entry : miniMap.entrySet()) {
                     //微信小程序报名才发送订阅消息
                     if (StrUtil.startWith(entry.getKey(), "wx")) {
-                        WxMaMsgService wxMaMsgService = WechatFactoryUtil.getService(entry.getKey(), "getMsgService", "18");
+                        WxMaMsgService wxMaMsgService = wechatMiniService.getWxMaServiceByAppId(entry.getKey()).getMsgService();
                         for (MiniMemberInfo miniMemberInfo : entry.getValue()) {
                             WxMaSubscribeMessage subscribeMessage = new WxMaSubscribeMessage();
                             subscribeMessage.setToUser(miniMemberInfo.getOpenId());

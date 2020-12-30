@@ -10,7 +10,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.common.StateEnum;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
-import com.aquilaflycloud.mdc.extra.wechat.util.WechatFactoryUtil;
+import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.WechatMiniProgramMessageMapper;
 import com.aquilaflycloud.mdc.model.wechat.WechatMiniProgramMessage;
 import com.aquilaflycloud.mdc.param.wechat.*;
@@ -36,12 +36,14 @@ import java.util.stream.Collectors;
 @Service
 public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniProgramSubscribeMessageService {
     @Resource
+    private WechatMiniService wechatMiniService;
+    @Resource
     private WechatMiniProgramMessageMapper wechatMiniProgramMessageMapper;
 
     @Override
     public List<WxMaSubscribeService.CategoryData> listCategory(WechatAuthorSiteGetParam param) {
         try {
-            WxMaSubscribeService wxMaSubscribeService = WechatFactoryUtil.getService(param.getAppId(), "getSubscribeService", "18");
+            WxMaSubscribeService wxMaSubscribeService = wechatMiniService.getWxMaServiceByAppId(param.getAppId()).getSubscribeService();
             return wxMaSubscribeService.getCategory();
         } catch (WxErrorException e) {
             e.printStackTrace();
@@ -54,7 +56,7 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
         try {
             int start = Convert.toInt(param.page().offset());
             int limit = Convert.toInt(param.getPageSize());
-            WxMaSubscribeService wxMaSubscribeService = WechatFactoryUtil.getService(param.getAppId(), "getSubscribeService", "18");
+            WxMaSubscribeService wxMaSubscribeService = wechatMiniService.getWxMaServiceByAppId(param.getAppId()).getSubscribeService();
             WxMaPubTemplateTitleListResult result = wxMaSubscribeService.getPubTemplateTitleList(param.getIds(), start, limit);
             IPage<WxMaPubTemplateTitleListResult.TemplateItem> page = new Page<>(param.getPageNum(), param.getPageSize(), result.getCount());
             page.setRecords(result.getData());
@@ -68,7 +70,7 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
     @Override
     public List<WxMaSubscribeService.PubTemplateKeyword> listPubTemplateKeyword(MiniPubTemplateKeywordGetParam param) {
         try {
-            WxMaSubscribeService wxMaSubscribeService = WechatFactoryUtil.getService(param.getAppId(), "getSubscribeService", "18");
+            WxMaSubscribeService wxMaSubscribeService = wechatMiniService.getWxMaServiceByAppId(param.getAppId()).getSubscribeService();
             return wxMaSubscribeService.getPubTemplateKeyWordsById(param.getTid());
         } catch (WxErrorException e) {
             e.printStackTrace();
@@ -79,7 +81,7 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
     @Override
     public BaseResult<String> addTemplate(MiniTemplateAddParam param) {
         try {
-            WxMaSubscribeService wxMaSubscribeService = WechatFactoryUtil.getService(param.getAppId(), "getSubscribeService", "18");
+            WxMaSubscribeService wxMaSubscribeService = wechatMiniService.getWxMaServiceByAppId(param.getAppId()).getSubscribeService();
             String priTmplId = wxMaSubscribeService.addTemplate(param.getTid(), param.getKidList(), param.getSceneDesc());
             return new BaseResult<String>().setResult(priTmplId);
         } catch (WxErrorException e) {
@@ -91,7 +93,7 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
     @Override
     public List<WxMaSubscribeService.TemplateInfo> listTemplate(WechatAuthorSiteGetParam param) {
         try {
-            WxMaSubscribeService wxMaSubscribeService = WechatFactoryUtil.getService(param.getAppId(), "getSubscribeService", "18");
+            WxMaSubscribeService wxMaSubscribeService = wechatMiniService.getWxMaServiceByAppId(param.getAppId()).getSubscribeService();
             return wxMaSubscribeService.getTemplateList();
         } catch (WxErrorException e) {
             e.printStackTrace();
@@ -102,7 +104,7 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
     @Override
     public void deleteTemplate(MiniTemplateGetParam param) {
         try {
-            WxMaSubscribeService wxMaSubscribeService = WechatFactoryUtil.getService(param.getAppId(), "getSubscribeService", "18");
+            WxMaSubscribeService wxMaSubscribeService = wechatMiniService.getWxMaServiceByAppId(param.getAppId()).getSubscribeService();
             boolean flag = wxMaSubscribeService.delTemplate(param.getPriTmplId());
             if (!flag) {
                 throw new ServiceException("删除失败");

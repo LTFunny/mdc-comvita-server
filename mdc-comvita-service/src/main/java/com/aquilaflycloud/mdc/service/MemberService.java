@@ -10,7 +10,6 @@ import com.aquilaflycloud.mdc.result.member.MemberDetailResult;
 import com.aquilaflycloud.mdc.result.member.MemberOtherResult;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import me.chanjar.weixin.mp.bean.result.WxMpUser;
 
 /**
  * MemberService
@@ -24,8 +23,6 @@ public interface MemberService {
     MemberDetailResult getMemberDetailInfo(MemberGetParam param);
 
     MemberInfo getMemberInfo(MemberInfoGetParam param);
-
-    void syncWechatFans(MemberSyncParam param);
 
     IPage<WechatFansInfo> pageWechatFans(WechatFansPageParam param);
 
@@ -53,21 +50,7 @@ public interface MemberService {
 
     BaseResult<String> editMiniPhone(MiniPhoneGetParam param);
 
-    BaseResult<Long> addMiniPluginMember(MiniPluginMemberAddParam param);
-
-    BaseResult<String> registerMiniPluginMember(MiniPluginMemberRegisterParam param);
-
     void saveMiniDevice(MiniDeviceSaveParam param);
-
-    void addSubscribeMember(String appId, WxMpUser wxMpUser);
-
-    void addSubscribeMember(String appId, String openId, String unionId);
-
-    void editUnSubscribeMember(String openId);
-
-    void batchAddSubscribeMember(String appId);
-
-    void editUnShareMember(String userId, String aliAppId);
 
     MemberAttributesAnalysisResult memberAttributesAnalysis(MemberAttributesAnalysisParam param);
 

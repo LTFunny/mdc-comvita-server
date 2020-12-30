@@ -11,7 +11,7 @@ import cn.hutool.json.JSONArray;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.shop.*;
-import com.aquilaflycloud.mdc.extra.wechat.service.WechatOpenPlatformService;
+import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.feign.consumer.org.ShopConsumer;
 import com.aquilaflycloud.mdc.mapper.ShopCommentInfoMapper;
 import com.aquilaflycloud.mdc.mapper.ShopInfoMapper;
@@ -71,7 +71,7 @@ public class ShopInfoServiceImpl implements ShopInfoService {
     private ShopCommentInfoService shopCommentInfoService;
 
     @Resource
-    private WechatOpenPlatformService wechatOpenPlatformService;
+    private WechatMiniService wechatMiniService;
 
     @Resource
     private ShopCommentInfoMapper shopCommentInfoMapper;
@@ -210,7 +210,7 @@ public class ShopInfoServiceImpl implements ShopInfoService {
 
                     //区分微信和支付宝
                     if (StrUtil.startWith(param.getAppId(), "wx")) {
-                        String url = wechatOpenPlatformService.miniCodeUnLimitGet(new MiniProgramQrCodeUnLimitGetParam().setAppId(param.getAppId()).setScene("id=" + item.getId().toString()).setPagePath(param.getUrlParam()));
+                        String url = wechatMiniService.miniCodeUnLimitGet(new MiniProgramQrCodeUnLimitGetParam().setAppId(param.getAppId()).setScene("id=" + item.getId().toString()).setPagePath(param.getUrlParam()));
                         if (null != url && StringUtils.isNotBlank(url)) {
                             item.setQrCode(url);
                         }
@@ -228,7 +228,7 @@ public class ShopInfoServiceImpl implements ShopInfoService {
                     if (StringUtils.isBlank(item.getQrCode())) {
                         //区分微信和支付宝
                         if (StrUtil.startWith(param.getAppId(), "wx")) {
-                            String url = wechatOpenPlatformService.miniCodeUnLimitGet(new MiniProgramQrCodeUnLimitGetParam().setAppId(param.getAppId()).setScene("id=" + item.getId().toString()).setPagePath(param.getUrlParam()));
+                            String url = wechatMiniService.miniCodeUnLimitGet(new MiniProgramQrCodeUnLimitGetParam().setAppId(param.getAppId()).setScene("id=" + item.getId().toString()).setPagePath(param.getUrlParam()));
                             if (null != url && StringUtils.isNotBlank(url)) {
                                 item.setQrCode(url);
                             }

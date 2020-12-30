@@ -12,7 +12,7 @@ import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.wechat.LiveScreenTypeEnum;
 import com.aquilaflycloud.mdc.enums.wechat.LiveStatusEnum;
 import com.aquilaflycloud.mdc.enums.wechat.LiveTypeEnum;
-import com.aquilaflycloud.mdc.extra.wechat.service.WechatOpenPlatformService;
+import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.WechatMiniLiveInfoMapper;
 import com.aquilaflycloud.mdc.model.wechat.WechatMiniLiveInfo;
 import com.aquilaflycloud.mdc.param.wechat.WechatAuthorSiteGetParam;
@@ -42,7 +42,7 @@ import java.util.List;
 @Service
 public class WechatMiniLiveServiceImpl implements WechatMiniLiveService {
     @Resource
-    private WechatOpenPlatformService wechatOpenPlatformService;
+    private WechatMiniService wechatMiniService;
     @Resource
     private WechatMiniLiveInfoMapper wechatMiniLiveInfoMapper;
 
@@ -53,7 +53,7 @@ public class WechatMiniLiveServiceImpl implements WechatMiniLiveService {
                 .eq(WechatMiniLiveInfo::getAppId, param.getAppId())
         );
         try {
-            List<WxMaLiveResult.RoomInfo> roomInfoList = wechatOpenPlatformService.getWxOpenComponentService().getWxMaServiceByAppid(param.getAppId())
+            List<WxMaLiveResult.RoomInfo> roomInfoList = wechatMiniService.getWxMaServiceByAppId(param.getAppId())
                     .getLiveService().getLiveInfos();
             List<WechatMiniLiveInfo> liveInfoList = new ArrayList<>();
             for (WxMaLiveResult.RoomInfo roomInfo : roomInfoList) {

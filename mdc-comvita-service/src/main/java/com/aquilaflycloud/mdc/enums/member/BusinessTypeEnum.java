@@ -18,9 +18,9 @@ public enum BusinessTypeEnum {
 //    OFFLINESIGN(3, "打卡有礼"),
     APPLY(4, "活动报名"),
     RECOMMEND(5, "最新推荐"),
-    SCENICSPOTS(6, "景区信息"),
-    SHOP(7, "商户标签"),
     EXCHANGEGOODS(8, "兑换商品"),
+    PREGOODS(9, "预售商品"),
+    PREACTIVITY(10, "预售活动"),
     ;
 
     BusinessTypeEnum(int type, String name) {

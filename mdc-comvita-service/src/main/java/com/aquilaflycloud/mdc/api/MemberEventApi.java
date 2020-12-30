@@ -81,16 +81,6 @@ public class MemberEventApi {
         return returnResult(memberEventLogService.increaseBusinessNum(eventParam));
     }
 
-    @ApiOperation(value = "记录景区信息分享", notes = "记录景区信息分享,返回分享数")
-    @ApiMapping(value = "comvita.member.scenicSpotsShare.add", method = RequestMethod.POST)
-    public BaseResult<Long> addScenicSpotsShare(MemberEventAddParam param) {
-        MemberEventParam eventParam = new MemberEventParam();
-        eventParam.setBusinessId(param.getBusinessId());
-        eventParam.setBusinessType(BusinessTypeEnum.SCENICSPOTS);
-        eventParam.setEventType(EventTypeEnum.SHARE);
-        return returnResult(memberEventLogService.increaseBusinessNum(eventParam));
-    }
-
     @ApiOperation(value = "记录商品分享", notes = "记录商品分享,返回分享数")
     @ApiMapping(value = "comvita.member.goodsShare.add", method = RequestMethod.POST)
     public BaseResult<Long> addGoodsShare(MemberEventAddParam param) {
