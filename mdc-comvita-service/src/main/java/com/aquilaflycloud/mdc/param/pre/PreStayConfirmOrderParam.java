@@ -31,6 +31,9 @@ public class PreStayConfirmOrderParam {
     @ApiModelProperty(value = "买家姓名")
     private String buyerName;
 
+    @ApiModelProperty(value = "活动id")
+    private Long activityInfoId;
+
     /**
      * 买家手机
      */
