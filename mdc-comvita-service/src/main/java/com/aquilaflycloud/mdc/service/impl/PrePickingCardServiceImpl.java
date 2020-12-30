@@ -221,6 +221,27 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
         return code;
     }
 
+    /**
+     * 初始化卡密码数据
+     */
+    private void initPrePickingCardPass() {
+        String setKey = "prePickingCardPassSet" + MdcUtil.getCurrentTenantId();
+        String mapKey = "prePickingCardPassMap" + MdcUtil.getCurrentTenantId();
+        if (!RedisUtil.redis().hasKey(setKey)) {
+            List<PrePickingCard> cardInfoList = prePickingCardMapper.selectList(Wrappers.<PrePickingCard>lambdaQuery()
+                    .select(PrePickingCard::getPassword, PrePickingCard::getId)
+                    .isNotNull(PrePickingCard::getPassword)
+            );
+            if (cardInfoList.size() > 0) {
+                RedisUtil.setRedis().add(setKey, cardInfoList.stream().map(PrePickingCard::getPassword).distinct().toArray(String[]::new));
+                RedisUtil.hashRedis().putAll(mapKey, cardInfoList.stream().collect(toMap(PrePickingCard::getId, PrePickingCard::getPassword)));
+                RedisUtil.redis().expire(setKey, 30, TimeUnit.DAYS);
+                RedisUtil.redis().expire(mapKey, 30, TimeUnit.DAYS);
+            }
+        }
+    }
+
+
     @Override
     public Boolean validationPickingCard(PrePickingCardValidationParam param) {
         PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
