@@ -6,24 +6,25 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 
 /**
  * @Author pengyongliang
- * @Date 2020/12/29 16:00
+ * @Date 2020/12/30 18:15
  * @Version 1.0
  */
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
-public enum  OrderInfoStateEnum {
+public enum ChildOrderInfoStateEnum {
 
-    //订单状态
-    STAYCONFIRM(1, "待确认"),
-    STAYRESERVATION(2, "待预约"),
-    WAITINGDELIVERY (3, "待提货"),
-    STAYSENDGOODS(4, "待发货"),
-    STAYSIGN(5,"待签收"),
-    BEENCOMPLETED(6,"已完成"),
-    AFTERSALEREFUND(7,"售后/退款"),
-    CONFIRMRECEIPT(8,"确认签收"),
+    /**
+     * 订单子状态
+     */
+    STAYRESERVATION(1,"待预约"),
+    PARTRESERVATION(2,"部分预约"),
+    WAITINGDELIVERY(3,"待提货"),
+    PARTWAITINGDELIVERY(4,"部分待提货"),
+    STAYSENDGOODS(5, "待发货"),
+    BEENCOMPLETED(9,"已完成"),
     ;
 
-    OrderInfoStateEnum(int type, String name) {
+
+    ChildOrderInfoStateEnum(int type, String name) {
         this.type = type;
         this.name = name;
     }
