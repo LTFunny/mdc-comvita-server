@@ -214,7 +214,7 @@ public class PreOrderInfo implements Serializable {
      */
     @TableField(value = "activity_info_id")
     @ApiModelProperty(value = "活动id")
-    private Long activityInfoid;
+    private Long activityInfoId;
 
     /**
      * 积分
