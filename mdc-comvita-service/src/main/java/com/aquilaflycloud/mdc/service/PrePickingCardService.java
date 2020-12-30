@@ -18,11 +18,11 @@ public interface PrePickingCardService {
 
     IPage<PrePickingCard> page(PrePickingCardPageParam param);
 
-    Boolean validationPickingCard(PrePickingCardValidationParam param);
-
     PrePickingCardAnalysisResult analysis();
 
     void batchAdd(PrePickingCardBatchAddParam param);
 
     void update(PrePickingCardUpdateParam param);
+
+    boolean validationPickingCard(PrePickingCardValidationParam param);
 }

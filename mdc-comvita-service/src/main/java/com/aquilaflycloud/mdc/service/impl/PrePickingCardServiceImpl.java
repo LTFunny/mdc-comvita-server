@@ -243,7 +243,7 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
 
 
     @Override
-    public Boolean validationPickingCard(PrePickingCardValidationParam param) {
+    public boolean validationPickingCard(PrePickingCardValidationParam param) {
         PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
         .eq(PrePickingCard::getPickingCode,param.getPickingCode())
         .eq(PrePickingCard::getPickingState,PickingCardStateEnum.NO_SALE));

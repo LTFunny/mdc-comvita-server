@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.service;
 
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
+import com.aquilaflycloud.mdc.param.pre.PreConfirmOrderParam;
 import com.aquilaflycloud.mdc.param.pre.PreOrderInfoGetParam;
 import com.aquilaflycloud.mdc.param.pre.PreOrderInfoPageParam;
 import com.aquilaflycloud.mdc.param.pre.PreStayConfirmOrderParam;
@@ -36,6 +37,13 @@ public interface PreOrderInfoService{
      */
     PreOrderInfoGetResult getConfirmOrderInfo(PreOrderInfoGetParam param);
 
+
+    /**
+     * 验证订单确认
+     * @param param
+     * @return
+     */
+    int validationConfirmOrder(PreConfirmOrderParam param);
 
 
 }

@@ -16,6 +16,9 @@ import java.util.List;
 @Data
 public class PreConfirmOrderParam {
 
+    @ApiModelProperty(value = "订单id")
+    private Long id;
+
     @ApiModelProperty(value = "订单状态" , required = true)
     @NotNull(message = "订单状态不能为空")
     private OrderInfoStateEnum orderState;
@@ -24,8 +27,11 @@ public class PreConfirmOrderParam {
     private String ticketUrl;
 
     @ApiModelProperty(value = "提货卡号")
-    private List<PrePickingCard> prePickingCardList;
+    private List<String> prePickingCardList;
 
     @ApiModelProperty(value = "不通过原因")
     private String reason;
+
+    @ApiModelProperty(value = "是否通过 0.通过 1.不通过")
+    private int isThrough;
 }

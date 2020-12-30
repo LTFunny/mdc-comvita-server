@@ -23,9 +23,10 @@ public class PrePickingCardApi {
     @Resource
     private PrePickingCardService prePickingCardService;
 
-    /*@ApiOperation(value = "生成待确认订单", notes = "生成待确认订单")
-    @ApiMapping(value = "comvita.order.info.statconfirm.add", method = RequestMethod.POST)
-    public Boolean addStatConfirmOrder(PrePickingCardValidationParam param) {
-        return new BaseResult<Integer>().setResult(prePickingCardService.addStatConfirmOrder(param));
-    }*/
+    @ApiOperation(value = "验证提货卡", notes = "验证提货卡")
+    @ApiMapping(value = "comvita.picking.card.validation", method = RequestMethod.POST)
+    public boolean addStatConfirmOrder(PrePickingCardValidationParam param) {
+        return prePickingCardService.validationPickingCard(param);
+    }
+
 }

@@ -17,8 +17,7 @@ import java.io.Serializable;
 @Data
 public class PreOrderInfoPageParam extends PageAuthParam<PreOrderInfo> implements Serializable {
 
-    @ApiModelProperty(value = "订单状态", required = true)
-    @NotNull(message = "订单状态不能为空")
+    @ApiModelProperty(value = "订单状态")
     private OrderInfoStateEnum orderState;
 
     @ApiModelProperty(value = "导购员id", required = true)
