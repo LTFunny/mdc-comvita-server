@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTyoeEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
@@ -10,8 +11,10 @@ import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.result.pre.PreOrderInfoGetResult;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import org.springframework.stereotype.Service;
@@ -70,6 +73,9 @@ import java.util.List;
         if(orderInfo < 0){
             throw new ServiceException("生成待确认订单失败。");
         }
+
+
+
         MemberInfo memberInfo = memberInfoMapper.normalSelectById(param.getMemberId());
         String content = memberInfo == null ? "" : memberInfo.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"通过扫码填写信息生成待确认订单";

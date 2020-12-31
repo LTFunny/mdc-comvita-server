@@ -35,4 +35,6 @@ public interface PreOrderInfoService{
     @Transactional
     void verificationOrder(PreOrderVerificationParam param);
 
+
+
 }
