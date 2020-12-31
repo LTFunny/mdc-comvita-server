@@ -15,12 +15,7 @@ public enum ChildOrderInfoStateEnum {
     /**
      * 订单子状态
      */
-    STAYRESERVATION(1,"待预约"),
-    PARTRESERVATION(2,"部分预约"),
-    WAITINGDELIVERY(3,"待提货"),
-    PARTWAITINGDELIVERY(4,"部分待提货"),
-    STAYSENDGOODS(5, "待发货"),
-    BEENCOMPLETED(9,"已完成"),
+    RESERVATION_DELIVERY(1,"待预约+待提货"),
     ;
 
 

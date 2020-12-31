@@ -33,7 +33,6 @@ import com.aquilaflycloud.mdc.param.exchange.OrderPageParam;
 import com.aquilaflycloud.mdc.param.member.MemberPageParam;
 import com.aquilaflycloud.mdc.param.member.RewardRecordPageParam;
 import com.aquilaflycloud.mdc.param.pre.PrePickingCardPageParam;
-import com.aquilaflycloud.mdc.param.shop.ShopInfoListParam;
 import com.aquilaflycloud.mdc.param.system.*;
 import com.aquilaflycloud.mdc.result.system.SqlResult;
 import com.aquilaflycloud.mdc.service.*;
@@ -61,7 +60,10 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -84,8 +86,6 @@ public class SystemFileServiceImpl implements SystemFileService {
     private SystemSqlInjectorService systemSqlInjectorService;
     @Resource
     private MemberService memberService;
-    @Resource
-    private ShopInfoService shopInfoService;
     @Resource
     private ExchangeService exchangeService;
     @Resource
@@ -111,11 +111,6 @@ public class SystemFileServiceImpl implements SystemFileService {
             case MEMBER_REWARD: {
                 RewardRecordPageParam exportParam = buildParam(param.getExportParam(), RewardRecordPageParam.class, "mdc:reward:list");
                 page = memberRewardService.page(exportParam);
-                break;
-            }
-            case SHOP_INFO: {
-                ShopInfoListParam exportParam = buildParam(param.getExportParam(), ShopInfoListParam.class, "mdc:system:shop:info:page");
-                page = shopInfoService.page(exportParam);
                 break;
             }
             case EXCHANGE_ORDER: {
