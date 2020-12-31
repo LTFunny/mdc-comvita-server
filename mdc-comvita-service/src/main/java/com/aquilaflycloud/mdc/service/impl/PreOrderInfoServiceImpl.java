@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTyoeEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
@@ -11,6 +12,7 @@ import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PreOrderInfoGetResult;
+import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -54,7 +56,6 @@ import java.util.List;
     private PreOrderGoodsMapper preOrderGoodsMapper;
 
 
-
     @Override
     public int addStatConfirmOrder(PreStayConfirmOrderParam param) {
         PreOrderInfo preOrderInfo = new PreOrderInfo();
@@ -72,6 +73,9 @@ import java.util.List;
         if(orderInfo < 0){
             throw new ServiceException("生成待确认订单失败。");
         }
+
+
+
         MemberInfo memberInfo = memberInfoMapper.normalSelectById(param.getMemberId());
         String content = memberInfo == null ? "" : memberInfo.getMemberName() + "通过扫码填写信息生成待确认订单";
         orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),memberInfo == null ? "" : memberInfo.getMemberName(),preOrderInfo.getId(),content);

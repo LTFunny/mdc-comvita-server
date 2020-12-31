@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * MemberFolksonomyEventAspect
@@ -40,7 +42,7 @@ public class MemberFolksonomyEventAspect {
             if (annotation != null) {
                 Object param = joinPoint.getArgs()[0];
                 JSONObject paramJson = JSONUtil.parseObj(param);
-                Long businessId = null;
+                List<Long> businessId = new ArrayList<>();
                 switch (annotation.value()[0]) {
                     case "comvita.member.adShare.add":
                     case "comvita.member.lotteryShare.add":
@@ -50,7 +52,12 @@ public class MemberFolksonomyEventAspect {
                     case "comvita.member.scenicSpotsShare.add":
                     case "comvita.member.adClick.add":
                     case "comvita.member.recommendClick.add": {
-                        businessId = paramJson.getLong("businessId");
+                        businessId.add(paramJson.getLong("businessId"));
+                        break;
+                    }
+                    case "comvita.order.info.statconfirm.add": {
+                        businessId.add(paramJson.getLong("goodsId"));
+                        businessId.add(paramJson.getLong("activityInfoId"));
                         break;
                     }
                     default:
@@ -62,8 +69,11 @@ public class MemberFolksonomyEventAspect {
         }
     }
 
-    private void saveFolksonomyMemberRel(Long businessId) {
-        folksonomyService.saveFolksonomyMemberRel(businessId);
+
+    private void saveFolksonomyMemberRel(List<Long> businessId) {
+        businessId.stream().forEach(k ->{
+            folksonomyService.saveFolksonomyMemberRel(k);
+        });
     }
 
     /**
