@@ -15,6 +15,7 @@ public enum ChildOrderInfoStateEnum {
     /**
      * 订单子状态
      */
+    STATELESS(0,"无状态"),
     RESERVATION_DELIVERY(1,"待预约+待提货"),
     ;
 
