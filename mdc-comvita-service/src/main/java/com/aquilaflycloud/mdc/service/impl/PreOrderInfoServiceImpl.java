@@ -10,10 +10,8 @@ import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
-import com.aquilaflycloud.mdc.result.pre.PreOrderInfoGetResult;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import org.springframework.stereotype.Service;
@@ -73,7 +71,8 @@ import java.util.List;
             throw new ServiceException("生成待确认订单失败。");
         }
         MemberInfo memberInfo = memberInfoMapper.normalSelectById(param.getMemberId());
-        String content = memberInfo == null ? "" : memberInfo.getMemberName() + "通过扫码填写信息生成待确认订单";
+        String content = memberInfo == null ? "" : memberInfo.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
+                +"通过扫码填写信息生成待确认订单";
         orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),memberInfo == null ? "" : memberInfo.getMemberName(),preOrderInfo.getId(),content);
         return orderInfo;
     }
@@ -131,10 +130,10 @@ import java.util.List;
         preOrderGoodsMapper.insertAllBatch(orderGoodsList);
         String content;
         if(param.getIsThrough() == 0){
-            content = ("导购员：" + preOrderInfo.getGuideName()+ "对订单：" +
+            content = ("导购员：" + preOrderInfo.getGuideName()+ DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")+ " 对订单：" +
                     preOrderInfo.getOrderCode() + "进行了确认。");
         }else {
-            content = ("导购员：" + preOrderInfo.getGuideName()+ "对订单：" +
+            content = ("导购员：" + preOrderInfo.getGuideName()+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss") +" 对订单：" +
                     preOrderInfo.getOrderCode() + "进行了不通过，不通过的原因为：" + preOrderInfo.getReason());
         }
         orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),preOrderInfo.getGuideName(),preOrderInfo.getId(),content);
@@ -182,6 +181,10 @@ import java.util.List;
             preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
         }
         preOrderInfoMapper.updateById(preOrderInfo);
+
+        String content = orderGoods.getVerificaterName() + "核销员于" +DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
+                + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了核销。";
+        orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),orderGoods.getVerificaterName(),preOrderInfo.getId(),content);
     }
 
 
