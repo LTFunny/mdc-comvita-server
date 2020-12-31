@@ -11,6 +11,7 @@ import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PreOrderInfoGetResult;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
+import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
@@ -34,7 +35,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     private PreOrderInfoMapper preOrderInfoMapper;
 
     @Resource
-    private PreOrderOperateRecordMapper  orderOperateRecordMapper;
+    private PreOrderOperateRecordService orderOperateRecordService;
 
     @Resource
     private MemberInfoMapper memberInfoMapper;
@@ -50,18 +51,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Resource
     private PreOrderGoodsMapper preOrderGoodsMapper;
-
-
-
-    public void orderOperateRecordLog(Long tenantId,String operatorName,Long orderId,String content){
-        //记录操作日志
-        PreOrderOperateRecord preOrderOperateRecord = new PreOrderOperateRecord();
-        preOrderOperateRecord.setTenantId(tenantId);
-        preOrderOperateRecord.setOperatorName(operatorName);
-        preOrderOperateRecord.setOrderId(orderId);
-        preOrderOperateRecord.setOperatorContent(content);
-        orderOperateRecordMapper.insert(preOrderOperateRecord);
-    }
 
 
 
@@ -84,7 +73,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         }
         MemberInfo memberInfo = memberInfoMapper.normalSelectById(param.getMemberId());
         String content = memberInfo == null ? "" : memberInfo.getMemberName() + "通过扫码填写信息生成待确认订单";
-        orderOperateRecordLog(preOrderInfo.getTenantId(),memberInfo == null ? "" : memberInfo.getMemberName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),memberInfo == null ? "" : memberInfo.getMemberName(),preOrderInfo.getId(),content);
         return orderInfo;
     }
 
@@ -176,7 +165,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             content = ("导购员：" + preOrderInfo.getGuideName()+ "对订单：" +
                     preOrderInfo.getOrderCode() + "进行了不通过，不通过的原因为：" + preOrderInfo.getReason());
         }
-        orderOperateRecordLog(preOrderInfo.getTenantId(),preOrderInfo.getGuideName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),preOrderInfo.getGuideName(),preOrderInfo.getId(),content);
     }
 
     @Override
@@ -210,7 +199,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         //记录日志
         String content = preOrderGoods.getReserveName() +DateUtil.format(new Date(), "yyyy-MM-dd")+" 对" +
                 preOrderGoods.getGoodsName() + "进行了预约，提货卡为：" + preOrderGoods.getCardCode();
-        orderOperateRecordLog(orderInfo.getTenantId(),preOrderGoods.getReserveName(),orderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(orderInfo.getTenantId(),preOrderGoods.getReserveName(),orderInfo.getId(),content);
     }
 
 
