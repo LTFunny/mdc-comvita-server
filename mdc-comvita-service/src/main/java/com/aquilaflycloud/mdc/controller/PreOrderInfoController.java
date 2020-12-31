@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.controller;
 
 import com.aquilaflycloud.mdc.param.pre.PreConfirmOrderParam;
+import com.aquilaflycloud.mdc.param.pre.PreOrderVerificationParam;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
 import io.swagger.annotations.Api;
@@ -28,5 +29,10 @@ public class PreOrderInfoController {
         orderInfoService.validationConfirmOrder(param);
     }
 
+    @ApiOperation(value = "核销订单", notes = "核销订单")
+    @ApiMapping(value = "backend.comvita.order.verification", method = RequestMethod.POST)
+    public void verificationOrder(PreOrderVerificationParam param) {
+        orderInfoService.verificationOrder(param);
+    }
 
 }

@@ -28,9 +28,11 @@ public interface PreOrderInfoService{
     void validationConfirmOrder(PreConfirmOrderParam param);
 
 
-
-
-
-
+    /**
+     * 核销提货卡
+     * @param param
+     */
+    @Transactional
+    void verificationOrder(PreOrderVerificationParam param);
 
 }

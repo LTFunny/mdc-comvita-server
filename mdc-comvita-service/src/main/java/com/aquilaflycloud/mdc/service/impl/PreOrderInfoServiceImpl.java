@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTyoeEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.aquilaflycloud.mdc.mapper.*;
@@ -29,7 +30,7 @@ import java.util.List;
  * @Version 1.0
  */
 @Service
-public class PreOrderInfoServiceImpl implements PreOrderInfoService {
+        public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Resource
     private PreOrderInfoMapper preOrderInfoMapper;
@@ -139,9 +140,49 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),preOrderInfo.getGuideName(),preOrderInfo.getId(),content);
     }
 
+    @Override
+    public void verificationOrder(PreOrderVerificationParam param) {
+        PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+        .eq(PrePickingCard::getPassword,param.getPassword())
+        .eq(PrePickingCard::getPickingState,PickingCardStateEnum.RESERVE));
+        if(prePickingCard == null){
+            throw new ServiceException("该兑换码有异常,请重新输入。");
+        }
+        prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
+        int updateCard = prePickingCardMapper.updateById(prePickingCard);
+        if(updateCard < 0){
+            throw new ServiceException("核销失败");
+        }
+        PreOrderGoods orderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+        .eq(PreOrderGoods::getCardId,prePickingCard.getId()));
+        orderGoods.setVerificaterId(param.getVerificaterId());
+        orderGoods.setVerificaterName(param.getVerificaterName());
+        orderGoods.setVerificaterOrgIds(param.getVerificaterOrgIds());
+        orderGoods.setVerificaterOrgNames(param.getVerificaterOrgNames());
+        orderGoods.setTakeTime(new Date());
+        preOrderGoodsMapper.updateById(orderGoods);
+        orderGoods.setCardPsw(param.getPassword());
+        List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+            .eq(PreOrderGoods::getOrderId,orderGoods.getOrderId())
+            .notIn(PreOrderGoods::getGoodsType,OrderGoodsTyoeEnum.GIFTS));
 
-
-
+        int result = preOrderGoodsMapper.pickingCardGet(orderGoods.getOrderId(), PickingCardStateEnum.VERIFICATE);
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(orderGoods.getOrderId());
+        List<PreOrderGoods> OrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,orderGoods.getOrderId())
+                .eq(PreOrderGoods::getGoodsType,OrderGoodsTyoeEnum.GIFTS));
+        if(preOrderGoodsList.size() == result){
+            preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.STATELESS);
+            if(OrderGoodsList.size() > 0) {
+                preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
+            }else {
+                preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+            }
+        }else {
+            preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
+        }
+        preOrderInfoMapper.updateById(preOrderInfo);
+    }
 
 
 }
