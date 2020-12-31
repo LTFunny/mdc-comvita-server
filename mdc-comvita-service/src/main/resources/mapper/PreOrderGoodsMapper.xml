@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper">
+
+
+    <select id="pickingCardGet"  parameterType="java.lang.Long" resultType="java.lang.Integer">
+         SELECT
+          COUNT(card.picking_state)
+        FROM
+          `pre_order_goods` or_goods
+          LEFT JOIN `pre_picking_card` card
+            ON or_goods.card_id = card.id
+        WHERE or_goods.order_id = #{orderId}
+        and card.picking_state = #{cardState}
+    </select>
+
+
+</mapper>

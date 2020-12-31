@@ -78,34 +78,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     }
 
     @Override
-    public IPage<PreOrderInfo> pagePreOrderInfo(PreOrderInfoPageParam param) {
-        IPage<PreOrderInfo> orderInfoIPage = null;
-        if(param.getOrderState().getType() == 1) {
-           orderInfoIPage = preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
-                    .eq(PreOrderInfo::getGuideId, param.getGuideId())
-                    .eq(PreOrderInfo::getOrderState, param.getOrderState()));
-        }else {
-            orderInfoIPage = preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
-                    .eq(PreOrderInfo::getGuideId, param.getGuideId())
-                    .notIn(PreOrderInfo::getOrderState,OrderInfoStateEnum.STAYCONFIRM));
-        }
-        return orderInfoIPage;
-    }
-
-    @Override
-    public PreOrderInfoGetResult getConfirmOrderInfo(PreOrderInfoGetParam param) {
-        PreOrderInfoGetResult orderInfoGetResult = new PreOrderInfoGetResult();
-        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getId());
-        BeanUtil.copyProperties(preOrderInfo,orderInfoGetResult);
-        PreActivityInfo preActivityInfo = activityInfoMapper.selectById(preOrderInfo.getActivityInfoId());
-        if(null != preActivityInfo){
-            PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
-            orderInfoGetResult.setPreGoodsInfo(preGoodsInfo);
-        }
-        return orderInfoGetResult;
-    }
-
-    @Override
     public void validationConfirmOrder(PreConfirmOrderParam param) {
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getId());
         if(null != preOrderInfo){
@@ -114,7 +86,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         BeanUtil.copyProperties(param,preOrderInfo);
         if(param.getIsThrough() == 0){
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYRESERVATION);
-            preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.STAYRESERVATION);
         }
         int updateOrder = preOrderInfoMapper.updateById(preOrderInfo);
         if(updateOrder < 0){
@@ -168,6 +139,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),preOrderInfo.getGuideName(),preOrderInfo.getId(),content);
     }
 
+
     @Override
     public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
         PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
@@ -191,10 +163,17 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         //更改提货卡状态
         prePickingCard.setPickingState(PickingCardStateEnum.RESERVE);
         prePickingCardMapper.updateById(prePickingCard);
-        //List<String> stateList = preOrderInfoMapper.pickingCardGet(orderInfo.getId());
-        //更改订单状态
-        orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
-        orderInfo.setChildOrderState(ChildOrderInfoStateEnum.PARTRESERVATION);
+
+        //当全部提货卡预约完 状态改为待提货
+        List<PreOrderGoods> orderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,orderInfo.getId()));
+        int result = preOrderGoodsMapper.pickingCardGet(orderInfo.getId(),PickingCardStateEnum.RESERVE);
+        if(result == orderGoodsList.size()){
+            orderInfo.setChildOrderState(null);
+            orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
+        }else {
+            orderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
+        }
         preOrderInfoMapper.updateById(orderInfo);
         //记录日志
         String content = preOrderGoods.getReserveName() +DateUtil.format(new Date(), "yyyy-MM-dd")+" 对" +

@@ -19,21 +19,6 @@ public interface PreOrderInfoService{
      */
     int addStatConfirmOrder(PreStayConfirmOrderParam param);
 
-    /**
-     * 订单确认列表
-     * @param param
-     * @return
-     */
-    IPage<PreOrderInfo> pagePreOrderInfo(PreOrderInfoPageParam param);
-
-
-    /**
-     * 订单确认详情
-     * @param param
-     * @return
-     */
-    PreOrderInfoGetResult getConfirmOrderInfo(PreOrderInfoGetParam param);
-
 
     /**
      * 验证订单确认
