@@ -32,29 +32,4 @@ public class PreOrderInfoApi {
         return new BaseResult<Integer>().setResult(orderInfoService.addStatConfirmOrder(param));
     }
 
-    @ApiOperation(value = "订单确认列表", notes = "订单确认列表")
-    @ApiMapping(value = "comvita.order.info.confirm.page", method = RequestMethod.POST)
-    public IPage<PreOrderInfo> pagePreOrderInfo(PreOrderInfoPageParam param) {
-        return orderInfoService.pagePreOrderInfo(param);
-    }
-
-    @ApiOperation(value = "订单确认详情", notes = "订单确认详情")
-    @ApiMapping(value = "comvita.order.info.confirm.get", method = RequestMethod.POST)
-    public PreOrderInfoGetResult getConfirmOrderInfo(PreOrderInfoGetParam param) {
-        return orderInfoService.getConfirmOrderInfo(param);
-    }
-
-    @ApiOperation(value = "对订单进行确认", notes = "对订单进行确认")
-    @ApiMapping(value = "comvita.order.info.confirm.validation", method = RequestMethod.POST)
-    public void validationConfirmOrder(PreConfirmOrderParam param) {
-         orderInfoService.validationConfirmOrder(param);
-    }
-
-    @ApiOperation(value = "预约自提", notes = "预约自提")
-    @ApiMapping(value = "comvita.order.goods.reservation", method = RequestMethod.POST)
-    public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
-        orderInfoService.reservationOrderGoods(param);
-    }
-
-
 }

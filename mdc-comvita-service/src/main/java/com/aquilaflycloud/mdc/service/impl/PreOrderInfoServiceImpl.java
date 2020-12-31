@@ -140,46 +140,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     }
 
 
-    @Override
-    public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
-        PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
-                .eq(PrePickingCard::getPickingCode,param.getPickingCode())
-                .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
-        if(prePickingCard == null){
-            throw new ServiceException("提货卡状态异常，无法进行绑定");
-        }
-        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getCardId,prePickingCard.getId()));
-        if(preOrderGoods == null){
-            throw new ServiceException("订单明细未找到该提货卡关联的数据。");
-        }
-        BeanUtil.copyProperties(param,preOrderGoods);
-        PreOrderInfo orderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
-        preOrderGoods.setReserveId(orderInfo.getMemberId());
-        int updateOrderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
-        if(updateOrderGoods < 0){
-            throw new ServiceException("预约失败。");
-        }
-        //更改提货卡状态
-        prePickingCard.setPickingState(PickingCardStateEnum.RESERVE);
-        prePickingCardMapper.updateById(prePickingCard);
 
-        //当全部提货卡预约完 状态改为待提货
-        List<PreOrderGoods> orderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,orderInfo.getId()));
-        int result = preOrderGoodsMapper.pickingCardGet(orderInfo.getId(),PickingCardStateEnum.RESERVE);
-        if(result == orderGoodsList.size()){
-            orderInfo.setChildOrderState(null);
-            orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
-        }else {
-            orderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
-        }
-        preOrderInfoMapper.updateById(orderInfo);
-        //记录日志
-        String content = preOrderGoods.getReserveName() +DateUtil.format(new Date(), "yyyy-MM-dd")+" 对" +
-                preOrderGoods.getGoodsName() + "进行了预约，提货卡为：" + preOrderGoods.getCardCode();
-        orderOperateRecordService.addOrderOperateRecordLog(orderInfo.getTenantId(),preOrderGoods.getReserveName(),orderInfo.getId(),content);
-    }
 
 
 

@@ -14,5 +14,25 @@
         and card.picking_state = #{cardState}
     </select>
 
+    <select id="orderGoodsPage"  parameterType="com.aquilaflycloud.mdc.param.pre.PreOrderGoodsPageParam"
+            resultType="com.aquilaflycloud.mdc.result.pre.PreOrderGoodsPageResult">
+       SELECT
+          or_goods.goods_id,
+          or_goods.goods_name,
+          or_goods.goods_picture,
+          or_goods.goods_description,
+          or_goods.reserve_shop,
+          or_goods.reserve_start_time,
+          or_goods.reserve_end_time
+        FROM
+          `pre_order_goods` or_goods
+          LEFT JOIN `pre_order_info` info
+            ON or_goods.`order_id` = info.`id`
+          LEFT JOIN `pre_picking_card` card
+            ON or_goods.`card_id` = card.`id`
+        WHERE info.`member_id` = #{param.memberId}
+        AND card.`picking_state` = #{param.pickingState}
+    </select>
+
 
 </mapper>

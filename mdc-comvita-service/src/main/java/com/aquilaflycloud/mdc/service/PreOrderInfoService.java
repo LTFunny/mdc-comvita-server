@@ -1,9 +1,7 @@
 package com.aquilaflycloud.mdc.service;
 
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
-import com.aquilaflycloud.mdc.result.pre.PreOrderInfoGetResult;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @Author pengyongliang
@@ -17,6 +15,7 @@ public interface PreOrderInfoService{
      * @param param
      * @return
      */
+    @Transactional
     int addStatConfirmOrder(PreStayConfirmOrderParam param);
 
 
@@ -25,13 +24,13 @@ public interface PreOrderInfoService{
      * @param param
      * @return
      */
+    @Transactional
     void validationConfirmOrder(PreConfirmOrderParam param);
 
 
-    /**
-     * 预约自提
-     * @param param
-     */
-    void reservationOrderGoods(PreReservationOrderGoodsParam param);
+
+
+
+
 
 }
