@@ -180,13 +180,13 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         orderGoods.setCardPsw(param.getPassword());
         List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
             .eq(PreOrderGoods::getOrderId,orderGoods.getOrderId())
-            .notIn(PreOrderGoods::getGoodsType,OrderGoodsTyoeEnum.GIFTS));
+            .notIn(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
 
         int result = preOrderGoodsMapper.pickingCardGet(orderGoods.getOrderId(), PickingCardStateEnum.VERIFICATE);
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(orderGoods.getOrderId());
         List<PreOrderGoods> OrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,orderGoods.getOrderId())
-                .eq(PreOrderGoods::getGoodsType,OrderGoodsTyoeEnum.GIFTS));
+                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
         if(preOrderGoodsList.size() == result){
             preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.STATELESS);
             if(OrderGoodsList.size() > 0) {
@@ -225,8 +225,14 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             result.setReservationNum(cards.size());
         }else {
             result.setIdentificationState(order.getOrderState());
-            result.setIngdeliveryNum(cards.size());
-            result.setReservationNum(cards.size());
+            if(cardStateEnum.equals(PickingCardStateEnum.VERIFICATE)){
+                result.setIngdeliveryNum(cards.size());
+                result.setReservationNum(0);
+            }
+            if(cardStateEnum.equals(PickingCardStateEnum.RESERVE)){
+                result.setIngdeliveryNum(0);
+                result.setReservationNum(cards.size());
+            }
         }
         return result;
     }
