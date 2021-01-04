@@ -133,12 +133,12 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
             params = ReUtil.findAll("(?<=\\{\\{)[^}]*(?=\\.)", content, 0);
             //验证消息模板格式是否符合业务功能需求
             switch (param.getMessageType()) {
-                case APPLYRECORDAUDIT: {
+                /*case APPLYRECORDAUDIT: {
                     if (params.size() != 4) {
                         throw new ServiceException(MiniMessageTypeEnum.APPLYRECORDAUDIT.getName() + "消息模板字段需要4个");
                     }
                     break;
-                }
+                }*/
                 case PREORDERCHANGE: {
                     if (params.size() != 4) {
                         throw new ServiceException(MiniMessageTypeEnum.PREORDERCHANGE.getName() + "消息模板字段需要4个");
@@ -170,8 +170,8 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
                     break;
                 }
                 case PREGOODSTAKE: {
-                    if (params.size() != 3) {
-                        throw new ServiceException(MiniMessageTypeEnum.PREGOODSTAKE.getName() + "消息模板字段需要3个");
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREGOODSTAKE.getName() + "消息模板字段需要4个");
                     }
                     break;
                 }
