@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.pre.PreRuleInfoTypeEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -36,7 +37,7 @@ public class PreRuleInfo implements Serializable {
      */
     @TableField(value = "rule_type")
     @ApiModelProperty(value = "规则类型(3-下单满减、2-下单折扣、1-下单即送)")
-    private Integer ruleType;
+    private PreRuleInfoTypeEnum ruleType;
 
     /**
      * 类型详情  保存为json串 样例如: type为下单满减 满100减10  {"full_price":"100","reduce_price":"10"}

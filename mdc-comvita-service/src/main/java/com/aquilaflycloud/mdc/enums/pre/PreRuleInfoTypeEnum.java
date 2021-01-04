@@ -6,29 +6,18 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 
 /**
  * @Author pengyongliang
- * @Date 2020/12/29 16:00
+ * @Date 2021/1/4 14:21
  * @Version 1.0
  */
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
-public enum  OrderInfoStateEnum {
+public enum PreRuleInfoTypeEnum {
 
-    //订单状态
-    STAYCONFIRM(1, "待确认"),
-    STAYRESERVATION(2, "待预约"),
-    WAITINGDELIVERY (3, "待提货"),
-    STAYSENDGOODS(4, "待发货"),
-    STAYSIGN(5,"待签收"),
-    BEENCOMPLETED(6,"已完成"),
-    AFTERSALEREFUND(7,"售后/退款"),
-    CONFIRMRECEIPT(8,"确认签收"),
-
-    //给会员订单显示标识用的
-
-    PARTRESERVATION(9,"部分预约"),
-    PARTINGDELIVERY(10,"部分提货"),
+    ORDER_SEND(1, "下单即送"),
+    ORDER_DISCOUNT(2, "下单折扣"),
+    ORDER_REDUCED(3, "下单满减"),
     ;
 
-    OrderInfoStateEnum(int type, String name) {
+    PreRuleInfoTypeEnum(int type, String name) {
         this.type = type;
         this.name = name;
     }

@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
  * @Version 1.0
  */
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
-public enum OrderGoodsTyoeEnum {
+public enum OrderGoodsTypeEnum {
 
     /**
      * 商品类型(1-预售商品、2-赠品、3-普通商品)
@@ -20,7 +20,7 @@ public enum OrderGoodsTyoeEnum {
     ORDINARY(3,"普通商品"),
     ;
 
-    OrderGoodsTyoeEnum(int type, String name) {
+    OrderGoodsTypeEnum(int type, String name) {
         this.type = type;
         this.name = name;
     }
