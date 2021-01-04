@@ -8,19 +8,19 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * PreGoodsInfoListParam
+ * AdministrationListParam
  * <p>
  * zly
  */
 @Accessors(chain = true)
 @Data
-public class PreGoodsInfoListParam extends PageParam {
+public class AdministrationListParam extends PageParam {
 
-    @ApiModelProperty(value = "商品名称")
-    private String goodsName;
+    @ApiModelProperty(value = "核销门店ids")
+    private String verificaterOrgIds;
 
-    @ApiModelProperty(value = "商品编号")
-    private String goodsCode;
+    @ApiModelProperty(value = "门店id")
+    private Long shopId;
 
     @ApiModelProperty(value = "商品状态(0-在售 1-下架)")
     private GoodsStateStateEnum goodsState;

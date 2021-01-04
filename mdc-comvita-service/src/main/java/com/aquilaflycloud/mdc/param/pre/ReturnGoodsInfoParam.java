@@ -1,7 +1,7 @@
 package com.aquilaflycloud.mdc.param.pre;
 
 import com.aquilaflycloud.mdc.enums.pre.GoodsStateStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTyoeEnum;
+import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -44,7 +44,7 @@ public class ReturnGoodsInfoParam  {
      */
     @ApiModelProperty(value = "商品类型(1-预售商品、2-赠品、3-普通商品)")
     @NotNull(message = "商品类型不能为空")
-    private OrderGoodsTyoeEnum goodsType;
+    private OrderGoodsTypeEnum goodsType;
 
     /**
      * 零售价
