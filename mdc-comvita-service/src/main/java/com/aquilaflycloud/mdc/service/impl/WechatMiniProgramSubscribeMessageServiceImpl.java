@@ -1,6 +1,8 @@
 package com.aquilaflycloud.mdc.service.impl;
 
+import cn.binarywang.wx.miniapp.api.WxMaMsgService;
 import cn.binarywang.wx.miniapp.api.WxMaSubscribeService;
+import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.binarywang.wx.miniapp.bean.template.WxMaPubTemplateTitleListResult;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -14,17 +16,20 @@ import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.WechatMiniProgramMessageMapper;
 import com.aquilaflycloud.mdc.model.wechat.WechatMiniProgramMessage;
 import com.aquilaflycloud.mdc.param.wechat.*;
+import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gitee.sop.servercommon.exception.ServiceException;
+import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +38,7 @@ import java.util.stream.Collectors;
  * @author star
  * @date 2020-03-03
  */
+@Slf4j
 @Service
 public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniProgramSubscribeMessageService {
     @Resource
@@ -125,16 +131,58 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
         List<String> params = null;
         if (StrUtil.isNotBlank(content)) {
             params = ReUtil.findAll("(?<=\\{\\{)[^}]*(?=\\.)", content, 0);
-        }
-        //验证消息模板格式是否符合业务功能需求
-        switch (param.getMessageType()) {
-            case APPLYRECORDAUDIT: {
-                if (params.size() != 4) {
-                    throw new ServiceException(MiniMessageTypeEnum.APPLYRECORDAUDIT.getName() + "消息模板字段需要4个");
+            //验证消息模板格式是否符合业务功能需求
+            switch (param.getMessageType()) {
+                case APPLYRECORDAUDIT: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.APPLYRECORDAUDIT.getName() + "消息模板字段需要4个");
+                    }
+                    break;
                 }
-                break;
+                case PREORDERCHANGE: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERCHANGE.getName() + "消息模板字段需要4个");
+                    }
+                    break;
+                }
+                case PREORDERDELIVERY: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERDELIVERY.getName() + "消息模板字段需要5个");
+                    }
+                    break;
+                }
+                case PREORDERREFUND: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERREFUND.getName() + "消息模板字段需要4个");
+                    }
+                    break;
+                }
+                case PREORDERALLCONSUME: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERALLCONSUME.getName() + "消息模板字段需要5个");
+                    }
+                    break;
+                }
+                case PREGOODSCONSUME: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREGOODSCONSUME.getName() + "消息模板字段需要3个");
+                    }
+                    break;
+                }
+                case PREGOODSTAKE: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREGOODSTAKE.getName() + "消息模板字段需要3个");
+                    }
+                    break;
+                }
+                case PREORDERAUDIT: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERAUDIT.getName() + "消息模板字段需要4个");
+                    }
+                    break;
+                }
+                default:
             }
-            default:
         }
         if (message == null) {
             message = new WechatMiniProgramMessage();
@@ -200,7 +248,56 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
         String appId = MdcUtil.getOtherAppId();
         return wechatMiniProgramMessageMapper.selectList(Wrappers.<WechatMiniProgramMessage>lambdaQuery()
                 .eq(WechatMiniProgramMessage::getAppId, appId)
-                .in(WechatMiniProgramMessage::getMessageType, param.getMessageType())
+                .in(WechatMiniProgramMessage::getMessageType, param.getMessageTypeList())
         ).stream().map(WechatMiniProgramMessage::getPriTmplId).collect(Collectors.toList());
+    }
+
+    /**
+     * 发送审核结果通知,小程序订阅消息
+     *
+     * @param miniMemberInfos 需要发送的小程序会员对象列表
+     * @param messageType     发送订阅消息类型
+     * @param id              业务数据id,消息需跳转小程序页面时传入
+     * @param contents        发送字段对应内容
+     */
+    @Override
+    public void sendMiniMessage(List<MiniMemberInfo> miniMemberInfos, MiniMessageTypeEnum messageType, Long id, String... contents) {
+        MdcUtil.getTtlExecutorService().submit(() -> {
+            WechatMiniProgramMessage message = wechatMiniProgramMessageMapper.selectOne(Wrappers.<WechatMiniProgramMessage>lambdaQuery()
+                    .eq(WechatMiniProgramMessage::getMessageType, messageType)
+            );
+            if (message != null) {
+                Map<String, List<MiniMemberInfo>> miniMap = miniMemberInfos.stream().collect(Collectors.groupingBy(MiniMemberInfo::getAppId));
+                for (Map.Entry<String, List<MiniMemberInfo>> entry : miniMap.entrySet()) {
+                    //微信小程序报名才发送订阅消息
+                    if (StrUtil.startWith(entry.getKey(), "wx")) {
+                        WxMaMsgService wxMaMsgService = wechatMiniService.getWxMaServiceByAppId(entry.getKey()).getMsgService();
+                        for (MiniMemberInfo miniMemberInfo : entry.getValue()) {
+                            WxMaSubscribeMessage subscribeMessage = new WxMaSubscribeMessage();
+                            subscribeMessage.setToUser(miniMemberInfo.getOpenId());
+                            subscribeMessage.setMiniprogramState(message.getMiniState().name());
+                            subscribeMessage.setTemplateId(message.getPriTmplId());
+                            if (StrUtil.isNotBlank(message.getPagePath())) {
+                                subscribeMessage.setPage(id != null ? message.getPagePath() + "?id=" + message.getPagePath() : message.getPagePath());
+                            }
+                            subscribeMessage.setLang(message.getMiniLang().name());
+                            String[] paramName = message.getParamName().split(",");
+                            for (int i = 0; i < paramName.length; i++) {
+                                WxMaSubscribeMessage.Data data = new WxMaSubscribeMessage.Data();
+                                String name = paramName[i];
+                                data.setName(name);
+                                data.setValue(contents[i]);
+                                subscribeMessage.addData(data);
+                            }
+                            try {
+                                wxMaMsgService.sendSubscribeMsg(subscribeMessage);
+                            } catch (WxErrorException e) {
+                                log.error("发送小程序订阅消息失败", e);
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 }

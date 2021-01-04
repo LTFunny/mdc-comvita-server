@@ -3,8 +3,10 @@ package com.aquilaflycloud.mdc.service;
 import cn.binarywang.wx.miniapp.api.WxMaSubscribeService;
 import cn.binarywang.wx.miniapp.bean.template.WxMaPubTemplateTitleListResult;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
+import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.model.wechat.WechatMiniProgramMessage;
 import com.aquilaflycloud.mdc.param.wechat.*;
+import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.util.List;
@@ -39,5 +41,7 @@ public interface WechatMiniProgramSubscribeMessageService {
     List<WechatMiniProgramMessage> listMessage(MiniMessageListParam param);
 
     List<String> listTmplId(MiniMessageTmplIdListParam param);
+
+    void sendMiniMessage(List<MiniMemberInfo> miniMemberInfos, MiniMessageTypeEnum messageType, Long id, String... contents);
 }
 

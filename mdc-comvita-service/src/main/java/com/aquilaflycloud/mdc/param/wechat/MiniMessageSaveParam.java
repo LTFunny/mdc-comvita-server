@@ -42,8 +42,7 @@ public class MiniMessageSaveParam {
     @NotNull(message = "模板类型不能为空")
     private MiniMessageTmplTypeEnum type;
 
-    @ApiModelProperty(value = "小程序页面路径", required = true)
-    @NotBlank(message = "小程序页面路径不能为空")
+    @ApiModelProperty(value = "小程序页面路径")
     private String pagePath;
 
     @ApiModelProperty(value = "小程序版本(wechat.MiniMessageStateEnum)", required = true)

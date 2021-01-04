@@ -5,12 +5,13 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
 public class MiniMessageTmplIdListParam {
-    @ApiModelProperty(value = "消息类型(wechat.MiniMessageTypeEnum)")
-    @NotNull(message = "消息类型不能为空")
-    private MiniMessageTypeEnum messageType;
+    @ApiModelProperty(value = "消息类型列表(wechat.MiniMessageTypeEnum)")
+    @NotEmpty(message = "消息类型列表不能为空")
+    private List<MiniMessageTypeEnum> messageTypeList;
 }

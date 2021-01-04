@@ -1,7 +1,5 @@
 package com.aquilaflycloud.mdc.service.impl;
 
-import cn.binarywang.wx.miniapp.api.WxMaMsgService;
-import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
@@ -18,19 +16,18 @@ import com.aquilaflycloud.mdc.enums.common.AuditStateEnum;
 import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
-import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.ApplyActivityMapper;
 import com.aquilaflycloud.mdc.mapper.ApplyMemberRecordMapper;
-import com.aquilaflycloud.mdc.mapper.WechatMiniProgramMessageMapper;
 import com.aquilaflycloud.mdc.model.apply.ApplyActivity;
 import com.aquilaflycloud.mdc.model.apply.ApplyMemberRecord;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
-import com.aquilaflycloud.mdc.model.wechat.WechatMiniProgramMessage;
 import com.aquilaflycloud.mdc.param.apply.*;
 import com.aquilaflycloud.mdc.result.apply.*;
+import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.ApplyActivityService;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
+import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.util.RedisUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -38,17 +35,13 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
-import lombok.Data;
-import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -66,11 +59,9 @@ public class ApplyActivityServiceImpl implements ApplyActivityService {
     @Resource
     private ApplyMemberRecordMapper applyMemberRecordMapper;
     @Resource
-    private WechatMiniProgramMessageMapper wechatMiniProgramMessageMapper;
-    @Resource
     private FolksonomyService folksonomyService;
     @Resource
-    private WechatMiniService wechatMiniService;
+    private WechatMiniProgramSubscribeMessageService wechatMiniProgramSubscribeMessageService;
 
     private ApplyActivity stateHandler(ApplyActivity applyActivity) {
         if (applyActivity == null) {
@@ -308,9 +299,9 @@ public class ApplyActivityServiceImpl implements ApplyActivityService {
             List<MiniMemberInfo> list = new ArrayList<>();
             list.add(new MiniMemberInfo().setAppId(record.getAppId()).setOpenId(record.getOpenId()));
             if (param.getIsApprove()) {
-                sendMiniMessage(list, apply.getId(), apply.getApplyName(), "通过", SUCCESS_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
+                wechatMiniProgramSubscribeMessageService.sendMiniMessage(list, MiniMessageTypeEnum.APPLYRECORDAUDIT, apply.getId(), apply.getApplyName(), "通过", SUCCESS_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
             } else {
-                sendMiniMessage(list, apply.getId(), apply.getApplyName(), "不通过", FAILED_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
+                wechatMiniProgramSubscribeMessageService.sendMiniMessage(list, MiniMessageTypeEnum.APPLYRECORDAUDIT, apply.getId(), apply.getApplyName(), "不通过", FAILED_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
             }
         } else {
             throw new ServiceException("该报名记录不需审核");
@@ -378,9 +369,9 @@ public class ApplyActivityServiceImpl implements ApplyActivityService {
             list.add(new MiniMemberInfo().setAppId(record.getAppId()).setOpenId(record.getOpenId()));
         }
         if (param.getIsApprove()) {
-            sendMiniMessage(list, apply.getId(), apply.getApplyName(), "通过", SUCCESS_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(list, MiniMessageTypeEnum.APPLYRECORDAUDIT, apply.getId(), apply.getApplyName(), "通过", SUCCESS_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
         } else {
-            sendMiniMessage(list, apply.getId(), apply.getApplyName(), "不通过", FAILED_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(list, MiniMessageTypeEnum.APPLYRECORDAUDIT, apply.getId(), apply.getApplyName(), "不通过", FAILED_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
         }
     }
 
@@ -528,7 +519,7 @@ public class ApplyActivityServiceImpl implements ApplyActivityService {
         List<MiniMemberInfo> list = new ArrayList<>();
         list.add(new MiniMemberInfo().setAppId(applyMemberRecord.getAppId()).setOpenId(applyMemberRecord.getOpenId()));
         if (applyMemberRecord.getAuditState() == AuditStateEnum.APPROVE) {
-            sendMiniMessage(list, apply.getId(), apply.getApplyName(), "通过", SUCCESS_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(list, MiniMessageTypeEnum.APPLYRECORDAUDIT, apply.getId(), apply.getApplyName(), "通过", SUCCESS_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
         }
     }
 
@@ -562,50 +553,4 @@ public class ApplyActivityServiceImpl implements ApplyActivityService {
 
     private final static String FAILED_MSG = "很遗憾，您提交的报名信息未能通过审核。";
     private final static String SUCCESS_MSG = "您好，您已报名成功，请准时参加活动。";
-
-    @Data
-    @Accessors(chain = true)
-    private class MiniMemberInfo {
-        private String appId;
-        private String openId;
-    }
-
-    //发送审核结果通知,小程序订阅消息
-    private void sendMiniMessage(List<MiniMemberInfo> miniMemberInfos, Long id, String... contents) {
-        MdcUtil.getTtlExecutorService().submit(() -> {
-            WechatMiniProgramMessage message = wechatMiniProgramMessageMapper.selectOne(Wrappers.<WechatMiniProgramMessage>lambdaQuery()
-                    .eq(WechatMiniProgramMessage::getMessageType, MiniMessageTypeEnum.APPLYRECORDAUDIT)
-            );
-            if (message != null) {
-                Map<String, List<MiniMemberInfo>> miniMap = miniMemberInfos.stream().collect(Collectors.groupingBy(MiniMemberInfo::getAppId));
-                for (Map.Entry<String, List<MiniMemberInfo>> entry : miniMap.entrySet()) {
-                    //微信小程序报名才发送订阅消息
-                    if (StrUtil.startWith(entry.getKey(), "wx")) {
-                        WxMaMsgService wxMaMsgService = wechatMiniService.getWxMaServiceByAppId(entry.getKey()).getMsgService();
-                        for (MiniMemberInfo miniMemberInfo : entry.getValue()) {
-                            WxMaSubscribeMessage subscribeMessage = new WxMaSubscribeMessage();
-                            subscribeMessage.setToUser(miniMemberInfo.getOpenId());
-                            subscribeMessage.setMiniprogramState(message.getMiniState().name());
-                            subscribeMessage.setTemplateId(message.getPriTmplId());
-                            subscribeMessage.setPage(id != null ? message.getPagePath() + "?id=" + message.getPagePath() : message.getPagePath());
-                            subscribeMessage.setLang(message.getMiniLang().name());
-                            String[] paramName = message.getParamName().split(",");
-                            for (int i = 0; i < paramName.length; i++) {
-                                WxMaSubscribeMessage.Data data = new WxMaSubscribeMessage.Data();
-                                String name = paramName[i];
-                                data.setName(name);
-                                data.setValue(contents[i]);
-                                subscribeMessage.addData(data);
-                            }
-                            try {
-                                wxMaMsgService.sendSubscribeMsg(subscribeMessage);
-                            } catch (WxErrorException e) {
-                                log.error("发送小程序订阅消息失败", e);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
 }
