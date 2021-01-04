@@ -2,12 +2,9 @@ package com.aquilaflycloud.mdc.param.pre;
 
 import com.aquilaflycloud.dataAuth.common.PageParam;
 import com.aquilaflycloud.mdc.enums.pre.GoodsStateStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.GoodsTypeStateEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import java.util.List;
 
 /**
  * PreGoodsInfoListParam

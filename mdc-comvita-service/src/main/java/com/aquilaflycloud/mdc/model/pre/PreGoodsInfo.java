@@ -74,7 +74,12 @@ public class PreGoodsInfo implements Serializable {
     @TableField(value = "goods_state")
     @ApiModelProperty(value = "商品状态(0-在售 1-下架)")
     private Integer goodsState;
-
+    /**
+     * 商品照片
+     */
+    @TableField(value = "folksonomy_id")
+    @ApiModelProperty(value = "标签id")
+    private String folksonomyId;
     /**
      * 创建时间
      */
