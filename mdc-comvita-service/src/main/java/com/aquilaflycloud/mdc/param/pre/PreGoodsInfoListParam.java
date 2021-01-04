@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.param.pre;
 
 import com.aquilaflycloud.dataAuth.common.PageParam;
 import com.aquilaflycloud.mdc.enums.pre.GoodsStateStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTyoeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -25,7 +26,7 @@ public class PreGoodsInfoListParam extends PageParam {
     private GoodsStateStateEnum goodsState;
 
     @ApiModelProperty(value = "商品类型(1-预售商品、2-赠品、3-普通商品)")
-    private GoodsTypeStateEnum goodsType;
+    private OrderGoodsTyoeEnum goodsType;
 
     @ApiModelProperty(value = "标签id")
     private Long  folksonomyId;
