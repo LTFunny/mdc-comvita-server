@@ -1,11 +1,8 @@
 package com.aquilaflycloud.mdc.api;
 
 import com.aquilaflycloud.dataAuth.common.BaseResult;
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
-import com.aquilaflycloud.mdc.result.pre.PreOrderInfoGetResult;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

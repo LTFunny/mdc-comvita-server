@@ -13,5 +13,6 @@ spring:
       config:
         server-addr: 127.0.0.1:8848
         file-extension: yaml
+#        namespace: 7ec1b11c-f61f-49ce-a6c4-f0bd01767bfa
         shared-dataids: afc-common.yaml
         refreshable-dataids: afc-common.yaml
