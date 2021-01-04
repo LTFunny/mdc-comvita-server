@@ -196,6 +196,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
             }else {
                 preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+
             }
         }else {
             preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
