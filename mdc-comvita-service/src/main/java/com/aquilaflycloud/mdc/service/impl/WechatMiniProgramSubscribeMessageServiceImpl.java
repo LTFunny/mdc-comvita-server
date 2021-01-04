@@ -146,7 +146,7 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
                     break;
                 }
                 case PREORDERDELIVERY: {
-                    if (params.size() != 4) {
+                    if (params.size() != 5) {
                         throw new ServiceException(MiniMessageTypeEnum.PREORDERDELIVERY.getName() + "消息模板字段需要5个");
                     }
                     break;
@@ -158,19 +158,19 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
                     break;
                 }
                 case PREORDERALLCONSUME: {
-                    if (params.size() != 4) {
+                    if (params.size() != 5) {
                         throw new ServiceException(MiniMessageTypeEnum.PREORDERALLCONSUME.getName() + "消息模板字段需要5个");
                     }
                     break;
                 }
                 case PREGOODSCONSUME: {
-                    if (params.size() != 4) {
+                    if (params.size() != 3) {
                         throw new ServiceException(MiniMessageTypeEnum.PREGOODSCONSUME.getName() + "消息模板字段需要3个");
                     }
                     break;
                 }
                 case PREGOODSTAKE: {
-                    if (params.size() != 4) {
+                    if (params.size() != 3) {
                         throw new ServiceException(MiniMessageTypeEnum.PREGOODSTAKE.getName() + "消息模板字段需要3个");
                     }
                     break;
