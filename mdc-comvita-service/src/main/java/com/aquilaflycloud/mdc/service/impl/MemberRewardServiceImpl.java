@@ -288,11 +288,13 @@ public class MemberRewardServiceImpl implements MemberRewardService {
             throw new ServiceException("转换日期失败");
         }
         boolean isUnifiedMember = false;
+        Set<String> appIdSet = null;
         SystemTenantConfigResult configResult = systemTenantConfigService.getConfig(TenantConfigTypeEnum.UNIFIEDMEMBER);
         if (configResult != null && configResult.getUnifiedMemberConfig() != null && configResult.getUnifiedMemberConfig().getUnified()
                 && configResult.getUnifiedMemberConfig().getUnifiedCol() == UnifiedColNameEnum.APPID
                 && configResult.getUnifiedMemberConfig().getIncludeValue().contains(param.getAppId())) {
             isUnifiedMember = true;
+            appIdSet = configResult.getUnifiedMemberConfig().getIncludeValue();
         }
         String key = StrUtil.join("_", "memberRank1000", MdcUtil.getCurrentTenantId(), SecureUtil.md5(JSONUtil.toJsonStr(param)));
         List<Long> memberIds = RedisUtil.<Long>listRedis().range(key, 0, -1);
@@ -300,7 +302,7 @@ public class MemberRewardServiceImpl implements MemberRewardService {
                 .ge(start != null, MemberRewardRecord::getCreateTime, start)
                 .le(end != null, MemberRewardRecord::getCreateTime, end)
                 .eq(!isUnifiedMember, MemberRewardRecord::getAppId, param.getAppId())
-                .in(isUnifiedMember, MemberRewardRecord::getAppId, configResult.getUnifiedMemberConfig().getIncludeValue())
+                .in(isUnifiedMember && CollUtil.isNotEmpty(appIdSet), MemberRewardRecord::getAppId, appIdSet)
                 .eq(MemberRewardRecord::getRewardType, param.getRewardType())
                 .in(CollUtil.isNotEmpty(memberIds) && memberIds.size() >= param.getLimit(), MemberRewardRecord::getMemberId, memberIds)
         );
