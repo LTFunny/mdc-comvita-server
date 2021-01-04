@@ -38,6 +38,18 @@ public interface PreOrderInfoService{
     void verificationOrder(PreOrderVerificationParam param);
 
 
+    /**
+     * 我的订单列表
+     * @param param
+     * @return
+     */
     IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageParam param);
+
+    /**
+     * 我的订单详情
+     * @param param
+     * @return
+     */
+    PreOrderInfoPageResult orderInfoGet(PreOrderInfoGetParam param);
 
 }
