@@ -1,6 +1,8 @@
 package com.aquilaflycloud.mdc.service;
 
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.result.pre.PreOrderInfoPageResult;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -36,5 +38,6 @@ public interface PreOrderInfoService{
     void verificationOrder(PreOrderVerificationParam param);
 
 
+    IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageParam param);
 
 }

@@ -2,16 +2,12 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
-import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
-import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTyoeEnum;
-import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
-import com.aquilaflycloud.mdc.result.pre.PreOrderInfoGetResult;
+import com.aquilaflycloud.mdc.result.pre.PreOrderInfoPageResult;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -31,7 +27,7 @@ import java.util.List;
  * @Version 1.0
  */
 @Service
-        public class PreOrderInfoServiceImpl implements PreOrderInfoService {
+public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Resource
     private PreOrderInfoMapper preOrderInfoMapper;
@@ -54,7 +50,8 @@ import java.util.List;
     @Resource
     private PreOrderGoodsMapper preOrderGoodsMapper;
 
-
+    @Resource
+    private PreRuleInfoMapper preRuleInfoMapper;
 
     @Override
     public int addStatConfirmOrder(PreStayConfirmOrderParam param) {
@@ -74,8 +71,6 @@ import java.util.List;
             throw new ServiceException("生成待确认订单失败。");
         }
 
-
-
         MemberInfo memberInfo = memberInfoMapper.normalSelectById(param.getMemberId());
         String content = memberInfo == null ? "" : memberInfo.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"通过扫码填写信息生成待确认订单";
@@ -92,10 +87,6 @@ import java.util.List;
         BeanUtil.copyProperties(param,preOrderInfo);
         if(param.getIsThrough() == 0){
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYRESERVATION);
-        }
-        int updateOrder = preOrderInfoMapper.updateById(preOrderInfo);
-        if(updateOrder < 0){
-            throw new ServiceException("订单操作失败。");
         }
         List<PreOrderGoods> orderGoodsList = new ArrayList<>();
         if(param.getIsThrough() == 0) {
@@ -129,9 +120,29 @@ import java.util.List;
                     preOrderGoods.setGoodsName(preGoodsInfo.getGoodsName());
                     preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
                     preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
+                    preOrderGoods.setTenantId(preOrderInfo.getTenantId());
                 }
                 orderGoodsList.add(preOrderGoods);
             });
+        }
+        //计算总金额
+        preOrderInfo.setTotalPrice(orderGoodsList.get(0).getGoodsPrice().multiply(new BigDecimal(orderGoodsList.size())));
+        int updateOrder = preOrderInfoMapper.updateById(preOrderInfo);
+        if(updateOrder < 0){
+            throw new ServiceException("订单操作失败。");
+        }
+        //判断是否存在赠品，存在就添加
+        PreOrderGoods preOrderGoods = new PreOrderGoods();
+        PreActivityInfo preActivityInfo = activityInfoMapper.selectById(preOrderInfo.getActivityInfoId());
+        PreRuleInfo preRuleInfo = preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
+                .eq(PreRuleInfo::getId,preActivityInfo.getRefRule())
+                .eq(PreRuleInfo::getRuleType,PreRuleInfoTypeEnum.ORDER_SEND));
+        if(preRuleInfo != null){
+            PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
+            BeanUtil.copyProperties(preGoodsInfo,preOrderGoods);
+            preOrderGoods.setOrderId(preOrderInfo.getId());
+            preOrderGoods.setGoodsId(preGoodsInfo.getId());
+            orderGoodsList.add(preOrderGoods);
         }
         preOrderGoodsMapper.insertAllBatch(orderGoodsList);
         String content;
@@ -191,6 +202,57 @@ import java.util.List;
         String content = orderGoods.getVerificaterName() + "核销员于" +DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了核销。";
         orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),orderGoods.getVerificaterName(),preOrderInfo.getId(),content);
+    }
+
+
+
+    public PreOrderInfoPageResult orderPageGet(PreOrderInfo order,OrderInfoStateEnum orderInfoStateEnum1,
+                                               PickingCardStateEnum cardStateEnum){
+        PreOrderInfoPageResult result = BeanUtil.copyProperties(order,PreOrderInfoPageResult.class);
+        List<PreOrderGoods> goods = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,result.getId()));
+        result.setPreOrderGoodsList(goods);
+        List<PrePickingCard> cards = new ArrayList<>();
+        goods.stream().forEach(k ->{
+            PrePickingCard card = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+                    .eq(PrePickingCard::getPickingState,cardStateEnum)
+                    .eq(PrePickingCard::getId,k.getCardId()));
+            cards.add(card);
+        });
+        if(cards.size() != goods.size()){
+            result.setIdentificationState(orderInfoStateEnum1);
+            result.setIngdeliveryNum(goods.size() - cards.size());
+            result.setReservationNum(cards.size());
+        }else {
+            result.setIdentificationState(order.getOrderState());
+            result.setIngdeliveryNum(cards.size());
+            result.setReservationNum(cards.size());
+        }
+        return result;
+    }
+
+    @Override
+    public IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageParam param) {
+        IPage<PreOrderInfoPageResult> page = null;
+        if(param.getOrderState().equals(OrderInfoStateEnum.WAITINGDELIVERY)){
+            page = preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
+                    .eq(PreOrderInfo::getOrderState,param.getOrderState())
+                    .eq(PreOrderInfo::getMemberId,param.getMemberId())
+                    .eq(PreOrderInfo::getChildOrderState,ChildOrderInfoStateEnum.RESERVATION_DELIVERY))
+                    .convert(order ->{
+                        return orderPageGet(order,OrderInfoStateEnum.PARTINGDELIVERY, PickingCardStateEnum.VERIFICATE);
+                    });
+                return page;
+        }else {
+            page = preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
+                    .eq(PreOrderInfo::getOrderState,param.getOrderState())
+                    .eq(PreOrderInfo::getMemberId,param.getMemberId())
+                    .eq(PreOrderInfo::getChildOrderState,ChildOrderInfoStateEnum.STATELESS))
+                    .convert(order ->{
+                        return orderPageGet(order,OrderInfoStateEnum.PARTRESERVATION,PickingCardStateEnum.RESERVE);
+            });
+            return page;
+        }
     }
 
 
