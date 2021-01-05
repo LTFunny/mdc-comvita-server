@@ -166,6 +166,13 @@ public class PreRefundOrderInfo implements Serializable {
     private String ticketUrl;
 
     /**
+     * 快递编码
+     */
+    @TableField(value = "express_code")
+    @ApiModelProperty(value = "快递编码")
+    private String expressCode;
+
+    /**
      * 快递名称
      */
     @TableField(value = "express_name")
