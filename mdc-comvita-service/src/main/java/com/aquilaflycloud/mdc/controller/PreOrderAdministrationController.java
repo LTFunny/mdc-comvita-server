@@ -1,7 +1,7 @@
 package com.aquilaflycloud.mdc.controller;
 
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.AdministrationListParam;
+import com.aquilaflycloud.mdc.result.pre.AdministrationPageResult;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -23,11 +23,9 @@ public class PreOrderAdministrationController {
     @Resource
     private PreOrderAdministrationService preOrderAdministrationService;
 
-
     @ApiOperation(value = "订单管理列表", notes = "订单管理列表")
-    @PreAuthorize("hasAuthority('mdc:pageAdministrationList:list')")
-    @ApiMapping(value = "backend.comvita.administration.page", method = RequestMethod.POST, permission = true)
-    public IPage<PreOrderInfo> pageAdministrationList(AdministrationListParam param) {
+    @ApiMapping(value = "backend.comvita.administration.page", method = RequestMethod.POST)
+    public IPage<AdministrationPageResult> pageAdministrationList(AdministrationListParam param) {
         return preOrderAdministrationService.pageAdministrationList(param);
     }
 

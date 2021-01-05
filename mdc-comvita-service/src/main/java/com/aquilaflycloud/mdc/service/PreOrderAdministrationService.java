@@ -1,8 +1,8 @@
 package com.aquilaflycloud.mdc.service;
 
 
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.AdministrationListParam;
+import com.aquilaflycloud.mdc.result.pre.AdministrationPageResult;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 /**
@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
  */
 public interface PreOrderAdministrationService {
 
-    IPage<PreOrderInfo> pageAdministrationList(AdministrationListParam param);
+    IPage<AdministrationPageResult> pageAdministrationList(AdministrationListParam param);
 
 
 }

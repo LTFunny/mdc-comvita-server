@@ -117,6 +117,9 @@ public class PreOrderGoods implements Serializable {
     @ApiModelProperty(value = "预约门店")
     private String reserveShop;
 
+    @TableField(value = "reserve_shop_id")
+    @ApiModelProperty(value = "预约门店id")
+    private String reserveShopId;
     /**
      * 预约开始时间
      */
