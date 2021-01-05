@@ -24,8 +24,8 @@ public class PreOrderExpressController {
     private PreOrderExpressService preOrderExpressService;
 
     @ApiOperation(value = "获取物流信息", notes = "获取物流信息")
-//    @PreAuthorize("hasAuthority('mdc:pre:order:express:get')")
-    @ApiMapping(value = "backend.comvita.pre.order.express.get", method = RequestMethod.POST)
+    @PreAuthorize("hasAuthority('mdc:pre:order:express:get')")
+    @ApiMapping(value = "backend.comvita.pre.order.express.get", method = RequestMethod.POST, permission = true)
     public List<PreOrderExpressResult> get(PreOrderExpressInfoParam param) {
         return preOrderExpressService.queryTrackInfo(param);
     }

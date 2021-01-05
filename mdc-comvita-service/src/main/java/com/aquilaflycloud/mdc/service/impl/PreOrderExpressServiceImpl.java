@@ -64,11 +64,11 @@ public class PreOrderExpressServiceImpl implements PreOrderExpressService {
         if (success && null != traces && traces.size() > 0) {
             for (int i = 0; i < traces.size(); i++) {
                 JSONObject jsonItem = traces.getJSONObject(i);
+                Object action = jsonItem.getInt("Action");
+                OrderExpressActionEnum expressActionEnum = EnumUtil.likeValueOf(OrderExpressActionEnum.class, action);
+
                 PreOrderExpressResult item = new PreOrderExpressResult();
-                item.setData(jsonItem.getStr("AcceptTime"),
-                        jsonItem.getStr("AcceptStation"),
-                        jsonItem.getStr("Location"),
-                        EnumUtil.likeValueOf(OrderExpressActionEnum.class, jsonItem.getStr("Action")));
+                item.setData(jsonItem.getStr("AcceptTime"), jsonItem.getStr("AcceptStation"), jsonItem.getStr("Location"), expressActionEnum);
 
                 result.add(item);
             }
@@ -88,13 +88,13 @@ public class PreOrderExpressServiceImpl implements PreOrderExpressService {
     public String getOrderTracesByJson(PreOrderExpressInfoParam paramInfo) {
         //TODO 上线修改
         //demo账号信息
-        String eBusinessId = "test1693466";
-        String appKey = "c17c0fe4-de83-4d83-beb3-1d575ee41f82";
-        String reqUrl = "http://sandboxapi.kdniao.com:8080/kdniaosandbox/gateway/exterfaceInvoke.json";
+//        String eBusinessId = "test1693466";
+//        String appKey = "c17c0fe4-de83-4d83-beb3-1d575ee41f82";
+//        String reqUrl = "http://sandboxapi.kdniao.com:8080/kdniaosandbox/gateway/exterfaceInvoke.json";
         //prod账号信息
-//        String eBusinessId = "1693466";
-//        String appKey = "e9734857-c794-43a8-b892-cf6aacef34a5";
-//        String reqUrl = "https://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx";
+        String eBusinessId = "1693466";
+        String appKey = "e9734857-c794-43a8-b892-cf6aacef34a5";
+        String reqUrl = "https://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx";
 
         //构造请求参数
         JSONObject param = new JSONObject();
@@ -116,7 +116,7 @@ public class PreOrderExpressServiceImpl implements PreOrderExpressService {
         params.put("EBusinessID", eBusinessId);
         //TODO 上线修改
         //demo：1002；prod：8001
-        params.put("RequestType", "1002");
+        params.put("RequestType", "8001");
 
         //构造请求签名
         String dataSign = "";
