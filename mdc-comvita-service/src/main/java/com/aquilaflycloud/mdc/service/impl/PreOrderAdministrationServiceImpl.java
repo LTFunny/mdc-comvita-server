@@ -16,8 +16,8 @@ import javax.annotation.Resource;
 @Service
 public class PreOrderAdministrationServiceImpl implements PreOrderAdministrationService {
 
-    @Resource
-    private PreOrderInfoMapper preGoodsInfoMapper;
+    /*@Resource
+    private PreOrderInfoMapper preGoodsInfoMapper;*/
     @Override
     public IPage<PreOrderInfo> pageAdministrationList(AdministrationListParam param) {
         return null;
