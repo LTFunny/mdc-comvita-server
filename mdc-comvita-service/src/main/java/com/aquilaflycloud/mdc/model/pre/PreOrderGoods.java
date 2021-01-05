@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -46,6 +47,13 @@ public class PreOrderGoods implements Serializable {
     @TableField(value = "card_id")
     @ApiModelProperty(value = "提货卡id")
     private Long cardId;
+
+    /**
+     * 订单商品状态
+     */
+    @TableField(value = "order_goods_state")
+    @ApiModelProperty(value = "订单商品状态")
+    private OrderGoodsStateEnum orderGoodsState;
 
     /**
      * 商品编号
