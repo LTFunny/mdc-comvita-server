@@ -43,7 +43,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         if(CollUtil.isNotEmpty(folksonomyIds)){
 
         }
-        List<FolksonomyInfo> folksonomyInfos = folksonomyService.getFolksonomyBusinessList(BusinessTypeEnum.PREACTIVITY, param.get);
+//        List<FolksonomyInfo> folksonomyInfos = folksonomyService.getFolksonomyBusinessList(BusinessTypeEnum.PREACTIVITY);
 
         IPage<PreActivityInfo> list=preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
                 .like( param.getActivityName()!=null,PreActivityInfo::getActivityName, param.getActivityName())
