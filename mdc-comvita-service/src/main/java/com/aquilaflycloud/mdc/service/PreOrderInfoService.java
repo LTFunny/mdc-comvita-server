@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.service;
 
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsGetResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderInfoPageResult;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,4 +53,19 @@ public interface PreOrderInfoService{
      */
     PreOrderInfoPageResult orderInfoGet(PreOrderInfoGetParam param);
 
+
+    /**
+     * 确认签收
+     * @param param
+     * @return
+     */
+    void confirmReceiptOrder(PreOrderInfoGetParam param);
+
+
+    /**
+     * 核销提货卡详情
+     * @param param
+     * @return
+     */
+    PreOrderGoodsGetResult orderCardGetInfo(PreOrderCardGetParam param);
 }

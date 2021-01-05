@@ -11,8 +11,10 @@
           LEFT JOIN `pre_picking_card` card
             ON or_goods.card_id = card.id
         WHERE or_goods.order_id = #{orderId}
+        and or_goods.goods_type not in (2)
         and card.picking_state = #{cardState}
     </select>
+
 
     <select id="orderGoodsPage"  parameterType="com.aquilaflycloud.mdc.param.pre.PreOrderGoodsPageParam"
             resultType="com.aquilaflycloud.mdc.result.pre.PreOrderGoodsPageResult">

@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
@@ -53,7 +54,7 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
     @Override
     public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
         PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
-                .eq(PrePickingCard::getPickingCode,param.getPickingCode())
+                .eq(PrePickingCard::getPassword,param.getPassword())
                 .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
         if(prePickingCard == null){
             throw new ServiceException("提货卡状态异常，无法进行绑定");
@@ -63,9 +64,13 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         if(preOrderGoods == null){
             throw new ServiceException("订单明细未找到该提货卡关联的数据。");
         }
+        if(StrUtil.isBlank(preOrderGoods.getCardCode())){
+            throw new ServiceException("请输入提货码。");
+        }
         BeanUtil.copyProperties(param,preOrderGoods);
         PreOrderInfo orderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
         preOrderGoods.setReserveId(orderInfo.getMemberId());
+        preOrderGoods.setCardPsw(param.getPassword());
         int updateOrderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
         if(updateOrderGoods < 0){
             throw new ServiceException("预约失败。");

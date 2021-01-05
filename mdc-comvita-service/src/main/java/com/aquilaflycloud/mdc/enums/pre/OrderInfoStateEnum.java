@@ -20,12 +20,10 @@ public enum  OrderInfoStateEnum {
     STAYSIGN(5,"待签收"),
     BEENCOMPLETED(6,"已完成"),
     AFTERSALEREFUND(7,"售后/退款"),
-    CONFIRMRECEIPT(8,"确认签收"),
-
     //给会员订单显示标识用的
 
-    PARTRESERVATION(9,"部分预约"),
-    PARTINGDELIVERY(10,"部分提货"),
+    PARTRESERVATION(8,"部分预约"),
+    PARTINGDELIVERY(9,"部分提货"),
     ;
 
     OrderInfoStateEnum(int type, String name) {

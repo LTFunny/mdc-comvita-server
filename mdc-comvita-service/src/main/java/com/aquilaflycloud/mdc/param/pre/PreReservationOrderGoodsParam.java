@@ -14,9 +14,9 @@ import java.util.Date;
 @Data
 public class PreReservationOrderGoodsParam  {
 
-    @ApiModelProperty(value = "提货卡号")
-    @NotNull(message = "提货卡号不能为空")
-    private String pickingCode;
+    @ApiModelProperty(value = "提货卡号密码")
+    @NotNull(message = "提货卡号密码不能为空")
+    private String password;
 
     @ApiModelProperty(value = "预约人名称")
     private String reserveName;
