@@ -99,13 +99,13 @@ public class PreOrderExpressServiceImpl implements PreOrderExpressService {
         //构造请求参数
         JSONObject param = new JSONObject();
         //顺丰速递需传手机号后四位
-        if ("SF".equals(paramInfo.getExpressName())) {
+        if ("SF".equals(paramInfo.getExpressCode())) {
             String buyerPhone = paramInfo.getBuyerPhone();
             param.set("CustomerName", StrUtil.sub(buyerPhone, buyerPhone.length()-4, buyerPhone.length()));
         }
 
         param.set("OrderCode", "");
-        param.set("ShipperCode", paramInfo.getExpressName());
+        param.set("ShipperCode", paramInfo.getExpressCode());
         param.set("LogisticCode", paramInfo.getExpressOrder());
 
         String requestData= param.toString();
