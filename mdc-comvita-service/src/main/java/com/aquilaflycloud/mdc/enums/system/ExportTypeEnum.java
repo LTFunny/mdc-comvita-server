@@ -20,7 +20,14 @@ public enum ExportTypeEnum {
     EXCHANGE_ORDER(9, "兑换订单"),
     COUPON_REL(10, "优惠券记录"),
     PRE_PICKING_CARD(11, "提留卡信息"),
+    SALES_VOUME(12,"销量报表"),
+    ORDER_INFO(13,"订单报表"),
+    READY_GOODS(14,"待发订单"),
+    AFTER_SALES(15,"售后订单"),
+    READY_INFO(16,"统计订单报表"),
+    GUIDE_INFO(17,"导购员报表")
     ;
+
 
     ExportTypeEnum(int type, String name) {
         this.type = type;

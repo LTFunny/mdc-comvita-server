@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.pre.AfterSaleTypeEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -44,7 +45,7 @@ public class PreRefundOrderInfo implements Serializable {
      */
     @TableField(value = "refund_goods_state")
     @ApiModelProperty(value = "售后商品状态")
-    private Integer refundGoodsState;
+    private AfterSaleTypeEnum refundGoodsState;
 
     /**
      * 售后时间
@@ -150,7 +151,19 @@ public class PreRefundOrderInfo implements Serializable {
     @TableField(value = "guide_name")
     @ApiModelProperty(value = "导购员名称")
     private String guideName;
+    /**
+     * 导购员id
+     */
+    @TableField(value = "after_guide_id")
+    @ApiModelProperty(value = "售后导购员id")
+    private Long afterGuideId;
 
+    /**
+     * 导购员名称
+     */
+    @TableField(value = "after_guide_name")
+    @ApiModelProperty(value = "售后导购员名称")
+    private String afterGuideName;
     /**
      * 总金额
      */

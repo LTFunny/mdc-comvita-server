@@ -5,19 +5,21 @@ import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderOperateRecordMapper;
-import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
-import com.aquilaflycloud.mdc.model.pre.PreOrderOperateRecord;
+import com.aquilaflycloud.mdc.mapper.PreRefundOrderInfoMapper;
+import com.aquilaflycloud.mdc.model.member.MemberSignRecord;
+import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.AdministrationListParam;
 import com.aquilaflycloud.mdc.param.pre.InputOrderNumberParam;
 import com.aquilaflycloud.mdc.param.pre.OrderDetailsParam;
 import com.aquilaflycloud.mdc.result.pre.AdministrationDetailsResult;
 import com.aquilaflycloud.mdc.result.pre.AdministrationPageResult;
+import com.aquilaflycloud.mdc.result.pre.AfterSalesDetailsResult;
 import com.aquilaflycloud.mdc.result.pre.RefundOrderInfoPageResult;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.swagger.annotations.ApiModelProperty;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -37,6 +39,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Resource
     private PreOrderGoodsMapper preOrderGoodsMapper;
     @Resource
+    private PreRefundOrderInfoMapper preRefundOrderInfoMapper;
+    @Resource
     private PreOrderOperateRecordMapper preOrderOperateRecordMapper;
     @Override
     public IPage<AdministrationPageResult> pageAdministrationList(AdministrationListParam param) {
@@ -45,9 +49,19 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
-    public IPage<RefundOrderInfoPageResult> pageOrderInfoList(AdministrationListParam param) {
-        IPage<RefundOrderInfoPageResult> page=preOrderInfoMapper.pageOrderInfoList(param.page(),param);
-        return page;
+    public IPage<PreRefundOrderInfo> pageOrderInfoList(AdministrationListParam param) {
+        IPage<PreRefundOrderInfo> list=preRefundOrderInfoMapper.selectPage(param.page(), Wrappers.<PreRefundOrderInfo>lambdaQuery()
+                .eq( param.getShopId()!=null,PreRefundOrderInfo::getShopId, param.getShopId())
+                .eq( param.getGuideId()!=null,PreRefundOrderInfo::getShopId, param.getShopId())
+                .eq( param.getAfterGuideId()!=null,PreRefundOrderInfo::getAfterGuideId, param.getAfterGuideId())
+                .eq( param.getOrderCode()!=null,PreRefundOrderInfo::getOrderCode, param.getOrderCode())
+                .like( param.getBuyerName()!=null,PreRefundOrderInfo::getBuyerName, param.getBuyerName())
+                .ge(param.getAfterSalesStartTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalesStartTime())
+                .le(param.getAfterSalEndTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalEndTime())
+                .ge(param.getCreateStartTime() != null, PreRefundOrderInfo::getCreateTime, param.getCreateStartTime())
+                .le(param.getCreateEndTime() != null, PreRefundOrderInfo::getCreateTime, param.getCreateEndTime())
+        );
+        return list;
     }
 
     @Override
@@ -103,6 +117,25 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
        //(value = "订单明细")
         result.setDetailsList(preOrderGoodsList);
        //(value = "操作记录")
+        result.setOperationList(preOrderOperateRecordlist) ;
+        return result;
+    }
+
+    @Override
+    public AfterSalesDetailsResult getAfterOrderDetails(OrderDetailsParam param) {
+        PreRefundOrderInfo info=preRefundOrderInfoMapper.selectById(param.getId());
+        if(info==null){
+            throw new SecurityException("输入的主键值有误");
+        }
+        List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,info.getOrderId()));
+        List<PreOrderOperateRecord> preOrderOperateRecordlist = preOrderOperateRecordMapper.selectList(Wrappers.<PreOrderOperateRecord>lambdaQuery()
+                .eq(PreOrderOperateRecord::getOrderId,info.getOrderId()));
+        AfterSalesDetailsResult result=new AfterSalesDetailsResult();
+        BeanUtils.copyProperties(info, result);
+        //(value = "订单明细")
+        result.setDetailsList(preOrderGoodsList);
+        //(value = "操作记录")
         result.setOperationList(preOrderOperateRecordlist) ;
         return result;
     }

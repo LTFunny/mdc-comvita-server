@@ -1,11 +1,13 @@
 package com.aquilaflycloud.mdc.controller;
 
+import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.AdministrationListParam;
 import com.aquilaflycloud.mdc.param.pre.ChangeGoodsInfoParam;
 import com.aquilaflycloud.mdc.param.pre.InputOrderNumberParam;
 import com.aquilaflycloud.mdc.param.pre.OrderDetailsParam;
 import com.aquilaflycloud.mdc.result.pre.AdministrationDetailsResult;
 import com.aquilaflycloud.mdc.result.pre.AdministrationPageResult;
+import com.aquilaflycloud.mdc.result.pre.AfterSalesDetailsResult;
 import com.aquilaflycloud.mdc.result.pre.RefundOrderInfoPageResult;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -47,7 +49,12 @@ public class PreOrderAdministrationController {
     }
     @ApiOperation(value = "售后订单列表", notes = "售后订单列表")
     @ApiMapping(value = "backend.comvita.after.sales.page", method = RequestMethod.POST)
-    public IPage<RefundOrderInfoPageResult> pageAfterSalesList(AdministrationListParam param) {
+    public IPage<PreRefundOrderInfo> pageAfterSalesList(AdministrationListParam param) {
         return preOrderAdministrationService.pageOrderInfoList(param);
+    }
+    @ApiOperation(value = "售后订单详情", notes = "售后订单详情")
+    @ApiMapping(value = "backend.comvita.after.details", method = RequestMethod.POST)
+    public AfterSalesDetailsResult getAfterOrderDetails (OrderDetailsParam param) {
+        return preOrderAdministrationService.getAfterOrderDetails(param);
     }
 }

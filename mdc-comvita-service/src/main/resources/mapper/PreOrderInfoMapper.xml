@@ -29,6 +29,9 @@
             <if test="param.shopId != null and param.shopId != ''">
                  and or_info.shop_id= #{param.shopId}
             </if>
+            <if test="param.guideId != null and param.guideId != ''">
+                and or_info.guide_id= #{param.guideId}
+            </if>
             <if test="param.reserveShopId != null and param.reserveShopId != ''">
                  and  goods.reserve_shop_id= #{param.reserveShopId}
             </if>
@@ -56,52 +59,5 @@
             </if>
             order by  or_info.create_time desc
     </select>
-    <select id="pageOrderInfoList"  parameterType="com.aquilaflycloud.mdc.param.pre.AdministrationListParam"
-            resultType="com.aquilaflycloud.mdc.result.pre.RefundOrderInfoPageResult">
-        SELECT
-        info.id,
-        refund.refund_code,
-        info.order_code,
-        info.buyer_name,
-        info.total_price,
-        refund.refund_price,
-        refund.refund_goods_state,
-        refund.refund_reason,
-        refund.refund_time,
-        refund.confirm_time
-        FROM
-        `pre_refund_order_info` refund
-        LEFT JOIN `pre_order_info` info
-        ON info.`id` = refund.`order_id`
-        where info.id is not null
-        <if test="param.shopId != null and param.shopId != ''">
-            and or_info.shop_id= #{param.shopId}
-        </if>
 
-        <if test="param.reserveShopId != null and param.reserveShopId != ''">
-            and  goods.reserve_shop_id= #{param.reserveShopId}
-        </if>
-        <if test="param.orderState != null and param.orderState != ''">
-            and  or_info.order_state= #{param.orderState.type}
-        </if>
-        <if test="param.orderCode != null and param.orderCode != ''">
-            and  or_info.order_code= #{param.orderCode}
-        </if>
-        <if test="param.buyerName != null and param.buyerName != ''">
-            and  or_info.buyer_name= #{param.buyerName}
-        </if>
-        <if test="param.createStartTime != null">
-            AND or_info.create_time <![CDATA[>=]]> #{param.createStartTime}
-        </if>
-        <if test="param.createEndTime != null">
-            AND or_info.create_time <![CDATA[<=]]> #{param.createEndTime}
-        </if>
-        <if test="param.sendStartTime != null">
-            AND or_info.delivery_time <![CDATA[>=]]> #{param.sendStartTime}
-        </if>
-        <if test="param.sendEndTime != null">
-            AND or_info.delivery_time <![CDATA[<=]]> #{param.sendEndTime}
-        </if>
-        order by  or_info.create_time desc
-    </select>
 </mapper>
