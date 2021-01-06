@@ -1,7 +1,9 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.pre.IsUpdateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -47,6 +49,9 @@ public class PreOrderGoods implements Serializable {
     @TableField(value = "card_id")
     @ApiModelProperty(value = "提货卡id")
     private Long cardId;
+
+
+
 
     /**
      * 商品编号
@@ -139,6 +144,13 @@ public class PreOrderGoods implements Serializable {
     @TableField(value = "picking_card_state")
     @ApiModelProperty(value = "提货卡状态")
     private PickingCardStateEnum pickingCardState;
+
+    /**
+     * 是否可修改
+     */
+    @TableField(value = "is_update")
+    @ApiModelProperty(value = "是否可修改")
+    private IsUpdateEnum isUpdate;
 
     /**
      * 预约人id(会员id)

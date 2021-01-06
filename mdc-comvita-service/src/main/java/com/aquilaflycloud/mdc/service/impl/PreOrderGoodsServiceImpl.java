@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.IsUpdateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
@@ -71,6 +72,8 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         PreOrderInfo orderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
         preOrderGoods.setReserveId(orderInfo.getMemberId());
         preOrderGoods.setCardPsw(param.getPassword());
+        preOrderGoods.setIsUpdate(IsUpdateEnum.YES);
+        //preOrderGoods.setOrderGoodsState(OrderInfoStateEnum.WAITINGDELIVERY);
         int updateOrderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
         if(updateOrderGoods < 0){
             throw new ServiceException("预约失败。");
@@ -78,9 +81,8 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         //更改提货卡状态
         prePickingCard.setPickingState(PickingCardStateEnum.RESERVE);
         prePickingCardMapper.updateById(prePickingCard);
-
         //当全部提货卡预约完 状态改为待提货
-        List<PreOrderGoods> orderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+        /*List<PreOrderGoods> orderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,orderInfo.getId()));
         int result = preOrderGoodsMapper.pickingCardGet(orderInfo.getId(),PickingCardStateEnum.RESERVE);
         if(result == orderGoodsList.size()){
@@ -88,7 +90,8 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
             orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
         }else {
             orderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
-        }
+        }*/
+        orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
         preOrderInfoMapper.updateById(orderInfo);
         //记录日志
         String content = preOrderGoods.getReserveName() +DateUtil.format(new Date(), "yyyy-MM-dd")+" 对" +

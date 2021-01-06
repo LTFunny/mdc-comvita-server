@@ -24,8 +24,26 @@ public class PreReservationOrderGoodsParam  {
     @ApiModelProperty(value = "预约人电话")
     private String reservePhone;
 
-    @ApiModelProperty(value = "预约门店")
-    private String reserveShop;
+    @ApiModelProperty(value = "收货地址-省")
+    private String deliveryProvince;
+
+    /**
+     * 收货地址-市
+     */
+    @ApiModelProperty(value = "收货地址-市")
+    private String deliveryCity;
+
+    /**
+     * 收货地址-区
+     */
+    @ApiModelProperty(value = "收货地址-区")
+    private String deliveryDistrict;
+
+    /**
+     * 收货地址-详细地址
+     */
+    @ApiModelProperty(value = "收货地址-详细地址")
+    private String deliveryAddress;
 
     /**
      * 预约开始时间
