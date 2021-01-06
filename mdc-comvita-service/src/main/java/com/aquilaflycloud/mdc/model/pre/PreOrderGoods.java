@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.model.pre;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -96,6 +97,56 @@ public class PreOrderGoods implements Serializable {
     @TableField(value = "goods_picture")
     @ApiModelProperty(value = "商品照片")
     private String goodsPicture;
+
+
+    /**
+     * 收货地址-省
+     */
+    @TableField(value = "delivery_province")
+    @ApiModelProperty(value = "收货地址-省")
+    private String deliveryProvince;
+
+    /**
+     * 收货地址-市
+     */
+    @TableField(value = "delivery_city")
+    @ApiModelProperty(value = "收货地址-市")
+    private String deliveryCity;
+
+    /**
+     * 收货地址-区
+     */
+    @TableField(value = "delivery_district")
+    @ApiModelProperty(value = "收货地址-区")
+    private String deliveryDistrict;
+
+    /**
+     * 收货地址-详细地址
+     */
+    @TableField(value = "delivery_address")
+    @ApiModelProperty(value = "收货地址-详细地址")
+    private String deliveryAddress;
+
+    /**
+     * 发货时间
+     */
+    @TableField(value = "delivery_time")
+    @ApiModelProperty(value = "发货时间")
+    private Date deliveryTime;
+
+    /**
+     * 快递单号
+     */
+    @TableField(value = "express_order_code")
+    @ApiModelProperty(value = "快递单号")
+    private String expressOrderCode;
+
+    /**
+     * 提货卡状态
+     */
+    @TableField(value = "picking_card_state")
+    @ApiModelProperty(value = "提货卡状态")
+    private PickingCardStateEnum pickingCardState;
 
     /**
      * 预约人id(会员id)
