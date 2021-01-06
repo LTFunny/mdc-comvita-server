@@ -18,8 +18,8 @@ public class InputOrderNumberParam {
     /**
      * 商品编号
      */
-    @ApiModelProperty(value = "商品主键")
-    @NotNull(message = "商品主键不能为空")
+    @ApiModelProperty(value = "主键")
+    @NotNull(message = "主键不能为空")
     private String id;
 
 

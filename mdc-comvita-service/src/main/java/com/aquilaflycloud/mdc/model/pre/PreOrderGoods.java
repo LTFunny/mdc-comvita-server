@@ -34,7 +34,19 @@ public class PreOrderGoods implements Serializable {
     @TableField(value = "order_id")
     @ApiModelProperty(value = "订单id")
     private Long orderId;
+    /**
+     * 导购员id
+     */
+    @TableField(value = "guide_id")
+    @ApiModelProperty(value = "导购员id")
+    private Long guideId;
 
+    /**
+     * 导购员名称
+     */
+    @TableField(value = "guide_name")
+    @ApiModelProperty(value = "导购员名称")
+    private String guideName;
     /**
      * 商品id
      */
@@ -48,7 +60,12 @@ public class PreOrderGoods implements Serializable {
     @TableField(value = "card_id")
     @ApiModelProperty(value = "提货卡id")
     private Long cardId;
-
+    /**
+     * 订单编码
+     */
+    @TableField(value = "order_code")
+    @ApiModelProperty(value = "订单编码")
+    private String orderCode;
     /**
      * 订单商品状态
      */
@@ -133,14 +150,24 @@ public class PreOrderGoods implements Serializable {
     @TableField(value = "delivery_time")
     @ApiModelProperty(value = "发货时间")
     private Date deliveryTime;
-
+    /**
+     * 快递名称
+     */
+    @TableField(value = "express_name")
+    @ApiModelProperty(value = "快递名称")
+    private String expressName;
     /**
      * 快递单号
      */
     @TableField(value = "express_order_code")
     @ApiModelProperty(value = "快递单号")
     private String expressOrderCode;
-
+    /**
+     * 快递编码
+     */
+    @TableField(value = "express_code")
+    @ApiModelProperty(value = "快递编码")
+    private String expressCode;
     /**
      * 提货卡状态
      */

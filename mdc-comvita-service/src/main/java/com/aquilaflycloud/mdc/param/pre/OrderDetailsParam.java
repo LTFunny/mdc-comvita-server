@@ -18,7 +18,7 @@ public class OrderDetailsParam {
     /**
      * 商品编号
      */
-    @ApiModelProperty(value = "商品主键")
+    @ApiModelProperty(value = "商品主键,订单管理传id，待发货传orderId")
     @NotNull(message = "商品主键不能为空")
     private String id;
 

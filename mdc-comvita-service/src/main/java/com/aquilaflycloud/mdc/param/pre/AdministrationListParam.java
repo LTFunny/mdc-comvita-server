@@ -33,9 +33,6 @@ public class AdministrationListParam extends PageParam {
 
     @ApiModelProperty(value = "售后导购员id")
     private Long afterGuideId;
-
-    @ApiModelProperty(value = "售后导购员id")
-    private Long saleGuideId;
    /* @ApiModelProperty(value = "核销人id")
     private Long verificaterId;*/
 

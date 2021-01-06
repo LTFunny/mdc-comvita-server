@@ -11,10 +11,8 @@ import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.AdministrationListParam;
 import com.aquilaflycloud.mdc.param.pre.InputOrderNumberParam;
 import com.aquilaflycloud.mdc.param.pre.OrderDetailsParam;
-import com.aquilaflycloud.mdc.result.pre.AdministrationDetailsResult;
-import com.aquilaflycloud.mdc.result.pre.AdministrationPageResult;
-import com.aquilaflycloud.mdc.result.pre.AfterSalesDetailsResult;
-import com.aquilaflycloud.mdc.result.pre.RefundOrderInfoPageResult;
+import com.aquilaflycloud.mdc.param.pre.ReadyListParam;
+import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -66,12 +64,12 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
     @Override
     public void inputOrderNumber(InputOrderNumberParam param) {
-        PreOrderInfo info=preOrderInfoMapper.selectById(param.getId());
+        PreOrderGoods info=preOrderGoodsMapper.selectById(param.getId());
         if(info!=null){
             info.setExpressName(param.getExpressName());
-            info.setExpressOrder(param.getExpressOrder());
+            info.setExpressOrderCode(param.getExpressOrder());
             info.setExpressCode(param.getExpressCode());
-            preOrderInfoMapper.updateById(info);
+            preOrderGoodsMapper.updateById(info);
         }else{
             throw new SecurityException("输入的主键值有误");
         }
@@ -138,5 +136,18 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         //(value = "操作记录")
         result.setOperationList(preOrderOperateRecordlist) ;
         return result;
+    }
+
+    @Override
+    public IPage<PreOrderGoods> pagereadySalesList(ReadyListParam param) {
+        IPage<PreOrderGoods> list=preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
+                .like( param.getGuideName()!=null,PreOrderGoods::getGuideName, param.getGuideName())
+                .eq( param.getReserveName()!=null,PreOrderGoods::getReserveName, param.getReserveName())
+                .eq( param.getOrderCode()!=null,PreOrderGoods::getOrderCode, param.getOrderCode())
+                .like( param.getReserveShop()!=null,PreOrderGoods::getReserveShop, param.getReserveShop())
+                .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
+                .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
+        );
+        return list;
     }
 }

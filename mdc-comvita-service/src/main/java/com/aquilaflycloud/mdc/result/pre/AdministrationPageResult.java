@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.result.pre;
 
 import com.aquilaflycloud.dataAuth.common.PageParam;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -66,4 +67,39 @@ public class AdministrationPageResult {
     @ApiModelProperty(value = "核销人id")
     private Long verificaterId;
 */
+    /**
+     * 收货地址-省
+     */
+    @ApiModelProperty(value = "收货地址-省")
+    private String deliveryProvince;
+
+    /**
+     * 收货地址-市
+     */
+    @ApiModelProperty(value = "收货地址-市")
+    private String deliveryCity;
+
+    /**
+     * 收货地址-区
+     */
+    @ApiModelProperty(value = "收货地址-区")
+    private String deliveryDistrict;
+
+    @ApiModelProperty(value = "门店名称")
+    private String shopName;
+
+    @ApiModelProperty(value = "导购员id")
+    private Long guideId;
+
+    @ApiModelProperty(value = "导购员名称")
+    private String guideName;
+
+    @ApiModelProperty(value = "商品编号")
+    private String goodsCode;
+
+    @ApiModelProperty(value = "商品名称")
+    private String goodsName;
+
+    @ApiModelProperty(value = "零售价")
+    private BigDecimal goodsPrice;
 }
