@@ -30,35 +30,35 @@ public class PreRuleController {
     private PreRuleService preRuleService;
 
     @ApiOperation(value = "销售规则分页信息", notes = "销售规则分页信息")
-    @PreAuthorize("hasAuthority('mdc:pre:rule:page')")
+//    @PreAuthorize("hasAuthority('mdc:pre:rule:page')")
     @ApiMapping(value = "backend.comvita.pre.rule.page", method = RequestMethod.POST, permission = true)
     public IPage<PreRuleInfo> page(PreRulePageParam param) {
         return preRuleService.page(param);
     }
 
     @ApiOperation(value = "销售规则新增", notes = "销售规则新增")
-    @PreAuthorize("hasAuthority('mdc:pre:rule:add')")
+//    @PreAuthorize("hasAuthority('mdc:pre:rule:add')")
     @ApiMapping(value = "backend.comvita.pre.rule.add", method = RequestMethod.POST, permission = true)
     public void add(PreRuleAddParam param) {
         preRuleService.add(param);
     }
 
     @ApiOperation(value = "销售规则编辑", notes = "销售规则编辑")
-    @PreAuthorize("hasAuthority('mdc:pre:rule:update')")
+//    @PreAuthorize("hasAuthority('mdc:pre:rule:update')")
     @ApiMapping(value = "backend.comvita.pre.rule.update", method = RequestMethod.POST, permission = true)
     public void update(PreRuleUpdateParam param) {
         preRuleService.update(param);
     }
 
     @ApiOperation(value = "销售规则停用", notes = "销售规则停用")
-    @PreAuthorize("hasAuthority('mdc:pre:rule:stop')")
+//    @PreAuthorize("hasAuthority('mdc:pre:rule:stop')")
     @ApiMapping(value = "backend.comvita.pre.rule.stop", method = RequestMethod.POST, permission = true)
     public void cancel(PreRuleIdParam param) {
         preRuleService.stop(param);
     }
 
     @ApiOperation(value = "销售规则设为默认", notes = "销售规则设为默认")
-    @PreAuthorize("hasAuthority('mdc:pre:rule:setDefault')")
+//    @PreAuthorize("hasAuthority('mdc:pre:rule:setDefault')")
     @ApiMapping(value = "backend.comvita.pre.rule.setDefault", method = RequestMethod.POST, permission = true)
     public void setDefault(PreRuleIdParam param) {
         preRuleService.setDefault(param);
@@ -66,7 +66,7 @@ public class PreRuleController {
 
 
     @ApiOperation(value = "获取启用的销售规则", notes = "获取启用的销售规则")
-    @PreAuthorize("hasAuthority('mdc:pre:rule:enableRules')")
+//    @PreAuthorize("hasAuthority('mdc:pre:rule:enableRules')")
     @ApiMapping(value = "backend.comvita.pre.rule.enableRules", method = RequestMethod.POST, permission = true)
     public List<PreEnableRuleResult> getEnableRules() {
         return preRuleService.getEnableRules();
