@@ -59,7 +59,7 @@ public interface PreOrderInfoService{
      * @param param
      * @return
      */
-    void confirmReceiptOrder(PreOrderInfoGetParam param);
+    void confirmReceiptOrder(PreOrderGoodsGetParam param);
 
 
     /**

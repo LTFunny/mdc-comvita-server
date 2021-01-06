@@ -147,7 +147,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         PreActivityInfo preActivityInfo = activityInfoMapper.selectById(preOrderInfo.getActivityInfoId());
         PreRuleInfo preRuleInfo = preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
                 .eq(PreRuleInfo::getId,preActivityInfo.getRefRule())
-                .eq(PreRuleInfo::getRuleType,PreRuleInfoTypeEnum.ORDER_SEND));
+                .eq(PreRuleInfo::getRuleType,RuleTypeEnum.ORDER_GIFTS));
         if(preRuleInfo != null){
             PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
             BeanUtil.copyProperties(preGoodsInfo,preOrderGoods);
@@ -220,95 +220,91 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     }
 
 
-
-    public PreOrderInfoPageResult orderPageGet(PreOrderInfo order,OrderInfoStateEnum orderInfoStateEnum1,
-                                               PickingCardStateEnum cardStateEnum){
+    public PreOrderInfoPageResult orderInfo(PreOrderInfo order){
         PreOrderInfoPageResult result = BeanUtil.copyProperties(order,PreOrderInfoPageResult.class);
-        List<PreOrderGoods> goods = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,result.getId()));
-        result.setPreOrderGoodsList(goods);
-        List<PrePickingCard> cards = new ArrayList<>();
-        goods.stream().forEach(k ->{
-            PrePickingCard card = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
-                    .eq(PrePickingCard::getPickingState,cardStateEnum)
-                    .eq(PrePickingCard::getId,k.getCardId()));
-            cards.add(card);
-        });
-        if(cards.size() != goods.size()){
-            result.setIdentificationState(orderInfoStateEnum1);
+        int orderGoodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,order.getId())
+                .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.PRETAKE));
+        if(orderGoodsCount > 0){
+            result.setOrderInfoListState(OrderInfoListStateEnum.PARTRESERVATION);
+            result.setReservationNum(orderGoodsCount);
         }else {
-            result.setIdentificationState(order.getOrderState());
+            result.setReservationNum(0);
         }
+        List<PreOrderGoods> preOrderGoods = preOrderGoodsMapper.selectList(Wrappers
+                .<PreOrderGoods>lambdaQuery().eq(PreOrderGoods::getOrderId,order.getId()));
+        result.setPreOrderGoodsList(preOrderGoods);
         return result;
     }
 
     @Override
     public IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageParam param) {
-        IPage<PreOrderInfoPageResult> page = null;
-        if(param.getOrderState().equals(OrderInfoStateEnum.WAITINGDELIVERY)){
-            page = preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
-                    .eq(PreOrderInfo::getOrderState,param.getOrderState())
-                    .eq(PreOrderInfo::getMemberId,param.getMemberId())
-                    .eq(PreOrderInfo::getChildOrderState,ChildOrderInfoStateEnum.RESERVATION_DELIVERY))
-                    .convert(order ->{
-                        return orderPageGet(order,OrderInfoStateEnum.PARTINGDELIVERY,PickingCardStateEnum.VERIFICATE);
-                    });
-                return page;
-        }else if(param.getOrderState().equals(OrderInfoStateEnum.STAYRESERVATION)){
-            page = preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
-                    .eq(PreOrderInfo::getOrderState,param.getOrderState())
-                    .eq(PreOrderInfo::getMemberId,param.getMemberId())
-                    .eq(PreOrderInfo::getChildOrderState,ChildOrderInfoStateEnum.STATELESS))
-                    .convert(order ->{
-                        return orderPageGet(order,OrderInfoStateEnum.PARTRESERVATION,PickingCardStateEnum.RESERVE);
-            });
-            return page;
-        }else {
-            page = preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
-                    .eq(PreOrderInfo::getOrderState,param.getOrderState())
-                    .eq(PreOrderInfo::getMemberId,param.getMemberId())
-                    .eq(PreOrderInfo::getChildOrderState,ChildOrderInfoStateEnum.STATELESS))
-                    .convert(order ->{
-                        return orderPageGet(order,OrderInfoStateEnum.PARTRESERVATION,PickingCardStateEnum.VERIFICATE);
-                    });
-            return page;
-        }
+
+        IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
+                .eq(PreOrderInfo::getOrderState,param.getOrderState())
+                .eq(PreOrderInfo::getMemberId,param.getMemberId()))
+                .convert(order ->{
+                    PreOrderInfoPageResult result  = orderInfo(order);
+                    return result;
+                });
+       return page;
     }
 
     @Override
     public PreOrderInfoPageResult orderInfoGet(PreOrderInfoGetParam param) {
-        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getId());
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderInfoId());
         if(preOrderInfo == null){
             throw new ServiceException("查询订单失败。");
         }
-        PreOrderInfoPageResult result = new PreOrderInfoPageResult();
-        if(preOrderInfo.getOrderState().equals(OrderInfoStateEnum.STAYRESERVATION) &&
-                preOrderInfo.getChildOrderState().equals(ChildOrderInfoStateEnum.STATELESS)){
-            result = orderPageGet(preOrderInfo,preOrderInfo.getOrderState(),PickingCardStateEnum.RESERVE);
-        } else if(preOrderInfo.getOrderState().equals(OrderInfoStateEnum.STAYRESERVATION) &&
-                preOrderInfo.getChildOrderState().equals(ChildOrderInfoStateEnum.RESERVATION_DELIVERY)){
-                result = orderPageGet(preOrderInfo,preOrderInfo.getOrderState(),PickingCardStateEnum.VERIFICATE);
-        }
-        result.setReservationNum(preOrderGoodsMapper.pickingCardGet(preOrderInfo.getId(),PickingCardStateEnum.RESERVE));
-        result.setIngdeliveryNum(preOrderGoodsMapper.pickingCardGet(preOrderInfo.getId(),PickingCardStateEnum.VERIFICATE));
-        PreOrderExpress preOrderExpress = preOrderExpressMapper.selectOne(Wrappers.<PreOrderExpress>lambdaQuery()
-                        .eq(PreOrderExpress::getOrderId,preOrderInfo.getId()));
-        if(null != preOrderExpress){
+        PreOrderInfoPageResult result = orderInfo(preOrderInfo);
+        int takenCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
+                .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.TAKEN));
+        result.setIngdeliveryNum(takenCount);
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+        .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
+        .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
+        //物流详情
+        if(null != preOrderGoods){
+            PreOrderExpress preOrderExpress = preOrderExpressMapper.selectOne(Wrappers.<PreOrderExpress>lambdaQuery()
+                    .eq(PreOrderExpress::getOrderId,preOrderGoods.getOrderId()));
             result.setPreOrderExpress(preOrderExpress);
         }
         return result;
     }
 
     @Override
-    public void confirmReceiptOrder(PreOrderInfoGetParam param) {
-        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getId());
-        preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
-        MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
-        Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo,null,preOrderInfo.getTotalPrice(),true);
-        preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+    public void confirmReceiptOrder(PreOrderGoodsGetParam param) {
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
+        preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
+        preOrderGoods.setVerificaterId(preOrderInfo.getGuideId());
+        preOrderGoods.setVerificaterName(preOrderInfo.getGuideName());
+        preOrderGoods.setVerificaterOrgIds(preOrderInfo.getCreatorOrgIds());
+        preOrderGoods.setVerificaterOrgNames(preOrderInfo.getCreatorOrgNames());
+        int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+        if(orderGoods < 0){
+            throw new ServiceException("确认签收操作失败。");
+        }
+        int orderGoodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,preOrderGoods.getOrderId()));
+
+        int takenCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,preOrderGoods.getOrderId())
+                .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.TAKEN));
+
+        if(orderGoodsCount == takenCount){
+            preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+            MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
+            Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord
+                    (memberInfo,null,preOrderInfo.getTotalPrice(),true);
+            preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+        }else {
+            preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
+        }
         int order = preOrderInfoMapper.updateById(preOrderInfo);
         if(order < 0){
-            throw new ServiceException("确认签收操作失败。");
+            throw new ServiceException("更改订单状态失败。");
         }
     }
 

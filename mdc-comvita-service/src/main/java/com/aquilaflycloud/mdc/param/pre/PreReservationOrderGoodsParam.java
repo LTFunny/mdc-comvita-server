@@ -14,12 +14,17 @@ import java.util.Date;
 @Data
 public class PreReservationOrderGoodsParam  {
 
+    @ApiModelProperty(value = "订单商品id")
+    private Long orderGoodsId;
+
     @ApiModelProperty(value = "提货卡号密码")
-    @NotNull(message = "提货卡号密码不能为空")
     private String password;
 
     @ApiModelProperty(value = "预约人名称")
     private String reserveName;
+
+    @ApiModelProperty(value = "预约人id(会员id)")
+    private Long reserveId;
 
     @ApiModelProperty(value = "预约人电话")
     private String reservePhone;
@@ -56,4 +61,9 @@ public class PreReservationOrderGoodsParam  {
      */
     @ApiModelProperty(value = "预约结束时间")
     private Date reserveEndTime;
+
+
+    @ApiModelProperty(value = "是否修改")
+    private Boolean isUpdate;
+
 }

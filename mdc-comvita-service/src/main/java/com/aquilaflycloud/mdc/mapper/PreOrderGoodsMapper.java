@@ -13,7 +13,4 @@ public interface PreOrderGoodsMapper extends AfcBaseMapper<PreOrderGoods> {
 
     int pickingCardGet(Long orderId, PickingCardStateEnum cardState);
 
-    @InterceptorIgnore(tenantLine = "true")
-    IPage<PreOrderGoodsPageResult> orderGoodsPage(IPage page, @Param("param") PreOrderGoodsPageParam param);
-
 }

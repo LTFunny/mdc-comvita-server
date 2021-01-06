@@ -1,5 +1,6 @@
 package com.aquilaflycloud.mdc.result.pre;
 
+import com.aquilaflycloud.dataAuth.common.PageParam;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -11,7 +12,7 @@ import java.util.Date;
  * @Version 1.0
  */
 @Data
-public class PreOrderGoodsPageResult {
+public class PreOrderGoodsPageResult extends PageParam {
 
     @ApiModelProperty(value = "商品id")
     private Long goodsId;
