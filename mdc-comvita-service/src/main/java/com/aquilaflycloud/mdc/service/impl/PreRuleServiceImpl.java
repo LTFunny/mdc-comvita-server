@@ -39,8 +39,8 @@ public class PreRuleServiceImpl implements PreRuleService {
     public IPage<PreRuleInfo> page(PreRulePageParam param) {
         IPage<PreRuleInfo> list = preRuleInfoMapper.selectPage(param.page(), Wrappers.<PreRuleInfo>lambdaQuery()
                 .like( param.getRuleName()!=null,PreRuleInfo::getRuleName, param.getRuleName())
-                .eq( param.getRuleState()!=null,PreRuleInfo::getRuleState, param.getRuleState().getType())
-                .eq( param.getRuleType()!=null,PreRuleInfo::getRuleType, param.getRuleType().getType())
+                .eq( param.getRuleState()!=null,PreRuleInfo::getRuleState, param.getRuleState())
+                .eq( param.getRuleType()!=null,PreRuleInfo::getRuleType, param.getRuleType())
         );
         return list;
     }
