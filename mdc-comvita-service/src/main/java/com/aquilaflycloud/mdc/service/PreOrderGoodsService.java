@@ -1,5 +1,6 @@
 package com.aquilaflycloud.mdc.service;
 
+import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.param.pre.PreOrderGoodsPageParam;
 import com.aquilaflycloud.mdc.param.pre.PreReservationOrderGoodsParam;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsPageResult;
@@ -26,5 +27,5 @@ public interface PreOrderGoodsService {
      * @param param
      * @return
      */
-    IPage<PreOrderGoodsPageResult> pagePreOrderGoods(PreOrderGoodsPageParam param);
+    IPage<PreOrderGoods> pagePreOrderGoods(PreOrderGoodsPageParam param);
 }

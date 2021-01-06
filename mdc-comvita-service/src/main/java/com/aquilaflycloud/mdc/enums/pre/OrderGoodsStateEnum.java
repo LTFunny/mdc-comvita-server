@@ -18,8 +18,9 @@ public enum OrderGoodsStateEnum {
      */
     PREPARE(1,"待预约"),
     PRETAKE(2,"已预约"),
-    TAKEN(3,"已提货"),
-    REFUND(4,"已退货"),
+    ALSENDGOODS(3, "已发货"),
+    TAKEN(4,"已提货"),
+    REFUND(5,"已退货"),
     ;
 
     OrderGoodsStateEnum(int type, String name) {

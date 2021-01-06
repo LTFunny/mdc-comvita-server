@@ -13,12 +13,21 @@ import java.math.BigDecimal;
 @Data
 public class PreActivityAnalysisResult {
 
+    /**
+     * 参与人数
+     */
     @ApiModelProperty(value = "参与人数")
     private Long participantsCount;
 
+    /**
+     * 转化金额
+     */
     @ApiModelProperty(value = "转化金额")
     private BigDecimal exchangePrice;
 
+    /**
+     * 客单价
+     */
     @ApiModelProperty(value = "客单价")
     private BigDecimal pricePerCustomer;
 

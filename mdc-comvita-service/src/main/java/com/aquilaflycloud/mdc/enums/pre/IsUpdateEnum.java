@@ -1,23 +1,22 @@
-package com.aquilaflycloud.mdc.enums.catalog;
+package com.aquilaflycloud.mdc.enums.pre;
 
 import com.alibaba.fastjson.annotation.JSONType;
 import com.aquilaflycloud.dataAuth.component.EnumDeserializer;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 
 /**
- * CatalogHierarchyTypeEnum
- *
- * @author zengqingjie
- * @date 2020-08-13
+ * @Author pengyongliang
+ * @Date 2021/1/6 10:45
+ * @Version 1.0
  */
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
-public enum CatalogHierarchyEnableEnum {
-    // 状态类型
-    NO(0, "禁用"),
-    YES(1, "启用"),
-    ;
+public enum IsUpdateEnum {
 
-    CatalogHierarchyEnableEnum(int type, String name) {
+    // 是否可修改 0.是 1.否
+    YES(0, "是"),
+    NO(1, "否");
+
+    IsUpdateEnum(int type, String name) {
         this.type = type;
         this.name = name;
     }

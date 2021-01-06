@@ -1,9 +1,12 @@
 package com.aquilaflycloud.mdc.param.pre;
 
 import com.aquilaflycloud.dataAuth.common.PageParam;
+import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * @Author pengyongliang
@@ -13,10 +16,12 @@ import lombok.Data;
 @Data
 public class PreOrderGoodsPageParam extends PageParam {
 
-    @ApiModelProperty(value = "会员id")
+    @ApiModelProperty(value = "会员id",required = true)
+    @NotNull(message = "会员id不能为空")
     private Long memberId;
 
-    @ApiModelProperty(value = "状态(pre.PickingCardStateEnum)(1-未销售、2-已售卖、3-已预约、4-已核销、5-已作废)")
-    private PickingCardStateEnum pickingState;
+    @ApiModelProperty(value = "订单商品状态", required = true)
+    @NotNull(message = "订单商品状态不能为空")
+    private OrderGoodsStateEnum orderGoodsState;
 
 }

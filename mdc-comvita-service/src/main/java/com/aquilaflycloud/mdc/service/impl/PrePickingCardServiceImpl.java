@@ -46,6 +46,7 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
         return prePickingCardMapper.selectPage(param.page(), Wrappers.<PrePickingCard> lambdaQuery()
                 .eq(StrUtil.isNotBlank(param.getPickingCode()), PrePickingCard::getPickingCode, param.getPickingCode())
                 .eq(ObjectUtil.isNotNull(param.getPickingState()), PrePickingCard::getPickingState, param.getPickingState())
+                .orderByDesc(PrePickingCard::getPickingCode)
                 .orderByDesc(PrePickingCard::getCreateTime)
         );
     }

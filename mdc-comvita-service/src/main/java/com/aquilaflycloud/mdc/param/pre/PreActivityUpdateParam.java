@@ -42,7 +42,7 @@ public class PreActivityUpdateParam {
      * 状态（1-未开始 2-进行中 3-已结束 4-已下架）
      */
     @ApiModelProperty(value = "活动状态(pre.ActivityStateEnum)")
-    private ActivityStateEnum activityState = ActivityStateEnum.NOT_STARTED;
+    private ActivityStateEnum activityState;
 
     /**
      * 活动开始时间

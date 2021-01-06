@@ -1,6 +1,6 @@
 package com.aquilaflycloud.mdc.result.pre;
 
-import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.OrderInfoListStateEnum;
 import com.aquilaflycloud.mdc.model.pre.PreOrderExpress;
 import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
@@ -21,7 +21,7 @@ public class PreOrderInfoPageResult extends PreOrderInfo {
     private List<PreOrderGoods> preOrderGoodsList;
 
     @ApiModelProperty(value = "状态标识")
-    private OrderInfoStateEnum identificationState;
+    private OrderInfoListStateEnum orderInfoListState;
 
     @ApiModelProperty(value = "预约数量")
     private int reservationNum;
@@ -31,4 +31,6 @@ public class PreOrderInfoPageResult extends PreOrderInfo {
 
     @ApiModelProperty(value = "快递信息")
     private PreOrderExpress preOrderExpress;
+
+
 }

@@ -25,13 +25,13 @@ public class PreRulePageParam extends PageParam<PreRuleInfo> {
     /**
      * 规则类型(3-下单满减、2-下单折扣、1-下单即送)
      */
-    @ApiModelProperty(value = "规则类型(3-下单满减、2-下单折扣、1-下单即送)")
+    @ApiModelProperty(value = "规则类型(pre.RuleTypeEnum)")
     private RuleTypeEnum ruleType;
 
     /**
      * 状态(1-已启用、0-已停用)
      */
-    @ApiModelProperty(value = "状态(1-已启用、0-已停用)")
+    @ApiModelProperty(value = "状态(pre.RuleStateEnum)")
     private RuleStateEnum ruleState;
 
 }
