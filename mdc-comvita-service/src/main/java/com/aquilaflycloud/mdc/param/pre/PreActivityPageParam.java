@@ -23,10 +23,10 @@ public class PreActivityPageParam extends PageParam<PreActivityInfo> {
     @ApiModelProperty(value = "活动名称")
     private String activityName;
 
-    @ApiModelProperty(value = "活动类型")
+    @ApiModelProperty(value = "活动类型(pre.ActivityTypeEnum)")
     private ActivityTypeEnum activityType;
 
-    @ApiModelProperty(value = "状态（1-未开始 2-进行中 3-已结束 4-已下架）")
+    @ApiModelProperty(value = "状态(pre.ActivityStateEnum)")
     private ActivityStateEnum activityState;
 
 
