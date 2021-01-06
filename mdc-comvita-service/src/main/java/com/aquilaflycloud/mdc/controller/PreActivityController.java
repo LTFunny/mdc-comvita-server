@@ -61,6 +61,11 @@ public class PreActivityController {
         preActivityService.cancel(param);
     }
 
+    /**
+     * 获取活动概况
+     * @param param
+     * @return
+     */
     @ApiOperation(value = "活动概况", notes = "活动概况")
     @PreAuthorize("hasAuthority('mdc:pre:activity:analyse')")
     @ApiMapping(value = "backend.comvita.pre.activity.analyse", method = RequestMethod.POST, permission = true)

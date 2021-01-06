@@ -2,16 +2,15 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
-import com.aquilaflycloud.mdc.mapper.FolksonomyBusinessRelMapper;
-import com.aquilaflycloud.mdc.mapper.PreActivityInfoMapper;
-import com.aquilaflycloud.mdc.mapper.PreGoodsInfoMapper;
-import com.aquilaflycloud.mdc.mapper.PreRuleInfoMapper;
+import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
+import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.model.pre.PreRuleInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PreActivityAnalysisResult;
@@ -27,9 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * PreActivityServiceImpl
@@ -47,6 +48,9 @@ public class PreActivityServiceImpl implements PreActivityService {
 
     @Resource
     private PreGoodsInfoMapper preGoodsInfoMapper;
+
+    @Resource
+    private PreOrderInfoMapper preOrderInfoMapper;
 
     @Resource
     private FolksonomyBusinessRelMapper folksonomyBusinessRelMapper;
@@ -188,6 +192,31 @@ public class PreActivityServiceImpl implements PreActivityService {
 
     @Override
     public PreActivityAnalysisResult analyse(PreActivityAnalysisParam param) {
-        return null;
+        QueryWrapper<PreOrderInfo> qw = new QueryWrapper<>();
+        qw.select("DISTINCT member_id","sum(total_price) as total")
+                .eq("activity_info_id",param.getId())
+                .groupBy("member_id");
+        List<Map<String, Object>> maps = preOrderInfoMapper.selectMaps(qw);
+        PreActivityAnalysisResult result = new  PreActivityAnalysisResult();
+        if(CollUtil.isNotEmpty(maps)){
+            result.setParticipantsCount(Convert.toLong(maps.size()));
+            final BigDecimal total = new BigDecimal(0.00);
+            maps.forEach(l ->{
+                BigDecimal bigDecimal = (BigDecimal) l.get("total");
+                total.add(bigDecimal);
+            });
+            result.setExchangePrice(total);
+            if(maps.size() > 0){
+                BigDecimal ppc = total.divide(new BigDecimal(maps.size()));
+                result.setPricePerCustomer(ppc);
+            }else{
+                result.setPricePerCustomer(new BigDecimal(0.00));
+            }
+        }else{
+            result.setParticipantsCount(0L);
+            result.setExchangePrice(new BigDecimal(0.00));
+            result.setPricePerCustomer(new BigDecimal(0.00));
+        }
+        return result;
     }
 }
