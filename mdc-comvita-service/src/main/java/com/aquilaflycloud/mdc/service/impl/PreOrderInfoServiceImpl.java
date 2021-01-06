@@ -139,7 +139,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         PreActivityInfo preActivityInfo = activityInfoMapper.selectById(preOrderInfo.getActivityInfoId());
         PreRuleInfo preRuleInfo = preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
                 .eq(PreRuleInfo::getId,preActivityInfo.getRefRule())
-                .eq(PreRuleInfo::getRuleType,PreRuleInfoTypeEnum.ORDER_SEND));
+                .eq(PreRuleInfo::getRuleType,RuleTypeEnum.ORDER_GIFTS));
         if(preRuleInfo != null){
             PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
             BeanUtil.copyProperties(preGoodsInfo,preOrderGoods);

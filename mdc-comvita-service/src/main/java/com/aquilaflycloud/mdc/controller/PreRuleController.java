@@ -4,6 +4,7 @@ import com.aquilaflycloud.mdc.model.pre.PreRuleInfo;
 import com.aquilaflycloud.mdc.param.pre.PreRuleAddParam;
 import com.aquilaflycloud.mdc.param.pre.PreRuleIdParam;
 import com.aquilaflycloud.mdc.param.pre.PreRulePageParam;
+import com.aquilaflycloud.mdc.param.pre.PreRuleUpdateParam;
 import com.aquilaflycloud.mdc.result.pre.PreEnableRuleResult;
 import com.aquilaflycloud.mdc.service.PreRuleService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -45,7 +46,7 @@ public class PreRuleController {
     @ApiOperation(value = "销售规则编辑", notes = "销售规则编辑")
     @PreAuthorize("hasAuthority('mdc:pre:rule:update')")
     @ApiMapping(value = "backend.comvita.pre.rule.update", method = RequestMethod.POST, permission = true)
-    public void update(PreRuleIdParam param) {
+    public void update(PreRuleUpdateParam param) {
         preRuleService.update(param);
     }
 
