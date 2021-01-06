@@ -17,7 +17,7 @@ public enum OrderGoodsStateEnum {
      * 订单商品状态
      */
     PREPARE(1,"待预约"),
-    PRETAKE(2,"待提货"),
+    PRETAKE(2,"已预约"),
     TAKEN(3,"已提货"),
     REFUND(4,"已退货"),
     ;
