@@ -5,29 +5,24 @@ import com.aquilaflycloud.dataAuth.component.EnumDeserializer;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 
 /**
- * RuleTypeEnum
- * 规则类型
- * 规则类型(3-下单满减、2-下单折扣、1-下单即送)
- * @author linkq
+ * OrderGoodsStateEnum
+ *
+ * @author star
+ * @date 2021/1/5
  */
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
-public enum RuleTypeEnum {
+public enum OrderGoodsStateEnum {
 
     /**
-     * 下单即送
+     * 订单商品状态
      */
-    ORDER_GIFTS(1, "下单即送"),
-    /**
-     * 下单折扣
-     */
-    ORDER_DISCOUNT(2, "下单折扣"),
-    /**
-     * 下单满减
-     */
-    ORDER_FULL_REDUCE(3, "下单满减")
+    PREPARE(1,"待预约"),
+    PRETAKE(2,"已预约"),
+    TAKEN(3,"已提货"),
+    REFUND(4,"已退货"),
     ;
 
-    RuleTypeEnum(int type, String name) {
+    OrderGoodsStateEnum(int type, String name) {
         this.type = type;
         this.name = name;
     }

@@ -1,11 +1,9 @@
 package com.aquilaflycloud.mdc.result.catalog;
 
-import com.aquilaflycloud.dataAuth.common.AuthParam;
 import com.aquilaflycloud.mdc.model.catalog.CatalogHierarchyInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**

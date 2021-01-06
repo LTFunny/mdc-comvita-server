@@ -25,6 +25,10 @@ public enum MemberErrorEnum {
      * 会员上传图片非人脸
      */
     MEMBER_ERROR_10004("10004"),
+    /**
+     * 会员手机号重复
+     */
+    MEMBER_ERROR_10005("10005"),
     ;
     private ServiceErrorMeta errorMeta;
 

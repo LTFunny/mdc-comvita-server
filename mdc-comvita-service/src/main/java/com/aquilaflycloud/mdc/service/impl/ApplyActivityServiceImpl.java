@@ -3,7 +3,6 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -15,7 +14,6 @@ import com.aquilaflycloud.mdc.enums.apply.ApplyStateEnum;
 import com.aquilaflycloud.mdc.enums.common.AuditStateEnum;
 import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
-import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.ApplyActivityMapper;
 import com.aquilaflycloud.mdc.mapper.ApplyMemberRecordMapper;
 import com.aquilaflycloud.mdc.model.apply.ApplyActivity;
@@ -298,11 +296,11 @@ public class ApplyActivityServiceImpl implements ApplyActivityService {
             //发送微信订阅消息
             List<MiniMemberInfo> list = new ArrayList<>();
             list.add(new MiniMemberInfo().setAppId(record.getAppId()).setOpenId(record.getOpenId()));
-            if (param.getIsApprove()) {
+            /*if (param.getIsApprove()) {
                 wechatMiniProgramSubscribeMessageService.sendMiniMessage(list, MiniMessageTypeEnum.APPLYRECORDAUDIT, apply.getId(), apply.getApplyName(), "通过", SUCCESS_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
             } else {
                 wechatMiniProgramSubscribeMessageService.sendMiniMessage(list, MiniMessageTypeEnum.APPLYRECORDAUDIT, apply.getId(), apply.getApplyName(), "不通过", FAILED_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
-            }
+            }*/
         } else {
             throw new ServiceException("该报名记录不需审核");
         }
@@ -368,11 +366,11 @@ public class ApplyActivityServiceImpl implements ApplyActivityService {
         for (ApplyMemberRecord record : recordList) {
             list.add(new MiniMemberInfo().setAppId(record.getAppId()).setOpenId(record.getOpenId()));
         }
-        if (param.getIsApprove()) {
+        /*if (param.getIsApprove()) {
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(list, MiniMessageTypeEnum.APPLYRECORDAUDIT, apply.getId(), apply.getApplyName(), "通过", SUCCESS_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
         } else {
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(list, MiniMessageTypeEnum.APPLYRECORDAUDIT, apply.getId(), apply.getApplyName(), "不通过", FAILED_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
-        }
+        }*/
     }
 
     @Override
@@ -518,9 +516,9 @@ public class ApplyActivityServiceImpl implements ApplyActivityService {
         //发送微信订阅消息
         List<MiniMemberInfo> list = new ArrayList<>();
         list.add(new MiniMemberInfo().setAppId(applyMemberRecord.getAppId()).setOpenId(applyMemberRecord.getOpenId()));
-        if (applyMemberRecord.getAuditState() == AuditStateEnum.APPROVE) {
+        /*if (applyMemberRecord.getAuditState() == AuditStateEnum.APPROVE) {
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(list, MiniMessageTypeEnum.APPLYRECORDAUDIT, apply.getId(), apply.getApplyName(), "通过", SUCCESS_MSG, DateTime.now().toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN));
-        }
+        }*/
     }
 
     @Override
