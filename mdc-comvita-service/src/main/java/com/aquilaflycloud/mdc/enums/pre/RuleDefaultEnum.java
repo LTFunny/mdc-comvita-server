@@ -5,29 +5,24 @@ import com.aquilaflycloud.dataAuth.component.EnumDeserializer;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 
 /**
- * RuleTypeEnum
- * 规则类型
- * 规则类型(3-下单满减、2-下单折扣、1-下单即送)
+ * RuleDefaultEnum
+ * 是否默认(0-否 1-是)
  * @author linkq
  */
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
-public enum RuleTypeEnum {
+public enum RuleDefaultEnum {
 
     /**
-     * 下单即送
+     * 不是默认
      */
-    ORDER_GIFTS(1, "下单即送"),
+    NOT_DEFAULT(0, "非默认"),
     /**
-     * 下单折扣
+     * 是默认
      */
-    ORDER_DISCOUNT(2, "下单折扣"),
-    /**
-     * 下单满减
-     */
-    ORDER_FULL_REDUCE(3, "下单满减")
+    DEFAULT(1, "默认")
     ;
 
-    RuleTypeEnum(int type, String name) {
+    RuleDefaultEnum(int type, String name) {
         this.type = type;
         this.name = name;
     }
