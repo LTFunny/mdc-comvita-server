@@ -240,7 +240,7 @@ public class MemberServiceImpl implements MemberService {
                 rank = rank == null ? null : Convert.toLong(rank, 0L) + 1;
                 result.setRank(rank);
             }
-            map.put(appId + memberInfo.getId(), result, 10, TimeUnit.MINUTES);
+            map.fastPut(appId + memberInfo.getId(), result, 10, TimeUnit.MINUTES);
         }
         return result;
     }
@@ -276,17 +276,21 @@ public class MemberServiceImpl implements MemberService {
         } else {
             try {
                 MemberInfoResult memberInfoResult = RedisUtil.<MemberInfoResult>valueRedis().get(memberSession);
-                boolean isSameAlipay = StrUtil.isAllNotBlank(memberInfoResult.getAliAppId(), memberInfo.getAliAppId(),
-                        memberInfoResult.getUserId(), memberInfo.getUserId())
-                        && StrUtil.equals(memberInfoResult.getAliAppId(), memberInfo.getAliAppId())
-                        && StrUtil.equals(memberInfoResult.getUserId(), memberInfo.getUserId());
-                boolean isSameWechat = StrUtil.isAllNotBlank(memberInfoResult.getWxAppId(), memberInfo.getWxAppId(),
-                        memberInfoResult.getOpenId(), memberInfo.getOpenId())
-                        && StrUtil.equals(memberInfoResult.getWxAppId(), memberInfo.getWxAppId())
-                        && StrUtil.equals(memberInfoResult.getOpenId(), memberInfo.getOpenId());
-                boolean isSameId = ObjectUtil.equal(memberInfoResult.getId(), memberInfo.getId());
-                if (memberInfoResult != null && (isSameAlipay || isSameWechat || isSameId)) {
-                    sessionKey = memberInfoResult.getSessionKey();
+                if (memberInfoResult != null) {
+                    boolean isSameAlipay = StrUtil.isAllNotBlank(memberInfoResult.getAliAppId(), memberInfo.getAliAppId(),
+                            memberInfoResult.getUserId(), memberInfo.getUserId())
+                            && StrUtil.equals(memberInfoResult.getAliAppId(), memberInfo.getAliAppId())
+                            && StrUtil.equals(memberInfoResult.getUserId(), memberInfo.getUserId());
+                    boolean isSameWechat = StrUtil.isAllNotBlank(memberInfoResult.getWxAppId(), memberInfo.getWxAppId(),
+                            memberInfoResult.getOpenId(), memberInfo.getOpenId())
+                            && StrUtil.equals(memberInfoResult.getWxAppId(), memberInfo.getWxAppId())
+                            && StrUtil.equals(memberInfoResult.getOpenId(), memberInfo.getOpenId());
+                    boolean isSameId = ObjectUtil.equal(memberInfoResult.getId(), memberInfo.getId());
+                    if (isSameAlipay || isSameWechat || isSameId) {
+                        sessionKey = memberInfoResult.getSessionKey();
+                    } else {
+                        memberSession = MdcUtil.getSnowflakeIdStr();
+                    }
                 } else {
                     memberSession = MdcUtil.getSnowflakeIdStr();
                 }
@@ -297,7 +301,7 @@ public class MemberServiceImpl implements MemberService {
         }
         if (memberInfo != null) {
             MemberInfoResult memberInfoResult = new MemberInfoResult();
-            BeanUtil.copyProperties(parseUnifiedMember(memberInfo), memberInfoResult, CopyOptions.create().ignoreNullValue());
+            BeanUtil.copyProperties(memberInfo, memberInfoResult, CopyOptions.create().ignoreNullValue());
             if (param.length > 0) {
                 sessionKey = param[0];
             }
@@ -362,13 +366,12 @@ public class MemberServiceImpl implements MemberService {
                                     throw new ServiceException("获取统一会员有误");
                                 }
                             }
-                            map.put(hashKey, memberUnifiedInfo, 7, TimeUnit.DAYS);
                             return memberUnifiedInfo;
                         });
+                        map.fastPut(hashKey, memberUnified, 7, TimeUnit.DAYS);
                     }
                     memberInfo.setId(memberUnified.getMemberId());
                     memberInfo.setMemberCode(memberUnified.getMemberCode());
-                    updateUnifiedLastTime(memberUnified.getId());
                 }
             }
         }
@@ -456,14 +459,9 @@ public class MemberServiceImpl implements MemberService {
                     .set(MemberInfo::getLastOperationTime, DateTime.now())
                     .eq(MemberInfo::getId, memberId)
             );
-        });
-    }
-
-    private void updateUnifiedLastTime(Long unifiedMemberId) {
-        MdcUtil.getTtlExecutorService().submit(() -> {
             memberUnifiedInfoMapper.update(null, Wrappers.<MemberUnifiedInfo>lambdaUpdate()
                     .set(MemberUnifiedInfo::getLastOperationTime, DateTime.now())
-                    .eq(MemberUnifiedInfo::getId, unifiedMemberId)
+                    .eq(MemberUnifiedInfo::getMemberId, memberId)
             );
         });
     }
@@ -533,7 +531,8 @@ public class MemberServiceImpl implements MemberService {
         memberInfo.setIsAuth(WhetherEnum.YES);
         int count = saveMember(memberInfo);
         if (count > 0) {
-            String memberSession = login2Session(memberInfoMapper.selectById(memberInfo.getId()));
+            memberInfo = memberInfoMapper.selectById(memberInfo.getId());
+            String memberSession = login2Session(parseUnifiedMember(memberInfo) );
             return new BaseResult<String>().setResult(memberSession);
         }
         throw new ServiceException("注册失败");
@@ -559,7 +558,8 @@ public class MemberServiceImpl implements MemberService {
         if (member != null) {
             updateLastTime(member.getId());
             updateMemberWithCode(member);
-            String memberSession = login2Session(member);
+            MemberInfo memberUnified = parseUnifiedMember(member);
+            String memberSession = login2Session(memberUnified);
             return new BaseResult<String>().setResult(memberSession);
         }
         throw MemberErrorEnum.MEMBER_ERROR_10002.getErrorMeta().getException();
@@ -580,13 +580,23 @@ public class MemberServiceImpl implements MemberService {
         if (count <= 0) {
             throw new ServiceException("更新失败");
         } else {
-            login2Session(memberInfoMapper.selectOne(Wrappers.<MemberInfo>lambdaQuery()
+            MemberInfo newMember = memberInfoMapper.selectOne(Wrappers.<MemberInfo>lambdaQuery()
                     .eq(StrUtil.isAllBlank(member.getWxAppId(), member.getAliAppId()), MemberInfo::getId, member.getId())
                     .eq(StrUtil.isAllNotBlank(member.getWxAppId(), member.getOpenId()), MemberInfo::getWxAppId, member.getWxAppId())
                     .eq(StrUtil.isAllNotBlank(member.getWxAppId(), member.getOpenId()), MemberInfo::getOpenId, member.getOpenId())
                     .eq(StrUtil.isAllNotBlank(member.getAliAppId(), member.getUserId()), MemberInfo::getAliAppId, member.getAliAppId())
                     .eq(StrUtil.isAllNotBlank(member.getAliAppId(), member.getUserId()), MemberInfo::getUserId, member.getUserId())
-            ));
+            );
+            if (StrUtil.isAllNotBlank(newMember.getWxAppId(), newMember.getOpenId())) {
+                String hashKey = newMember.getWxAppId() + "_" + newMember.getOpenId();
+                RedisUtil.redisson().getMapCache("miniMemberRMap").fastRemove(hashKey);
+            } else if (StrUtil.isAllNotBlank(newMember.getAliAppId(), newMember.getUserId())) {
+                String hashKey = newMember.getAliAppId() + "_" + newMember.getUserId();
+                RedisUtil.redisson().getMapCache("tinyMemberRMap").fastRemove(hashKey);
+            }
+            newMember.setId(member.getId());
+            newMember.setMemberCode(member.getMemberCode());
+            login2Session(newMember);
         }
     }
 
@@ -594,12 +604,12 @@ public class MemberServiceImpl implements MemberService {
         int count = memberInfoMapper.selectCount(Wrappers.<MemberInfo>lambdaQuery()
                 .eq(MemberInfo::getPhoneNumber, phoneNumber)
                 .ne(MemberInfo::getId, member.getId())
-                .ne(MemberInfo::getSource, member.getSource())
-                .ne(StrUtil.isNotBlank(member.getWxAppId()), MemberInfo::getWxAppId, member.getWxAppId())
-                .ne(StrUtil.isNotBlank(member.getAliAppId()), MemberInfo::getAliAppId, member.getAliAppId())
+                .eq(MemberInfo::getSource, member.getSource())
+                .eq(StrUtil.isNotBlank(member.getWxAppId()), MemberInfo::getWxAppId, member.getWxAppId())
+                .eq(StrUtil.isNotBlank(member.getAliAppId()), MemberInfo::getAliAppId, member.getAliAppId())
         );
         if (count > 0) {
-            throw new ServiceException("手机号已存在");
+            throw MemberErrorEnum.MEMBER_ERROR_10005.getErrorMeta().getException();
         }
         MemberInfo update = new MemberInfo();
         update.setPhoneNumber(phoneNumber);
@@ -613,13 +623,21 @@ public class MemberServiceImpl implements MemberService {
         if (count <= 0) {
             throw new ServiceException("更新手机失败");
         } else {
-            login2Session(memberInfoMapper.selectOne(Wrappers.<MemberInfo>lambdaQuery()
+            MemberInfo newMember = memberInfoMapper.selectOne(Wrappers.<MemberInfo>lambdaQuery()
                     .eq(StrUtil.isAllBlank(member.getWxAppId(), member.getAliAppId()), MemberInfo::getId, member.getId())
                     .eq(StrUtil.isAllNotBlank(member.getWxAppId(), member.getOpenId()), MemberInfo::getWxAppId, member.getWxAppId())
                     .eq(StrUtil.isAllNotBlank(member.getWxAppId(), member.getOpenId()), MemberInfo::getOpenId, member.getOpenId())
                     .eq(StrUtil.isAllNotBlank(member.getAliAppId(), member.getUserId()), MemberInfo::getAliAppId, member.getAliAppId())
                     .eq(StrUtil.isAllNotBlank(member.getAliAppId(), member.getUserId()), MemberInfo::getUserId, member.getUserId())
-            ));
+            );
+            if (StrUtil.isAllNotBlank(newMember.getWxAppId(), newMember.getOpenId())) {
+                String hashKey = newMember.getWxAppId() + "_" + newMember.getOpenId();
+                RedisUtil.redisson().getMapCache("miniMemberRMap").fastRemove(hashKey);
+            } else if (StrUtil.isAllNotBlank(newMember.getAliAppId(), newMember.getUserId())) {
+                String hashKey = newMember.getAliAppId() + "_" + newMember.getUserId();
+                RedisUtil.redisson().getMapCache("tinyMemberRMap").fastRemove(hashKey);
+            }
+            login2Session(parseUnifiedMember(newMember));
         }
     }
 
@@ -701,8 +719,9 @@ public class MemberServiceImpl implements MemberService {
             }
             updateLastTime(memberInfo.getId());
             updateMemberWithCode(memberInfo);
-            map.put(hashKey, memberInfo, 10, TimeUnit.MINUTES);
-            String memberSession = login2Session(memberInfo, result.getSessionKey());
+            map.fastPut(hashKey, memberInfo, 10, TimeUnit.MINUTES);
+            MemberInfo memberUnified = parseUnifiedMember(memberInfo);
+            String memberSession = login2Session(memberUnified, result.getSessionKey());
             return new BaseResult<String>().setResult(memberSession);
         } catch (Exception e) {
             e.printStackTrace();
@@ -755,8 +774,9 @@ public class MemberServiceImpl implements MemberService {
                         .eq(MemberInfo::getOpenId, sessionKey.getOpenId())
                 );
                 String hashKey = memberInfo.getWxAppId() + "_" + memberInfo.getOpenId();
-                RMapCache<String, MemberInfo> map = RedisUtil.redisson().getMapCache("miniMemberRMap");
-                map.put(hashKey, memberInfo, 10, TimeUnit.MINUTES);
+                RedisUtil.redisson().getMapCache("miniMemberRMap").fastRemove(hashKey);
+                memberInfo.setId(sessionKey.getId());
+                memberInfo.setMemberCode(sessionKey.getMemberCode());
                 login2Session(memberInfo);
             } else {
                 throw new ServiceException("授权失败");

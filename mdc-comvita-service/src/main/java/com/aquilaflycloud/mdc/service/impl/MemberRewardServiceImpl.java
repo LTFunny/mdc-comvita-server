@@ -409,6 +409,8 @@ public class MemberRewardServiceImpl implements MemberRewardService {
         Long rank = RedisUtil.<Long>zSetRedis().reverseRank(key, memberInfo.getId());
         memberRank.setRankNo(rank == null ? null : Convert.toLong(rank, 0L) + 1);
         memberRank.setGradeTitle(memberGradeService.getRewardGrade(appId, memberRank.getRewardType(), memberRank.getTotalReward()).getGradeTitle());
+        memberRank.setNickName(memberInfo.getNickName());
+        memberRank.setAvatarUrl(memberInfo.getAvatarUrl());
         result.setMemberRank(memberRank);
         result.setMemberRankList(list);
         return result;
