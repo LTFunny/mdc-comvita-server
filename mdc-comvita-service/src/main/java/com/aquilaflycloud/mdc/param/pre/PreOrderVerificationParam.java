@@ -13,8 +13,8 @@ import javax.validation.constraints.NotNull;
 @Data
 public class PreOrderVerificationParam {
 
-    @ApiModelProperty(value = "提货卡密码")
-    private String password;
+    @ApiModelProperty(value = "提货卡号")
+    private String pickingCode;
 
     @ApiModelProperty(value = "核销人id")
     private Long verificaterId;

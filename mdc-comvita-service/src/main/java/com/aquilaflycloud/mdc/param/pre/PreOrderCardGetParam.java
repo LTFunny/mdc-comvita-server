@@ -7,13 +7,14 @@ import javax.validation.constraints.NotNull;
 
 /**
  * @Author pengyongliang
- * @Date 2021/1/6 15:11
+ * @Date 2021/1/5 11:39
  * @Version 1.0
  */
 @Data
-public class PreOrderInfoGetParam {
+public class PreOrderCardGetParam {
 
-    @ApiModelProperty(value = "订单id" , required = true)
-    @NotNull(message = "订单id不能为空")
-    private Long orderInfoId;
+    @ApiModelProperty(value = "提货卡号" , required = true)
+    @NotNull(message = "提货卡号不能为空")
+    private String pickingCode;
+
 }

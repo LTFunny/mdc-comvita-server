@@ -2,9 +2,8 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
-import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
+import cn.hutool.core.util.StrUtil;
+import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PrePickingCardMapper;
@@ -46,36 +45,48 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
     private PreOrderOperateRecordService orderOperateRecordService;
 
     @Override
-    public IPage<PreOrderGoodsPageResult> pagePreOrderGoods(PreOrderGoodsPageParam param) {
-        return preOrderGoodsMapper.orderGoodsPage(param.page(),param);
+    public IPage<PreOrderGoods> pagePreOrderGoods(PreOrderGoodsPageParam param) {
+        return preOrderGoodsMapper.selectPage(param.page(),Wrappers.<PreOrderGoods>lambdaQuery()
+        .eq(PreOrderGoods::getReserveId,param.getMemberId())
+        .eq(PreOrderGoods::getOrderGoodsState,param.getOrderGoodsState()));
     }
 
     @Override
     public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
-        PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
-                .eq(PrePickingCard::getPickingCode,param.getPickingCode())
-                .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
-        if(prePickingCard == null){
-            throw new ServiceException("提货卡状态异常，无法进行绑定");
-        }
-        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getCardId,prePickingCard.getId()));
-        if(preOrderGoods == null){
-            throw new ServiceException("订单明细未找到该提货卡关联的数据。");
+        PreOrderGoods preOrderGoods = new PreOrderGoods();
+        if(param.getIsUpdate()) {
+            PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+                    .eq(PrePickingCard::getPassword,param.getPassword())
+                    .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
+            if (prePickingCard == null) {
+                throw new ServiceException("提货卡状态异常，无法进行绑定");
+            }
+            preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .eq(PreOrderGoods::getCardId, prePickingCard.getId()));
+            if (preOrderGoods == null) {
+                throw new ServiceException("订单明细未找到该提货卡关联的数据。");
+            }
+            if (StrUtil.isBlank(preOrderGoods.getCardCode())) {
+                throw new ServiceException("请输入提货码。");
+            }
+            //更改提货卡状态
+            prePickingCard.setPickingState(PickingCardStateEnum.RESERVE);
+            prePickingCardMapper.updateById(prePickingCard);
+            preOrderGoods.setCardPsw(param.getPassword());
+            preOrderGoods.setIsUpdate(IsUpdateEnum.YES);
+        }else {
+            preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
+            preOrderGoods.setIsUpdate(IsUpdateEnum.NO);
         }
         BeanUtil.copyProperties(param,preOrderGoods);
-        PreOrderInfo orderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
-        preOrderGoods.setReserveId(orderInfo.getMemberId());
+        preOrderGoods.setReserveId(param.getReserveId());
+        preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
         int updateOrderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
         if(updateOrderGoods < 0){
             throw new ServiceException("预约失败。");
         }
-        //更改提货卡状态
-        prePickingCard.setPickingState(PickingCardStateEnum.RESERVE);
-        prePickingCardMapper.updateById(prePickingCard);
-
         //当全部提货卡预约完 状态改为待提货
-        List<PreOrderGoods> orderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+        /*List<PreOrderGoods> orderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,orderInfo.getId()));
         int result = preOrderGoodsMapper.pickingCardGet(orderInfo.getId(),PickingCardStateEnum.RESERVE);
         if(result == orderGoodsList.size()){
@@ -83,12 +94,20 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
             orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
         }else {
             orderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
-        }
+        }*/
+        PreOrderInfo orderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
+        orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
         preOrderInfoMapper.updateById(orderInfo);
         //记录日志
-        String content = preOrderGoods.getReserveName() +DateUtil.format(new Date(), "yyyy-MM-dd")+" 对" +
-                preOrderGoods.getGoodsName() + "进行了预约，提货卡为：" + preOrderGoods.getCardCode();
-        orderOperateRecordService.addOrderOperateRecordLog(orderInfo.getTenantId(),preOrderGoods.getReserveName(),orderInfo.getId(),content);
+        if(param.getIsUpdate()) {
+            String content = preOrderGoods.getReserveName() + DateUtil.format(new Date(), "yyyy-MM-dd") + " 对" +
+                    preOrderGoods.getGoodsName() + "进行了预约，提货卡为：" + preOrderGoods.getCardCode();
+            orderOperateRecordService.addOrderOperateRecordLog(orderInfo.getTenantId(), preOrderGoods.getReserveName(), orderInfo.getId(), content);
+        }else {
+            String content = preOrderGoods.getReserveName() + DateUtil.format(new Date(), "yyyy-MM-dd") + " 对预约信息" +
+                    preOrderGoods.getGoodsName() + "进行了修改。";
+            orderOperateRecordService.addOrderOperateRecordLog(orderInfo.getTenantId(), preOrderGoods.getReserveName(), orderInfo.getId(), content);
+        }
     }
 
 
