@@ -6,5 +6,65 @@
             parameterType="java.lang.String" resultType="java.lang.String">
        SELECT SUBSTRING(MAX(order_code),7) FROM `pre_order_info`
     </select>
-
+    <select id="pageAdministrationList"  parameterType="com.aquilaflycloud.mdc.param.pre.AdministrationListParam"
+            resultType="com.aquilaflycloud.mdc.result.pre.AdministrationPageResult">
+   SELECT
+        or_info.id,
+        or_info.order_code,
+        or_info.buyer_name,
+        or_info.buyer_address,
+        or_info.buyer_postal_code,
+        or_info.total_price,
+        or_info.express_name,
+        or_info.express_order,
+        or_info.create_time,
+        or_info.delivery_time,
+        or_info.order_state,
+        goods.last_update_time
+        FROM
+          `pre_order_info` or_info
+          LEFT JOIN `pre_order_goods` goods
+        ON or_info.`id` = goods.`order_id`
+     where or_info.id is not null
+        <if test="param.shopId != null and param.shopId != ''">
+      and or_info.shop_id= #{param.shopId}
+        </if>
+        <if test="param.verificaterOrgIds != null and param.verificaterOrgIds != ''">
+      and  goods.verificater_org_ids= #{param.verificaterOrgIds}
+        </if>
+        <if test="param.reserveShopId != null and param.reserveShopId != ''">
+             and  goods.reserve_shop_id= #{param.reserveShopId}
+        </if>
+        <if test="param.verificaterId != null and param.verificaterId != ''">
+            and  goods.verificater_id= #{param.verificaterId}
+        </if>
+        <if test="param.orderState != null and param.orderState != ''">
+            and  or_info.order_state= #{param.orderState.type}
+        </if>
+        <if test="param.orderCode != null and param.orderCode != ''">
+         and  or_info.order_code= #{param.orderCode}
+        </if>
+        <if test="param.buyerName != null and param.buyerName != ''">
+             and  or_info.buyer_name= #{param.buyerName}
+        </if>
+        <if test="param.createStartTime != null">
+            AND or_info.create_time <![CDATA[>=]]> #{param.createStartTime}
+        </if>
+        <if test="param.createEndTime != null">
+            AND or_info.create_time <![CDATA[<=]]> #{param.createEndTime}
+        </if>
+        <if test="param.writeOffStartTime != null">
+            AND goods.last_update_time <![CDATA[>=]]> #{param.writeOffStartTime}
+        </if>
+        <if test="param.writeOffEndTime != null">
+            AND goods.last_update_time <![CDATA[<=]]> #{param.writeOffEndTime}
+        </if>
+        <if test="param.sendStartTime != null">
+            AND or_info.delivery_time <![CDATA[>=]]> #{param.sendStartTime}
+        </if>
+        <if test="param.sendEndTime != null">
+            AND or_info.delivery_time <![CDATA[<=]]> #{param.sendEndTime}
+        </if>
+        order by  or_info.create_time desc
+    </select>
 </mapper>
