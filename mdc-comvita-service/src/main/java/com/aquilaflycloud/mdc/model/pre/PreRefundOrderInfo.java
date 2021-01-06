@@ -76,6 +76,20 @@ public class PreRefundOrderInfo implements Serializable {
     private String orderCode;
 
     /**
+     * 活动id
+     */
+    @TableField(value = "order_code")
+    @ApiModelProperty(value = "活动id")
+    private Long activityInfoId;
+
+    /**
+     * 积分
+     */
+    @TableField(value = "order_code")
+    @ApiModelProperty(value = "积分")
+    private BigDecimal score;
+
+    /**
      * 会员id
      */
     @TableField(value = "member_id")
