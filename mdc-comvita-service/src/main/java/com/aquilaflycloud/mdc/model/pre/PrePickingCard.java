@@ -43,7 +43,7 @@ public class PrePickingCard implements Serializable {
      * 状态 (1-未销售、2-已售卖、3-已预约、4-已核销、5-已作废)
      */
     @TableField(value = "picking_state")
-    @ApiModelProperty(value = "状态(pre.PickingCardStateEnum)(1-未销售、2-已售卖、3-已预约、4-已核销、5-已作废)")
+    @ApiModelProperty(value = "状态")
     private PickingCardStateEnum pickingState;
 
     /**
