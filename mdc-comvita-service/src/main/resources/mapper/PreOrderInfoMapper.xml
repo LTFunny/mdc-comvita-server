@@ -59,5 +59,13 @@
             </if>
             order by  or_info.create_time desc
     </select>
+    <select id="pageOrderReportList"  parameterType="com.aquilaflycloud.mdc.param.pre.ReportFormParam"
+            resultType="com.aquilaflycloud.mdc.result.pre.ReportOrderPageResult">
+   SELECT
 
+    </select>
+    <select id="achievementsGuide"  parameterType="com.aquilaflycloud.mdc.param.pre.ReportFormParam"
+            resultType="com.aquilaflycloud.mdc.result.pre.ReportGuidePageResult">
+
+    </select>
 </mapper>
