@@ -15,12 +15,11 @@ import java.util.Date;
  * <p>
  * zly
  */
-@Accessors(chain = true)
 @Data
 public class AdministrationListParam extends PageParam {
 
     @ApiModelProperty(value = "销售门店id")
-    private Long shopId;
+    private String shopId;
 
   /*  @ApiModelProperty(value = "核销门店ids")
     private String verificaterOrgIds;*/
@@ -28,16 +27,16 @@ public class AdministrationListParam extends PageParam {
     @ApiModelProperty(value = "预约门店id")
     private String reserveShopId;
 
-    @ApiModelProperty(value = "导购员id")
-    private Long guideId;
+    @ApiModelProperty(value = "导购员名称")
+    private String guideName;
 
-    @ApiModelProperty(value = "售后导购员id")
-    private Long afterGuideId;
+    @ApiModelProperty(value = "售后导购员名称")
+    private String afterGuideName;
    /* @ApiModelProperty(value = "核销人id")
     private Long verificaterId;*/
 
     @ApiModelProperty(value = "订单状态")
-    private OrderInfoStateEnum orderState;
+    private String orderState;
 
     @ApiModelProperty(value = "订单编码")
     private String orderCode;
