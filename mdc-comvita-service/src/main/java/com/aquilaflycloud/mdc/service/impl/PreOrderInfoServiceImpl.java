@@ -78,6 +78,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = new PreOrderInfo();
         BeanUtil.copyProperties(param,preOrderInfo);
+        preOrderInfo.setMemberId(infoResult.getId());
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYCONFIRM);
         preOrderInfo.setScore(new BigDecimal("0"));
         preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderRefundCode", "O" + DateTime.now().toString("yyMMdd"), 5));
@@ -93,7 +94,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Override
     public void validationConfirmOrder(PreConfirmOrderParam param) {
-        PreOrderInfo preOrderInfo = preOrderInfoMapper.normalSelectById(param.getId());
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getId());
         if(null == preOrderInfo){
             throw new ServiceException("找不到此订单");
         }
@@ -106,7 +107,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             param.getPrePickingCardList().stream().forEach(card ->{
                 PrePickingCardValidationParam param1 = new PrePickingCardValidationParam();
                 param1.setPickingCode(card);
-                PrePickingCard prePickingCard = prePickingCardMapper.normalSelectOne(Wrappers.<PrePickingCard>lambdaQuery()
+                PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
                         .eq(PrePickingCard::getPickingCode,card)
                         .eq(PrePickingCard::getPickingState,PickingCardStateEnum.NO_SALE));
                 if(prePickingCard == null){
@@ -244,7 +245,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Override
     public IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
-        IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.normalSelectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
+        IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
                 .eq(PreOrderInfo::getOrderState,param.getOrderState())
                 .eq(PreOrderInfo::getMemberId,infoResult.getId()))
                 .convert(order ->{
@@ -256,7 +257,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Override
     public PreOrderInfoPageResult orderInfoGet(PreOrderInfoGetParam param) {
-        PreOrderInfo preOrderInfo = preOrderInfoMapper.normalSelectById(param.getOrderInfoId());
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderInfoId());
         if(preOrderInfo == null){
             throw new ServiceException("查询订单失败。");
         }
@@ -280,7 +281,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Override
     public void confirmReceiptOrder(PreOrderGoodsGetParam param) {
         PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
-        PreOrderInfo preOrderInfo = preOrderInfoMapper.normalSelectById(preOrderGoods.getOrderId());
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
         preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
         preOrderGoods.setVerificaterId(preOrderInfo.getGuideId());
         preOrderGoods.setVerificaterName(preOrderInfo.getGuideName());
