@@ -1,6 +1,8 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.pre.RuleDefaultEnum;
+import com.aquilaflycloud.mdc.enums.pre.RuleStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.RuleTypeEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -14,6 +16,7 @@ import java.util.Date;
 
 /**
  * 规则信息表
+ * @author linkq
  */
 @Data
 @TableName(value = "pre_rule_info")
@@ -51,14 +54,14 @@ public class PreRuleInfo implements Serializable {
      */
     @TableField(value = "rule_state")
     @ApiModelProperty(value = "状态(1-已启用、0-已停用)")
-    private Integer ruleState;
+    private RuleStateEnum ruleState;
 
     /**
      * 是否默认(0-否 1-是)
      */
     @TableField(value = "is_default")
     @ApiModelProperty(value = "是否默认(0-否 1-是)")
-    private Integer isDefault;
+    private RuleDefaultEnum isDefault;
 
     /**
      * 创建时间

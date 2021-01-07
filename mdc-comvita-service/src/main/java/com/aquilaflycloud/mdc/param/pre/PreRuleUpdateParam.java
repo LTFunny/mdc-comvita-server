@@ -1,5 +1,6 @@
 package com.aquilaflycloud.mdc.param.pre;
 
+import com.aquilaflycloud.mdc.enums.pre.RuleDefaultEnum;
 import com.aquilaflycloud.mdc.enums.pre.RuleStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.RuleTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
@@ -42,8 +43,8 @@ public class PreRuleUpdateParam {
     /**
      * 是否默认(0-否 1-是)
      */
-    @ApiModelProperty(value = "是否默认(0-否 1-是)")
-    private Integer isDefault;
+    @ApiModelProperty(value = "是否默认(pre.RuleDefaultEnum)")
+    private RuleDefaultEnum isDefault;
 
 
 }
