@@ -40,9 +40,9 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
     public IPage<PreGoodsInfo> pagePreGoodsInfoList(PreGoodsInfoListParam param) {
         IPage<PreGoodsInfo> list=preGoodsInfoMapper.selectPage(param.page(), Wrappers.<PreGoodsInfo>lambdaQuery()
                 .like( StrUtil.isNotBlank(param.getGoodsName()),PreGoodsInfo::getGoodsName, param.getGoodsName())
-                .like( param.getFolksonomyId()!=null,PreGoodsInfo::getFolksonomyId, param.getFolksonomyId())
-                .eq( StrUtil.isNotBlank(param.getGoodsState().getName()),PreGoodsInfo::getGoodsState, param.getGoodsState())
-                .eq( StrUtil.isNotBlank(param.getGoodsType().getName()),PreGoodsInfo::getGoodsType, param.getGoodsType())
+                .like( StrUtil.isNotBlank(param.getFolksonomyId()),PreGoodsInfo::getFolksonomyId, param.getFolksonomyId())
+                .eq( StrUtil.isNotBlank(param.getGoodsState()),PreGoodsInfo::getGoodsState, param.getGoodsState())
+                .eq( StrUtil.isNotBlank(param.getGoodsType()),PreGoodsInfo::getGoodsType, param.getGoodsType())
                 .eq( StrUtil.isNotBlank(param.getGoodsCode()),PreGoodsInfo::getGoodsCode, param.getGoodsCode())
         );
         return list;
