@@ -8,5 +8,5 @@ package com.aquilaflycloud.mdc.service;
 public interface PreOrderOperateRecordService {
 
 
-    void addOrderOperateRecordLog(Long tenantId,String operatorName,Long orderId,String content);
+    void addOrderOperateRecordLog(String operatorName,Long orderId,String content);
 }

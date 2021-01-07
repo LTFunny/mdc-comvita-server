@@ -19,10 +19,9 @@ public class PreOrderOperateRecordServiceImpl implements PreOrderOperateRecordSe
     private PreOrderOperateRecordMapper orderOperateRecordMapper;
 
     @Override
-    public void addOrderOperateRecordLog(Long tenantId, String operatorName, Long orderId, String content) {
+    public void addOrderOperateRecordLog(String operatorName, Long orderId, String content) {
         //记录操作日志
         PreOrderOperateRecord preOrderOperateRecord = new PreOrderOperateRecord();
-        preOrderOperateRecord.setTenantId(tenantId);
         preOrderOperateRecord.setOperatorName(operatorName);
         preOrderOperateRecord.setOrderId(orderId);
         preOrderOperateRecord.setOperatorContent(content);

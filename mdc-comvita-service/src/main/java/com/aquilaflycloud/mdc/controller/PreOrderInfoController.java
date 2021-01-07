@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.controller;
 
 import com.aquilaflycloud.mdc.param.pre.PreConfirmOrderParam;
 import com.aquilaflycloud.mdc.param.pre.PreOrderCardGetParam;
+import com.aquilaflycloud.mdc.param.pre.PreOrderRefundParam;
 import com.aquilaflycloud.mdc.param.pre.PreOrderVerificationParam;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsGetResult;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
@@ -47,6 +48,14 @@ public class PreOrderInfoController {
     @ApiMapping(value = "backend.comvita.order.card.get", method = RequestMethod.POST)
     public PreOrderGoodsGetResult orderCardGetInfo(PreOrderCardGetParam param) {
         return orderInfoService.orderCardGetInfo(param);
+    }
+
+
+    @ApiOperation(value = "登记订单退货", notes = "登记订单退货")
+    @PreAuthorize("hasAuthority('mdc:order:refund')")
+    @ApiMapping(value = "backend.comvita.order.info.refund", method = RequestMethod.POST)
+    public void refundOrder(PreOrderRefundParam param) {
+        orderInfoService.refundOrder(param);
     }
 
 }

@@ -68,4 +68,6 @@ public interface PreOrderInfoService{
      * @return
      */
     PreOrderGoodsGetResult orderCardGetInfo(PreOrderCardGetParam param);
+
+    void refundOrder(PreOrderRefundParam param);
 }

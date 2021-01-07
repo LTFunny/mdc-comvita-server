@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
  */
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
 public enum AfterSaleTypeEnum {
+    //售后商品状态
     ALLGOOD(0, "全部无损"),
     PARTGOOD(1, "部分损坏");
 

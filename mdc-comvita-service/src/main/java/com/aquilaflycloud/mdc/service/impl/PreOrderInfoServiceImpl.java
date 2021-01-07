@@ -1,6 +1,8 @@
 package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
@@ -14,10 +16,12 @@ import com.aquilaflycloud.mdc.result.pre.PreOrderInfoPageResult;
 import com.aquilaflycloud.mdc.service.MemberRewardService;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
+import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -25,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Author pengyongliang
@@ -36,6 +41,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Resource
     private PreOrderInfoMapper preOrderInfoMapper;
+
+    @Resource
+    private PreRefundOrderInfoMapper preRefundOrderInfoMapper;
 
     @Resource
     private PreOrderOperateRecordService orderOperateRecordService;
@@ -85,7 +93,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         MemberInfo memberInfo = memberInfoMapper.normalSelectById(param.getMemberId());
         String content = memberInfo == null ? "" : memberInfo.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"通过扫码填写信息生成待确认订单";
-        orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),memberInfo == null ? "" : memberInfo.getMemberName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(memberInfo == null ? "" : memberInfo.getMemberName(),preOrderInfo.getId(),content);
         return orderInfo;
     }
 
@@ -164,7 +172,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             content = ("导购员：" + preOrderInfo.getGuideName()+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss") +" 对订单：" +
                     preOrderInfo.getOrderCode() + "进行了不通过，不通过的原因为：" + preOrderInfo.getReason());
         }
-        orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),preOrderInfo.getGuideName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getGuideName(),preOrderInfo.getId(),content);
     }
 
     @Override
@@ -216,7 +224,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         }
         String content = orderGoods.getVerificaterName() + "核销员于" +DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了核销。";
-        orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getTenantId(),orderGoods.getVerificaterName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(orderGoods.getVerificaterName(),preOrderInfo.getId(),content);
     }
 
 
@@ -325,6 +333,53 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preOrderGoodsGetResult.setBirthday(memberInfo.getBirthday());
         preOrderGoodsGetResult.setSex(memberInfo.getSex());
         return preOrderGoodsGetResult;
+    }
+
+    @Transactional
+    @Override
+    public void refundOrder(PreOrderRefundParam param) {
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
+        PreRefundOrderInfo preRefundOrderInfo = new PreRefundOrderInfo();
+        BeanUtil.copyProperties(preOrderInfo, preRefundOrderInfo, CopyOptions.create().setIgnoreProperties(MdcUtil.getIgnoreNames()));
+        BeanUtil.copyProperties(param, preRefundOrderInfo);
+        preRefundOrderInfo.setRefundCode(MdcUtil.getTenantIncIdStr("preOrderRefundCode", "R" + DateTime.now().toString("yyMMdd"), 5));
+        preRefundOrderInfo.setRefundTime(DateTime.now());
+        preRefundOrderInfo.setAfterGuideId(MdcUtil.getCurrentUserId());
+        preRefundOrderInfo.setAfterGuideName(MdcUtil.getCurrentUserName());
+        int count = preRefundOrderInfoMapper.insert(preRefundOrderInfo);
+        if (count <= 0) {
+            throw new ServiceException("登记售后失败");
+        }
+        //更新订单商品状态
+        PreOrderGoods update = new PreOrderGoods();
+        update.setOrderGoodsState(OrderGoodsStateEnum.REFUND);
+        count = preOrderGoodsMapper.update(update, Wrappers.<PreOrderGoods>lambdaUpdate()
+                .eq(PreOrderGoods::getOrderId, param.getOrderId())
+        );
+        if (count <= 0) {
+            throw new ServiceException("登记售后失败");
+        }
+        //获取订单商品对应提货卡id
+        List<Long> cardIdList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                .select(PreOrderGoods::getCardId)
+                .eq(PreOrderGoods::getOrderId, param.getOrderId())
+        ).stream().map(PreOrderGoods::getCardId).collect(Collectors.toList());
+        //更新提货卡状态
+        PrePickingCard cardUpdate = new PrePickingCard();
+        cardUpdate.setPickingState(PickingCardStateEnum.NO_SALE);
+        //已出售更新为未出售
+        prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+                .in(PrePickingCard::getId, cardIdList)
+                .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
+        );
+        cardUpdate.setPickingState(PickingCardStateEnum.CANCEL);
+        //非已出售更新为已作废
+        prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+                .in(PrePickingCard::getId, cardIdList)
+                .ne(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
+        );
+        //记录订单操作日志
+        orderOperateRecordService.addOrderOperateRecordLog(MdcUtil.getCurrentUserName(), param.getOrderId(), "登记售后");
     }
 
 

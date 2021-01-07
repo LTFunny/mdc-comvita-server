@@ -3,7 +3,10 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aquilaflycloud.mdc.enums.pre.*;
+import com.aquilaflycloud.mdc.enums.pre.IsUpdateEnum;
+import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PrePickingCardMapper;
@@ -12,7 +15,6 @@ import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.model.pre.PrePickingCard;
 import com.aquilaflycloud.mdc.param.pre.PreOrderGoodsPageParam;
 import com.aquilaflycloud.mdc.param.pre.PreReservationOrderGoodsParam;
-import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsPageResult;
 import com.aquilaflycloud.mdc.service.PreOrderGoodsService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -22,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @Author pengyongliang
@@ -102,11 +103,11 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         if(param.getIsUpdate()) {
             String content = preOrderGoods.getReserveName() + DateUtil.format(new Date(), "yyyy-MM-dd") + " 对" +
                     preOrderGoods.getGoodsName() + "进行了预约，提货卡为：" + preOrderGoods.getCardCode();
-            orderOperateRecordService.addOrderOperateRecordLog(orderInfo.getTenantId(), preOrderGoods.getReserveName(), orderInfo.getId(), content);
+            orderOperateRecordService.addOrderOperateRecordLog(preOrderGoods.getReserveName(), orderInfo.getId(), content);
         }else {
             String content = preOrderGoods.getReserveName() + DateUtil.format(new Date(), "yyyy-MM-dd") + " 对预约信息" +
                     preOrderGoods.getGoodsName() + "进行了修改。";
-            orderOperateRecordService.addOrderOperateRecordLog(orderInfo.getTenantId(), preOrderGoods.getReserveName(), orderInfo.getId(), content);
+            orderOperateRecordService.addOrderOperateRecordLog(preOrderGoods.getReserveName(), orderInfo.getId(), content);
         }
     }
 
