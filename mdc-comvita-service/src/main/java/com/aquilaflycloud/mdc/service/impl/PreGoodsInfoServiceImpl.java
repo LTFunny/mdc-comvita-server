@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.mapper.PreGoodsInfoMapper;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
@@ -38,11 +39,11 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
     @Override
     public IPage<PreGoodsInfo> pagePreGoodsInfoList(PreGoodsInfoListParam param) {
         IPage<PreGoodsInfo> list=preGoodsInfoMapper.selectPage(param.page(), Wrappers.<PreGoodsInfo>lambdaQuery()
-                .like( param.getGoodsName()!=null,PreGoodsInfo::getGoodsName, param.getGoodsName())
+                .like( StrUtil.isNotBlank(param.getGoodsName()),PreGoodsInfo::getGoodsName, param.getGoodsName())
                 .like( param.getFolksonomyId()!=null,PreGoodsInfo::getFolksonomyId, param.getFolksonomyId())
-                .eq( param.getGoodsState()!=null,PreGoodsInfo::getGoodsState, param.getGoodsState())
-                .eq( param.getGoodsType()!=null,PreGoodsInfo::getGoodsType, param.getGoodsType())
-                .eq( param.getGoodsCode()!=null,PreGoodsInfo::getGoodsCode, param.getGoodsCode())
+                .eq( StrUtil.isNotBlank(param.getGoodsState().getName()),PreGoodsInfo::getGoodsState, param.getGoodsState())
+                .eq( StrUtil.isNotBlank(param.getGoodsType().getName()),PreGoodsInfo::getGoodsType, param.getGoodsType())
+                .eq( StrUtil.isNotBlank(param.getGoodsCode()),PreGoodsInfo::getGoodsCode, param.getGoodsCode())
         );
         return list;
     }
