@@ -28,7 +28,7 @@ public class PreOrderInfoController {
     private PreOrderInfoService orderInfoService;
 
     @ApiOperation(value = "对订单进行确认", notes = "对订单进行确认")
-    @PreAuthorize("hasAuthority('mdc:confirm:validation')")
+    //@PreAuthorize("hasAuthority('mdc:confirm:validation')")
     @ApiMapping(value = "backend.comvita.order.info.confirm.validation", method = RequestMethod.POST)
     public void validationConfirmOrder(PreConfirmOrderParam param) {
         orderInfoService.validationConfirmOrder(param);
