@@ -10,13 +10,18 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.pre.OrderExpressActionEnum;
+import com.aquilaflycloud.mdc.mapper.PreOrderExpressMapper;
+import com.aquilaflycloud.mdc.model.pre.PreOrderExpress;
 import com.aquilaflycloud.mdc.param.pre.PreOrderExpressInfoParam;
+import com.aquilaflycloud.mdc.param.pre.PreOrderInfoGetParam;
 import com.aquilaflycloud.mdc.result.pre.PreOrderExpressResult;
 import com.aquilaflycloud.mdc.service.PreOrderExpressService;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +37,9 @@ import java.util.Map;
 @Slf4j
 public class PreOrderExpressServiceImpl implements PreOrderExpressService {
 
+    @Resource
+    private PreOrderExpressMapper preOrderExpressMapper;
+
     @Override
     public List<PreOrderExpressResult> queryTrackInfo(PreOrderExpressInfoParam param) {
         List<PreOrderExpressResult> result = new ArrayList<>();
@@ -44,6 +52,13 @@ public class PreOrderExpressServiceImpl implements PreOrderExpressService {
         }
 
         return parseOrderTraces(queryStr);
+    }
+
+    @Override
+    public PreOrderExpress orderExpressGetInfo(PreOrderInfoGetParam param) {
+        PreOrderExpress orderExpress = preOrderExpressMapper.selectOne(Wrappers.<PreOrderExpress>lambdaQuery()
+                .eq(PreOrderExpress::getOrderId,param.getOrderInfoId()));
+        return orderExpress;
     }
 
     public List<PreOrderExpressResult> parseOrderTraces (String queryStr) {

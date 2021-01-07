@@ -1,6 +1,8 @@
 package com.aquilaflycloud.mdc.api;
 
+import com.aquilaflycloud.mdc.model.pre.PreOrderExpress;
 import com.aquilaflycloud.mdc.param.pre.PreOrderExpressInfoParam;
+import com.aquilaflycloud.mdc.param.pre.PreOrderInfoGetParam;
 import com.aquilaflycloud.mdc.result.pre.PreOrderExpressResult;
 import com.aquilaflycloud.mdc.service.PreOrderExpressService;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -26,5 +28,11 @@ public class PreOrderExpressApi {
     @ApiMapping(value = "comvita.order.express.get", method = RequestMethod.POST)
     public List<PreOrderExpressResult> get(PreOrderExpressInfoParam param) {
         return preOrderExpressService.queryTrackInfo(param);
+    }
+
+    @ApiOperation(value = "预约发货获取物流信息", notes = "预约发货获取物流信息")
+    @ApiMapping(value = "comvita.order.express.get.info", method = RequestMethod.POST)
+    public PreOrderExpress orderExpressGetInfo(PreOrderInfoGetParam param) {
+        return preOrderExpressService.orderExpressGetInfo(param);
     }
 }

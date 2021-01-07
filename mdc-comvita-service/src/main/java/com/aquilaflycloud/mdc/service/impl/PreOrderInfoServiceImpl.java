@@ -78,6 +78,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = new PreOrderInfo();
         BeanUtil.copyProperties(param,preOrderInfo);
+        preOrderInfo.setMemberId(infoResult.getId());
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYCONFIRM);
         preOrderInfo.setScore(new BigDecimal("0"));
         preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderRefundCode", "O" + DateTime.now().toString("yyMMdd"), 5));
