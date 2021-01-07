@@ -10,6 +10,7 @@ import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
 import com.aquilaflycloud.mdc.result.member.MemberScanRewardResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsGetResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderInfoPageResult;
@@ -74,6 +75,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Override
     public int addStatConfirmOrder(PreStayConfirmOrderParam param) {
+        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = new PreOrderInfo();
         BeanUtil.copyProperties(param,preOrderInfo);
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYCONFIRM);
@@ -83,11 +85,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if(orderInfo < 0){
             throw new ServiceException("生成待确认订单失败。");
         }
-
-        MemberInfo memberInfo = memberInfoMapper.normalSelectById(param.getMemberId());
-        String content = memberInfo == null ? "" : memberInfo.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
+        String content =  infoResult.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"通过扫码填写信息生成待确认订单";
-        orderOperateRecordService.addOrderOperateRecordLog(memberInfo == null ? "" : memberInfo.getMemberName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
         return orderInfo;
     }
 
@@ -243,10 +243,10 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Override
     public IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageParam param) {
-
+        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.normalSelectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
                 .eq(PreOrderInfo::getOrderState,param.getOrderState())
-                .eq(PreOrderInfo::getMemberId,param.getMemberId()))
+                .eq(PreOrderInfo::getMemberId,infoResult.getId()))
                 .convert(order ->{
                     PreOrderInfoPageResult result  = orderInfo(order);
                     return result;
