@@ -58,13 +58,13 @@ public class PreActivityAddParam {
      * 关联商品
      */
     @ApiModelProperty(value = "关联商品")
-    private PreGoods4ActivityResult refGoods;
+    private Long refGoods;
 
     /**
      * 关联的销售规则
      */
     @ApiModelProperty(value = "关联的销售规则")
-    private PreEnableRuleResult refRule;
+    private Long refRule;
 
     /**
      * 活动照片
