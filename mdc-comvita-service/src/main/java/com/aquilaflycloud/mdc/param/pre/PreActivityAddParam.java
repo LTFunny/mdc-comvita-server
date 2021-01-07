@@ -21,7 +21,7 @@ public class PreActivityAddParam {
     /**
      * 活动名称
      */
-    @ApiModelProperty(value = "活动名称")
+    @ApiModelProperty(value = "活动名称" , required = true)
     @NotNull(message = "活动名称不能为空")
     @Size(message = "名称不能超过{max}字符",max=100)
     private String activityName;
