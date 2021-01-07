@@ -81,7 +81,7 @@ public class PreRuleServiceImpl implements PreRuleService {
             throw new ServiceException("规则主键id为空" );
         }
         PreRuleInfo info =  preRuleInfoMapper.selectById(param.getId());
-        info.setRuleState(RuleStateEnum.DISABLE.getType());
+        info.setRuleState(RuleStateEnum.DISABLE);
         preRuleInfoMapper.updateById(info);
     }
 
@@ -91,7 +91,7 @@ public class PreRuleServiceImpl implements PreRuleService {
             throw new ServiceException("规则主键id为空" );
         }
         PreRuleInfo info =  preRuleInfoMapper.selectById(param.getId());
-        info.setIsDefault(RuleDefaultEnum.DEFAULT.getType());
+        info.setIsDefault(RuleDefaultEnum.DEFAULT);
         preRuleInfoMapper.updateById(info);
     }
 
