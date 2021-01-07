@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.controller;
 
 import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
+import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
@@ -27,7 +28,7 @@ public class PreOrderAdministrationController {
 
     @ApiOperation(value = "订单管理列表", notes = "订单管理列表")
     @ApiMapping(value = "backend.comvita.administration.page", method = RequestMethod.POST)
-    public IPage<AdministrationPageResult> pageAdministrationList(AdministrationListParam param) {
+    public IPage<PreOrderInfo> pageAdministrationList(AdministrationListParam param) {
         return preOrderAdministrationService.pageAdministrationList(param);
     }
 

@@ -12,6 +12,7 @@ import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.BeanUtils;
@@ -38,17 +39,25 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Resource
     private PreOrderOperateRecordMapper preOrderOperateRecordMapper;
     @Override
-    public IPage<AdministrationPageResult> pageAdministrationList(AdministrationListParam param) {
-        IPage<AdministrationPageResult> page=preOrderInfoMapper.pageAdministrationList(param.page(),param);
-        return page;
+    public IPage<PreOrderInfo> pageAdministrationList(AdministrationListParam param) {
+        IPage<PreOrderInfo> list=preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
+                .eq(StringUtils.isNotBlank(param.getShopId()),PreOrderInfo::getShopId, param.getShopId())
+                .eq( StringUtils.isNotBlank(param.getGuideName()),PreOrderInfo::getGuideName, param.getGuideName())
+                .eq( StringUtils.isNotBlank(param.getOrderState()),PreOrderInfo::getOrderState, param.getOrderState())
+                .eq( StringUtils.isNotBlank(param.getOrderCode()),PreOrderInfo::getOrderCode, param.getOrderCode())
+                .like( StringUtils.isNotBlank(param.getBuyerName()),PreOrderInfo::getBuyerName, param.getBuyerName())
+                .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
+                .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
+        );
+        return list;
     }
 
     @Override
     public IPage<PreRefundOrderInfo> pageOrderInfoList(AdministrationListParam param) {
         IPage<PreRefundOrderInfo> list=preRefundOrderInfoMapper.selectPage(param.page(), Wrappers.<PreRefundOrderInfo>lambdaQuery()
                 .eq( param.getShopId()!=null,PreRefundOrderInfo::getShopId, param.getShopId())
-                .eq( param.getGuideId()!=null,PreRefundOrderInfo::getShopId, param.getShopId())
-                .eq( param.getAfterGuideId()!=null,PreRefundOrderInfo::getAfterGuideId, param.getAfterGuideId())
+                .eq( param.getGuideName()!=null,PreRefundOrderInfo::getGuideName, param.getGuideName())
+                .eq( param.getAfterGuideName()!=null,PreRefundOrderInfo::getAfterGuideName, param.getAfterGuideName())
                 .eq( param.getOrderCode()!=null,PreRefundOrderInfo::getOrderCode, param.getOrderCode())
                 .like( param.getBuyerName()!=null,PreRefundOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getAfterSalesStartTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalesStartTime())
