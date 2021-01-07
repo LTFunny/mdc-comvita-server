@@ -27,10 +27,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * PreActivityServiceImpl
@@ -115,8 +112,9 @@ public class PreActivityServiceImpl implements PreActivityService {
         activityInfo.setId(MdcUtil.getSnowflakeId());
         int count = preActivityInfoMapper.insert(activityInfo);
         if (count == 1) {
-            folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREACTIVITY, activityInfo.getId(), param.getFolksonomyIds());
             log.info("新增活动成功");
+            folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREACTIVITY, activityInfo.getId(), param.getFolksonomyIds());
+            log.info("处理标签成功");
         } else {
             throw new ServiceException("新增活动失败");
         }
@@ -163,17 +161,47 @@ public class PreActivityServiceImpl implements PreActivityService {
         checkTimeParam(param.getBeginTime(),param.getEndTime());
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
         BeanUtil.copyProperties(param, activityInfo,"id");
-        //@TODO
-//        if(CollectionUtils.isEmpty(param.getFolksonomyIds())) {
-//            String tagId=param.getFolksonomyIds().toString();
-//            activityInfo.setFolksonomyId(tagId);
-//        }
+
         preActivityInfoMapper.updateById(activityInfo);
         log.info("编辑活动信息成功");
-        List<FolksonomyInfo> oldfolk = folksonomyService.getFolksonomyBusinessList(BusinessTypeEnum.PREACTIVITY, activityInfo.getId());
+        Set<Long> oldIds = new HashSet<>();
+        QueryWrapper<FolksonomyBusinessRel> qw = new QueryWrapper<>();
+        qw.in("business_id", param.getId());
+        List<FolksonomyBusinessRel> folksonomyBusinessRels = folksonomyBusinessRelMapper.selectList(qw);
+        if(CollUtil.isNotEmpty(folksonomyBusinessRels)){
+            folksonomyBusinessRels.forEach(f -> {
+                oldIds.add(f.getFolksonomyId());
+            });
+        }
+        Set<Long> newIds = new HashSet<>();
+        if(CollUtil.isNotEmpty(param.getFolksonomyIds())){
+            newIds = new HashSet(Arrays.asList(param.getFolksonomyIds()));
+        }
+        List<Long> addIds = new ArrayList<>();
+        List<Long> deleteIds = new ArrayList<>();
+        for(Long n : newIds){
+            if(!oldIds.contains(n)){
+                addIds.add(n);
+            }
+        }
+        for(Long o : oldIds){
+            if(!newIds.contains(o)){
+                deleteIds.add(o);
+            }
+        }
+        if(CollUtil.isNotEmpty(addIds)){
+            folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREACTIVITY, activityInfo.getId(), addIds);
+        }
 
-        //保存业务功能标签
-        folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREACTIVITY, activityInfo.getId(), param.getFolksonomyIds());
+        if(CollUtil.isNotEmpty(deleteIds)){
+            deleteIds.forEach(i -> {
+                folksonomyBusinessRelMapper.delete(new QueryWrapper<FolksonomyBusinessRel>()
+                        .eq("folksonomy_id", i)
+                        .eq("business_id",param.getId()));
+
+            });
+        }
+        log.info("处理标签成功");
     }
 
     /**
@@ -217,7 +245,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             throw new ServiceException("下架的活动主键id为空" );
         }
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
-        activityInfo.setActivityState(param.getActivityState().getType());
+        activityInfo.setActivityState(param.getActivityState());
         preActivityInfoMapper.updateById(activityInfo);
     }
 

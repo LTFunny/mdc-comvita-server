@@ -1,6 +1,8 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -35,15 +37,15 @@ public class PreActivityInfo implements Serializable {
      * 活动类型
      */
     @TableField(value = "activity_type")
-    @ApiModelProperty(value = "活动类型")
-    private Integer activityType;
+    @ApiModelProperty(value = "活动类型(pre.ActivityTypeEnum)")
+    private ActivityTypeEnum activityType;
 
     /**
      * 状态（1-未开始 2-进行中 3-已结束 4-已下架）
      */
     @TableField(value = "activity_state")
-    @ApiModelProperty(value = "状态（1-未开始 2-进行中 3-已结束 4-已下架）")
-    private Integer activityState;
+    @ApiModelProperty(value = "状态（pre.ActivityStateEnum）")
+    private ActivityStateEnum activityState;
 
     /**
      * 活动开始时间
