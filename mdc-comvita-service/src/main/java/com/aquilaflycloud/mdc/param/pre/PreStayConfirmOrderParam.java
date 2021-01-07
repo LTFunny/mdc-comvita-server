@@ -13,8 +13,6 @@ import java.util.Date;
 @Data
 public class PreStayConfirmOrderParam {
 
-    @ApiModelProperty(value = "会员id")
-    private Long memberId;
 
     @ApiModelProperty(value = "导购员id")
     private Long guideId;
