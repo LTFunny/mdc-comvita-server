@@ -16,6 +16,7 @@ import com.aquilaflycloud.mdc.model.pre.PreRuleInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PreActivityAnalysisResult;
 import com.aquilaflycloud.mdc.result.pre.PreActivityDetailResult;
+import com.aquilaflycloud.mdc.result.pre.PreActivityPageResult;
 import com.aquilaflycloud.mdc.result.pre.PreActivityRewardResult;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.service.PreActivityService;
@@ -58,11 +59,9 @@ public class PreActivityServiceImpl implements PreActivityService {
     private FolksonomyService folksonomyService;
 
     @Override
-    public IPage<PreActivityInfo> page(PreActivityPageParam param) {
-
+    public IPage<PreActivityPageResult> page(PreActivityPageParam param) {
         List<Long> businessIds = getFolksonomyBusinessRels(param.getFolksonomyIds());
-
-        IPage<PreActivityInfo> list = preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
+        return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
                 .like( param.getActivityName()!=null,PreActivityInfo::getActivityName, param.getActivityName())
                 .in(CollUtil.isNotEmpty(businessIds),PreActivityInfo::getId,businessIds)
                 .eq( param.getActivityState()!=null,
@@ -75,9 +74,35 @@ public class PreActivityServiceImpl implements PreActivityService {
                         "date_format (optime,'%Y-%m-%d') >= date_format('" + param.getCreateTimeStart() + "','%Y-%m-%d')")
                 .apply(param.getCreateTimeEnd() != null,
                         "date_format (optime,'%Y-%m-%d') <= date_format('" + param.getCreateTimeEnd() + "','%Y-%m-%d')")
-        );
+        ).convert(apply -> {
+            PreActivityPageResult result = new PreActivityPageResult();
+            BeanUtil.copyProperties(apply, result);
+            result.setRefGoodsCode(getGoodsCode(apply.getRefGoods()));
+            result.setFolksonomyIds(getFolksonomyIds(apply.getId()));
+            return result;
+        });
+    }
 
-        return list;
+    private List<Long> getFolksonomyIds(Long id) {
+        List<Long> ids = new ArrayList<>();
+        QueryWrapper<FolksonomyBusinessRel> qw = new QueryWrapper<>();
+        qw.in("business_id", id);
+        List<FolksonomyBusinessRel> folksonomyBusinessRels = folksonomyBusinessRelMapper.selectList(qw);
+        if(CollUtil.isNotEmpty(folksonomyBusinessRels)){
+            folksonomyBusinessRels.forEach(f -> {
+                ids.add(f.getFolksonomyId());
+            });
+        }
+        return ids;
+    }
+
+    private String getGoodsCode(Long refGoods) {
+        String code = "";
+        PreGoodsInfo goods = preGoodsInfoMapper.selectById(refGoods);
+        if(null != goods){
+            code = goods.getGoodsCode();
+        }
+        return code;
     }
 
     /**
