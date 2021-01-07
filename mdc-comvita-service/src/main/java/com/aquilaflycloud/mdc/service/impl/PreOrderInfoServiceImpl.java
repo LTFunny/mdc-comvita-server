@@ -132,6 +132,8 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 PreActivityInfo preActivityInfo = activityInfoMapper.selectById(preOrderInfo.getActivityInfoId());
                 if(null != preActivityInfo){
                     PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
+                    preOrderGoods.setGuideId(preOrderInfo.getGuideId());
+                    preOrderGoods.setGuideName(preOrderInfo.getGuideName());
                     preOrderGoods.setGoodsId(preGoodsInfo.getId());
                     preOrderGoods.setGoodsDescription(preGoodsInfo.getGoodsDescription());
                     preOrderGoods.setGoodsPicture(preGoodsInfo.getGoodsPicture());
