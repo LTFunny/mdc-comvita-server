@@ -8,10 +8,74 @@
     </select>
     <select id="pageOrderReportList"  parameterType="com.aquilaflycloud.mdc.param.pre.ReportFormParam"
             resultType="com.aquilaflycloud.mdc.result.pre.ReportOrderPageResult">
-
+            select
+            shop_name shopName,
+            sum(total_price) orderTotalPrice,
+            count(id) orderNumber,
+            b.refundOrderNumber refundOrderNumber,
+            b.refundOrderTotalPrice refundOrderTotalPrice
+            from
+            pre_order_info a
+            left join
+            (select shop_id , sum(total_price) refundOrderTotalPrice,count(id) refundOrderNumber
+             from pre_refund_order_info
+             where shop_id is not null
+            <if test="param.shopId != null and param.shopId != ''">
+                and shop_id = #{param.shopId}
+            </if>
+            <if test="param.createStartTime != null">
+                AND create_time <![CDATA[>=]]> #{param.createStartTime}
+            </if>
+            <if test="param.createEndTime != null">
+                AND create_time <![CDATA[<=]]> #{param.createEndTime}
+            </if>
+             group by shop_id
+                         ) b on a.shop_id=b.shop_id
+             where a.order_state not in (1)
+            <if test="param.shopId != null and param.shopId != ''">
+                and a.shop_id = #{param.shopId}
+            </if>
+            <if test="param.createStartTime != null">
+                AND a.create_time <![CDATA[>=]]> #{param.createStartTime}
+            </if>
+            <if test="param.createEndTime != null">
+                AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
+            </if>
+            group by a.shop_id
     </select>
     <select id="achievementsGuide"  parameterType="com.aquilaflycloud.mdc.param.pre.ReportFormParam"
             resultType="com.aquilaflycloud.mdc.result.pre.ReportGuidePageResult">
+            select
+            a.guide_name guideName,
+             count(a.id)-b.refundOrderNumber  orderNumber,
+             sum(a.total_price)-b.refundOrderTotalPrice  orderPrice
+            from pre_order_info a
+            left join (
+            select shop_id , sum(total_price) refundOrderTotalPrice,count(id) refundOrderNumber
+            from pre_refund_order_info
+            where guide_id is not null
+            <if test="param.guideName != null and param.guideName != ''">
+                and guide_name = #{param.guideName}
+            </if>
+            <if test="param.createStartTime != null">
+                AND create_time <![CDATA[>=]]> #{param.createStartTime}
+            </if>
+            <if test="param.createEndTime != null">
+                AND create_time <![CDATA[<=]]> #{param.createEndTime}
+            </if>
+            group by guide_id
+            )b on b.guide_id=a.guide_id
+            where a.order_state=6
+            <if test="param.guideName != null and param.guideName != ''">
+                and a.guide_name = #{param.guideName}
+            </if>
+            <if test="param.createStartTime != null">
+                AND a.create_time <![CDATA[>=]]> #{param.createStartTime}
+            </if>
+            <if test="param.createEndTime != null">
+                AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
+            </if>
+            group by a.guide_id
 
     </select>
 </mapper>

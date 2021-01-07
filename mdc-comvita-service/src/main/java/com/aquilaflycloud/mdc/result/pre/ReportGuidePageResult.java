@@ -18,8 +18,8 @@ import java.util.Date;
 public class ReportGuidePageResult {
 
 
-    @ApiModelProperty(value = "导购员编号")
-    private Long guideId;
+  /*  @ApiModelProperty(value = "导购员编号")
+    private Long guideId;*/
 
     @ApiModelProperty(value = "导购员名称")
     private String guideName;
@@ -28,7 +28,7 @@ public class ReportGuidePageResult {
     private String newCustomerNum;
 
     @ApiModelProperty(value = "销售订单数量")
-    private String orderNumber;
+    private Integer orderNumber;
 
     @ApiModelProperty(value = "订单金额")
     private BigDecimal orderPrice;
