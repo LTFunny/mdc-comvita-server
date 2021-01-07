@@ -19,7 +19,6 @@ public enum  OrderInfoStateEnum {
     STAYSENDGOODS(4, "待发货"),
     STAYSIGN(5,"待签收"),
     BEENCOMPLETED(6,"已完成"),
-    AFTERSALEREFUND(7,"售后/退款"),
     //给会员订单显示标识用的
     ;
 
