@@ -23,11 +23,11 @@ public class PreGoodsInfoListParam extends PageParam {
     private String goodsCode;
 
     @ApiModelProperty(value = "商品状态(0-在售 1-下架)")
-    private GoodsStateStateEnum goodsState;
+    private String goodsState;
 
     @ApiModelProperty(value = "商品类型(1-预售商品、2-赠品、3-普通商品)")
-    private OrderGoodsTypeEnum goodsType;
+    private String goodsType;
 
     @ApiModelProperty(value = "标签id")
-    private Long  folksonomyId;
+    private String  folksonomyId;
 }
