@@ -8,10 +8,7 @@ import com.aquilaflycloud.mdc.mapper.PreOrderOperateRecordMapper;
 import com.aquilaflycloud.mdc.mapper.PreRefundOrderInfoMapper;
 import com.aquilaflycloud.mdc.model.member.MemberSignRecord;
 import com.aquilaflycloud.mdc.model.pre.*;
-import com.aquilaflycloud.mdc.param.pre.AdministrationListParam;
-import com.aquilaflycloud.mdc.param.pre.InputOrderNumberParam;
-import com.aquilaflycloud.mdc.param.pre.OrderDetailsParam;
-import com.aquilaflycloud.mdc.param.pre.ReadyListParam;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -63,6 +60,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
+    //1.判断是否所有商品都发货了，2.填赠品的时候是否所有商品都发货了
     public void inputOrderNumber(InputOrderNumberParam param) {
         PreOrderGoods info=preOrderGoodsMapper.selectById(param.getId());
         if(info!=null){
@@ -149,5 +147,17 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
         );
         return list;
+    }
+
+    @Override
+    public IPage<ReportOrderPageResult> pageOrderReportList(ReportFormParam param) {
+        IPage<ReportOrderPageResult> page=preOrderInfoMapper.pageOrderReportList(param.page(),param);
+        return page;
+    }
+
+    @Override
+    public IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param) {
+        IPage<ReportGuidePageResult> page=preOrderInfoMapper.achievementsGuide(param.page(),param);
+        return page;
     }
 }
