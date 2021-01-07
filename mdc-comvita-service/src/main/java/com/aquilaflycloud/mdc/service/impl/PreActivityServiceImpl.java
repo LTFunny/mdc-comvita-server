@@ -3,7 +3,8 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DateTime;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
@@ -15,6 +16,7 @@ import com.aquilaflycloud.mdc.model.pre.PreRuleInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PreActivityAnalysisResult;
 import com.aquilaflycloud.mdc.result.pre.PreActivityDetailResult;
+import com.aquilaflycloud.mdc.result.pre.PreActivityRewardResult;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.service.PreActivityService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
@@ -110,6 +112,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         PreActivityInfo activityInfo = new PreActivityInfo();
         BeanUtil.copyProperties(param, activityInfo);
         activityInfo.setId(MdcUtil.getSnowflakeId());
+        activityInfo.setRewardRuleContent(JSONUtil.toJsonStr(param.getRewardRuleList()));
         int count = preActivityInfoMapper.insert(activityInfo);
         if (count == 1) {
             log.info("新增活动成功");
@@ -161,7 +164,9 @@ public class PreActivityServiceImpl implements PreActivityService {
         checkTimeParam(param.getBeginTime(),param.getEndTime());
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
         BeanUtil.copyProperties(param, activityInfo,"id");
-
+        if (CollUtil.isNotEmpty(param.getRewardRuleList())) {
+            activityInfo.setRewardRuleContent(JSONUtil.toJsonStr(param.getRewardRuleList()));
+        }
         preActivityInfoMapper.updateById(activityInfo);
         log.info("编辑活动信息成功");
         Set<Long> oldIds = new HashSet<>();
@@ -226,6 +231,10 @@ public class PreActivityServiceImpl implements PreActivityService {
         PreRuleInfo rule = preRuleInfoMapper.selectById(info.getRefRule());
         if(null != rule){
             preActivityDetailResult.setRefRuleName(rule.getRuleName());
+        }
+        //rewardRuleList
+        if (StrUtil.isNotBlank(info.getRewardRuleContent())) {
+            preActivityDetailResult.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardResult.class));
         }
         // ksonomyIds
         List<FolksonomyInfo> folksonomyInfos = folksonomyService.getFolksonomyBusinessList(BusinessTypeEnum.PREACTIVITY, info.getId());

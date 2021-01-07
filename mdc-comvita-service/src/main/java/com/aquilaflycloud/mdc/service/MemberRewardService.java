@@ -68,6 +68,8 @@ public interface MemberRewardService {
 
     void addOfflineSignRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue);
 
+    void addPreActivityRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue);
+
     void addCleanRewardRecord();
 }
 
