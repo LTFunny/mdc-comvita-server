@@ -51,7 +51,7 @@
              sum(a.total_price)-b.refundOrderTotalPrice  orderPrice
             from pre_order_info a
             left join (
-            select shop_id , sum(total_price) refundOrderTotalPrice,count(id) refundOrderNumber
+            select guide_id , sum(total_price) refundOrderTotalPrice,count(id) refundOrderNumber
             from pre_refund_order_info
             where guide_id is not null
             <if test="param.guideName != null and param.guideName != ''">
