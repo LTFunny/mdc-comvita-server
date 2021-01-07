@@ -76,12 +76,16 @@ public class PreRuleServiceImpl implements PreRuleService {
     }
 
     @Override
-    public void stop(PreRuleIdParam param) {
+    public void cancelStart(PreRuleIdParam param) {
         if(param.getId()==null) {
             throw new ServiceException("规则主键id为空" );
         }
         PreRuleInfo info =  preRuleInfoMapper.selectById(param.getId());
-        info.setRuleState(RuleStateEnum.DISABLE);
+        if(RuleStateEnum.DISABLE.getType() == info.getRuleType().getType()){
+            info.setRuleState(RuleStateEnum.ENABLE);
+        }else if(RuleStateEnum.ENABLE.getType() == info.getRuleType().getType()){
+            info.setRuleState(RuleStateEnum.DISABLE);
+        }
         preRuleInfoMapper.updateById(info);
     }
 
