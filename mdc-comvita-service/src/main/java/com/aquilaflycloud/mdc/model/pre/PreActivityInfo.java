@@ -76,6 +76,13 @@ public class PreActivityInfo implements Serializable {
     private Long refRule;
 
     /**
+     * 奖励规则
+     */
+    @TableField(value = "reward_rule_content")
+    @ApiModelProperty(value = "奖励规则")
+    private String rewardRuleContent;
+
+    /**
      * 活动照片
      */
     @TableField(value = "activity_picture")

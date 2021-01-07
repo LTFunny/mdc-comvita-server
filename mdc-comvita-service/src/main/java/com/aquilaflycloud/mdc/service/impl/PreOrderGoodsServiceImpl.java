@@ -15,8 +15,10 @@ import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.model.pre.PrePickingCard;
 import com.aquilaflycloud.mdc.param.pre.PreOrderGoodsPageParam;
 import com.aquilaflycloud.mdc.param.pre.PreReservationOrderGoodsParam;
+import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
 import com.aquilaflycloud.mdc.service.PreOrderGoodsService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
+import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
@@ -47,8 +49,9 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
 
     @Override
     public IPage<PreOrderGoods> pagePreOrderGoods(PreOrderGoodsPageParam param) {
+        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         return preOrderGoodsMapper.selectPage(param.page(),Wrappers.<PreOrderGoods>lambdaQuery()
-        .eq(PreOrderGoods::getReserveId,param.getMemberId())
+        .eq(PreOrderGoods::getReserveId,infoResult.getId())
         .eq(PreOrderGoods::getOrderGoodsState,param.getOrderGoodsState()));
     }
 

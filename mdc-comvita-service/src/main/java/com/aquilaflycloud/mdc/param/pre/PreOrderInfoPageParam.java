@@ -19,6 +19,4 @@ public class PreOrderInfoPageParam extends PageParam<PreOrderInfo> implements Se
     @ApiModelProperty(value = "订单状态")
     private OrderInfoStateEnum orderState;
 
-    @ApiModelProperty(value = "会员id")
-    private Long memberId;
 }

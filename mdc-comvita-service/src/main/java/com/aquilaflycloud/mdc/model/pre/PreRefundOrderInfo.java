@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.aquilaflycloud.mdc.enums.pre.AfterSaleTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -267,7 +268,7 @@ public class PreRefundOrderInfo implements Serializable {
      */
     @TableField(value = "order_state")
     @ApiModelProperty(value = "订单状态")
-    private Integer orderState;
+    private OrderGoodsStateEnum orderState;
 
     /**
      * 创建时间

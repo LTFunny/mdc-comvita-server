@@ -654,6 +654,11 @@ public class MemberRewardServiceImpl implements MemberRewardService {
         addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.OFFLINESIGN, null);
     }
 
+    @Override
+    public void addPreActivityRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue) {
+        addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.PREACTIVITY, null);
+    }
+
     private Map<String, DateTime> getCleanDate(MemberRewardRule rule) {
         DateTime now = DateUtil.beginOfDay(DateTime.now());
         DateTime cleanDate = DateUtil.dateNew(now).setMutable(true);
