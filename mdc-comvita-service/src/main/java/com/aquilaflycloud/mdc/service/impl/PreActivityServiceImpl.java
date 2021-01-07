@@ -27,6 +27,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -129,6 +130,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         return businessIds;
     }
 
+    @Transactional
     @Override
     public void add(PreActivityAddParam param) {
         checkNameParam(param.getActivityName());
@@ -180,6 +182,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
     }
 
+    @Transactional
     @Override
     public void update(PreActivityUpdateParam param) {
         if(param.getId()==null) {
