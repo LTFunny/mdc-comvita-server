@@ -1,7 +1,9 @@
 package com.aquilaflycloud.mdc.service.impl;
 
+import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderOperateRecordMapper;
@@ -73,10 +75,26 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     public void inputOrderNumber(InputOrderNumberParam param) {
         PreOrderGoods info=preOrderGoodsMapper.selectById(param.getId());
         if(info!=null){
-            info.setExpressName(param.getExpressName());
-            info.setExpressOrderCode(param.getExpressOrder());
-            info.setExpressCode(param.getExpressCode());
-            preOrderGoodsMapper.updateById(info);
+            if(OrderGoodsTypeEnum.GIFTS.equals(info.getGoodsType())){ //填赠品的时候是否所有商品都发货了
+                List<PreOrderGoods> list=preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                        .eq(PreOrderGoods::getOrderId,info.getOrderId())
+                        .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE,OrderGoodsStateEnum.PREPARE)
+                );
+                if(list.size()>0){
+                    throw new SecurityException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
+                }
+                PreOrderInfo preOrderInfo=preOrderInfoMapper.selectById(info.getOrderId());
+                preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
+                preOrderInfoMapper.updateById(preOrderInfo);
+            }
+                info.setExpressName(param.getExpressName());
+                info.setExpressOrderCode(param.getExpressOrder());
+                info.setExpressCode(param.getExpressCode());
+                info.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
+                info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
+                preOrderGoodsMapper.updateById(info);
+
+
         }else{
             throw new SecurityException("输入的主键值有误");
         }
