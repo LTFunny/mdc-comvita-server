@@ -86,7 +86,6 @@ public class PreOrderExpressServiceImpl implements PreOrderExpressService {
      * @return
      */
     public String getOrderTracesByJson(PreOrderExpressInfoParam paramInfo) {
-        //TODO 上线修改
         //demo账号信息
 //        String eBusinessId = "test1693466";
 //        String appKey = "c17c0fe4-de83-4d83-beb3-1d575ee41f82";
@@ -114,7 +113,6 @@ public class PreOrderExpressServiceImpl implements PreOrderExpressService {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("RequestData", URLUtil.encode(requestData));
         params.put("EBusinessID", eBusinessId);
-        //TODO 上线修改
         //demo：1002；prod：8001
         params.put("RequestType", "8001");
 
