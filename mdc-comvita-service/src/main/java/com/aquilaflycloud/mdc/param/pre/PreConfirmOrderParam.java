@@ -19,10 +19,6 @@ public class PreConfirmOrderParam {
     @ApiModelProperty(value = "订单id")
     private Long id;
 
-    @ApiModelProperty(value = "订单状态" , required = true)
-    @NotNull(message = "订单状态不能为空")
-    private OrderInfoStateEnum orderState;
-
     @ApiModelProperty(value = "销售小票url")
     private String ticketUrl;
 
