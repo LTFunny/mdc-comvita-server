@@ -19,6 +19,6 @@ public class PreActivityCancelParam {
     private Long id;
 
     @ApiModelProperty(value = "活动状态(pre.ActivityStateEnum)")
-    private ActivityStateEnum activityState = ActivityStateEnum.CANCELED;
+    private ActivityStateEnum activityState;
 
 }
