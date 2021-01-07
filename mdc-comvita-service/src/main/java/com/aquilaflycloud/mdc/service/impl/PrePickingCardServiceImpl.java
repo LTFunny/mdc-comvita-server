@@ -93,17 +93,17 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
             }
 
             //保存数据
-            List<PrePickingCard> insertcards = new ArrayList<>();
+            List<PrePickingCard> insertCards = new ArrayList<>();
             for (int i = 0; i < count; i++) {
                 Long id = idList.get(i);
                 String pass = passList.get(i);
                 String code = codeList.get(i);
 
                 PrePickingCard item = new PrePickingCard(id, code, pass, PickingCardStateEnum.NO_SALE);
-                insertcards.add(item);
+                insertCards.add(item);
             }
 
-            int insertCount = prePickingCardMapper.insertAllBatch(insertcards);
+            int insertCount = prePickingCardMapper.insertAllBatch(insertCards);
 
             if (insertCount != count) {
                 throw new ServiceException("保存提货卡信息失败，请重试");
