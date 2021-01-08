@@ -140,32 +140,32 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
                     break;
                 }*/
                 case PREORDERSIGN: {
-                    if (params.size() != 4) {
-                        throw new ServiceException(MiniMessageTypeEnum.PREORDERSIGN.getName() + "消息模板字段需要4个");
-                    }
-                    break;
-                }
-                case PREORDERDELIVERIED: {
                     if (params.size() != 5) {
-                        throw new ServiceException(MiniMessageTypeEnum.PREORDERDELIVERIED.getName() + "消息模板字段需要5个");
-                    }
-                    break;
-                }
-                case PREORDERRCHANGESIGN: {
-                    if (params.size() != 5) {
-                        throw new ServiceException(MiniMessageTypeEnum.PREORDERRCHANGESIGN.getName() + "消息模板字段需要5个");
-                    }
-                    break;
-                }
-                case PREORDERRCHANGE: {
-                    if (params.size() != 4) {
-                        throw new ServiceException(MiniMessageTypeEnum.PREORDERRCHANGE.getName() + "消息模板字段需要4个");
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERSIGN.getName() + "消息模板字段需要5个");
                     }
                     break;
                 }
                 case PREORDERDELIVERY: {
                     if (params.size() != 5) {
                         throw new ServiceException(MiniMessageTypeEnum.PREORDERDELIVERY.getName() + "消息模板字段需要5个");
+                    }
+                    break;
+                }
+                case PREORDERGOODSSIGN: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERGOODSSIGN.getName() + "消息模板字段需要4个");
+                    }
+                    break;
+                }
+                case PREORDERGOODSELIVERY: {
+                    if (params.size() != 5) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERGOODSELIVERY.getName() + "消息模板字段需要5个");
+                    }
+                    break;
+                }
+                case PREORDERCHANGE: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERCHANGE.getName() + "消息模板字段需要4个");
                     }
                     break;
                 }
