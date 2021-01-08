@@ -65,7 +65,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             PreActivityPageResult result = new PreActivityPageResult();
             BeanUtil.copyProperties(apply, result);
             result.setRefGoodsCode(getGoodsCode(apply.getRefGoods()));
-            result.setFolksonomys(getFolksonomys(apply.getId()));
+            result.setFolksonomyIds(getFolksonomys(apply.getId()));
             return result;
         });
     }
@@ -90,7 +90,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             PreActivityPageResult result = new PreActivityPageResult();
             BeanUtil.copyProperties(apply, result);
             result.setRefGoodsCode(getGoodsCode(apply.getRefGoods()));
-            result.setFolksonomys(getFolksonomys(apply.getId()));
+            result.setFolksonomyIds(getFolksonomys(apply.getId()));
             return result;
         });
     }
