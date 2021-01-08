@@ -179,6 +179,10 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             BeanUtil.copyProperties(preGoodsInfo, preOrderGoods);
             preOrderGoods.setOrderId(preOrderInfo.getId());
             preOrderGoods.setGoodsId(preGoodsInfo.getId());
+            preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
+            preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
+            preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
+            preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
             orderGoodsList.add(preOrderGoods);
         }
         preOrderGoodsMapper.insertAllBatch(orderGoodsList);
@@ -257,7 +261,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
 
     public PreOrderInfoPageResult orderInfo(PreOrderInfo order){
-
         PreOrderInfoPageResult result = BeanUtil.copyProperties(order, PreOrderInfoPageResult.class);
         int orderGoodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
@@ -307,6 +310,18 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
                 .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.TAKEN));
         result.setIngdeliveryNum(takenCount);
+        if(preOrderInfo.getOrderState().equals(OrderInfoStateEnum.BEENCOMPLETED) && param.getAfter() == 1){
+            result.setState("售后/退款");
+        }
+        int cardCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
+                .eq(PreOrderGoods::getPickingCardState,PickingCardStateEnum.RESERVE));
+        int goodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
+                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.PREPARE));
+        if(preOrderInfo.getOrderState().equals(OrderInfoStateEnum.WAITINGDELIVERY) && cardCount != goodsCount){
+            result.setState("部分预约");
+        }
         PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
         .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
         .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));

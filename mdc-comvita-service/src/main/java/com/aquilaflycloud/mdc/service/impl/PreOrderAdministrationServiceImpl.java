@@ -24,8 +24,11 @@ import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.gitee.sop.servercommon.exception.ServiceException;
+import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -65,11 +68,11 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Override
     public IPage<PreRefundOrderInfo> pageOrderInfoList(AdministrationListParam param) {
         IPage<PreRefundOrderInfo> list=preRefundOrderInfoMapper.selectPage(param.page(), Wrappers.<PreRefundOrderInfo>lambdaQuery()
-                .eq( param.getShopId()!=null,PreRefundOrderInfo::getShopId, param.getShopId())
-                .eq( param.getGuideName()!=null,PreRefundOrderInfo::getGuideName, param.getGuideName())
-                .eq( param.getAfterGuideName()!=null,PreRefundOrderInfo::getAfterGuideName, param.getAfterGuideName())
-                .eq( param.getOrderCode()!=null,PreRefundOrderInfo::getOrderCode, param.getOrderCode())
-                .like( param.getBuyerName()!=null,PreRefundOrderInfo::getBuyerName, param.getBuyerName())
+                .eq( StringUtils.isNotBlank(param.getShopId()),PreRefundOrderInfo::getShopId, param.getShopId())
+                .eq( StringUtils.isNotBlank(param.getGuideName()),PreRefundOrderInfo::getGuideName, param.getGuideName())
+                .eq( StringUtils.isNotBlank(param.getAfterGuideName()),PreRefundOrderInfo::getAfterGuideName, param.getAfterGuideName())
+                .eq( StringUtils.isNotBlank(param.getOrderCode()),PreRefundOrderInfo::getOrderCode, param.getOrderCode())
+                .like( StringUtils.isNotBlank(param.getBuyerName()),PreRefundOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getAfterSalesStartTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalesStartTime())
                 .le(param.getAfterSalEndTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalEndTime())
                 .ge(param.getCreateStartTime() != null, PreRefundOrderInfo::getCreateTime, param.getCreateStartTime())
@@ -79,11 +82,12 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
+    @Transactional
     //1.判断是否所有商品都发货了，2.填赠品的时候是否所有商品都发货了
     public void inputOrderNumber(InputOrderNumberParam param) {
         PreOrderGoods info = preOrderGoodsMapper.selectById(param.getId());
         if (info == null) {
-            throw new SecurityException("商品不存在");
+            throw new ServiceException("商品不存在");
         }
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(info.getOrderId());
         if (OrderGoodsTypeEnum.GIFTS.equals(info.getGoodsType())) { //填赠品的时候是否所有商品都发货了
@@ -92,7 +96,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
             );
             if (list.size() > 0) {
-                throw new SecurityException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
+                throw new ServiceException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
             }
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
             preOrderInfoMapper.updateById(preOrderInfo);
@@ -126,7 +130,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     public AdministrationDetailsResult getOrderDetails(OrderDetailsParam param) {
         PreOrderInfo info=preOrderInfoMapper.selectById(param.getId());
         if(info==null){
-            throw new SecurityException("输入的主键值有误");
+            throw new ServiceException("输入的主键值有误");
         }
         List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,info.getId()));
@@ -170,7 +174,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     public AfterSalesDetailsResult getAfterOrderDetails(OrderDetailsParam param) {
         PreRefundOrderInfo info=preRefundOrderInfoMapper.selectById(param.getId());
         if(info==null){
-            throw new SecurityException("输入的主键值有误");
+            throw new ServiceException("输入的主键值有误");
         }
         List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,info.getOrderId()));
@@ -208,6 +212,18 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     //todo 拉新数量没有加
     public IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param) {
         IPage<ReportGuidePageResult> page=preOrderInfoMapper.achievementsGuide(param.page(),param);
+        return page;
+    }
+
+    @Override
+    public IPage<OrderPageResult> pageOrderPageResultList(AdministrationListParam param) {
+        IPage<OrderPageResult> page=preOrderInfoMapper.pageOrderPageResultList(param.page(),param);
+        return page;
+    }
+
+    @Override
+    public IPage<SalePageResult> pageSalePageResultList(AdministrationListParam param) {
+        IPage<SalePageResult> page=preOrderInfoMapper.pageSalePageResultList(param.page(),param);
         return page;
     }
 }

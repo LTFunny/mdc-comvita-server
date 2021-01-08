@@ -3,7 +3,7 @@
 <mapper namespace="com.aquilaflycloud.mdc.mapper.PreActivityInfoMapper">
 
 
-    <select id="getFolksonomy"  parameterType="java.util.Map" resultType="java.lang.Integer">
+    <select id="getFolksonomy" resultType ="java.util.Map" parameterType="java.lang.Long">
         SELECT
         info.id,info.name
         FROM

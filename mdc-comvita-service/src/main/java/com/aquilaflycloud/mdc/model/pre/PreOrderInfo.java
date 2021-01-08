@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.model.pre;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.aquilaflycloud.mdc.enums.member.SexEnum;
 import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.FailSymbolEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -190,6 +191,28 @@ public class PreOrderInfo implements Serializable {
     private String buyerPostalCode;
 
     /**
+     * 买家地址-省
+     */
+    @TableField(value = "buyer_province")
+    @ApiModelProperty(value = "买家地址-省")
+    private String buyerProvince;
+
+    /**
+     * 买家地址-市
+     */
+    @TableField(value = "buyer_city")
+    @ApiModelProperty(value = "买家地址-市")
+    private String buyerCity;
+
+    /**
+     * 买家地址-区
+     */
+    @TableField(value = "buyer_district")
+    @ApiModelProperty(value = "买家地址-区")
+    private String buyerDistrict;
+
+
+    /**
      * 买家详细地址
      */
     @TableField(value = "buyer_address")
@@ -237,6 +260,13 @@ public class PreOrderInfo implements Serializable {
     @TableField(value = "score")
     @ApiModelProperty(value = "积分")
     private BigDecimal score;
+
+    /**
+     * 确认订单(不通过标识)
+     */
+    @TableField(value = "fail_symbol")
+    @ApiModelProperty(value = "确认订单(不通过标识)")
+    private FailSymbolEnum failSymbol;
 
     /**
      * 不通过原因
