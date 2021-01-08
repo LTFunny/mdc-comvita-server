@@ -152,8 +152,8 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
                     break;
                 }
                 case PREORDERRCHANGESIGN: {
-                    if (params.size() != 4) {
-                        throw new ServiceException(MiniMessageTypeEnum.PREORDERRCHANGESIGN.getName() + "消息模板字段需要4个");
+                    if (params.size() != 5) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERRCHANGESIGN.getName() + "消息模板字段需要5个");
                     }
                     break;
                 }

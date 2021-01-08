@@ -17,9 +17,9 @@ public enum MiniMessageTypeEnum {
     //某个商品签收
     PREORDERSIGN(2, "订单签收通知", "商品名称, 物流公司, 快递单号, 温馨提示"),
     //某个商品发货
-    PREORDERDELIVERIED(3, "订单发货通知", "商品信息, 收货地址, 快递公司, 快递单号, 温馨提示"),
+    PREORDERDELIVERIED(3, "订单发货通知", "订单编号, 收货地址, 快递公司, 快递单号, 温馨提示"),
     //某个商品(包括赠品)签收
-    PREORDERRCHANGESIGN(4, "订单状态变化通知", "订单编号, 订单状态, 更新时间, 变化详情"),
+    PREORDERRCHANGESIGN(4, "订单签收通知", "订单编号, 商品名称, 物流公司, 快递单号, 温馨提示"),
     //预约结果提醒
     PREORDERRCHANGE(5, "订单状态变化通知", "订单编号, 订单状态, 更新时间, 备注"),
     //订单赠品发货
