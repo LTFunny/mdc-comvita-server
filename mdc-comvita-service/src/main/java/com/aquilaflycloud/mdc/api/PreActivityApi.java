@@ -25,8 +25,8 @@ public class PreActivityApi {
 
     @ApiOperation(value = "获取预售活动列表", notes = "获取预售活动列表")
     @ApiMapping(value = "comvita.pre.activity.info.page", method = RequestMethod.POST)
-    public IPage<PreActivityPageResult> pagePreActivity() {
-        return preActivityService.pagePreActivity(new PreActivityPageParam());
+    public IPage<PreActivityPageResult> pagePreActivity(PreActivityPageParam param) {
+        return preActivityService.pagePreActivity(param);
     }
 
 }
