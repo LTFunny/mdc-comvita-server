@@ -2,12 +2,14 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
+import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
@@ -17,9 +19,11 @@ import com.aquilaflycloud.mdc.result.member.MemberScanRewardResult;
 import com.aquilaflycloud.mdc.result.pre.PreActivityRewardResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsGetResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderInfoPageResult;
+import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.MemberRewardService;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
+import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -51,6 +55,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Resource
     private PreOrderOperateRecordService orderOperateRecordService;
+
+    @Resource
+    private WechatMiniProgramSubscribeMessageService wechatMiniProgramSubscribeMessageService;
 
     @Resource
     private MemberInfoMapper memberInfoMapper;
@@ -100,33 +107,33 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Override
     public void validationConfirmOrder(PreConfirmOrderParam param) {
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getId());
-        if(null == preOrderInfo){
+        if (null == preOrderInfo) {
             throw new ServiceException("找不到此订单");
         }
-        BeanUtil.copyProperties(param,preOrderInfo);
-        if(param.getIsThrough() == 0){
+        BeanUtil.copyProperties(param, preOrderInfo);
+        if (param.getIsThrough() == 0) {
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYRESERVATION);
         }
         List<PreOrderGoods> orderGoodsList = new ArrayList<>();
-        if(param.getIsThrough() == 0) {
+        if (param.getIsThrough() == 0) {
             PreActivityInfo preActivityInfo = activityInfoMapper.selectById(preOrderInfo.getActivityInfoId());
-            if(null == preActivityInfo) {
+            if (null == preActivityInfo) {
                 throw new ServiceException("活动不存在");
             }
             PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
-            param.getPrePickingCardList().stream().forEach(card ->{
+            param.getPrePickingCardList().stream().forEach(card -> {
                 PrePickingCardValidationParam param1 = new PrePickingCardValidationParam();
                 param1.setPickingCode(card);
                 PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
-                        .eq(PrePickingCard::getPickingCode,card)
-                        .eq(PrePickingCard::getPickingState,PickingCardStateEnum.NO_SALE));
-                if(prePickingCard == null){
+                        .eq(PrePickingCard::getPickingCode, card)
+                        .eq(PrePickingCard::getPickingState, PickingCardStateEnum.NO_SALE));
+                if (prePickingCard == null) {
                     throw new ServiceException("其中提货卡有误，无法提交。");
                 }
                 prePickingCard.setPickingState(PickingCardStateEnum.SALE);
                 //更改提货卡状态
                 int updateCard = prePickingCardMapper.updateById(prePickingCard);
-                if(updateCard < 0){
+                if (updateCard < 0) {
                     throw new ServiceException("提货卡更改状态失败。");
                 }
                 //订单明细
@@ -158,32 +165,42 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         //计算总金额
         preOrderInfo.setTotalPrice(orderGoodsList.get(0).getGoodsPrice().multiply(new BigDecimal(orderGoodsList.size())));
         int updateOrder = preOrderInfoMapper.updateById(preOrderInfo);
-        if(updateOrder < 0){
+        if (updateOrder < 0) {
             throw new ServiceException("订单操作失败。");
         }
         //判断是否存在赠品，存在就添加
         PreOrderGoods preOrderGoods = new PreOrderGoods();
         PreActivityInfo preActivityInfo = activityInfoMapper.selectById(preOrderInfo.getActivityInfoId());
         PreRuleInfo preRuleInfo = preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
-                .eq(PreRuleInfo::getId,preActivityInfo.getRefRule())
-                .eq(PreRuleInfo::getRuleType,RuleTypeEnum.ORDER_GIFTS));
-        if(preRuleInfo != null){
+                .eq(PreRuleInfo::getId, preActivityInfo.getRefRule())
+                .eq(PreRuleInfo::getRuleType, RuleTypeEnum.ORDER_GIFTS));
+        if (preRuleInfo != null) {
             PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
-            BeanUtil.copyProperties(preGoodsInfo,preOrderGoods);
+            BeanUtil.copyProperties(preGoodsInfo, preOrderGoods);
             preOrderGoods.setOrderId(preOrderInfo.getId());
             preOrderGoods.setGoodsId(preGoodsInfo.getId());
             orderGoodsList.add(preOrderGoods);
         }
         preOrderGoodsMapper.insertAllBatch(orderGoodsList);
         String content;
-        if(param.getIsThrough() == 0){
-            content = ("导购员：" + preOrderInfo.getGuideName()+ DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")+ " 对订单：" +
+        if (param.getIsThrough() == 0) {
+            content = ("导购员：" + preOrderInfo.getGuideName() + DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss") + " 对订单：" +
                     preOrderInfo.getOrderCode() + "进行了确认。");
-        }else {
-            content = ("导购员：" + preOrderInfo.getGuideName()+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss") +" 对订单：" +
+            //发送微信订阅消息
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
+                            .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERAUDIT, null,
+                    preOrderInfo.getOrderCode(), "您提交的订单已审核", "确认通过",
+                    "订单" + preOrderInfo.getOrderCode() + "审核通过");
+        } else {
+            content = ("导购员：" + preOrderInfo.getGuideName() + DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss") + " 对订单：" +
                     preOrderInfo.getOrderCode() + "进行了不通过，不通过的原因为：" + preOrderInfo.getReason());
+            //发送微信订阅消息
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
+                            .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERAUDIT, null,
+                    preOrderInfo.getOrderCode(), "您提交的订单已审核", "不通过",
+                    "订单" + preOrderInfo.getOrderCode() + "审核不通过, 原因: " + preOrderInfo.getReason());
         }
-        orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getGuideName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getGuideName(), preOrderInfo.getId(), content);
     }
 
     @Override
@@ -313,28 +330,43 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preOrderGoods.setVerificaterOrgIds(preOrderInfo.getCreatorOrgIds());
         preOrderGoods.setVerificaterOrgNames(preOrderInfo.getCreatorOrgNames());
         int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
-        if(orderGoods < 0){
+        if (orderGoods < 0) {
             throw new ServiceException("确认签收操作失败。");
         }
         int orderGoodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,preOrderGoods.getOrderId()));
+                .eq(PreOrderGoods::getOrderId, preOrderGoods.getOrderId()));
 
         int takenCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,preOrderGoods.getOrderId())
-                .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.TAKEN));
+                .eq(PreOrderGoods::getOrderId, preOrderGoods.getOrderId())
+                .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.TAKEN));
 
-        if(orderGoodsCount == takenCount){
+        if (orderGoodsCount == takenCount) {
             preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
             MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
             Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord
-                    (memberInfo,null,preOrderInfo.getTotalPrice(),true);
+                    (memberInfo, null, preOrderInfo.getTotalPrice(), true);
             preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
-        }else {
+        } else {
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
+
         }
         int order = preOrderInfoMapper.updateById(preOrderInfo);
-        if(order < 0){
+        if (order < 0) {
             throw new ServiceException("更改订单状态失败。");
+        }
+        if (preOrderGoods.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
+            //签收赠品,发送微信订阅消息
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
+                            .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERSIGN, null,
+                    preOrderInfo.getOrderCode(), preOrderGoods.getGoodsName(), preOrderGoods.getExpressName(),
+                    preOrderGoods.getExpressOrderCode(), "订单" + preOrderInfo.getOrderCode() + "的赠品" + preOrderGoods.getGoodsName() + "已签收");
+        } else {
+            //签收预售商品,发送微信订阅消息
+            MemberInfo memberInfo = memberInfoMapper.selectById(preOrderGoods.getReserveId());
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(memberInfo.getWxAppId())
+                            .setOpenId(memberInfo.getOpenId())), MiniMessageTypeEnum.PREORDERGOODSSIGN, null,
+                    preOrderGoods.getGoodsName(), preOrderGoods.getExpressName(), preOrderGoods.getExpressOrderCode(),
+                    preOrderGoods.getGoodsName() + "商品已签收");
         }
     }
 
@@ -410,6 +442,11 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         );
         //记录订单操作日志
         orderOperateRecordService.addOrderOperateRecordLog(MdcUtil.getCurrentUserName(), param.getOrderId(), "登记售后");
+        //发送微信订阅消息
+        wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
+                        .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERREFUNDAUDIT, null,
+                preOrderInfo.getOrderCode(), preRefundOrderInfo.getRefundPrice().toString(), "通过",
+                "订单" + preOrderInfo.getOrderCode() + "已成功办理售后");
     }
 
 
