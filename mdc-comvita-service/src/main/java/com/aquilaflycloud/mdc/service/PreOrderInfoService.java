@@ -18,7 +18,6 @@ public interface PreOrderInfoService{
      * @param param
      * @return
      */
-    @Transactional
     int addStatConfirmOrder(PreStayConfirmOrderParam param);
 
 
@@ -27,7 +26,6 @@ public interface PreOrderInfoService{
      * @param param
      * @return
      */
-    @Transactional
     void validationConfirmOrder(PreConfirmOrderParam param);
 
 
@@ -35,7 +33,6 @@ public interface PreOrderInfoService{
      * 核销提货卡
      * @param param
      */
-    @Transactional
     void verificationOrder(PreOrderVerificationParam param);
 
 
@@ -59,7 +56,6 @@ public interface PreOrderInfoService{
      * @param param
      * @return
      */
-    @Transactional
     void confirmReceiptOrder(PreOrderGoodsGetParam param);
 
 

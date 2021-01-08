@@ -21,6 +21,7 @@ public enum RewardSourceEnum {
     LOTTERY(5, "欢乐抽奖"),
     OFFLINESIGN(6, "线下打卡"),
     MISSION(7, "会员任务"),
+    PREACTIVITY(8, "预售活动"),
     ;
 
     RewardSourceEnum(int type, String name) {

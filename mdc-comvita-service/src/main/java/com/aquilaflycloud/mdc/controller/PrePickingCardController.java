@@ -4,7 +4,6 @@ import com.aquilaflycloud.mdc.model.pre.PrePickingCard;
 import com.aquilaflycloud.mdc.param.pre.PrePickingCardBatchAddParam;
 import com.aquilaflycloud.mdc.param.pre.PrePickingCardPageParam;
 import com.aquilaflycloud.mdc.param.pre.PrePickingCardUpdateParam;
-import com.aquilaflycloud.mdc.param.pre.PrePickingCardValidationParam;
 import com.aquilaflycloud.mdc.result.pre.PrePickingCardAnalysisResult;
 import com.aquilaflycloud.mdc.service.PrePickingCardService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -55,11 +54,5 @@ public class PrePickingCardController {
     @ApiMapping(value = "backend.comvita.pre.picking.card.analysis", method = RequestMethod.POST, permission = true)
     public PrePickingCardAnalysisResult analysis() {
         return prePickingCardService.analysis();
-    }
-
-    @ApiOperation(value = "验证提货卡", notes = "验证提货卡")
-    @ApiMapping(value = "comvita.picking.card.validation", method = RequestMethod.POST)
-    public boolean addStatConfirmOrder(PrePickingCardValidationParam param) {
-        return prePickingCardService.validationPickingCard(param);
     }
 }

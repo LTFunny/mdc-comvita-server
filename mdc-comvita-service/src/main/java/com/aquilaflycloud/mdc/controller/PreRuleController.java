@@ -50,11 +50,11 @@ public class PreRuleController {
         preRuleService.update(param);
     }
 
-    @ApiOperation(value = "销售规则停用", notes = "销售规则停用")
+    @ApiOperation(value = "销售规则停用/启用", notes = "销售规则停用/启用")
 //    @PreAuthorize("hasAuthority('mdc:pre:rule:stop')")
-    @ApiMapping(value = "backend.comvita.pre.rule.stop", method = RequestMethod.POST, permission = true)
-    public void cancel(PreRuleIdParam param) {
-        preRuleService.stop(param);
+    @ApiMapping(value = "backend.comvita.pre.rule.stop_start", method = RequestMethod.POST, permission = true)
+    public void cancelStart(PreRuleIdParam param) {
+        preRuleService.cancelStart(param);
     }
 
     @ApiOperation(value = "销售规则设为默认", notes = "销售规则设为默认")

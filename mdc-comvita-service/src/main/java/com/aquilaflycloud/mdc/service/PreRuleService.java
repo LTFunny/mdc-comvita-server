@@ -37,10 +37,10 @@ public interface PreRuleService {
     void update(PreRuleUpdateParam param);
 
     /**
-     * 停用
+     * 停用/启用
      * @param param
      */
-    void stop(PreRuleIdParam param);
+    void cancelStart(PreRuleIdParam param);
 
     /**
      * 设为默认

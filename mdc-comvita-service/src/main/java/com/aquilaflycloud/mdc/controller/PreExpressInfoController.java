@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +23,7 @@ public class PreExpressInfoController {
     private PreExpressInfoService preExpressInfoService;
 
     @ApiOperation(value = "获取快递编码信息分页", notes = "获取快递编码信息分页")
-    @PreAuthorize("hasAuthority('mdc:pre:express:info:page')")
+//    @PreAuthorize("hasAuthority('mdc:pre:express:info:page')")
     @ApiMapping(value = "backend.comvita.pre.express.info.page", method = RequestMethod.POST, permission = true)
     public IPage<PreExpressInfo> page(PreExpressInfoPageParam param) {
         return preExpressInfoService.page(param);

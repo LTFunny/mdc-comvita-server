@@ -1,20 +1,20 @@
 package com.aquilaflycloud.mdc.service.impl;
 
+import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderOperateRecordMapper;
 import com.aquilaflycloud.mdc.mapper.PreRefundOrderInfoMapper;
 import com.aquilaflycloud.mdc.model.member.MemberSignRecord;
 import com.aquilaflycloud.mdc.model.pre.*;
-import com.aquilaflycloud.mdc.param.pre.AdministrationListParam;
-import com.aquilaflycloud.mdc.param.pre.InputOrderNumberParam;
-import com.aquilaflycloud.mdc.param.pre.OrderDetailsParam;
-import com.aquilaflycloud.mdc.param.pre.ReadyListParam;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.BeanUtils;
@@ -41,17 +41,25 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Resource
     private PreOrderOperateRecordMapper preOrderOperateRecordMapper;
     @Override
-    public IPage<AdministrationPageResult> pageAdministrationList(AdministrationListParam param) {
-        IPage<AdministrationPageResult> page=preOrderInfoMapper.pageAdministrationList(param.page(),param);
-        return page;
+    public IPage<PreOrderInfo> pageAdministrationList(AdministrationListParam param) {
+        IPage<PreOrderInfo> list=preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
+                .eq(StringUtils.isNotBlank(param.getShopId()),PreOrderInfo::getShopId, param.getShopId())
+                .eq( StringUtils.isNotBlank(param.getGuideName()),PreOrderInfo::getGuideName, param.getGuideName())
+                .eq( StringUtils.isNotBlank(param.getOrderState()),PreOrderInfo::getOrderState, param.getOrderState())
+                .eq( StringUtils.isNotBlank(param.getOrderCode()),PreOrderInfo::getOrderCode, param.getOrderCode())
+                .like( StringUtils.isNotBlank(param.getBuyerName()),PreOrderInfo::getBuyerName, param.getBuyerName())
+                .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
+                .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
+        );
+        return list;
     }
 
     @Override
     public IPage<PreRefundOrderInfo> pageOrderInfoList(AdministrationListParam param) {
         IPage<PreRefundOrderInfo> list=preRefundOrderInfoMapper.selectPage(param.page(), Wrappers.<PreRefundOrderInfo>lambdaQuery()
                 .eq( param.getShopId()!=null,PreRefundOrderInfo::getShopId, param.getShopId())
-                .eq( param.getGuideId()!=null,PreRefundOrderInfo::getShopId, param.getShopId())
-                .eq( param.getAfterGuideId()!=null,PreRefundOrderInfo::getAfterGuideId, param.getAfterGuideId())
+                .eq( param.getGuideName()!=null,PreRefundOrderInfo::getGuideName, param.getGuideName())
+                .eq( param.getAfterGuideName()!=null,PreRefundOrderInfo::getAfterGuideName, param.getAfterGuideName())
                 .eq( param.getOrderCode()!=null,PreRefundOrderInfo::getOrderCode, param.getOrderCode())
                 .like( param.getBuyerName()!=null,PreRefundOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getAfterSalesStartTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalesStartTime())
@@ -63,13 +71,30 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
+    //1.判断是否所有商品都发货了，2.填赠品的时候是否所有商品都发货了
     public void inputOrderNumber(InputOrderNumberParam param) {
         PreOrderGoods info=preOrderGoodsMapper.selectById(param.getId());
         if(info!=null){
-            info.setExpressName(param.getExpressName());
-            info.setExpressOrderCode(param.getExpressOrder());
-            info.setExpressCode(param.getExpressCode());
-            preOrderGoodsMapper.updateById(info);
+            if(OrderGoodsTypeEnum.GIFTS.equals(info.getGoodsType())){ //填赠品的时候是否所有商品都发货了
+                List<PreOrderGoods> list=preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                        .eq(PreOrderGoods::getOrderId,info.getOrderId())
+                        .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE,OrderGoodsStateEnum.PREPARE)
+                );
+                if(list.size()>0){
+                    throw new SecurityException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
+                }
+                PreOrderInfo preOrderInfo=preOrderInfoMapper.selectById(info.getOrderId());
+                preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
+                preOrderInfoMapper.updateById(preOrderInfo);
+            }
+                info.setExpressName(param.getExpressName());
+                info.setExpressOrderCode(param.getExpressOrder());
+                info.setExpressCode(param.getExpressCode());
+                info.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
+                info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
+                preOrderGoodsMapper.updateById(info);
+
+
         }else{
             throw new SecurityException("输入的主键值有误");
         }
@@ -149,5 +174,18 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
         );
         return list;
+    }
+
+    @Override
+    public IPage<ReportOrderPageResult> pageOrderReportList(ReportFormParam param) {
+        IPage<ReportOrderPageResult> page=preOrderInfoMapper.pageOrderReportList(param.page(),param);
+        return page;
+    }
+
+    @Override
+    //todo 拉新数量没有加
+    public IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param) {
+        IPage<ReportGuidePageResult> page=preOrderInfoMapper.achievementsGuide(param.page(),param);
+        return page;
     }
 }

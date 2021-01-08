@@ -4,6 +4,8 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.mapper.*;
@@ -12,6 +14,7 @@ import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
 import com.aquilaflycloud.mdc.result.member.MemberScanRewardResult;
+import com.aquilaflycloud.mdc.result.pre.PreActivityRewardResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsGetResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderInfoPageResult;
 import com.aquilaflycloud.mdc.service.MemberRewardService;
@@ -73,6 +76,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Resource
     private MemberRewardService memberRewardService;
 
+    @Transactional
     @Override
     public int addStatConfirmOrder(PreStayConfirmOrderParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
@@ -92,6 +96,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         return orderInfo;
     }
 
+    @Transactional
     @Override
     public void validationConfirmOrder(PreConfirmOrderParam param) {
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getId());
@@ -104,6 +109,11 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         }
         List<PreOrderGoods> orderGoodsList = new ArrayList<>();
         if(param.getIsThrough() == 0) {
+            PreActivityInfo preActivityInfo = activityInfoMapper.selectById(preOrderInfo.getActivityInfoId());
+            if(null == preActivityInfo) {
+                throw new ServiceException("活动不存在");
+            }
+            PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
             param.getPrePickingCardList().stream().forEach(card ->{
                 PrePickingCardValidationParam param1 = new PrePickingCardValidationParam();
                 param1.setPickingCode(card);
@@ -124,22 +134,26 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 preOrderGoods.setCardId(prePickingCard.getId());
                 preOrderGoods.setOrderId(preOrderInfo.getId());
                 preOrderGoods.setCardCode(card);
-                PreActivityInfo preActivityInfo = activityInfoMapper.selectById(preOrderInfo.getActivityInfoId());
-                if(null != preActivityInfo){
-                    PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
-                    preOrderGoods.setGuideId(preOrderInfo.getGuideId());
-                    preOrderGoods.setGuideName(preOrderInfo.getGuideName());
-                    preOrderGoods.setGoodsId(preGoodsInfo.getId());
-                    preOrderGoods.setGoodsDescription(preGoodsInfo.getGoodsDescription());
-                    preOrderGoods.setGoodsPicture(preGoodsInfo.getGoodsPicture());
-                    preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
-                    preOrderGoods.setGoodsName(preGoodsInfo.getGoodsName());
-                    preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
-                    preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
-                    preOrderGoods.setTenantId(preOrderInfo.getTenantId());
-                }
+                preOrderGoods.setGuideId(preOrderInfo.getGuideId());
+                preOrderGoods.setGuideName(preOrderInfo.getGuideName());
+                preOrderGoods.setGoodsId(preGoodsInfo.getId());
+                preOrderGoods.setGoodsDescription(preGoodsInfo.getGoodsDescription());
+                preOrderGoods.setGoodsPicture(preGoodsInfo.getGoodsPicture());
+                preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
+                preOrderGoods.setGoodsName(preGoodsInfo.getGoodsName());
+                preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
+                preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
+                preOrderGoods.setTenantId(preOrderInfo.getTenantId());
                 orderGoodsList.add(preOrderGoods);
             });
+            //确认订单后奖励
+            if (StrUtil.isNotBlank(preActivityInfo.getRewardRuleContent())) {
+                MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
+                List<PreActivityRewardResult> rewardRuleList = JSONUtil.toList(JSONUtil.parseArray(preActivityInfo.getRewardRuleContent()), PreActivityRewardResult.class);
+                for (PreActivityRewardResult rewardRule : rewardRuleList) {
+                    memberRewardService.addPreActivityRewardRecord(memberInfo, rewardRule.getRewardType(), rewardRule.getRewardValue());
+                }
+            }
         }
         //计算总金额
         preOrderInfo.setTotalPrice(orderGoodsList.get(0).getGoodsPrice().multiply(new BigDecimal(orderGoodsList.size())));
@@ -288,6 +302,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         return result;
     }
 
+    @Transactional
     @Override
     public void confirmReceiptOrder(PreOrderGoodsGetParam param) {
         PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
@@ -354,6 +369,14 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preRefundOrderInfo.setAfterGuideId(MdcUtil.getCurrentUserId());
         preRefundOrderInfo.setAfterGuideName(MdcUtil.getCurrentUserName());
         int count = preRefundOrderInfoMapper.insert(preRefundOrderInfo);
+        if (count <= 0) {
+            throw new ServiceException("登记售后失败");
+        }
+        //更新订单状态
+        PreOrderInfo orderUpdate = new PreOrderInfo();
+        orderUpdate.setId(param.getOrderId());
+        orderUpdate.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+        count = preOrderInfoMapper.updateById(orderUpdate);
         if (count <= 0) {
             throw new ServiceException("登记售后失败");
         }

@@ -2,11 +2,9 @@ package com.aquilaflycloud.mdc.service;
 
 
 import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
+import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
-import com.aquilaflycloud.mdc.param.pre.AdministrationListParam;
-import com.aquilaflycloud.mdc.param.pre.InputOrderNumberParam;
-import com.aquilaflycloud.mdc.param.pre.OrderDetailsParam;
-import com.aquilaflycloud.mdc.param.pre.ReadyListParam;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -15,7 +13,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
  */
 public interface PreOrderAdministrationService {
 
-    IPage<AdministrationPageResult> pageAdministrationList(AdministrationListParam param);
+    IPage<PreOrderInfo> pageAdministrationList(AdministrationListParam param);
 
     IPage<PreRefundOrderInfo>pageOrderInfoList (AdministrationListParam param);
 
@@ -26,4 +24,8 @@ public interface PreOrderAdministrationService {
     AfterSalesDetailsResult getAfterOrderDetails(OrderDetailsParam param);
 
     IPage<PreOrderGoods> pagereadySalesList(ReadyListParam param);
+
+    IPage<ReportOrderPageResult> pageOrderReportList(ReportFormParam param);
+
+    IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param);
 }

@@ -32,8 +32,12 @@ import com.aquilaflycloud.mdc.param.coupon.CouponRelPageParam;
 import com.aquilaflycloud.mdc.param.exchange.OrderPageParam;
 import com.aquilaflycloud.mdc.param.member.MemberPageParam;
 import com.aquilaflycloud.mdc.param.member.RewardRecordPageParam;
+import com.aquilaflycloud.mdc.param.pre.AdministrationListParam;
 import com.aquilaflycloud.mdc.param.pre.PrePickingCardPageParam;
+import com.aquilaflycloud.mdc.param.pre.ReadyListParam;
+import com.aquilaflycloud.mdc.param.pre.ReportFormParam;
 import com.aquilaflycloud.mdc.param.system.*;
+import com.aquilaflycloud.mdc.result.pre.ReportOrderPageResult;
 import com.aquilaflycloud.mdc.result.system.SqlResult;
 import com.aquilaflycloud.mdc.service.*;
 import com.aquilaflycloud.mdc.util.MdcUtil;
@@ -94,7 +98,8 @@ public class SystemFileServiceImpl implements SystemFileService {
     private MemberRewardService memberRewardService;
     @Resource
     private PrePickingCardService prePickingCardService;
-
+    @Resource
+    private PreOrderAdministrationService preOrderAdministrationService;
     private IPage pageData(ExcelDownloadParam param) {
         IPage page;
         switch (param.getExportType()) {
@@ -126,6 +131,26 @@ public class SystemFileServiceImpl implements SystemFileService {
             case PRE_PICKING_CARD: {
                 PrePickingCardPageParam exportParam = buildParam(param.getExportParam(), PrePickingCardPageParam.class, "mdc:pre:picking:card:page");
                 page = prePickingCardService.page(exportParam);
+                break;
+            }
+            case READY_INFO: {
+                ReportFormParam exportParam = buildParam(param.getExportParam(), ReportFormParam.class);
+                page = preOrderAdministrationService.pageOrderReportList(exportParam);
+                break;
+            }
+            case GUIDE_INFO: {
+                ReportFormParam exportParam = buildParam(param.getExportParam(), ReportFormParam.class);
+                page = preOrderAdministrationService.achievementsGuide(exportParam);
+                break;
+            }
+            case AFTER_SALES: {
+                AdministrationListParam exportParam = buildParam(param.getExportParam(), AdministrationListParam.class);
+                page = preOrderAdministrationService.pageOrderInfoList(exportParam);
+                break;
+            }
+            case READY_GOODS: {
+                ReadyListParam exportParam = buildParam(param.getExportParam(), ReadyListParam.class);
+                page = preOrderAdministrationService.pagereadySalesList(exportParam);
                 break;
             }
             default:

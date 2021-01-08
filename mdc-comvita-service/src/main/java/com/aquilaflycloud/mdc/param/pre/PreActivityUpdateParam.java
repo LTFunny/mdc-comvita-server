@@ -2,11 +2,10 @@ package com.aquilaflycloud.mdc.param.pre;
 
 import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
-import com.aquilaflycloud.mdc.result.pre.PreEnableRuleResult;
-import com.aquilaflycloud.mdc.result.pre.PreGoods4ActivityResult;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -62,13 +61,13 @@ public class PreActivityUpdateParam {
      * 关联商品
      */
     @ApiModelProperty(value = "关联商品")
-    private PreGoods4ActivityResult refGoods;
+    private Long refGoods;
 
     /**
      * 关联的销售规则
      */
     @ApiModelProperty(value = "关联的销售规则")
-    private PreEnableRuleResult refRule;
+    private Long refRule;
 
     /**
      * 活动照片
@@ -84,6 +83,9 @@ public class PreActivityUpdateParam {
     @NotNull(message = "活动介绍不能为空")
     private String activityProfile;
 
+    @ApiModelProperty(value = "奖励规则")
+    @Valid
+    private List<PreActivityRewardParam> rewardRuleList;
 
     @ApiModelProperty(value = "标签ids")
     private List<Long> folksonomyIds;
