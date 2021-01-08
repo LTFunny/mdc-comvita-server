@@ -180,7 +180,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             }
             //计算总金额
             preOrderInfo.setTotalPrice(orderGoodsList.get(0).getGoodsPrice().multiply(new BigDecimal(orderGoodsList.size())));
-
+            preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
             //判断是否存在赠品，存在就添加
             PreRuleInfo preRuleInfo = preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
                     .eq(PreRuleInfo::getId,preActivityInfo.getRefRule())
@@ -204,31 +204,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if(updateOrder < 0){
             throw new ServiceException("订单操作失败。");
         }
-        }
-        //计算总金额
-        preOrderInfo.setTotalPrice(orderGoodsList.get(0).getGoodsPrice().multiply(new BigDecimal(orderGoodsList.size())));
-        int updateOrder = preOrderInfoMapper.updateById(preOrderInfo);
-        if (updateOrder < 0) {
-            throw new ServiceException("订单操作失败。");
-        }
-        //判断是否存在赠品，存在就添加
-        PreOrderGoods preOrderGoods = new PreOrderGoods();
-        PreActivityInfo preActivityInfo = activityInfoMapper.selectById(preOrderInfo.getActivityInfoId());
-        PreRuleInfo preRuleInfo = preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
-                .eq(PreRuleInfo::getId, preActivityInfo.getRefRule())
-                .eq(PreRuleInfo::getRuleType, RuleTypeEnum.ORDER_GIFTS));
-        if (preRuleInfo != null) {
-            PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
-            BeanUtil.copyProperties(preGoodsInfo, preOrderGoods);
-            preOrderGoods.setOrderId(preOrderInfo.getId());
-            preOrderGoods.setGoodsId(preGoodsInfo.getId());
-            preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
-            preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
-            preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
-            preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
-            orderGoodsList.add(preOrderGoods);
-        }
-        preOrderGoodsMapper.insertAllBatch(orderGoodsList);
         String content;
         if (param.getIsThrough() == 0) {
             content = ("导购员：" + preOrderInfo.getGuideName() + DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss") + " 对订单：" +
