@@ -92,7 +92,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preOrderInfo.setMemberId(infoResult.getId());
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYCONFIRM);
         preOrderInfo.setScore(new BigDecimal("0"));
-        preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderRefundCode", "O" + DateTime.now().toString("yyMMdd"), 5));
+        preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderCode", "O" + DateTime.now().toString("yyMMdd"), 5));
         int orderInfo = preOrderInfoMapper.insert(preOrderInfo);
         if(orderInfo < 0){
             throw new ServiceException("生成待确认订单失败。");
