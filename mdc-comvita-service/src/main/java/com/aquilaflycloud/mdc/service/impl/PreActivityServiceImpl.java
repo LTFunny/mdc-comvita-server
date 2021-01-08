@@ -14,10 +14,7 @@ import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.model.pre.PreRuleInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
-import com.aquilaflycloud.mdc.result.pre.PreActivityAnalysisResult;
-import com.aquilaflycloud.mdc.result.pre.PreActivityDetailResult;
-import com.aquilaflycloud.mdc.result.pre.PreActivityPageResult;
-import com.aquilaflycloud.mdc.result.pre.PreActivityRewardResult;
+import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.service.PreActivityService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
@@ -79,22 +76,25 @@ public class PreActivityServiceImpl implements PreActivityService {
             PreActivityPageResult result = new PreActivityPageResult();
             BeanUtil.copyProperties(apply, result);
             result.setRefGoodsCode(getGoodsCode(apply.getRefGoods()));
-            result.setFolksonomyIds(getFolksonomyIds(apply.getId()));
+            result.setFolksonomys(getFolksonomys(apply.getId()));
             return result;
         });
     }
 
-    private List<Long> getFolksonomyIds(Long id) {
-        List<Long> ids = new ArrayList<>();
-        QueryWrapper<FolksonomyBusinessRel> qw = new QueryWrapper<>();
-        qw.in("business_id", id);
-        List<FolksonomyBusinessRel> folksonomyBusinessRels = folksonomyBusinessRelMapper.selectList(qw);
-        if(CollUtil.isNotEmpty(folksonomyBusinessRels)){
-            folksonomyBusinessRels.forEach(f -> {
-                ids.add(f.getFolksonomyId());
+    private List<PreActivityFolksonomyResult> getFolksonomys(Long business_id) {
+        List<PreActivityFolksonomyResult> results = new ArrayList<>();
+        List<Map<String, Object>> list = preActivityInfoMapper.getFolksonomy(business_id);
+        if(CollUtil.isNotEmpty(list)){
+            list.forEach(l -> {
+                Long id = (Long) l.get("id");
+                String name = (String) l.get("name");
+                PreActivityFolksonomyResult p = new PreActivityFolksonomyResult();
+                p.setFolksonomyId(id);
+                p.setFolksonomyName(name);
+                results.add(p);
             });
         }
-        return ids;
+        return results;
     }
 
     private String getGoodsCode(Long refGoods) {

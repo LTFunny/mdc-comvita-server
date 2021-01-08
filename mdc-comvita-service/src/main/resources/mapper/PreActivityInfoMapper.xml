@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aquilaflycloud.mdc.mapper.PreActivityInfoMapper">
+
+
+    <select id="getFolksonomy"  parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT
+        info.id,info.name
+        FROM
+        `folksonomy_info` info
+        LEFT JOIN `folksonomy_business_rel` ref
+        ON info.id = ref.folksonomy_id
+        WHERE ref.business_id = #{id}
+    </select>
+
+
+
+
+
+</mapper>
