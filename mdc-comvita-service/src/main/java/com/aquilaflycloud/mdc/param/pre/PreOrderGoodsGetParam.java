@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.param.pre;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotNull;
 
@@ -11,6 +12,7 @@ import javax.validation.constraints.NotNull;
  * @Version 1.0
  */
 @Data
+@Accessors(chain = true)
 public class PreOrderGoodsGetParam {
 
     @ApiModelProperty(value = "订单明细id" , required = true)

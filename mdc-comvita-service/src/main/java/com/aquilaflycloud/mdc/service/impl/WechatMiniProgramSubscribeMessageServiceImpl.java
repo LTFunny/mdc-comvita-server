@@ -237,7 +237,7 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
         if (CollUtil.isNotEmpty(param.getMessageTypeList())) {
             return wechatMiniProgramMessageMapper.selectList(Wrappers.<WechatMiniProgramMessage>lambdaQuery()
                     .eq(WechatMiniProgramMessage::getAppId, param.getAppId())
-                    .in(WechatMiniProgramMessage::getMessageType, param.getMessageTypeList())
+                    .in(CollUtil.isNotEmpty(param.getMessageTypeList()), WechatMiniProgramMessage::getMessageType, param.getMessageTypeList())
             );
         }
         return CollUtil.newArrayList();
@@ -248,7 +248,7 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
         String appId = MdcUtil.getOtherAppId();
         return wechatMiniProgramMessageMapper.selectList(Wrappers.<WechatMiniProgramMessage>lambdaQuery()
                 .eq(WechatMiniProgramMessage::getAppId, appId)
-                .in(CollUtil.isNotEmpty(param.getMessageTypeList()), WechatMiniProgramMessage::getMessageType, param.getMessageTypeList())
+                .in(WechatMiniProgramMessage::getMessageType, param.getMessageTypeList())
         ).stream().map(WechatMiniProgramMessage::getPriTmplId).collect(Collectors.toList());
     }
 
