@@ -35,7 +35,7 @@ public class OrderPageResult {
     @ApiModelProperty(value = "预约时间")
     private Date reserveStartTime;
 
-    @ApiModelProperty(value = "提货时间")
+    @ApiModelProperty(value = "发货时间")
     private Date takeTime;
 
     @ApiModelProperty(value = "订单状态")
@@ -69,8 +69,6 @@ public class OrderPageResult {
     private BigDecimal goodsPrice;
 
     @ApiModelProperty(value = "销售单价")
-    private Integer unitPrice;
+    private BigDecimal unitPrice;
 
-    @ApiModelProperty(value = "销售单价")
-    private Integer totaGoodsPrice;
 }

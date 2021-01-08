@@ -13,9 +13,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 public interface PreGoodsInfoService {
     IPage<PreGoodsInfo> pagePreGoodsInfoList(PreGoodsInfoListParam param);
 
-    String addPreGoodsInfo(ReturnGoodsInfoParam param);
+    void addPreGoodsInfo(ReturnGoodsInfoParam param);
 
-    String editPreGoodsInfo(ReturnGoodsInfoParam param);
+    void editPreGoodsInfo(ReturnGoodsInfoParam param);
 
     void changeGoodsType(ChangeGoodsInfoParam param);
 

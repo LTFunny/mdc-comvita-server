@@ -49,8 +49,8 @@ public class SalePageResult {
     private BigDecimal goodsPrice;
 
     @ApiModelProperty(value = "销售单价")
-    private Integer unitPrice;
+    private BigDecimal unitPrice;
 
-    @ApiModelProperty(value = "销售单价")
-    private Integer totaGoodsPrice;
+    @ApiModelProperty(value = "成交总额")
+    private BigDecimal totaGoodsPrice;
 }
