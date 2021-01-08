@@ -91,5 +91,15 @@
               AND order_info.order_state = #{param.orderState}
         order by order_info.last_update_time desc
     </select>
+    <select id="pageOrderPageResultList"  parameterType="com.aquilaflycloud.mdc.param.pre.AdministrationListParam"
+            resultType="com.aquilaflycloud.mdc.result.pre.OrderPageResult">
 
+
+
+    </select>
+    <select id="pageSalePageResultList"  parameterType="com.aquilaflycloud.mdc.param.pre.AdministrationListParam"
+            resultType="com.aquilaflycloud.mdc.result.pre.SalePageResult">
+
+
+    </select>
 </mapper>

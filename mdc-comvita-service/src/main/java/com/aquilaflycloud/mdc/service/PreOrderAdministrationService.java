@@ -28,4 +28,9 @@ public interface PreOrderAdministrationService {
     IPage<ReportOrderPageResult> pageOrderReportList(ReportFormParam param);
 
     IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param);
+
+    IPage<OrderPageResult> pageOrderPageResultList(AdministrationListParam param);
+
+    IPage<SalePageResult> pageSalePageResultList(AdministrationListParam param);
+
 }

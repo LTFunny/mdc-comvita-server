@@ -19,6 +19,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -49,10 +50,11 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
     }
 
     @Override
-    public void addPreGoodsInfo(ReturnGoodsInfoParam param) {
+    @Transactional
+    public String addPreGoodsInfo(ReturnGoodsInfoParam param) {
         //判读是否存在名称和编号
         if(StringUtils.isNotBlank(getCount(param.getGoodsName(),param.getGoodsCode()))){
-            throw new SecurityException(getCount(param.getGoodsName(),param.getGoodsCode()));
+            throw new ServiceException(getCount(param.getGoodsName(),param.getGoodsCode()));
         }
         String tagId=null;
         if(CollectionUtils.isEmpty(param.getFolksonomyIds())) {
@@ -74,10 +76,11 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         } else {
             throw new ServiceException("保存商品信息失败: count=" + count);
         }
+        return "保存成功";
     }
 
     @Override
-    public void editPreGoodsInfo(ReturnGoodsInfoParam param) {
+    public String editPreGoodsInfo(ReturnGoodsInfoParam param) {
         if(param.getId()==null) {
             throw new ServiceException("修改的数据主键未传" );
         }
@@ -85,12 +88,12 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         //判读是否存在名称和编号
         if(!param.getGoodsCode().equals(info.getGoodsCode())){
             if(StringUtils.isNotBlank(getCount(null,param.getGoodsCode()))){
-                throw new SecurityException(getCount(null,param.getGoodsCode()));
+                throw new ServiceException(getCount(null,param.getGoodsCode()));
             }
         }
         if(!param.getGoodsName().equals(info.getGoodsName())){
             if(StringUtils.isNotBlank(getCount(param.getGoodsName(),null))){
-                throw new SecurityException(getCount(param.getGoodsName(),null));
+                throw new ServiceException(getCount(param.getGoodsName(),null));
             }
         }
 
@@ -103,7 +106,7 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         log.info("修改商品信息成功");
         //保存业务功能标签
         folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREGOODS, info.getId(), param.getFolksonomyIds());
-
+        return "修改成功";
     }
 
     @Override
