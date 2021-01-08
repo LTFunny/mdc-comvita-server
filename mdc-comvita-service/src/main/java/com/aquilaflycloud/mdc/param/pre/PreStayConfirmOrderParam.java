@@ -48,6 +48,23 @@ public class PreStayConfirmOrderParam {
     @ApiModelProperty(value = "买家地址邮编")
     private String buyerPostalCode;
 
+
+
+    @ApiModelProperty(value = "买家地址-省")
+    private String buyerProvince;
+
+    /**
+     * 买家地址-市
+     */
+    @ApiModelProperty(value = "买家地址-市")
+    private String buyerCity;
+
+    /**
+     * 买家地址-区
+     */
+    @ApiModelProperty(value = "买家地址-区")
+    private String buyerDistrict;
+
     /**
      * 买家详细地址
      */

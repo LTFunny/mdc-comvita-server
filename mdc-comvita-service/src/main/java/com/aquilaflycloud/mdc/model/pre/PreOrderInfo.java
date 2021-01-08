@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.model.pre;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.aquilaflycloud.mdc.enums.member.SexEnum;
 import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.FailSymbolEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -259,6 +260,13 @@ public class PreOrderInfo implements Serializable {
     @TableField(value = "score")
     @ApiModelProperty(value = "积分")
     private BigDecimal score;
+
+    /**
+     * 确认订单(不通过标识)
+     */
+    @TableField(value = "reason")
+    @ApiModelProperty(value = "确认订单(不通过标识)")
+    private FailSymbolEnum failSymbol;
 
     /**
      * 不通过原因

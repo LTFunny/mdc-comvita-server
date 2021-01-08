@@ -16,4 +16,7 @@ public class PreOrderInfoGetParam {
     @ApiModelProperty(value = "订单id" , required = true)
     @NotNull(message = "订单id不能为空")
     private Long orderInfoId;
+
+    @ApiModelProperty(value = "售后标识")
+    private int after;
 }
