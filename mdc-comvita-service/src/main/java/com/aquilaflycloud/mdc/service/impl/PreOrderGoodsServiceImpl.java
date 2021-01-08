@@ -23,6 +23,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -55,8 +56,11 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         .eq(PreOrderGoods::getOrderGoodsState,param.getOrderGoodsState()));
     }
 
+
+    @Transactional
     @Override
     public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
+        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderGoods preOrderGoods = new PreOrderGoods();
         if(param.getIsUpdate()) {
             PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
@@ -83,22 +87,12 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
             preOrderGoods.setIsUpdate(IsUpdateEnum.NO);
         }
         BeanUtil.copyProperties(param,preOrderGoods);
-        preOrderGoods.setReserveId(param.getReserveId());
+        preOrderGoods.setReserveId(infoResult.getId());
         preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
         int updateOrderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
         if(updateOrderGoods < 0){
             throw new ServiceException("预约失败。");
         }
-        //当全部提货卡预约完 状态改为待提货
-        /*List<PreOrderGoods> orderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,orderInfo.getId()));
-        int result = preOrderGoodsMapper.pickingCardGet(orderInfo.getId(),PickingCardStateEnum.RESERVE);
-        if(result == orderGoodsList.size()){
-            orderInfo.setChildOrderState(ChildOrderInfoStateEnum.STATELESS);
-            orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
-        }else {
-            orderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
-        }*/
         PreOrderInfo orderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
         orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
         preOrderInfoMapper.updateById(orderInfo);

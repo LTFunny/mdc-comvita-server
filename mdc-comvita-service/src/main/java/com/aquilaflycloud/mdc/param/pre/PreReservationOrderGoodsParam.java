@@ -23,9 +23,6 @@ public class PreReservationOrderGoodsParam  {
     @ApiModelProperty(value = "预约人名称")
     private String reserveName;
 
-    @ApiModelProperty(value = "预约人id(会员id)")
-    private Long reserveId;
-
     @ApiModelProperty(value = "预约人电话")
     private String reservePhone;
 

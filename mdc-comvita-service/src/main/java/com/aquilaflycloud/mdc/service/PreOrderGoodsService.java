@@ -18,7 +18,6 @@ public interface PreOrderGoodsService {
      * 预约自提
      * @param param
      */
-    @Transactional
     void reservationOrderGoods(PreReservationOrderGoodsParam param);
 
 

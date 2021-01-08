@@ -240,7 +240,8 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
 
     public PreOrderInfoPageResult orderInfo(PreOrderInfo order){
-        PreOrderInfoPageResult result = BeanUtil.copyProperties(order,PreOrderInfoPageResult.class);
+
+        PreOrderInfoPageResult result = BeanUtil.copyProperties(order, PreOrderInfoPageResult.class);
         int orderGoodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
                 .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.PRETAKE));
@@ -269,14 +270,13 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Override
     public IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
-        IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
-                .eq(PreOrderInfo::getOrderState,param.getOrderState())
-                .eq(PreOrderInfo::getMemberId,infoResult.getId()))
-                .convert(order ->{
-                    PreOrderInfoPageResult result  = orderInfo(order);
-                    return result;
-                });
-       return page;
+        param.setMemberId(infoResult.getId());
+        IPage<PreOrderInfo> page =  preOrderInfoMapper.pageOrderInfoPageResult(param.page(),param);
+        IPage<PreOrderInfoPageResult> pageResultIPage = page.convert(order ->{
+            PreOrderInfoPageResult result  = orderInfo(order);
+            return result;
+        });
+        return pageResultIPage;
     }
 
     @Override
