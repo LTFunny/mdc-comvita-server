@@ -38,15 +38,15 @@ public class PreGoodsInfoController {
     @ApiOperation(value = "新增商品信息", notes = "新增商品信息")
 //    @PreAuthorize("hasAuthority('mdc:preGoodsInfo:list')")
     @ApiMapping(value = "backend.comvita.goods.info.add", method = RequestMethod.POST, permission = false)
-    public BaseResult<String> addPreGoodsInfo(ReturnGoodsInfoParam param) {
-        return new BaseResult().setResult( preGoodsInfoService.addPreGoodsInfo(param));
+    public void addPreGoodsInfo(ReturnGoodsInfoParam param) {
+         preGoodsInfoService.addPreGoodsInfo(param);
     }
 
     @ApiOperation(value = "编辑商品信息", notes = "编辑商品信息")
 //    @PreAuthorize("hasAuthority('mdc:preGoodsInfo:list')")
     @ApiMapping(value = "backend.comvita.goods.info.edit", method = RequestMethod.POST, permission = false)
-    public BaseResult<String> editPreGoodsInfo(ReturnGoodsInfoParam param) {
-        return new BaseResult().setResult( preGoodsInfoService.editPreGoodsInfo(param));
+    public void editPreGoodsInfo(ReturnGoodsInfoParam param) {
+        preGoodsInfoService.editPreGoodsInfo(param);
     }
 
     @ApiOperation(value = "商品上下架", notes = "商品上下架")
@@ -61,6 +61,5 @@ public class PreGoodsInfoController {
     @ApiMapping(value = "backend.comvita.goods.data", method = RequestMethod.POST, permission = false)
     public BaseResult<ReturnGoodsInfoParam> goodsData(GoodsInfoParam param) {
         return new BaseResult<ReturnGoodsInfoParam>().setResult(preGoodsInfoService.goodsData(param));
-
     }
 }

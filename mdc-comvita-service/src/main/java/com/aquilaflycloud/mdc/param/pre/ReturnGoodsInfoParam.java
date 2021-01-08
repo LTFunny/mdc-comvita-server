@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * PreGoodsInfoListParam
@@ -76,4 +77,7 @@ public class ReturnGoodsInfoParam  {
 
     @ApiModelProperty(value = "标签ids")
     private List<Long> folksonomyIds;
+
+    @ApiModelProperty(value = "标签名称")
+    private Map<String,Long> folksonomyNames;
 }
