@@ -22,4 +22,6 @@ public interface PreActivityService {
     void cancel(PreActivityCancelParam param);
 
     PreActivityAnalysisResult analyse(PreActivityAnalysisParam param);
+
+    IPage<PreActivityPageResult> pagePreActivity(PreActivityPageParam param);
 }
