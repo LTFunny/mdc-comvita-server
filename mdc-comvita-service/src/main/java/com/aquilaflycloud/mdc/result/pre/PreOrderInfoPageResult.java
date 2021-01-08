@@ -1,13 +1,12 @@
 package com.aquilaflycloud.mdc.result.pre;
 
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoListStateEnum;
+import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
 import com.aquilaflycloud.mdc.model.pre.PreOrderExpress;
 import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * @Author pengyongliang
@@ -18,7 +17,13 @@ import java.util.List;
 public class PreOrderInfoPageResult extends PreOrderInfo {
 
     @ApiModelProperty(value = "商品信息")
-    private List<PreOrderGoods> preOrderGoodsList;
+    private PreGoodsInfo preGoodsInfo;
+
+    @ApiModelProperty(value = "商品信息数量")
+    private int goodsInfoNum;
+
+    @ApiModelProperty(value = "赠品信息")
+    private PreOrderGoods giftsGoodsInfo;
 
     @ApiModelProperty(value = "状态标识")
     private OrderInfoListStateEnum orderInfoListState;

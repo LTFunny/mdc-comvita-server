@@ -236,9 +236,19 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         }else {
             result.setReservationNum(0);
         }
-        List<PreOrderGoods> preOrderGoods = preOrderGoodsMapper.selectList(Wrappers
-                .<PreOrderGoods>lambdaQuery().eq(PreOrderGoods::getOrderId,order.getId()));
-        result.setPreOrderGoodsList(preOrderGoods);
+        PreActivityInfo activityInfo = activityInfoMapper.selectById(order.getActivityInfoId());
+        PreGoodsInfo goodsInfo = goodsInfoMapper.selectById(activityInfo.getRefGoods());
+        result.setPreGoodsInfo(goodsInfo);
+        int goodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,order.getId())
+                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.PREPARE));
+        result.setGoodsInfoNum(goodsCount);
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,order.getId())
+                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
+        if(null != preOrderGoods){
+            result.setGiftsGoodsInfo(preOrderGoods);
+        }
         return result;
     }
 
