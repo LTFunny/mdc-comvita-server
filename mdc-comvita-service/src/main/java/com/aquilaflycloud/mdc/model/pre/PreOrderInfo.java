@@ -190,6 +190,28 @@ public class PreOrderInfo implements Serializable {
     private String buyerPostalCode;
 
     /**
+     * 买家地址-省
+     */
+    @TableField(value = "buyer_city")
+    @ApiModelProperty(value = "买家地址-省")
+    private String buyerProvince;
+
+    /**
+     * 买家地址-市
+     */
+    @TableField(value = "buyer_city")
+    @ApiModelProperty(value = "买家地址-市")
+    private String buyerCity;
+
+    /**
+     * 买家地址-区
+     */
+    @TableField(value = "buyer_district")
+    @ApiModelProperty(value = "买家地址-区")
+    private String buyerDistrict;
+
+
+    /**
      * 买家详细地址
      */
     @TableField(value = "buyer_address")

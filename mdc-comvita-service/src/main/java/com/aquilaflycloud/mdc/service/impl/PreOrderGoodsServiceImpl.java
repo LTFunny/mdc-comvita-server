@@ -88,6 +88,7 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         }
         BeanUtil.copyProperties(param,preOrderGoods);
         preOrderGoods.setReserveId(infoResult.getId());
+        preOrderGoods.setPickingCardState(PickingCardStateEnum.RESERVE);
         preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
         int updateOrderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
         if(updateOrderGoods < 0){
