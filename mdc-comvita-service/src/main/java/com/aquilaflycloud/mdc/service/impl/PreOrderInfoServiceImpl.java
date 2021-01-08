@@ -96,6 +96,20 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         return orderInfo;
     }
 
+    @Override
+    public void updateStatConfirmOrder(PreStayConfirmOrderParam param) {
+        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
+        BeanUtil.copyProperties(param,preOrderInfo);
+        int orderInfo = preOrderInfoMapper.updateById(preOrderInfo);
+        if(orderInfo < 0){
+            throw new ServiceException("修改待确认订单失败。");
+        }
+        String content =  infoResult.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
+                +"修改待确认订单";
+        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
+    }
+
     @Transactional
     @Override
     public void validationConfirmOrder(PreConfirmOrderParam param) {
@@ -253,7 +267,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 .eq(PreOrderGoods::getOrderId,order.getId())
                 .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.PRETAKE));
         if(orderGoodsCount > 0){
-            result.setOrderInfoListState(OrderInfoListStateEnum.PARTRESERVATION);
             result.setReservationNum(orderGoodsCount);
         }else {
             result.setReservationNum(0);
