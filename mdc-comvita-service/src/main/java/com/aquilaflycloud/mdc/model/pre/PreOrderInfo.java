@@ -193,7 +193,7 @@ public class PreOrderInfo implements Serializable {
     /**
      * 买家地址-省
      */
-    @TableField(value = "buyer_city")
+    @TableField(value = "buyer_province")
     @ApiModelProperty(value = "买家地址-省")
     private String buyerProvince;
 
@@ -264,7 +264,7 @@ public class PreOrderInfo implements Serializable {
     /**
      * 确认订单(不通过标识)
      */
-    @TableField(value = "reason")
+    @TableField(value = "fail_symbol")
     @ApiModelProperty(value = "确认订单(不通过标识)")
     private FailSymbolEnum failSymbol;
 
