@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 @Data
@@ -17,6 +16,5 @@ public class MiniMessageListParam {
     private String appId;
 
     @ApiModelProperty(value = "消息类型列表(wechat.MiniMessageTypeEnum)")
-    @NotEmpty(message = "消息类型列表不能为空")
     private List<MiniMessageTypeEnum> messageTypeList;
 }
