@@ -139,9 +139,27 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
                     }
                     break;
                 }*/
-                case PREORDERCHANGE: {
+                case PREORDERSIGN: {
                     if (params.size() != 4) {
-                        throw new ServiceException(MiniMessageTypeEnum.PREORDERCHANGE.getName() + "消息模板字段需要4个");
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERSIGN.getName() + "消息模板字段需要4个");
+                    }
+                    break;
+                }
+                case PREORDERDELIVERIED: {
+                    if (params.size() != 5) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERDELIVERIED.getName() + "消息模板字段需要5个");
+                    }
+                    break;
+                }
+                case PREORDERRCHANGESIGN: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERRCHANGESIGN.getName() + "消息模板字段需要4个");
+                    }
+                    break;
+                }
+                case PREORDERRCHANGE: {
+                    if (params.size() != 4) {
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERRCHANGE.getName() + "消息模板字段需要4个");
                     }
                     break;
                 }
@@ -151,27 +169,9 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
                     }
                     break;
                 }
-                case PREORDERREFUND: {
+                case PREORDERREFUNDAUDIT: {
                     if (params.size() != 4) {
-                        throw new ServiceException(MiniMessageTypeEnum.PREORDERREFUND.getName() + "消息模板字段需要4个");
-                    }
-                    break;
-                }
-                case PREORDERALLCONSUME: {
-                    if (params.size() != 5) {
-                        throw new ServiceException(MiniMessageTypeEnum.PREORDERALLCONSUME.getName() + "消息模板字段需要5个");
-                    }
-                    break;
-                }
-                case PREGOODSCONSUME: {
-                    if (params.size() != 3) {
-                        throw new ServiceException(MiniMessageTypeEnum.PREGOODSCONSUME.getName() + "消息模板字段需要3个");
-                    }
-                    break;
-                }
-                case PREGOODSTAKE: {
-                    if (params.size() != 4) {
-                        throw new ServiceException(MiniMessageTypeEnum.PREGOODSTAKE.getName() + "消息模板字段需要4个");
+                        throw new ServiceException(MiniMessageTypeEnum.PREORDERREFUNDAUDIT.getName() + "消息模板字段需要4个");
                     }
                     break;
                 }
@@ -248,7 +248,7 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
         String appId = MdcUtil.getOtherAppId();
         return wechatMiniProgramMessageMapper.selectList(Wrappers.<WechatMiniProgramMessage>lambdaQuery()
                 .eq(WechatMiniProgramMessage::getAppId, appId)
-                .in(WechatMiniProgramMessage::getMessageType, param.getMessageTypeList())
+                .in(CollUtil.isNotEmpty(param.getMessageTypeList()), WechatMiniProgramMessage::getMessageType, param.getMessageTypeList())
         ).stream().map(WechatMiniProgramMessage::getPriTmplId).collect(Collectors.toList());
     }
 
