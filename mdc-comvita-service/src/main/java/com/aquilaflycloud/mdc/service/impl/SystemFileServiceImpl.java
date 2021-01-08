@@ -153,6 +153,16 @@ public class SystemFileServiceImpl implements SystemFileService {
                 page = preOrderAdministrationService.pagereadySalesList(exportParam);
                 break;
             }
+            case ORDER_INFO: {
+                AdministrationListParam exportParam = buildParam(param.getExportParam(), AdministrationListParam.class);
+                page = preOrderAdministrationService.pageOrderPageResultList(exportParam);
+                break;
+            }
+            case SALES_VOUME: {
+                AdministrationListParam exportParam = buildParam(param.getExportParam(), AdministrationListParam.class);
+                page = preOrderAdministrationService.pageSalePageResultList(exportParam);
+                break;
+            }
             default:
                 throw new ServiceException("导出类型有误" + param.getExportType());
         }

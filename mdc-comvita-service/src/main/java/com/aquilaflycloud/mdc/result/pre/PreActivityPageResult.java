@@ -19,6 +19,6 @@ public class PreActivityPageResult extends PreActivityInfo {
     private String refGoodsCode;
 
     @ApiModelProperty(value = "活动标签")
-    private List<PreActivityFolksonomyResult> folksonomys;
+    private List<PreActivityFolksonomyResult> folksonomyIds;
 
 }

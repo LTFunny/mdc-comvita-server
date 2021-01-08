@@ -1,28 +1,32 @@
 package com.aquilaflycloud.mdc.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
-import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
-import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
-import com.aquilaflycloud.mdc.mapper.PreOrderOperateRecordMapper;
-import com.aquilaflycloud.mdc.mapper.PreRefundOrderInfoMapper;
-import com.aquilaflycloud.mdc.model.member.MemberSignRecord;
-import com.aquilaflycloud.mdc.model.pre.*;
+import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
+import com.aquilaflycloud.mdc.mapper.*;
+import com.aquilaflycloud.mdc.model.member.MemberInfo;
+import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
+import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
+import com.aquilaflycloud.mdc.model.pre.PreOrderOperateRecord;
+import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
+import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
+import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.swagger.annotations.ApiModelProperty;
+import com.gitee.sop.servercommon.exception.ServiceException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 
@@ -31,7 +35,10 @@ import java.util.List;
  */
 @Service
 public class PreOrderAdministrationServiceImpl implements PreOrderAdministrationService {
-
+    @Resource
+    private WechatMiniProgramSubscribeMessageService wechatMiniProgramSubscribeMessageService;
+    @Resource
+    private MemberInfoMapper memberInfoMapper;
     @Resource
     private PreOrderInfoMapper preOrderInfoMapper;
     @Resource
@@ -57,11 +64,11 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Override
     public IPage<PreRefundOrderInfo> pageOrderInfoList(AdministrationListParam param) {
         IPage<PreRefundOrderInfo> list=preRefundOrderInfoMapper.selectPage(param.page(), Wrappers.<PreRefundOrderInfo>lambdaQuery()
-                .eq( param.getShopId()!=null,PreRefundOrderInfo::getShopId, param.getShopId())
-                .eq( param.getGuideName()!=null,PreRefundOrderInfo::getGuideName, param.getGuideName())
-                .eq( param.getAfterGuideName()!=null,PreRefundOrderInfo::getAfterGuideName, param.getAfterGuideName())
-                .eq( param.getOrderCode()!=null,PreRefundOrderInfo::getOrderCode, param.getOrderCode())
-                .like( param.getBuyerName()!=null,PreRefundOrderInfo::getBuyerName, param.getBuyerName())
+                .eq( StringUtils.isNotBlank(param.getShopId()),PreRefundOrderInfo::getShopId, param.getShopId())
+                .eq( StringUtils.isNotBlank(param.getGuideName()),PreRefundOrderInfo::getGuideName, param.getGuideName())
+                .eq( StringUtils.isNotBlank(param.getAfterGuideName()),PreRefundOrderInfo::getAfterGuideName, param.getAfterGuideName())
+                .eq( StringUtils.isNotBlank(param.getOrderCode()),PreRefundOrderInfo::getOrderCode, param.getOrderCode())
+                .like( StringUtils.isNotBlank(param.getBuyerName()),PreRefundOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getAfterSalesStartTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalesStartTime())
                 .le(param.getAfterSalEndTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalEndTime())
                 .ge(param.getCreateStartTime() != null, PreRefundOrderInfo::getCreateTime, param.getCreateStartTime())
@@ -71,32 +78,47 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
+    @Transactional
     //1.判断是否所有商品都发货了，2.填赠品的时候是否所有商品都发货了
     public void inputOrderNumber(InputOrderNumberParam param) {
-        PreOrderGoods info=preOrderGoodsMapper.selectById(param.getId());
-        if(info!=null){
-            if(OrderGoodsTypeEnum.GIFTS.equals(info.getGoodsType())){ //填赠品的时候是否所有商品都发货了
-                List<PreOrderGoods> list=preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                        .eq(PreOrderGoods::getOrderId,info.getOrderId())
-                        .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE,OrderGoodsStateEnum.PREPARE)
-                );
-                if(list.size()>0){
-                    throw new SecurityException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
-                }
-                PreOrderInfo preOrderInfo=preOrderInfoMapper.selectById(info.getOrderId());
-                preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
-                preOrderInfoMapper.updateById(preOrderInfo);
+        PreOrderGoods info = preOrderGoodsMapper.selectById(param.getId());
+        if (info == null) {
+            throw new ServiceException("商品不存在");
+        }
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(info.getOrderId());
+        if (OrderGoodsTypeEnum.GIFTS.equals(info.getGoodsType())) { //填赠品的时候是否所有商品都发货了
+            List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .eq(PreOrderGoods::getOrderId, info.getOrderId())
+                    .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
+            );
+            if (list.size() > 0) {
+                throw new ServiceException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
             }
-                info.setExpressName(param.getExpressName());
-                info.setExpressOrderCode(param.getExpressOrder());
-                info.setExpressCode(param.getExpressCode());
-                info.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
-                info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
-                preOrderGoodsMapper.updateById(info);
-
-
-        }else{
-            throw new SecurityException("输入的主键值有误");
+            preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
+            preOrderInfoMapper.updateById(preOrderInfo);
+        }
+        info.setExpressName(param.getExpressName());
+        info.setExpressOrderCode(param.getExpressOrder());
+        info.setExpressCode(param.getExpressCode());
+        info.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
+        info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
+        preOrderGoodsMapper.updateById(info);
+        if (info.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
+            //赠品发货,发送订单发货微信订阅消息
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
+                            .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERDELIVERY, null,
+                    preOrderInfo.getOrderCode(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress(),
+                    info.getExpressName(), info.getExpressOrderCode(), info.getGoodsName() + "商品已发货");
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
+                            .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERCHANGE, null,
+                    preOrderInfo.getOrderCode(), "已发货", DateTime.now().toString(), "订单" + preOrderInfo.getOrderCode() + "已发货");
+        } else {
+            //商品发货,发送商品发货微信订阅消息
+            MemberInfo memberInfo = memberInfoMapper.selectById(info.getReserveId());
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(memberInfo.getWxAppId())
+                            .setOpenId(memberInfo.getOpenId())), MiniMessageTypeEnum.PREORDERGOODSELIVERY, null,
+                    info.getGoodsName(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress(),
+                    info.getExpressName(), info.getExpressOrderCode(), info.getGoodsName() + "商品已发货");
         }
     }
 
@@ -104,7 +126,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     public AdministrationDetailsResult getOrderDetails(OrderDetailsParam param) {
         PreOrderInfo info=preOrderInfoMapper.selectById(param.getId());
         if(info==null){
-            throw new SecurityException("输入的主键值有误");
+            throw new ServiceException("输入的主键值有误");
         }
         List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,info.getId()));
@@ -148,7 +170,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     public AfterSalesDetailsResult getAfterOrderDetails(OrderDetailsParam param) {
         PreRefundOrderInfo info=preRefundOrderInfoMapper.selectById(param.getId());
         if(info==null){
-            throw new SecurityException("输入的主键值有误");
+            throw new ServiceException("输入的主键值有误");
         }
         List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,info.getOrderId()));
@@ -186,6 +208,18 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     //todo 拉新数量没有加
     public IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param) {
         IPage<ReportGuidePageResult> page=preOrderInfoMapper.achievementsGuide(param.page(),param);
+        return page;
+    }
+
+    @Override
+    public IPage<OrderPageResult> pageOrderPageResultList(AdministrationListParam param) {
+        IPage<OrderPageResult> page=preOrderInfoMapper.pageOrderPageResultList(param.page(),param);
+        return page;
+    }
+
+    @Override
+    public IPage<SalePageResult> pageSalePageResultList(AdministrationListParam param) {
+        IPage<SalePageResult> page=preOrderInfoMapper.pageSalePageResultList(param.page(),param);
         return page;
     }
 }

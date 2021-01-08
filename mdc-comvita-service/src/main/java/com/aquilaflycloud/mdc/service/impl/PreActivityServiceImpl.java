@@ -6,6 +6,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
@@ -57,6 +58,19 @@ public class PreActivityServiceImpl implements PreActivityService {
     private FolksonomyService folksonomyService;
 
     @Override
+    public IPage<PreActivityPageResult> pagePreActivity(PreActivityPageParam param) {
+        return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
+                .eq( PreActivityInfo::getActivityType, ActivityTypeEnum.PRE_SALES)
+        ).convert(apply -> {
+            PreActivityPageResult result = new PreActivityPageResult();
+            BeanUtil.copyProperties(apply, result);
+            result.setRefGoodsCode(getGoodsCode(apply.getRefGoods()));
+            result.setFolksonomyIds(getFolksonomys(apply.getId()));
+            return result;
+        });
+    }
+
+    @Override
     public IPage<PreActivityPageResult> page(PreActivityPageParam param) {
         List<Long> businessIds = getFolksonomyBusinessRels(param.getFolksonomyIds());
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
@@ -76,7 +90,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             PreActivityPageResult result = new PreActivityPageResult();
             BeanUtil.copyProperties(apply, result);
             result.setRefGoodsCode(getGoodsCode(apply.getRefGoods()));
-            result.setFolksonomys(getFolksonomys(apply.getId()));
+            result.setFolksonomyIds(getFolksonomys(apply.getId()));
             return result;
         });
     }

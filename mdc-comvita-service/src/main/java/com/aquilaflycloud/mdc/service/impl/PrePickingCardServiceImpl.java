@@ -116,8 +116,7 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
     public void update(PrePickingCardUpdateParam param) {
         PrePickingCard card = prePickingCardMapper.selectById(param.getId());
 
-        if (ObjectUtil.equal(card.getPickingState(), PickingCardStateEnum.NO_SALE)
-                || ObjectUtil.equal(card.getPickingState(), PickingCardStateEnum.RESERVE)) {
+        if (ObjectUtil.equal(card.getPickingState(), PickingCardStateEnum.NO_SALE)) {
             PrePickingCard update = new PrePickingCard();
             update.setId(card.getId());
             update.setPickingState(PickingCardStateEnum.CANCEL);
@@ -127,7 +126,7 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
                 throw new ServiceException("提货卡作废失败，请重试");
             }
         } else {
-            throw new ServiceException("仅状态为未销售、已预约的提货卡可做此操作");
+            throw new ServiceException("仅状态为未销售的提货卡可做此操作");
         }
     }
 
