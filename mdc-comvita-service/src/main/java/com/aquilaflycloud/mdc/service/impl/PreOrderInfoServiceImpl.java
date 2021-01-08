@@ -76,6 +76,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Resource
     private MemberRewardService memberRewardService;
 
+    @Transactional
     @Override
     public int addStatConfirmOrder(PreStayConfirmOrderParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
@@ -291,6 +292,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         return result;
     }
 
+    @Transactional
     @Override
     public void confirmReceiptOrder(PreOrderGoodsGetParam param) {
         PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
