@@ -59,7 +59,7 @@ public class PrePickingCardController {
 
     @ApiOperation(value = "验证提货卡", notes = "验证提货卡")
 //    @PreAuthorize("hasAuthority('mdc:pre:picking:card:validation')")
-    @ApiMapping(value = "comvita.picking.card.validation", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.picking.card.validation", method = RequestMethod.POST, permission = true)
     public void addStatConfirmOrder(PrePickingCardValidationParam param) {
          prePickingCardService.validationPickingCard(param);
     }
