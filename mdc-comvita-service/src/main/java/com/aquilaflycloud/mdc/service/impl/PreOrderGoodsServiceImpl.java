@@ -71,7 +71,7 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
     public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderGoods preOrderGoods = new PreOrderGoods();
-        if(!param.getIsUpdate()) {
+        if(param.getIsUpdate().equals(IsUpdateEnum.NO)) {
             PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
                     .eq(PrePickingCard::getPassword,param.getPassword())
                     .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
@@ -90,10 +90,10 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
             prePickingCard.setPickingState(PickingCardStateEnum.RESERVE);
             prePickingCardMapper.updateById(prePickingCard);
             preOrderGoods.setCardPsw(param.getPassword());
-            preOrderGoods.setIsUpdate(IsUpdateEnum.YES);
+            preOrderGoods.setIsUpdate(IsUpdateEnum.NO);
         }else {
             preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
-            preOrderGoods.setIsUpdate(IsUpdateEnum.NO);
+            preOrderGoods.setIsUpdate(IsUpdateEnum.YES);
         }
         BeanUtil.copyProperties(param,preOrderGoods);
         preOrderGoods.setReserveId(infoResult.getId());
@@ -107,7 +107,7 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
         preOrderInfoMapper.updateById(orderInfo);
         //记录日志
-        if(param.getIsUpdate()) {
+        if(param.getIsUpdate().equals(IsUpdateEnum.NO)) {
             String content = preOrderGoods.getReserveName() + DateUtil.format(new Date(), "yyyy-MM-dd") + " 对" +
                     preOrderGoods.getGoodsName() + "进行了预约，提货卡为：" + preOrderGoods.getCardCode();
             orderOperateRecordService.addOrderOperateRecordLog(preOrderGoods.getReserveName(), orderInfo.getId(), content);
