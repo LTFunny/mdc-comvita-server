@@ -25,9 +25,6 @@ public class PreOrderInfoPageResult extends PreOrderInfo {
     @ApiModelProperty(value = "赠品信息")
     private PreOrderGoods giftsGoodsInfo;
 
-    @ApiModelProperty(value = "状态标识")
-    private OrderInfoListStateEnum orderInfoListState;
-
     @ApiModelProperty(value = "预约数量")
     private int reservationNum;
 
