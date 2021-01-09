@@ -167,7 +167,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
                 preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
                 preOrderGoods.setTenantId(preOrderInfo.getTenantId());
-                preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
+                preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PREPARE);
                 orderGoodsList.add(preOrderGoods);
             });
             //确认订单后奖励
