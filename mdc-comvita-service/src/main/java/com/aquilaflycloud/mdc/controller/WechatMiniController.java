@@ -26,8 +26,8 @@ public class WechatMiniController {
 
     @ApiOperation(value = "根据内容生成小程序二维码", notes = "根据内容生成小程序二维码")
 //    @PreAuthorize("hasAuthority('mdc:wechat:qrcode')")
-    @ApiMapping(value = "backend.comvita.wechat.qrcode.add", method = RequestMethod.POST, permission = true)
-    public BaseResult<String> addQrcode(MiniQrcodeGetParam param) {
+    @ApiMapping(value = "backend.comvita.wechat.qrcode.get", method = RequestMethod.POST, permission = true)
+    public BaseResult<String> getQrcode(MiniQrcodeGetParam param) {
         return wechatMiniFunctionService.getMiniQrcode(param);
     }
 
