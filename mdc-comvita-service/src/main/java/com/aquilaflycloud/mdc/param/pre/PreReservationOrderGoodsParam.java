@@ -1,5 +1,6 @@
 package com.aquilaflycloud.mdc.param.pre;
 
+import com.aquilaflycloud.mdc.enums.pre.IsUpdateEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -59,8 +60,7 @@ public class PreReservationOrderGoodsParam  {
     @ApiModelProperty(value = "预约结束时间")
     private Date reserveEndTime;
 
-
-    @ApiModelProperty(value = "是否修改")
-    private Boolean isUpdate;
+    @ApiModelProperty(value = "是否可修改")
+    private IsUpdateEnum isUpdate;
 
 }
