@@ -49,4 +49,11 @@ public class PreOrderInfoApi {
         orderInfoService.confirmReceiptOrder(param);
     }
 
+    @ApiOperation(value = "修改待确认订单", notes = "修改待确认订单")
+    @ApiMapping(value = "comvita.order.info.statconfirm.update", method = RequestMethod.POST)
+    public void confirmReceiptOrder(PreStayConfirmOrderParam param) {
+        orderInfoService.updateStatConfirmOrder(param);
+    }
+
+
 }

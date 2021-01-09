@@ -56,6 +56,15 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         .eq(PreOrderGoods::getOrderGoodsState,param.getOrderGoodsState()));
     }
 
+    @Override
+    public PreOrderGoods getPreOrderGoods(PreReservationOrderGoodsParam param) {
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
+        if(preOrderGoods == null){
+            throw new ServiceException("找不到此订单。");
+        }
+        return preOrderGoods;
+    }
+
 
     @Transactional
     @Override
