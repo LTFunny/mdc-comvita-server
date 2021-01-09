@@ -189,7 +189,8 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 PreOrderGoods preOrderGoods = new PreOrderGoods();
                 PreGoodsInfo preGoodsInfo1 = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
                 BeanUtil.copyProperties(preGoodsInfo1,preOrderGoods);
-                preOrderGoods.setOrderId(preGoodsInfo1.getId());
+                preOrderGoods.setId(null);
+                preOrderGoods.setOrderId(preOrderInfo.getId());
                 preOrderGoods.setGoodsId(preGoodsInfo1.getId());
                 preOrderGoods.setGoodsType(OrderGoodsTypeEnum.GIFTS);
                 preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
