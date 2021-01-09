@@ -70,10 +70,18 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
     public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderGoods preOrderGoods = new PreOrderGoods();
+        PrePickingCard prePickingCard = new PrePickingCard();
         if(param.getIsUpdate().equals(IsUpdateEnum.NO)) {
-            PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
-                    .eq(PrePickingCard::getPassword,param.getPassword())
-                    .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
+            prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+                    .eq(PrePickingCard::getPassword, param.getPassword())
+                    .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE));
+            preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+            .eq(PreOrderGoods::getCardId,prePickingCard.getId()));
+        }else {
+            preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .eq(PreOrderGoods::getId,param.getOrderGoodsId()));
+        }
+        if(param.getIsUpdate().equals(IsUpdateEnum.NO)) {
             //更改提货卡状态
             prePickingCard.setPickingState(PickingCardStateEnum.RESERVE);
             int cardCount = prePickingCardMapper.updateById(prePickingCard);
