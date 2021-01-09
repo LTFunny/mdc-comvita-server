@@ -1,10 +1,8 @@
 package com.aquilaflycloud.mdc.service;
 
+import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
 import com.aquilaflycloud.mdc.model.pre.PrePickingCard;
-import com.aquilaflycloud.mdc.param.pre.PrePickingCardBatchAddParam;
-import com.aquilaflycloud.mdc.param.pre.PrePickingCardPageParam;
-import com.aquilaflycloud.mdc.param.pre.PrePickingCardUpdateParam;
-import com.aquilaflycloud.mdc.param.pre.PrePickingCardValidationParam;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PrePickingCardAnalysisResult;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -24,5 +22,7 @@ public interface PrePickingCardService {
 
     void update(PrePickingCardUpdateParam param);
 
-    boolean validationPickingCard(PrePickingCardValidationParam param);
+    void validationPickingCard(PrePickingCardValidationParam param);
+
+    PreGoodsInfo validationCardPassWord(PreReservationOrderGoodsParam param);
 }
