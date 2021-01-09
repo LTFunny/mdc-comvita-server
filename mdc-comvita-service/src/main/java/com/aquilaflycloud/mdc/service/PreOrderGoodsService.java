@@ -35,4 +35,6 @@ public interface PreOrderGoodsService {
      * @return
      */
     PreOrderGoods getPreOrderGoods(PreReservationOrderGoodsParam param);
+
+
 }

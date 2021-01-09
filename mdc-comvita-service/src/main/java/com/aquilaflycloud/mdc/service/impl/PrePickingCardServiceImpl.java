@@ -4,13 +4,15 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
+import com.aquilaflycloud.mdc.enums.pre.IsUpdateEnum;
 import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
+import com.aquilaflycloud.mdc.mapper.PreGoodsInfoMapper;
+import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
 import com.aquilaflycloud.mdc.mapper.PrePickingCardMapper;
+import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
+import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.model.pre.PrePickingCard;
-import com.aquilaflycloud.mdc.param.pre.PrePickingCardBatchAddParam;
-import com.aquilaflycloud.mdc.param.pre.PrePickingCardPageParam;
-import com.aquilaflycloud.mdc.param.pre.PrePickingCardUpdateParam;
-import com.aquilaflycloud.mdc.param.pre.PrePickingCardValidationParam;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PrePickingCardAnalysisResult;
 import com.aquilaflycloud.mdc.service.PrePickingCardService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
@@ -40,6 +42,12 @@ import static java.util.stream.Collectors.toMap;
 public class PrePickingCardServiceImpl implements PrePickingCardService {
     @Resource
     private PrePickingCardMapper prePickingCardMapper;
+
+    @Resource
+    private PreOrderGoodsMapper preOrderGoodsMapper;
+
+    @Resource
+    private PreGoodsInfoMapper preGoodsInfoMapper;
 
     @Override
     public IPage<PrePickingCard> page(PrePickingCardPageParam param) {
@@ -243,13 +251,35 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
 
 
     @Override
-    public boolean validationPickingCard(PrePickingCardValidationParam param) {
+    public void validationPickingCard(PrePickingCardValidationParam param) {
         PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
         .eq(PrePickingCard::getPickingCode,param.getPickingCode())
         .eq(PrePickingCard::getPickingState,PickingCardStateEnum.NO_SALE));
         if(prePickingCard == null){
             throw new ServiceException("该卡号无法使用。");
         }
-        return true;
+    }
+
+    @Override
+    public PreGoodsInfo validationCardPassWord(PreReservationOrderGoodsParam param) {
+        PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+                .eq(PrePickingCard::getPassword,param.getPassword())
+                .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
+        if (prePickingCard == null) {
+            throw new ServiceException("提货卡状态异常，无法进行绑定");
+        }
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getCardId, prePickingCard.getId()));
+        if (preOrderGoods == null) {
+            throw new ServiceException("订单明细未找到该提货卡关联的数据。");
+        }
+        if (StrUtil.isBlank(preOrderGoods.getCardCode())) {
+            throw new ServiceException("请输入提货码。");
+        }
+        PreGoodsInfo preGoodsInfo = preGoodsInfoMapper.selectById(preOrderGoods.getGoodsId());
+        if(null == preGoodsInfo){
+            throw new ServiceException("该提货卡绑定没有商品信息");
+        }
+        return preGoodsInfo;
     }
 }

@@ -65,7 +65,6 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         return preOrderGoods;
     }
 
-
     @Transactional
     @Override
     public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
@@ -75,20 +74,12 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
             PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
                     .eq(PrePickingCard::getPassword,param.getPassword())
                     .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
-            if (prePickingCard == null) {
-                throw new ServiceException("提货卡状态异常，无法进行绑定");
-            }
-            preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
-                    .eq(PreOrderGoods::getCardId, prePickingCard.getId()));
-            if (preOrderGoods == null) {
-                throw new ServiceException("订单明细未找到该提货卡关联的数据。");
-            }
-            if (StrUtil.isBlank(preOrderGoods.getCardCode())) {
-                throw new ServiceException("请输入提货码。");
-            }
             //更改提货卡状态
             prePickingCard.setPickingState(PickingCardStateEnum.RESERVE);
-            prePickingCardMapper.updateById(prePickingCard);
+            int cardCount = prePickingCardMapper.updateById(prePickingCard);
+            if(cardCount < 0){
+                throw new ServiceException("提货卡状态修改失败。");
+            }
             preOrderGoods.setCardPsw(param.getPassword());
             preOrderGoods.setIsUpdate(IsUpdateEnum.NO);
         }else {
