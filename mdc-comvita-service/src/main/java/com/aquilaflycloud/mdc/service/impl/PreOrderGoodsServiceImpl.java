@@ -71,7 +71,7 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
     public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderGoods preOrderGoods = new PreOrderGoods();
-        if(param.getIsUpdate()) {
+        if(!param.getIsUpdate()) {
             PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
                     .eq(PrePickingCard::getPassword,param.getPassword())
                     .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
