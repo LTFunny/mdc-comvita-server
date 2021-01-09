@@ -21,6 +21,8 @@ public interface PreOrderInfoService{
     int addStatConfirmOrder(PreStayConfirmOrderParam param);
 
 
+    void updateStatConfirmOrder(PreStayConfirmOrderParam param);
+
     /**
      * 验证订单确认
      * @param param
