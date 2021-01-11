@@ -84,10 +84,10 @@ public class PreRuleServiceImpl implements PreRuleService {
                 JSONObject jsonObject = JSONUtil.parseObj(info.getTypeDetail());
                 BigDecimal fullPrice = jsonObject.getBigDecimal("fullPrice");
                 BigDecimal reducePrice = jsonObject.getBigDecimal("reducePrice");
-                PreRuleOrderFullReduceParam pofrp = new PreRuleOrderFullReduceParam();
-                pofrp.setFullPrice(fullPrice);
-                pofrp.setReducePrice(reducePrice);
-                p.setOrderFullReduce(pofrp);
+                PreRuleOrderFullReduceParam preRuleOrderFullReduceParam = new PreRuleOrderFullReduceParam();
+                preRuleOrderFullReduceParam.setFullPrice(fullPrice);
+                preRuleOrderFullReduceParam.setReducePrice(reducePrice);
+                p.setOrderFullReduce(preRuleOrderFullReduceParam);
             }
             if(info.getRuleType() == RuleTypeEnum.ORDER_GIFTS){
                 JSONArray jsonArray = JSONUtil.parseArray(info.getTypeDetail());
@@ -128,7 +128,25 @@ public class PreRuleServiceImpl implements PreRuleService {
     public void update(PreRuleUpdateParam param) {
         checkNameParam(param.getRuleName());
         PreRuleInfo info =  preRuleInfoMapper.selectById(param.getId());
-        BeanUtil.copyProperties(param, info,"id");
+        BeanUtil.copyProperties(param, info,"id","typeDetail");
+        if(param.getRuleType() == RuleTypeEnum.ORDER_DISCOUNT){
+            String jsonStr = JSONUtil.toJsonStr(param.getDiscount());
+            if(!info.getTypeDetail().equals(jsonStr)){
+                info.setTypeDetail(JSONUtil.toJsonStr(param.getDiscount()));
+            }
+        }
+        if(param.getRuleType() == RuleTypeEnum.ORDER_FULL_REDUCE){
+            String jsonStr = JSONUtil.toJsonStr(param.getOrderFullReduce());
+            if(!info.getTypeDetail().equals(jsonStr)){
+                info.setTypeDetail(JSONUtil.toJsonStr(param.getOrderFullReduce()));
+            }
+        }
+        if(param.getRuleType() == RuleTypeEnum.ORDER_GIFTS){
+            String jsonStr = JSONUtil.toJsonStr(param.getRefGoods());
+            if(!info.getTypeDetail().equals(jsonStr)){
+                info.setTypeDetail(JSONUtil.toJsonStr(param.getRefGoods()));
+            }
+        }
         preRuleInfoMapper.updateById(info);
     }
 
