@@ -27,4 +27,14 @@ public interface PreOrderGoodsService {
      * @return
      */
     IPage<PreOrderGoods> pagePreOrderGoods(PreOrderGoodsPageParam param);
+
+
+    /**
+     * 预约自提详情
+     * @param param
+     * @return
+     */
+    PreOrderGoods getPreOrderGoods(PreReservationOrderGoodsParam param);
+
+
 }

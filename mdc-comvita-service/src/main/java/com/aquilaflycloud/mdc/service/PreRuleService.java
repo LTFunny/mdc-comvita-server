@@ -6,8 +6,8 @@ import com.aquilaflycloud.mdc.param.pre.PreRuleIdParam;
 import com.aquilaflycloud.mdc.param.pre.PreRulePageParam;
 import com.aquilaflycloud.mdc.param.pre.PreRuleUpdateParam;
 import com.aquilaflycloud.mdc.result.pre.PreEnableRuleResult;
+import com.aquilaflycloud.mdc.result.pre.PreRuleDetailResult;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,13 +22,19 @@ public interface PreRuleService {
      * @param param
      * @return
      */
-    IPage<PreRuleInfo> page(PreRulePageParam param);
+    IPage<PreRuleDetailResult> page(PreRulePageParam param);
 
     /**
      * add
      * @param param
      */
     void add(PreRuleAddParam param);
+
+    /**
+     * 获取详情
+     * @param param
+     */
+    PreRuleDetailResult get(PreRuleIdParam param);
 
     /**
      * update

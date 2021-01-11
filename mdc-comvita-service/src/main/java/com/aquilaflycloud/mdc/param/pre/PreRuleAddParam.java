@@ -6,6 +6,9 @@ import com.aquilaflycloud.mdc.enums.pre.RuleTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 /**
  * PreRuleAddParam
  * @author linkq
@@ -22,11 +25,14 @@ public class PreRuleAddParam {
     @ApiModelProperty(value = "规则类型(pre.RuleTypeEnum)")
     private RuleTypeEnum ruleType;
 
-    /**
-     * 类型详情  保存为json串 样例如: type为下单满减 满100减10  {"full_price":"100","reduce_price":"10"}
-     */
-    @ApiModelProperty(value = "类型详情")
-    private String typeDetail;
+    @ApiModelProperty(value = "下单满减参数")
+    private PreRuleOrderFullReduceParam orderFullReduce;
+
+    @ApiModelProperty(value = "下单折扣参数")
+    private BigDecimal discount;
+
+    @ApiModelProperty(value = "下单即送参数商品关联信息")
+    private List<PreRuleGoodsParam> refGoods;
 
     /**
      * 状态(1-已启用、0-已停用)

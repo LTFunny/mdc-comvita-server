@@ -103,6 +103,20 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         return orderInfo;
     }
 
+    @Override
+    public void updateStatConfirmOrder(PreStayConfirmOrderParam param) {
+        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
+        BeanUtil.copyProperties(param,preOrderInfo);
+        int orderInfo = preOrderInfoMapper.updateById(preOrderInfo);
+        if(orderInfo < 0){
+            throw new ServiceException("修改待确认订单失败。");
+        }
+        String content =  infoResult.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
+                +"修改待确认订单";
+        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
+    }
+
     @Transactional
     @Override
     public void validationConfirmOrder(PreConfirmOrderParam param) {
@@ -113,6 +127,8 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         BeanUtil.copyProperties(param, preOrderInfo);
         if (param.getIsThrough() == 0) {
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYRESERVATION);
+        }else {
+            preOrderInfo.setFailSymbol(FailSymbolEnum.YES);
         }
         List<PreOrderGoods> orderGoodsList = new ArrayList<>();
         if (param.getIsThrough() == 0) {
@@ -151,6 +167,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
                 preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
                 preOrderGoods.setTenantId(preOrderInfo.getTenantId());
+                preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PREPARE);
                 orderGoodsList.add(preOrderGoods);
             });
             //确认订单后奖励
@@ -161,31 +178,33 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     memberRewardService.addPreActivityRewardRecord(memberInfo, rewardRule.getRewardType(), rewardRule.getRewardValue());
                 }
             }
+            //计算总金额
+            preOrderInfo.setTotalPrice(orderGoodsList.get(0).getGoodsPrice().multiply(new BigDecimal(orderGoodsList.size())));
+            preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
+            //判断是否存在赠品，存在就添加
+            PreRuleInfo preRuleInfo = preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
+                    .eq(PreRuleInfo::getId,preActivityInfo.getRefRule())
+                    .eq(PreRuleInfo::getRuleType,RuleTypeEnum.ORDER_GIFTS));
+            if(preRuleInfo != null){
+                PreOrderGoods preOrderGoods = new PreOrderGoods();
+                PreGoodsInfo preGoodsInfo1 = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
+                BeanUtil.copyProperties(preGoodsInfo1,preOrderGoods);
+                preOrderGoods.setId(null);
+                preOrderGoods.setOrderId(preOrderInfo.getId());
+                preOrderGoods.setGoodsId(preGoodsInfo1.getId());
+                preOrderGoods.setGoodsType(OrderGoodsTypeEnum.GIFTS);
+                preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
+                preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
+                preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
+                preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
+                orderGoodsList.add(preOrderGoods);
+            }
+            preOrderGoodsMapper.insertAllBatch(orderGoodsList);
         }
-        //计算总金额
-        preOrderInfo.setTotalPrice(orderGoodsList.get(0).getGoodsPrice().multiply(new BigDecimal(orderGoodsList.size())));
         int updateOrder = preOrderInfoMapper.updateById(preOrderInfo);
-        if (updateOrder < 0) {
+        if(updateOrder < 0){
             throw new ServiceException("订单操作失败。");
         }
-        //判断是否存在赠品，存在就添加
-        PreOrderGoods preOrderGoods = new PreOrderGoods();
-        PreActivityInfo preActivityInfo = activityInfoMapper.selectById(preOrderInfo.getActivityInfoId());
-        PreRuleInfo preRuleInfo = preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
-                .eq(PreRuleInfo::getId, preActivityInfo.getRefRule())
-                .eq(PreRuleInfo::getRuleType, RuleTypeEnum.ORDER_GIFTS));
-        if (preRuleInfo != null) {
-            PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
-            BeanUtil.copyProperties(preGoodsInfo, preOrderGoods);
-            preOrderGoods.setOrderId(preOrderInfo.getId());
-            preOrderGoods.setGoodsId(preGoodsInfo.getId());
-            preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
-            preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
-            preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
-            preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
-            orderGoodsList.add(preOrderGoods);
-        }
-        preOrderGoodsMapper.insertAllBatch(orderGoodsList);
         String content;
         if (param.getIsThrough() == 0) {
             content = ("导购员：" + preOrderInfo.getGuideName() + DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss") + " 对订单：" +
@@ -266,7 +285,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 .eq(PreOrderGoods::getOrderId,order.getId())
                 .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.PRETAKE));
         if(orderGoodsCount > 0){
-            result.setOrderInfoListState(OrderInfoListStateEnum.PARTRESERVATION);
             result.setReservationNum(orderGoodsCount);
         }else {
             result.setReservationNum(0);

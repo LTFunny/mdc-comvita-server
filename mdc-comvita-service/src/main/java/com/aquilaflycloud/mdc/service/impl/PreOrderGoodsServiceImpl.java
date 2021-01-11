@@ -56,35 +56,43 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         .eq(PreOrderGoods::getOrderGoodsState,param.getOrderGoodsState()));
     }
 
+    @Override
+    public PreOrderGoods getPreOrderGoods(PreReservationOrderGoodsParam param) {
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
+        if(preOrderGoods == null){
+            throw new ServiceException("找不到此订单。");
+        }
+        return preOrderGoods;
+    }
 
     @Transactional
     @Override
     public void reservationOrderGoods(PreReservationOrderGoodsParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderGoods preOrderGoods = new PreOrderGoods();
-        if(param.getIsUpdate()) {
-            PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
-                    .eq(PrePickingCard::getPassword,param.getPassword())
-                    .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
-            if (prePickingCard == null) {
-                throw new ServiceException("提货卡状态异常，无法进行绑定");
-            }
+        PrePickingCard prePickingCard = new PrePickingCard();
+        if(param.getIsUpdate().equals(IsUpdateEnum.NO)) {
+            prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+                    .eq(PrePickingCard::getPassword, param.getPassword())
+                    .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE));
             preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
-                    .eq(PreOrderGoods::getCardId, prePickingCard.getId()));
-            if (preOrderGoods == null) {
-                throw new ServiceException("订单明细未找到该提货卡关联的数据。");
-            }
-            if (StrUtil.isBlank(preOrderGoods.getCardCode())) {
-                throw new ServiceException("请输入提货码。");
-            }
+            .eq(PreOrderGoods::getCardId,prePickingCard.getId()));
+        }else {
+            preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .eq(PreOrderGoods::getId,param.getOrderGoodsId()));
+        }
+        if(param.getIsUpdate().equals(IsUpdateEnum.NO)) {
             //更改提货卡状态
             prePickingCard.setPickingState(PickingCardStateEnum.RESERVE);
-            prePickingCardMapper.updateById(prePickingCard);
+            int cardCount = prePickingCardMapper.updateById(prePickingCard);
+            if(cardCount < 0){
+                throw new ServiceException("提货卡状态修改失败。");
+            }
             preOrderGoods.setCardPsw(param.getPassword());
-            preOrderGoods.setIsUpdate(IsUpdateEnum.YES);
+            preOrderGoods.setIsUpdate(IsUpdateEnum.NO);
         }else {
             preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
-            preOrderGoods.setIsUpdate(IsUpdateEnum.NO);
+            preOrderGoods.setIsUpdate(IsUpdateEnum.YES);
         }
         BeanUtil.copyProperties(param,preOrderGoods);
         preOrderGoods.setReserveId(infoResult.getId());
@@ -98,7 +106,7 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
         preOrderInfoMapper.updateById(orderInfo);
         //记录日志
-        if(param.getIsUpdate()) {
+        if(param.getIsUpdate().equals(IsUpdateEnum.NO)) {
             String content = preOrderGoods.getReserveName() + DateUtil.format(new Date(), "yyyy-MM-dd") + " 对" +
                     preOrderGoods.getGoodsName() + "进行了预约，提货卡为：" + preOrderGoods.getCardCode();
             orderOperateRecordService.addOrderOperateRecordLog(preOrderGoods.getReserveName(), orderInfo.getId(), content);
