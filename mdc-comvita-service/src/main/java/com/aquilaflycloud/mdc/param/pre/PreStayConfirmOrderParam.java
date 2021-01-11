@@ -17,15 +17,6 @@ public class PreStayConfirmOrderParam {
     @ApiModelProperty(value = "导购员id")
     private Long guideId;
 
-    @ApiModelProperty(value = "导购员名称")
-    private String guideName;
-
-    @ApiModelProperty(value = "门店id")
-    private Long shopId;
-
-    @ApiModelProperty(value = "门店名称")
-    private String shopName;
-
     @ApiModelProperty(value = "买家姓名")
     private String buyerName;
 
