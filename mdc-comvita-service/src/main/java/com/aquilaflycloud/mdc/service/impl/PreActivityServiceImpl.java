@@ -6,6 +6,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
@@ -263,7 +264,7 @@ public class PreActivityServiceImpl implements PreActivityService {
     @Override
     public PreActivityDetailResult get(PreActivityGetParam param) {
         if(param.getId()==null) {
-            throw new ServiceException("下架的活动主键id为空" );
+            throw new ServiceException("获取详情的活动主键id为空" );
         }
         PreActivityInfo info=  preActivityInfoMapper.selectById(param.getId());
         PreActivityDetailResult preActivityDetailResult = new PreActivityDetailResult();
@@ -300,7 +301,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             throw new ServiceException("下架的活动主键id为空" );
         }
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
-        activityInfo.setActivityState(param.getActivityState());
+        activityInfo.setActivityState(ActivityStateEnum.CANCELED);
         preActivityInfoMapper.updateById(activityInfo);
     }
 
