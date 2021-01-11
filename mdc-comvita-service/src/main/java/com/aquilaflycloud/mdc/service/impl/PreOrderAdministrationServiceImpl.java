@@ -9,10 +9,7 @@ import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
-import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
-import com.aquilaflycloud.mdc.model.pre.PreOrderOperateRecord;
-import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
+import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
@@ -57,6 +54,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .like( StringUtils.isNotBlank(param.getBuyerName()),PreOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
+                .orderByDesc(PreOrderInfo::getCreateTime)
         );
         return list;
     }
@@ -73,6 +71,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .le(param.getAfterSalEndTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalEndTime())
                 .ge(param.getCreateStartTime() != null, PreRefundOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreRefundOrderInfo::getCreateTime, param.getCreateEndTime())
+                .orderByDesc(PreRefundOrderInfo::getCreateTime)
         );
         return list;
     }
@@ -197,6 +196,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .like( param.getReserveShop()!=null,PreOrderGoods::getReserveShop, param.getReserveShop())
                 .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
+                .orderByDesc(PreOrderGoods::getCreateTime)
         );
         return list;
     }

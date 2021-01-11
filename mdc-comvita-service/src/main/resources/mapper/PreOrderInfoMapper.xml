@@ -39,6 +39,7 @@
             AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
         </if>
         group by a.shop_id
+        order by a.create_time desc
     </select>
     <select id="achievementsGuide"  parameterType="com.aquilaflycloud.mdc.param.pre.ReportFormParam"
             resultType="com.aquilaflycloud.mdc.result.pre.ReportGuidePageResult">
@@ -73,7 +74,7 @@
             AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
         </if>
         group by a.guide_id
-
+        order by a.create_time desc
     </select>
 
     <select id="pageOrderInfoPageResult" parameterType="com.aquilaflycloud.mdc.param.pre.PreOrderInfoPageParam"

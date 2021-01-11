@@ -48,6 +48,7 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
                 .eq( StrUtil.isNotBlank(param.getGoodsState()),PreGoodsInfo::getGoodsState, param.getGoodsState())
                 .eq( StrUtil.isNotBlank(param.getGoodsType()),PreGoodsInfo::getGoodsType, param.getGoodsType())
                 .eq( StrUtil.isNotBlank(param.getGoodsCode()),PreGoodsInfo::getGoodsCode, param.getGoodsCode())
+                .orderByDesc(PreGoodsInfo::getCreateTime)
         );
         return list;
     }
@@ -75,9 +76,10 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         preGoodsInfo.setGoodsType(param.getGoodsType());
         preGoodsInfo.setGoodsPrice( param.getGoodsPrice());
         preGoodsInfo.setGoodsDescription(param.getGoodsDescription());
-        preGoodsInfo.setGoodsState(param.getGoodsState().getType());
+        preGoodsInfo.setGoodsState(param.getGoodsState());
         preGoodsInfo.setFolksonomyId(tagId);
         preGoodsInfo.setGoodsPicture(param.getGoodsPicture());
+        preGoodsInfo.setFolksonomyName(param.getFolksonomyName());
         int count = preGoodsInfoMapper.insert(preGoodsInfo);
         if (count == 1) {
             //保存业务功能标签
@@ -130,7 +132,7 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
     @Transactional
     public void changeGoodsType(ChangeGoodsInfoParam param) {
         PreGoodsInfo info=  preGoodsInfoMapper.selectById(param.getId());
-        info.setGoodsState(param.getGoodsState().getType());
+        info.setGoodsState(param.getGoodsState());
         preGoodsInfoMapper.updateById(info);
     }
 
@@ -142,15 +144,11 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         if(StringUtils.isNotBlank(info.getFolksonomyId())){
             String[] tagId=info.getFolksonomyId().split(",");
             List<Long> list=new ArrayList<>();
-            Map<String,Long> map=new HashMap<>();
             for(String id:tagId){
                 FolksonomyGetParam folksonomyGetParam=new FolksonomyGetParam();
                 folksonomyGetParam.setId(Long.parseLong(id));
-                FolksonomyInfo folksonomy=folksonomyService.getFolksonomy(folksonomyGetParam);
-                map.put(folksonomy.getName(),Long.parseLong(id));
                 list.add(Long.parseLong(id));
             }
-            returnGoodsInfoParam.setFolksonomyNames(map);
             returnGoodsInfoParam.setFolksonomyIds(list);
         }
         return returnGoodsInfoParam;

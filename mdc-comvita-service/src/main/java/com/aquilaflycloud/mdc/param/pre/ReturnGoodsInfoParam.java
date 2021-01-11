@@ -79,5 +79,6 @@ public class ReturnGoodsInfoParam  {
     private List<Long> folksonomyIds;
 
     @ApiModelProperty(value = "标签名称")
-    private Map<String,Long> folksonomyNames;
+    private String folksonomyName;
+
 }
