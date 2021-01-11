@@ -101,14 +101,14 @@ public class PreOrderInfoController {
 
     @ApiOperation(value = "登记退货列表", notes = "登记退货列表")
     //    @PreAuthorize("hasAuthority('mdc:orderRefund.page')")
-    @ApiMapping(value = "comvita.order.refund.info.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.order.refund.info.page", method = RequestMethod.POST, permission = true)
     public IPage<PreOrderInfoPageResult> refundOrderPage(PreOrderInfoPageParam param) {
         return orderInfoService.refundOrderPage(param);
     }
 
     @ApiOperation(value = "登记退货详情", notes = "登记退货详情")
     //    @PreAuthorize("hasAuthority('mdc:orderRefund.get')")
-    @ApiMapping(value = "comvita.order.refund.info.get", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.order.refund.info.get", method = RequestMethod.POST, permission = true)
     public PreOrderInfoPageResult refundOrderInfoGet(PreOrderInfoGetParam param) {
         return orderInfoService.orderInfoGet(param);
     }
