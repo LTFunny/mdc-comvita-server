@@ -119,10 +119,15 @@ public class FolksonomyServiceImpl implements FolksonomyService {
         return getFolksonomyMemberList(FolksonomyTypeEnum.MEMBER, memberId);
     }
 
+    @Override
+    public List<FolksonomyInfo> listMemberRelFolksonomy(FolksonomyTypeEnum folksonomyType, Long memberId) {
+        return getFolksonomyMemberList(folksonomyType, memberId);
+    }
+
     private List<FolksonomyInfo> getFolksonomyMemberList(FolksonomyTypeEnum folksonomyType, Long memberId) {
         List<Long> folksonomyIds = folksonomyMemberRelMapper.selectMaps(Wrappers.<FolksonomyMemberRel>lambdaQuery()
                 .select(FolksonomyMemberRel::getFolksonomyId)
-                .eq(FolksonomyMemberRel::getType, folksonomyType)
+                .eq(folksonomyType != null, FolksonomyMemberRel::getType, folksonomyType)
                 .eq(FolksonomyMemberRel::getMemberId, memberId)).stream()
                 .map(map -> Convert.toLong(map.get("folksonomy_id"))).collect(Collectors.toList());
         if (folksonomyIds.size() > 0) {
@@ -194,18 +199,6 @@ public class FolksonomyServiceImpl implements FolksonomyService {
         if (count <= 0) {
             throw new ServiceException("删除标签失败");
         }
-    }
-
-    @Transactional
-    @Override
-    public void initDataFolksonomy() {
-        List<FolksonomyInfo> list = folksonomyInfoMapper.normalSelectList(Wrappers.<FolksonomyInfo>lambdaQuery()
-                .isNull(FolksonomyInfo::getTenantId)
-                .eq(FolksonomyInfo::getType, FolksonomyTypeEnum.DATA))
-                .stream().peek((info) -> info.setId(null)).collect(Collectors.toList());
-        folksonomyInfoMapper.physicalDelete(Wrappers.<FolksonomyInfo>lambdaQuery()
-                .eq(FolksonomyInfo::getType, FolksonomyTypeEnum.DATA));
-        folksonomyInfoMapper.insertAllBatch(list);
     }
 
     private List<FolksonomyInfo> listFolksonomy(FolksonomyListParam param, FolksonomyTypeEnum folksonomyType) {

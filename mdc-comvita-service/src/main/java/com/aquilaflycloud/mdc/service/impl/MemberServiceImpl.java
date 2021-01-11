@@ -86,6 +86,8 @@ public class MemberServiceImpl implements MemberService {
     private ClientConfigService clientConfigService;
     @Resource
     private SystemTenantConfigService systemTenantConfigService;
+    @Resource
+    private FolksonomyService folksonomyService;
 
     //======controller=======//
     @Override
@@ -136,24 +138,20 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberDetailResult getMemberDetailInfo(MemberGetParam param) {
-        MemberDetailResult result = new MemberDetailResult();
         MemberInfo memberInfo = memberInfoMapper.selectById(param.getMemberId());
         if (memberInfo == null) {
             throw MemberErrorEnum.MEMBER_ERROR_10002.getErrorMeta().getException();
         }
-        List<MemberInfo> memberInfoList = memberInfoMapper.selectList(Wrappers.<MemberInfo>lambdaQuery()
-                .eq(StrUtil.isNotBlank(memberInfo.getPhoneNumber()), MemberInfo::getPhoneNumber, memberInfo.getPhoneNumber())
-                .or().eq(StrUtil.isNotBlank(memberInfo.getUnionId()), MemberInfo::getUnionId, memberInfo.getUnionId())
-                .or().eq(StrUtil.isNotBlank(memberInfo.getUserId()), MemberInfo::getUserId, memberInfo.getUserId())
-                .orderByDesc(MemberInfo::getSource, MemberInfo::getSubSource, MemberInfo::getWxAppId, MemberInfo::getAliAppId)
-        );
-        List<MemberDetailResult.MemberDetail> memberDetailList = new ArrayList<>();
-        for (MemberInfo member : memberInfoList) {
-            MemberDetailResult.MemberDetail memberDetail = new MemberDetailResult.MemberDetail();
-            BeanUtil.copyProperties(member, memberDetail);
-            memberDetailList.add(memberDetail);
-        }
-        result.setMemberDetailList(memberDetailList);
+        MemberDetailResult result = BeanUtil.copyProperties(memberInfo, MemberDetailResult.class);
+        result.setAppName(wechatMiniService.getWxAuthorByAppId(memberInfo.getWxAppId()).getNickName());
+        result.setModel(wechatMiniProgramDeviceInfoMapper.selectOne(Wrappers.<WechatMiniProgramDeviceInfo>lambdaQuery()
+                .eq(WechatMiniProgramDeviceInfo::getMemberId, memberInfo.getId())
+        ).getModel());
+        Integer growth = memberRewardService.getMemberTotalReward(memberInfo.getId(), RewardTypeEnum.GROWTH);
+        result.setGrowthValue(growth);
+        result.setScoreValue(memberRewardService.getMemberTotalReward(memberInfo.getId(), RewardTypeEnum.SCORE));
+        result.setGradeTitle(memberGradeService.getRewardGrade(memberInfo.getWxAppId(), RewardTypeEnum.GROWTH, growth).getGradeTitle());
+        result.setFolksonomyInfoList(folksonomyService.listMemberRelFolksonomy(null, memberInfo.getId()));
         return result;
     }
 
