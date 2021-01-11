@@ -78,9 +78,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     private PreRuleInfoMapper preRuleInfoMapper;
 
     @Resource
-    private PreOrderExpressMapper preOrderExpressMapper;
-
-    @Resource
     private MemberRewardService memberRewardService;
 
     @Transactional
@@ -89,6 +86,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = new PreOrderInfo();
         BeanUtil.copyProperties(param,preOrderInfo);
+        MdcUtil.setMemberInfo(preOrderInfo,infoResult);
         preOrderInfo.setMemberId(infoResult.getId());
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYCONFIRM);
         preOrderInfo.setScore(new BigDecimal("0"));
@@ -279,7 +277,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     }
 
 
-    public PreOrderInfoPageResult orderInfo(PreOrderInfo order){
+    public PreOrderInfoPageResult orderInfo(PreOrderInfo order,int after){
         PreOrderInfoPageResult result = BeanUtil.copyProperties(order, PreOrderInfoPageResult.class);
         int orderGoodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
@@ -302,6 +300,18 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if(null != preOrderGoods){
             result.setGiftsGoodsInfo(preOrderGoods);
         }
+        if(order.getOrderState().equals(OrderInfoStateEnum.BEENCOMPLETED) && after == 1){
+            result.setState("售后/退款");
+        }
+        int cardCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,order.getId())
+                .eq(PreOrderGoods::getPickingCardState,PickingCardStateEnum.RESERVE));
+        int goodsCount2 = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,order.getId())
+                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.PREPARE));
+        if(order.getOrderState().equals(OrderInfoStateEnum.WAITINGDELIVERY) && cardCount != goodsCount2){
+            result.setState("部分预约");
+        }
         return result;
     }
 
@@ -311,7 +321,17 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         param.setMemberId(infoResult.getId());
         IPage<PreOrderInfo> page =  preOrderInfoMapper.pageOrderInfoPageResult(param.page(),param);
         IPage<PreOrderInfoPageResult> pageResultIPage = page.convert(order ->{
-            PreOrderInfoPageResult result  = orderInfo(order);
+            PreOrderInfoPageResult result  = orderInfo(order,param.getAfter());
+            return result;
+        });
+        return pageResultIPage;
+    }
+
+    @Override
+    public IPage<PreOrderInfoPageResult> refundOrderPage(PreOrderInfoPageParam param) {
+        IPage<PreOrderInfo> page =  preOrderInfoMapper.pageOrderInfoPageResult(param.page(),param);
+        IPage<PreOrderInfoPageResult> pageResultIPage = page.convert(order ->{
+            PreOrderInfoPageResult result  = orderInfo(order,param.getAfter());
             return result;
         });
         return pageResultIPage;
@@ -323,32 +343,11 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if(preOrderInfo == null){
             throw new ServiceException("查询订单失败。");
         }
-        PreOrderInfoPageResult result = orderInfo(preOrderInfo);
+        PreOrderInfoPageResult result = orderInfo(preOrderInfo,param.getAfter());
         int takenCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
                 .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.TAKEN));
         result.setIngdeliveryNum(takenCount);
-        if(preOrderInfo.getOrderState().equals(OrderInfoStateEnum.BEENCOMPLETED) && param.getAfter() == 1){
-            result.setState("售后/退款");
-        }
-        int cardCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
-                .eq(PreOrderGoods::getPickingCardState,PickingCardStateEnum.RESERVE));
-        int goodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
-                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.PREPARE));
-        if(preOrderInfo.getOrderState().equals(OrderInfoStateEnum.WAITINGDELIVERY) && cardCount != goodsCount){
-            result.setState("部分预约");
-        }
-        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
-        .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
-        .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
-        //物流详情
-        if(null != preOrderGoods){
-            PreOrderExpress preOrderExpress = preOrderExpressMapper.selectOne(Wrappers.<PreOrderExpress>lambdaQuery()
-                    .eq(PreOrderExpress::getOrderId,preOrderGoods.getOrderId()));
-            result.setPreOrderExpress(preOrderExpress);
-        }
         return result;
     }
 
