@@ -23,7 +23,7 @@ public class PreOrderRefundParam {
     @NotNull(message = "退款金额不能为空")
     private BigDecimal refundAmount;
 
-    @ApiModelProperty(value = "商品状态", required = true)
+    @ApiModelProperty(value = "商品状态(pre.AfterSaleTypeEnum)", required = true)
     @NotNull(message = "商品状态不能为空")
     private AfterSaleTypeEnum refundGoodsState;
 
