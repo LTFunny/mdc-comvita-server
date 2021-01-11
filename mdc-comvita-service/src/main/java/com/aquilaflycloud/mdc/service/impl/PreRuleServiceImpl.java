@@ -104,25 +104,25 @@ public class PreRuleServiceImpl implements PreRuleService {
     @Override
     public void update(PreRuleUpdateParam param) {
         PreRuleInfo info =  preRuleInfoMapper.selectById(param.getId());
-        BeanUtil.copyProperties(param, info,"id","typeDetail");
-        if(param.getRuleType() == RuleTypeEnum.ORDER_DISCOUNT){
+        if(info.getRuleType() == RuleTypeEnum.ORDER_DISCOUNT){
             String jsonStr = JSONUtil.toJsonStr(param.getOrderDiscount());
             if(!info.getTypeDetail().equals(jsonStr)){
                 info.setTypeDetail(JSONUtil.toJsonStr(param.getOrderDiscount()));
             }
         }
-        if(param.getRuleType() == RuleTypeEnum.ORDER_FULL_REDUCE){
+        if(info.getRuleType() == RuleTypeEnum.ORDER_FULL_REDUCE){
             String jsonStr = JSONUtil.toJsonStr(param.getOrderFullReduce());
             if(!info.getTypeDetail().equals(jsonStr)){
                 info.setTypeDetail(JSONUtil.toJsonStr(param.getOrderFullReduce()));
             }
         }
-        if(param.getRuleType() == RuleTypeEnum.ORDER_GIFTS){
+        if(info.getRuleType() == RuleTypeEnum.ORDER_GIFTS){
             String jsonStr = JSONUtil.toJsonStr(param.getRefGoods());
             if(!info.getTypeDetail().equals(jsonStr)){
                 info.setTypeDetail(JSONUtil.toJsonStr(param.getRefGoods()));
             }
         }
+        BeanUtil.copyProperties(param, info,"id","typeDetail");
         preRuleInfoMapper.updateById(info);
     }
 
