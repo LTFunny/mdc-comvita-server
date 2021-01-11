@@ -408,7 +408,15 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
         int order = preOrderInfoMapper.updateById(preOrderInfo);
         if (order < 0) {
-            throw new ServiceException("更改订单状态失败。");
+            throw new ServiceException("签收订单失败。");
+        }
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
+                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
+        preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
+        int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+        if(orderGoods < 0){
+            throw new ServiceException("更改商品明细状态失败。");
         }
         String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了订单签收。";
