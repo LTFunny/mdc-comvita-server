@@ -10,6 +10,7 @@ import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
+import com.aquilaflycloud.mdc.feign.consumer.org.IUserConsumer;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
@@ -25,6 +26,7 @@ import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
+import com.aquilaflycloud.org.service.provider.entity.PUmsUserDetail;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
@@ -80,6 +82,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Resource
     private MemberRewardService memberRewardService;
 
+    @Resource
+    private IUserConsumer userConsumer;
+
     @Transactional
     @Override
     public int addStatConfirmOrder(PreStayConfirmOrderParam param) {
@@ -91,6 +96,14 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYCONFIRM);
         preOrderInfo.setScore(new BigDecimal("0"));
         preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderCode", "O" + DateTime.now().toString("yyMMdd"), 5));
+        PUmsUserDetail pUmsUserDetail = userConsumer.getUserOrganization(param.getGuideId());
+        if(null == pUmsUserDetail){
+            throw new ServiceException("获取导购员失败。");
+        }
+        preOrderInfo.setGuideId(pUmsUserDetail.getUserId());
+        preOrderInfo.setGuideName(pUmsUserDetail.getRealName());
+        preOrderInfo.setShopId(pUmsUserDetail.getOrgId());
+        preOrderInfo.setShopName(pUmsUserDetail.getOrgName());
         int orderInfo = preOrderInfoMapper.insert(preOrderInfo);
         if(orderInfo < 0){
             throw new ServiceException("生成待确认订单失败。");
@@ -353,7 +366,8 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Transactional
     @Override
-    public void confirmReceiptOrder(PreOrderGoodsGetParam param) {
+    public void confirmReceiptOrderGoods(PreOrderGoodsGetParam param) {
+        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
         preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
@@ -365,27 +379,8 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if (orderGoods < 0) {
             throw new ServiceException("确认签收操作失败。");
         }
-        int orderGoodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId, preOrderGoods.getOrderId()));
-
-        int takenCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId, preOrderGoods.getOrderId())
-                .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.TAKEN));
-
-        if (orderGoodsCount == takenCount) {
-            preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
-            MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
-            Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord
-                    (memberInfo, null, preOrderInfo.getTotalPrice(), true);
-            preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
-        } else {
-            preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
-
-        }
-        int order = preOrderInfoMapper.updateById(preOrderInfo);
-        if (order < 0) {
-            throw new ServiceException("更改订单状态失败。");
-        }
+        String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss") + "进行了商品签收。";
+        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
         if (preOrderGoods.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
             //签收赠品,发送微信订阅消息
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
@@ -400,6 +395,24 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     preOrderGoods.getGoodsName(), preOrderGoods.getExpressName(), preOrderGoods.getExpressOrderCode(),
                     preOrderGoods.getGoodsName() + "商品已签收");
         }
+    }
+
+    @Override
+    public void confirmReceiptOrder(PreOrderGetParam param) {
+        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
+        preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+        MemberInfo memberInfo = memberInfoMapper.selectById(infoResult.getId());
+        Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord
+                (memberInfo, null, preOrderInfo.getTotalPrice(), true);
+        preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+        int order = preOrderInfoMapper.updateById(preOrderInfo);
+        if (order < 0) {
+            throw new ServiceException("更改订单状态失败。");
+        }
+        String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
+                + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了订单签收。";
+        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
     }
 
     @Override

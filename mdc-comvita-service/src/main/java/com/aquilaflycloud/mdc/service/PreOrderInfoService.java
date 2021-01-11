@@ -58,11 +58,18 @@ public interface PreOrderInfoService{
 
 
     /**
-     * 确认签收
+     * 商品确认签收
      * @param param
      * @return
      */
-    void confirmReceiptOrder(PreOrderGoodsGetParam param);
+    void confirmReceiptOrderGoods(PreOrderGoodsGetParam param);
+
+    /**
+     * 订单确认签收
+     * @param param
+     * @return
+     */
+    void confirmReceiptOrder(PreOrderGetParam param);
 
 
     /**

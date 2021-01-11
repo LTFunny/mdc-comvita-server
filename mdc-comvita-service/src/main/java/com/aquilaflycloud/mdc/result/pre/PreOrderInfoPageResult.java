@@ -32,4 +32,5 @@ public class PreOrderInfoPageResult extends PreOrderInfo {
     @ApiModelProperty(value = "订单状态(state)")
     private String state;
 
+
 }
