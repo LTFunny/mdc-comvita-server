@@ -77,6 +77,7 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         preGoodsInfo.setGoodsDescription(param.getGoodsDescription());
         preGoodsInfo.setGoodsState(param.getGoodsState().getType());
         preGoodsInfo.setFolksonomyId(tagId);
+        preGoodsInfo.setGoodsPicture(param.getGoodsPicture());
         int count = preGoodsInfoMapper.insert(preGoodsInfo);
         if (count == 1) {
             //保存业务功能标签
