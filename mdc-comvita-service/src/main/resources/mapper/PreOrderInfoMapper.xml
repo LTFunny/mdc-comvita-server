@@ -76,19 +76,26 @@
 
     </select>
 
-
     <select id="pageOrderInfoPageResult" parameterType="com.aquilaflycloud.mdc.param.pre.PreOrderInfoPageParam"
             resultType="com.aquilaflycloud.mdc.model.pre.PreOrderInfo">
         SELECT
-          order_info.*
+        order_info.*
         FROM
-          `pre_order_info` order_info
+        `pre_order_info` order_info
         <if test="param.after == 1">
-         RIGHT JOIN `pre_refund_order_info` refund
+            RIGHT JOIN `pre_refund_order_info` refund
             ON order_info.id = refund.order_id
         </if>
-            WHERE order_info.member_id = #{param.memberId}
-              AND order_info.order_state = #{param.orderState}
+        where 1=1
+        <if test="param.memberId != null and param.memberId != ''">
+            and order_info.member_id = #{param.memberId}
+        </if>
+        <if test="param.orderState != null and param.orderState != ''">
+            AND order_info.order_state = #{param.orderState}
+        </if>
+        <if test="param.buyerPhone != null and param.buyerPhone != ''">
+            AND order_info.buyer_phone = #{param.buyerPhone}
+        </if>
         order by order_info.last_update_time desc
     </select>
     <select id="pageOrderPageResultList"  parameterType="com.aquilaflycloud.mdc.param.pre.AdministrationListParam"

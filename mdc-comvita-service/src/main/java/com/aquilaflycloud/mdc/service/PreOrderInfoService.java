@@ -45,6 +45,10 @@ public interface PreOrderInfoService{
      */
     IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageParam param);
 
+
+    IPage<PreOrderInfoPageResult> refundOrderPage(PreOrderInfoPageParam param);
+
+
     /**
      * 我的订单详情
      * @param param
@@ -68,5 +72,7 @@ public interface PreOrderInfoService{
      */
     PreOrderGoodsGetResult orderCardGetInfo(PreOrderCardGetParam param);
 
+
     void refundOrder(PreOrderRefundParam param);
+
 }

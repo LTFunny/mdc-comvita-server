@@ -24,4 +24,7 @@ public class PreOrderInfoPageParam extends PageParam<PreOrderInfo> implements Se
 
     @ApiModelProperty(value = "售后标识")
     private int after;
+
+    @ApiModelProperty(value = "买家手机")
+    private String buyerPhone;
 }

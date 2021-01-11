@@ -7,6 +7,7 @@ import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.AdministrationDetailsResult;
 import com.aquilaflycloud.mdc.result.pre.AfterSalesDetailsResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsGetResult;
+import com.aquilaflycloud.mdc.result.pre.PreOrderInfoPageResult;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -97,4 +98,19 @@ public class PreOrderInfoController {
     public IPage<PreOrderGoods> pagereadySalesList(ReadyListParam param) {
         return preOrderAdministrationService.pagereadySalesList(param);
     }
+
+    @ApiOperation(value = "登记退货列表", notes = "登记退货列表")
+    //    @PreAuthorize("hasAuthority('mdc:orderRefund.page')")
+    @ApiMapping(value = "comvita.order.refund.info.page", method = RequestMethod.POST, permission = true)
+    public IPage<PreOrderInfoPageResult> refundOrderPage(PreOrderInfoPageParam param) {
+        return orderInfoService.refundOrderPage(param);
+    }
+
+    @ApiOperation(value = "登记退货详情", notes = "登记退货详情")
+    //    @PreAuthorize("hasAuthority('mdc:orderRefund.get')")
+    @ApiMapping(value = "comvita.order.refund.info.get", method = RequestMethod.POST, permission = true)
+    public PreOrderInfoPageResult refundOrderInfoGet(PreOrderInfoGetParam param) {
+        return orderInfoService.orderInfoGet(param);
+    }
+
 }
