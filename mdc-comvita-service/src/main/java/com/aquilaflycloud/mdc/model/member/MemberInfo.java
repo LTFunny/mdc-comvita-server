@@ -231,6 +231,13 @@ public class MemberInfo implements Serializable {
     private SubSourceEnum subSource;
 
     /**
+     * 导购员id
+     */
+    @TableField(value = "guide_id")
+    @ApiModelProperty(value = "导购员id")
+    private String guideId;
+
+    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
