@@ -301,7 +301,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             result.setGiftsGoodsInfo(preOrderGoods);
         }
         if(order.getOrderState().equals(OrderInfoStateEnum.BEENCOMPLETED) && after == 1){
-            result.setState("售后/退款");
+            result.setState("待退款");
         }
         int cardCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
