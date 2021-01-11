@@ -61,7 +61,7 @@ public class PreActivityServiceImpl implements PreActivityService {
     @Override
     public IPage<PreActivityPageResult> pagePreActivity(PreActivityPageParam param) {
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
-                .eq( PreActivityInfo::getActivityType, ActivityTypeEnum.PRE_SALES)
+                .eq(PreActivityInfo::getActivityType, ActivityTypeEnum.PRE_SALES)
         ).convert(this::dataConvertResult);
     }
 
@@ -69,7 +69,9 @@ public class PreActivityServiceImpl implements PreActivityService {
     public IPage<PreActivityPageResult> page(PreActivityPageParam param) {
         List<Long> businessIds = getFolksonomyBusinessRels(param.getFolksonomyIds());
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
-                .like( param.getActivityName()!=null,PreActivityInfo::getActivityName, param.getActivityName())
+                .like( param.getActivityName()!=null,
+                        PreActivityInfo::getActivityName,
+                        param.getActivityName())
                 .in(CollUtil.isNotEmpty(businessIds),PreActivityInfo::getId,businessIds)
                 .eq( param.getActivityState()!=null,
                         PreActivityInfo::getActivityState,
@@ -207,7 +209,6 @@ public class PreActivityServiceImpl implements PreActivityService {
         if(param.getId()==null) {
             throw new ServiceException("编辑的活动主键id为空" );
         }
-        checkNameParam(param.getActivityName());
         checkTimeParam(param.getBeginTime(),param.getEndTime());
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
         BeanUtil.copyProperties(param, activityInfo,"id");
