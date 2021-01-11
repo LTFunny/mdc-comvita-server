@@ -79,7 +79,8 @@ public class PreActivityInfo implements Serializable {
      * 奖励规则
      */
     @TableField(value = "reward_rule_content")
-    @ApiModelProperty(value = "奖励规则")
+    @ApiModelProperty(value = "奖励规则", hidden = true)
+    @JSONField(serialize = false)
     private String rewardRuleContent;
 
     /**
