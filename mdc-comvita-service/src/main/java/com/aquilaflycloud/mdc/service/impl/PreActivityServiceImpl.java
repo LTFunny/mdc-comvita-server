@@ -61,16 +61,7 @@ public class PreActivityServiceImpl implements PreActivityService {
     public IPage<PreActivityPageResult> pagePreActivity(PreActivityPageParam param) {
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
                 .eq( PreActivityInfo::getActivityType, ActivityTypeEnum.PRE_SALES)
-        ).convert(apply -> {
-            PreActivityPageResult result = new PreActivityPageResult();
-            BeanUtil.copyProperties(apply, result);
-            result.setRefGoodsCode(getGoodsCode(apply.getRefGoods()));
-            result.setFolksonomyIds(getFolksonomys(apply.getId()));
-            if(StrUtil.isNotBlank(apply.getRewardRuleContent())){
-                result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(apply.getRewardRuleContent()), PreActivityRewardParam.class));
-            }
-            return result;
-        });
+        ).convert(this::dataConvertResult);
     }
 
     @Override
@@ -89,17 +80,24 @@ public class PreActivityServiceImpl implements PreActivityService {
                         "date_format (optime,'%Y-%m-%d') >= date_format('" + param.getCreateTimeStart() + "','%Y-%m-%d')")
                 .apply(param.getCreateTimeEnd() != null,
                         "date_format (optime,'%Y-%m-%d') <= date_format('" + param.getCreateTimeEnd() + "','%Y-%m-%d')")
-        ).convert(apply -> {
+        ).convert(this::dataConvertResult);
+    }
+
+    private PreActivityPageResult dataConvertResult(PreActivityInfo info){
+        if(null != info){
             PreActivityPageResult result = new PreActivityPageResult();
-            BeanUtil.copyProperties(apply, result);
-            result.setRefGoodsCode(getGoodsCode(apply.getRefGoods()));
-            result.setFolksonomyIds(getFolksonomys(apply.getId()));
-            if(StrUtil.isNotBlank(apply.getRewardRuleContent())){
-                result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(apply.getRewardRuleContent()), PreActivityRewardParam.class));
+            BeanUtil.copyProperties(info, result);
+            result.setRefGoodsCode(getGoodsCode(info.getRefGoods()));
+            result.setFolksonomyIds(getFolksonomys(info.getId()));
+            if(StrUtil.isNotBlank(info.getRewardRuleContent())){
+                result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
             }
             return result;
-        });
+        }else {
+            return null;
+        }
     }
+
 
     private List<PreActivityFolksonomyResult> getFolksonomys(Long business_id) {
         List<PreActivityFolksonomyResult> results = new ArrayList<>();
