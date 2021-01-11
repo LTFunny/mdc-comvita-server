@@ -2,8 +2,6 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.pre.RuleDefaultEnum;
 import com.aquilaflycloud.mdc.enums.pre.RuleStateEnum;
@@ -22,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,33 +73,13 @@ public class PreRuleServiceImpl implements PreRuleService {
             PreRuleDetailResult p = new PreRuleDetailResult();
             BeanUtil.copyProperties(info, p);
             if(info.getRuleType() == RuleTypeEnum.ORDER_DISCOUNT){
-                JSONObject jsonObject = JSONUtil.parseObj(info.getTypeDetail());
-                BigDecimal bigDecimal = jsonObject.getBigDecimal("discount");
-                p.setDiscount(bigDecimal);
+                p.setOrderDiscount(JSONUtil.toBean(info.getTypeDetail(),PreRuleOrderDiscountParam.class));
             }
             if(info.getRuleType() == RuleTypeEnum.ORDER_FULL_REDUCE){
-                JSONObject jsonObject = JSONUtil.parseObj(info.getTypeDetail());
-                BigDecimal fullPrice = jsonObject.getBigDecimal("fullPrice");
-                BigDecimal reducePrice = jsonObject.getBigDecimal("reducePrice");
-                PreRuleOrderFullReduceParam preRuleOrderFullReduceParam = new PreRuleOrderFullReduceParam();
-                preRuleOrderFullReduceParam.setFullPrice(fullPrice);
-                preRuleOrderFullReduceParam.setReducePrice(reducePrice);
-                p.setOrderFullReduce(preRuleOrderFullReduceParam);
+                p.setOrderFullReduce(JSONUtil.toBean(info.getTypeDetail(),PreRuleOrderFullReduceParam.class));
             }
             if(info.getRuleType() == RuleTypeEnum.ORDER_GIFTS){
-                JSONArray jsonArray = JSONUtil.parseArray(info.getTypeDetail());
-                List<PreRuleGoodsParam> list = new ArrayList<>();
-                if(null != jsonArray){
-                    for (JSONObject jsonObj : jsonArray.jsonIter()) {
-                        Long goodsId = jsonObj.getLong("goodsId");
-                        String goodsCode = jsonObj.getStr("goodsCode");
-                        PreRuleGoodsParam param1 = new PreRuleGoodsParam();
-                        param1.setGoodsCode(goodsCode);
-                        param1.setGoodsId(goodsId);
-                        list.add(param1);
-                    }
-                }
-                p.setRefGoods(list);
+                p.setRefGoods(JSONUtil.toList(JSONUtil.parseArray(info.getTypeDetail()), PreRuleGoodsParam.class));
             }
             return p;
         }else {
@@ -155,9 +132,9 @@ public class PreRuleServiceImpl implements PreRuleService {
             throw new ServiceException("规则主键id为空" );
         }
         PreRuleInfo info =  preRuleInfoMapper.selectById(param.getId());
-        if(RuleStateEnum.DISABLE.getType() == info.getRuleType().getType()){
+        if(RuleStateEnum.DISABLE == info.getRuleState()){
             info.setRuleState(RuleStateEnum.ENABLE);
-        }else if(RuleStateEnum.ENABLE.getType() == info.getRuleType().getType()){
+        }else if(RuleStateEnum.ENABLE == info.getRuleState()){
             info.setRuleState(RuleStateEnum.DISABLE);
         }
         preRuleInfoMapper.updateById(info);
@@ -170,9 +147,11 @@ public class PreRuleServiceImpl implements PreRuleService {
         }
         PreRuleInfo oldInfo =  preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
                 .eq(PreRuleInfo::getIsDefault,RuleDefaultEnum.DEFAULT));
-        oldInfo.setIsDefault(RuleDefaultEnum.NOT_DEFAULT);
-        preRuleInfoMapper.updateById(oldInfo);
-        log.info("默认撤销成功!");
+        if(null != oldInfo){
+            oldInfo.setIsDefault(RuleDefaultEnum.NOT_DEFAULT);
+            preRuleInfoMapper.updateById(oldInfo);
+            log.info("默认撤销成功!");
+        }
         PreRuleInfo info =  preRuleInfoMapper.selectById(param.getId());
         info.setIsDefault(RuleDefaultEnum.DEFAULT);
         preRuleInfoMapper.updateById(info);
