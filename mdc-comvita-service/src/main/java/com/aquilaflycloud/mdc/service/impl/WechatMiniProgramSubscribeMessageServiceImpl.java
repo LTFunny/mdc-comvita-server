@@ -234,13 +234,10 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
 
     @Override
     public List<WechatMiniProgramMessage> listMessage(MiniMessageListParam param) {
-        if (CollUtil.isNotEmpty(param.getMessageTypeList())) {
-            return wechatMiniProgramMessageMapper.selectList(Wrappers.<WechatMiniProgramMessage>lambdaQuery()
-                    .eq(WechatMiniProgramMessage::getAppId, param.getAppId())
-                    .in(CollUtil.isNotEmpty(param.getMessageTypeList()), WechatMiniProgramMessage::getMessageType, param.getMessageTypeList())
-            );
-        }
-        return CollUtil.newArrayList();
+        return wechatMiniProgramMessageMapper.selectList(Wrappers.<WechatMiniProgramMessage>lambdaQuery()
+                .eq(WechatMiniProgramMessage::getAppId, param.getAppId())
+                .in(CollUtil.isNotEmpty(param.getMessageTypeList()), WechatMiniProgramMessage::getMessageType, param.getMessageTypeList())
+        );
     }
 
     @Override
