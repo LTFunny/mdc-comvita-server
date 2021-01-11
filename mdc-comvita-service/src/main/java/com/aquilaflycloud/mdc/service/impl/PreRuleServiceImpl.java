@@ -169,6 +169,7 @@ public class PreRuleServiceImpl implements PreRuleService {
                 PreEnableRuleResult ruleResult = new  PreEnableRuleResult();
                 ruleResult.setRuleId(r.getId());
                 ruleResult.setRuleName(r.getRuleName());
+                results.add(ruleResult);
             });
             return results;
         }else{
