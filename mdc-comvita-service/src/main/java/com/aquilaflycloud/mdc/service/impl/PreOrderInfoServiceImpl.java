@@ -219,7 +219,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
                             .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERAUDIT, null,
                     preOrderInfo.getOrderCode(), "您提交的订单已审核", "不通过",
-                    "订单" + preOrderInfo.getOrderCode() + "审核不通过, 原因: " + preOrderInfo.getReason());
+                    "订单" + preOrderInfo.getOrderCode() + "审核不通过");
         }
         orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getGuideName(), preOrderInfo.getId(), content);
     }
