@@ -66,7 +66,9 @@ public class PreActivityServiceImpl implements PreActivityService {
             BeanUtil.copyProperties(apply, result);
             result.setRefGoodsCode(getGoodsCode(apply.getRefGoods()));
             result.setFolksonomyIds(getFolksonomys(apply.getId()));
-            result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(apply.getRewardRuleContent()), PreActivityRewardParam.class));
+            if(StrUtil.isNotBlank(apply.getRewardRuleContent())){
+                result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(apply.getRewardRuleContent()), PreActivityRewardParam.class));
+            }
             return result;
         });
     }
