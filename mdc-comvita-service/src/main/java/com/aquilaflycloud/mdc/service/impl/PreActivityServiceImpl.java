@@ -185,8 +185,10 @@ public class PreActivityServiceImpl implements PreActivityService {
 //        if(endTime.getTime() < now.getTime()){
 //            throw new ServiceException("活动结束时间不得早于当前时间");
 //        }
-        if(endTime.getTime() < beginTime.getTime()){
-            throw new ServiceException("活动结束时间不得早于活动开始时间");
+        if(null != beginTime && null != endTime){
+            if(endTime.getTime() < beginTime.getTime()){
+                throw new ServiceException("活动结束时间不得早于活动开始时间");
+            }
         }
     }
 

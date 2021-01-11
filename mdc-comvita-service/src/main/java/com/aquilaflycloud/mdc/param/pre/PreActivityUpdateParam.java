@@ -26,7 +26,6 @@ public class PreActivityUpdateParam {
      * 活动名称
      */
     @ApiModelProperty(value = "活动名称")
-    @NotNull(message = "活动名称不能为空")
     @Size(message = "名称不能超过{max}字符",max=100)
     private String activityName;
 
@@ -34,7 +33,6 @@ public class PreActivityUpdateParam {
      * 活动类型
      */
     @ApiModelProperty(value = "活动类型(pre.ActivityTypeEnum)")
-    @NotNull(message = "活动类型不能为空")
     private ActivityTypeEnum activityType;
 
     /**
@@ -47,14 +45,12 @@ public class PreActivityUpdateParam {
      * 活动开始时间
      */
     @ApiModelProperty(value = "活动开始时间")
-    @NotNull(message = "活动开始时间不能为空")
     private Date beginTime;
 
     /**
      * 活动结束时间
      */
     @ApiModelProperty(value = "活动结束时间")
-    @NotNull(message = "活动结束时间不能为空")
     private Date endTime;
 
     /**
@@ -73,14 +69,12 @@ public class PreActivityUpdateParam {
      * 活动照片
      */
     @ApiModelProperty(value = "活动照片")
-    @NotNull(message = "活动照片不能为空")
     private String activityPicture;
 
     /**
      * 活动介绍
      */
     @ApiModelProperty(value = "活动介绍")
-    @NotNull(message = "活动介绍不能为空")
     private String activityProfile;
 
     @ApiModelProperty(value = "奖励规则")
