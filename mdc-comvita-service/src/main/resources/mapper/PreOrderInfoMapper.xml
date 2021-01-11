@@ -90,7 +90,7 @@
         <if test="param.memberId != null and param.memberId != ''">
             and order_info.member_id = #{param.memberId}
         </if>
-        <if test="param.orderState != null and param.orderState != ''">
+        <if test="param.orderState != null">
             AND order_info.order_state = #{param.orderState}
         </if>
         <if test="param.buyerPhone != null and param.buyerPhone != ''">
