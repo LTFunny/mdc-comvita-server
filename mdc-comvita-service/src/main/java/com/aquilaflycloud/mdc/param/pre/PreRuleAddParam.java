@@ -29,7 +29,7 @@ public class PreRuleAddParam {
     private PreRuleOrderFullReduceParam orderFullReduce;
 
     @ApiModelProperty(value = "下单折扣参数")
-    private BigDecimal discount;
+    private PreRuleOrderDiscountParam orderDiscount;
 
     @ApiModelProperty(value = "下单即送参数商品关联信息")
     private List<PreRuleGoodsParam> refGoods;

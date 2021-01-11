@@ -55,7 +55,7 @@ public class PreRuleServiceImpl implements PreRuleService {
         BeanUtil.copyProperties(param, info);
         info.setId(MdcUtil.getSnowflakeId());
         if(param.getRuleType() == RuleTypeEnum.ORDER_DISCOUNT){
-            info.setTypeDetail(JSONUtil.toJsonStr(param.getDiscount()));
+            info.setTypeDetail(JSONUtil.toJsonStr(param.getOrderDiscount()));
         }
         if(param.getRuleType() == RuleTypeEnum.ORDER_FULL_REDUCE){
             info.setTypeDetail(JSONUtil.toJsonStr(param.getOrderFullReduce()));
@@ -126,13 +126,12 @@ public class PreRuleServiceImpl implements PreRuleService {
 
     @Override
     public void update(PreRuleUpdateParam param) {
-        checkNameParam(param.getRuleName());
         PreRuleInfo info =  preRuleInfoMapper.selectById(param.getId());
         BeanUtil.copyProperties(param, info,"id","typeDetail");
         if(param.getRuleType() == RuleTypeEnum.ORDER_DISCOUNT){
-            String jsonStr = JSONUtil.toJsonStr(param.getDiscount());
+            String jsonStr = JSONUtil.toJsonStr(param.getOrderDiscount());
             if(!info.getTypeDetail().equals(jsonStr)){
-                info.setTypeDetail(JSONUtil.toJsonStr(param.getDiscount()));
+                info.setTypeDetail(JSONUtil.toJsonStr(param.getOrderDiscount()));
             }
         }
         if(param.getRuleType() == RuleTypeEnum.ORDER_FULL_REDUCE){
