@@ -1,5 +1,6 @@
 package com.aquilaflycloud.mdc.result.pre;
 
+import com.aquilaflycloud.mdc.enums.member.SexEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.model.pre.PreOrderOperateRecord;
@@ -74,6 +75,12 @@ public class AdministrationDetailsResult {
     @ApiModelProperty(value = "操作记录")
     private List<PreOrderOperateRecord> operationList ;
 
+    @ApiModelProperty(value = "买家性别")
+    private SexEnum buyerSex;
 
+    @ApiModelProperty(value = "买家生日")
+    private Date buyerBirthday;
 
+    @ApiModelProperty(value = "积分")
+    private BigDecimal score;
 }

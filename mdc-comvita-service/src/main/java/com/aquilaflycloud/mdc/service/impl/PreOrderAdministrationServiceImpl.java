@@ -163,6 +163,9 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         result.setDetailsList(preOrderGoodsList);
        //(value = "操作记录")
         result.setOperationList(preOrderOperateRecordlist) ;
+        result.setBuyerSex(info.getBuyerSex());
+        result.setBuyerBirthday(info.getBuyerBirthday());
+        result.setScore(info.getScore());
         return result;
     }
 
