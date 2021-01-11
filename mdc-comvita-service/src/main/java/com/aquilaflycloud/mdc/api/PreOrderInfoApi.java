@@ -43,9 +43,15 @@ public class PreOrderInfoApi {
         return orderInfoService.orderInfoGet(param);
     }
 
-    @ApiOperation(value = "确认签收", notes = "确认签收")
+    @ApiOperation(value = "商品确认签收", notes = "商品确认签收")
+    @ApiMapping(value = "comvita.order.goods.confirm.receipt", method = RequestMethod.POST)
+    public void confirmReceiptOrderGoods(PreOrderGoodsGetParam param) {
+        orderInfoService.confirmReceiptOrderGoods(param);
+    }
+
+    @ApiOperation(value = "订单确认签收", notes = "订单确认签收")
     @ApiMapping(value = "comvita.order.info.confirm.receipt", method = RequestMethod.POST)
-    public void confirmReceiptOrder(PreOrderGoodsGetParam param) {
+    public void confirmReceiptOrder(PreOrderGetParam param) {
         orderInfoService.confirmReceiptOrder(param);
     }
 
