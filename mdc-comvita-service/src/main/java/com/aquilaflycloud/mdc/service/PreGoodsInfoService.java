@@ -1,10 +1,7 @@
 package com.aquilaflycloud.mdc.service;
 
 import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
-import com.aquilaflycloud.mdc.param.pre.ChangeGoodsInfoParam;
-import com.aquilaflycloud.mdc.param.pre.GoodsInfoParam;
-import com.aquilaflycloud.mdc.param.pre.PreGoodsInfoListParam;
-import com.aquilaflycloud.mdc.param.pre.ReturnGoodsInfoParam;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.GoodsSalesVolumeResult;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -22,6 +19,6 @@ public interface PreGoodsInfoService {
 
     ReturnGoodsInfoParam goodsData(GoodsInfoParam param);
 
-    GoodsSalesVolumeResult goodsVolume(GoodsInfoParam param);
+    GoodsSalesVolumeResult goodsVolume(GoodsSaleNumParam param);
 
 }

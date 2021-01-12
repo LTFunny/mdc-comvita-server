@@ -194,4 +194,30 @@
         order by  a.create_time desc
 
     </select>
+    <select id="getNum"  parameterType="com.aquilaflycloud.mdc.param.pre.GoodsSaleNumParam"
+            resultType="com.aquilaflycloud.mdc.result.pre.GoodsSalesVolumeResult">
+    select
+        a.num goodsSevenNum,
+        b.num goodsFifteenNum,
+        c.num goodsThirtyNum
+    from
+      (select
+        count(id) num
+        from
+           pre_order_info
+        where
+        create_time <![CDATA[>=]]> #{param.goodsSevenNum}) a,
+         (select
+          count(id) num
+        from
+           pre_order_info
+        where
+        create_time <![CDATA[>=]]> #{param.goodsFifteenTime}) b,
+         (select
+          count(id) num
+        from
+           pre_order_info
+        where
+        create_time <![CDATA[>=]]> #{param.goodsThirtyTime}) c
+    </select>
 </mapper>
