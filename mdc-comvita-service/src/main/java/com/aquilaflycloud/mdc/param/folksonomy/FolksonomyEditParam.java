@@ -19,6 +19,9 @@ public class FolksonomyEditParam {
     @NotNull(message = "id不能为空")
     private Long id;
 
+    @ApiModelProperty(value = "目录id")
+    private String catalogId;
+
     @ApiModelProperty(value = "名称")
     private String name;
 
