@@ -1,8 +1,10 @@
 package com.aquilaflycloud.mdc.controller;
 
 import com.aquilaflycloud.dataAuth.common.BaseResult;
+import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyCatalog;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.param.folksonomy.*;
+import com.aquilaflycloud.mdc.result.folksonomy.FolksonomyCatalogNode;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -42,6 +44,41 @@ public class FolksonomyController {
         return folksonomyService.pageBusinessFolksonomy(param);
     }
 
+    @ApiOperation(value = "新增标签目录", notes = "新增标签目录")
+    @PreAuthorize("hasAuthority('mdc:folksonomyCatalog:add')")
+    @ApiMapping(value = "backend.comvita.folksonomy.catalog.add", method = RequestMethod.POST, permission = true)
+    public BaseResult<Long> addCatalog(FolksonomyCatalogAddParam param) {
+        return folksonomyService.addFolksonomyCatalog(param);
+    }
+
+    @ApiOperation(value = "编辑标签目录", notes = "编辑标签目录")
+    @PreAuthorize("hasAuthority('mdc:folksonomyCatalog:edit')")
+    @ApiMapping(value = "backend.comvita.folksonomy.catalog.edit", method = RequestMethod.POST, permission = true)
+    public void editCatalog(FolksonomyCatalogEditParam param) {
+        folksonomyService.editFolksonomyCatalog(param);
+    }
+
+    @ApiOperation(value = "删除标签目录", notes = "删除标签目录")
+    @PreAuthorize("hasAuthority('mdc:folksonomyCatalog:delete')")
+    @ApiMapping(value = "backend.comvita.folksonomy.catalog.delete", method = RequestMethod.POST, permission = true)
+    public void deleteCatalog(FolksonomyCatalogDeleteParam param) {
+        folksonomyService.deleteFolksonomyCatalog(param);
+    }
+
+    @ApiOperation(value = "获取标签目录", notes = "获取标签目录")
+    @PreAuthorize("hasAuthority('mdc:folksonomyCatalog:get')")
+    @ApiMapping(value = "backend.comvita.folksonomy.catalog.get", method = RequestMethod.POST, permission = true)
+    public FolksonomyCatalog getCatalog(FolksonomyCatalogGetParam param) {
+        return folksonomyService.getFolksonomyCatalog(param);
+    }
+
+    @ApiOperation(value = "获取标签目录树", notes = "获取标签目录树")
+    @PreAuthorize("hasAuthority('mdc:folksonomyCatalog:list')")
+    @ApiMapping(value = "backend.comvita.folksonomy.catalogTree.list", method = RequestMethod.POST, permission = true)
+    public List<FolksonomyCatalogNode> listCatalogTree(FolksonomyCatalogListParam param) {
+        return folksonomyService.listFolksonomyCatalogTree(param);
+    }
+
     @ApiOperation(value = "新增功能标签", notes = "新增功能标签")
     @PreAuthorize("hasAuthority('mdc:folksonomy:add')")
     @ApiMapping(value = "backend.comvita.folksonomy.business.add", method = RequestMethod.POST, permission = true)
@@ -52,7 +89,7 @@ public class FolksonomyController {
     @ApiOperation(value = "修改功能标签", notes = "修改功能标签")
     @PreAuthorize("hasAuthority('mdc:folksonomy:edit')")
     @ApiMapping(value = "backend.comvita.folksonomy.business.edit", method = RequestMethod.POST, permission = true)
-    public void addBusiness(FolksonomyEditParam param) {
+    public void editBusiness(FolksonomyEditParam param) {
         folksonomyService.editBusinessFolksonomy(param);
     }
 
@@ -87,7 +124,7 @@ public class FolksonomyController {
     @ApiOperation(value = "修改会员标签", notes = "修改会员标签")
     @PreAuthorize("hasAuthority('mdc:folksonomy:edit')")
     @ApiMapping(value = "backend.comvita.folksonomy.member.edit", method = RequestMethod.POST, permission = true)
-    public void addMember(FolksonomyEditParam param) {
+    public void editMember(FolksonomyEditParam param) {
         folksonomyService.editMemberFolksonomy(param);
     }
 
