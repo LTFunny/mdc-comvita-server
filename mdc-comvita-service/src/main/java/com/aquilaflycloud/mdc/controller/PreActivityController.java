@@ -53,11 +53,11 @@ public class PreActivityController {
         preActivityService.update(param);
     }
 
-    @ApiOperation(value = "活动下架", notes = "活动下架")
-//    @PreAuthorize("hasAuthority('mdc:pre:activity:cancel')")
-    @ApiMapping(value = "backend.comvita.pre.activity.cancel", method = RequestMethod.POST, permission = true)
-    public void cancel(PreActivityCancelParam param) {
-        preActivityService.cancel(param);
+    @ApiOperation(value = "活动上架(下架)", notes = "活动上架(下架)")
+//    @PreAuthorize("hasAuthority('mdc:pre:activity:state:change')")
+    @ApiMapping(value = "backend.comvita.pre.activity.state.change", method = RequestMethod.POST, permission = true)
+    public void changeState(PreActivityCancelParam param) {
+        preActivityService.changeState(param);
     }
 
     /**

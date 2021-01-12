@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
@@ -301,12 +302,25 @@ public class PreActivityServiceImpl implements PreActivityService {
     }
 
     @Override
-    public void cancel(PreActivityCancelParam param) {
+    public void changeState(PreActivityCancelParam param) {
         if(param.getId()==null) {
-            throw new ServiceException("下架的活动主键id为空" );
+            throw new ServiceException("上架(下架)的活动主键id为空" );
         }
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
-        activityInfo.setActivityState(ActivityStateEnum.CANCELED);
+        if(activityInfo.getActivityState() == ActivityStateEnum.CANCELED){
+            //根据时间 判断上架状态
+            DateTime now = DateTime.now();
+            if (now.isAfterOrEquals(activityInfo.getBeginTime()) && now.isBeforeOrEquals(activityInfo.getEndTime())) {
+                activityInfo.setActivityState(ActivityStateEnum.IN_PROGRESS);
+            } else if (now.isBefore(activityInfo.getBeginTime())) {
+                activityInfo.setActivityState(ActivityStateEnum.NOT_STARTED);
+            } else if (now.isAfter(activityInfo.getEndTime())) {
+                activityInfo.setActivityState(ActivityStateEnum.FINISHED);
+            }
+        }else{
+            //下架
+            activityInfo.setActivityState(ActivityStateEnum.CANCELED);
+        }
         preActivityInfoMapper.updateById(activityInfo);
     }
 
