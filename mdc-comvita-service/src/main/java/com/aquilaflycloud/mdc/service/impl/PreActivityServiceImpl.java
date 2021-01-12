@@ -323,7 +323,9 @@ public class PreActivityServiceImpl implements PreActivityService {
             final BigDecimal total = new BigDecimal(0.00);
             maps.forEach(l ->{
                 BigDecimal bigDecimal = (BigDecimal) l.get("total");
-                total.add(bigDecimal);
+                if(null != bigDecimal){
+                    total.add(bigDecimal);
+                }
             });
             result.setExchangePrice(total);
             if(maps.size() > 0){
