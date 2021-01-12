@@ -389,6 +389,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 preOrderGoods.getGoodsName() + "商品已签收");
     }
 
+    @Transactional
     @Override
     public void confirmReceiptOrder(PreOrderGetParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
