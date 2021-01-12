@@ -5,7 +5,7 @@
 
     <select id="getFolksonomy" resultType ="java.util.Map" parameterType="java.lang.Long">
         SELECT
-        info.id,info.name
+        distinct info.id,info.name
         FROM
         `folksonomy_info` info
         LEFT JOIN `folksonomy_business_rel` ref

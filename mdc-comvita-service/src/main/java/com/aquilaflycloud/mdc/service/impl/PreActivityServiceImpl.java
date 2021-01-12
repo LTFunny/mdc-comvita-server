@@ -136,7 +136,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         if(CollUtil.isEmpty(folksonomyIds)){
             return null;
         }
-        List<Long> businessIds = new ArrayList<>();
+        Set<Long> businessIds = new HashSet<>();
         //先获取标签关联的业务id
         if(CollUtil.isNotEmpty(folksonomyIds)){
             QueryWrapper<FolksonomyBusinessRel> qw = new QueryWrapper<>();
@@ -148,7 +148,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                 });
             }
         }
-        return businessIds;
+        return new ArrayList<>(businessIds);
     }
 
     @Transactional
