@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.service;
 
 import com.aquilaflycloud.dataAuth.common.BaseResult;
+import com.aquilaflycloud.mdc.enums.folksonomy.FolksonomyTypeEnum;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.param.folksonomy.*;
@@ -21,13 +22,13 @@ public interface FolksonomyService {
 
     List<FolksonomyInfo> listMemberRelFolksonomy();
 
+    List<FolksonomyInfo> listMemberRelFolksonomy(FolksonomyTypeEnum folksonomyType, Long memberId);
+
     void saveFolksonomyMemberRel(Long businessId);
 
     void addFolksonomyMemberRel(FolksonomyGetParam param);
 
     void deleteFolksonomyMemberRel(FolksonomyGetParam param);
-
-    void initDataFolksonomy();
 
     List<FolksonomyInfo> listBusinessFolksonomy(FolksonomyListParam param);
 

@@ -69,20 +69,17 @@ public class AdministrationDetailsResult {
     @ApiModelProperty(value = "最后核销时间")
     private Date lastUpdateTime;
 
-    @ApiModelProperty(value = "订单明细")
+   @ApiModelProperty(value = "订单明细")
     private List<PreOrderGoods> detailsList;
 
     @ApiModelProperty(value = "操作记录")
     private List<PreOrderOperateRecord> operationList ;
 
-    @ApiModelProperty(value = "买家生日")
-    private Date buyerBirthday;
-
-    /**
-     * 买家性别
-     */
     @ApiModelProperty(value = "买家性别")
     private SexEnum buyerSex;
+
+    @ApiModelProperty(value = "买家生日")
+    private Date buyerBirthday;
 
     @ApiModelProperty(value = "积分")
     private BigDecimal score;

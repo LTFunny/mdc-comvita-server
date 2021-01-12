@@ -1,10 +1,12 @@
 package com.aquilaflycloud.mdc.result.pre;
 
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
+import com.aquilaflycloud.mdc.param.pre.PreActivityRewardParam;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -20,5 +22,8 @@ public class PreActivityPageResult extends PreActivityInfo {
 
     @ApiModelProperty(value = "活动标签")
     private List<PreActivityFolksonomyResult> folksonomyIds;
+
+    @ApiModelProperty(value = "奖励规则")
+    private List<PreActivityRewardParam> rewardRuleList;
 
 }

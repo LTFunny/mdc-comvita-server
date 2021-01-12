@@ -6,6 +6,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
@@ -60,21 +61,17 @@ public class PreActivityServiceImpl implements PreActivityService {
     @Override
     public IPage<PreActivityPageResult> pagePreActivity(PreActivityPageParam param) {
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
-                .eq( PreActivityInfo::getActivityType, ActivityTypeEnum.PRE_SALES)
-        ).convert(apply -> {
-            PreActivityPageResult result = new PreActivityPageResult();
-            BeanUtil.copyProperties(apply, result);
-            result.setRefGoodsCode(getGoodsCode(apply.getRefGoods()));
-            result.setFolksonomyIds(getFolksonomys(apply.getId()));
-            return result;
-        });
+                .eq(PreActivityInfo::getActivityType, ActivityTypeEnum.PRE_SALES)
+        ).convert(this::dataConvertResult);
     }
 
     @Override
     public IPage<PreActivityPageResult> page(PreActivityPageParam param) {
         List<Long> businessIds = getFolksonomyBusinessRels(param.getFolksonomyIds());
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
-                .like( param.getActivityName()!=null,PreActivityInfo::getActivityName, param.getActivityName())
+                .like( param.getActivityName()!=null,
+                        PreActivityInfo::getActivityName,
+                        param.getActivityName())
                 .in(CollUtil.isNotEmpty(businessIds),PreActivityInfo::getId,businessIds)
                 .eq( param.getActivityState()!=null,
                         PreActivityInfo::getActivityState,
@@ -86,14 +83,24 @@ public class PreActivityServiceImpl implements PreActivityService {
                         "date_format (optime,'%Y-%m-%d') >= date_format('" + param.getCreateTimeStart() + "','%Y-%m-%d')")
                 .apply(param.getCreateTimeEnd() != null,
                         "date_format (optime,'%Y-%m-%d') <= date_format('" + param.getCreateTimeEnd() + "','%Y-%m-%d')")
-        ).convert(apply -> {
-            PreActivityPageResult result = new PreActivityPageResult();
-            BeanUtil.copyProperties(apply, result);
-            result.setRefGoodsCode(getGoodsCode(apply.getRefGoods()));
-            result.setFolksonomyIds(getFolksonomys(apply.getId()));
-            return result;
-        });
+        ).convert(this::dataConvertResult);
     }
+
+    private PreActivityPageResult dataConvertResult(PreActivityInfo info){
+        if(null != info){
+            PreActivityPageResult result = new PreActivityPageResult();
+            BeanUtil.copyProperties(info, result);
+            result.setRefGoodsCode(getGoodsCode(info.getRefGoods()));
+            result.setFolksonomyIds(getFolksonomys(info.getId()));
+            if(StrUtil.isNotBlank(info.getRewardRuleContent())){
+                result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
+            }
+            return result;
+        }else {
+            return null;
+        }
+    }
+
 
     private List<PreActivityFolksonomyResult> getFolksonomys(Long business_id) {
         List<PreActivityFolksonomyResult> results = new ArrayList<>();
@@ -178,8 +185,10 @@ public class PreActivityServiceImpl implements PreActivityService {
 //        if(endTime.getTime() < now.getTime()){
 //            throw new ServiceException("活动结束时间不得早于当前时间");
 //        }
-        if(endTime.getTime() < beginTime.getTime()){
-            throw new ServiceException("活动结束时间不得早于活动开始时间");
+        if(null != beginTime && null != endTime){
+            if(endTime.getTime() < beginTime.getTime()){
+                throw new ServiceException("活动结束时间不得早于活动开始时间");
+            }
         }
     }
 
@@ -202,7 +211,6 @@ public class PreActivityServiceImpl implements PreActivityService {
         if(param.getId()==null) {
             throw new ServiceException("编辑的活动主键id为空" );
         }
-        checkNameParam(param.getActivityName());
         checkTimeParam(param.getBeginTime(),param.getEndTime());
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
         BeanUtil.copyProperties(param, activityInfo,"id");
@@ -222,7 +230,9 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
         Set<Long> newIds = new HashSet<>();
         if(CollUtil.isNotEmpty(param.getFolksonomyIds())){
-            newIds = new HashSet(Arrays.asList(param.getFolksonomyIds()));
+            for(Long id : param.getFolksonomyIds()){
+                newIds.add(id);
+            }
         }
         List<Long> addIds = new ArrayList<>();
         List<Long> deleteIds = new ArrayList<>();
@@ -259,7 +269,7 @@ public class PreActivityServiceImpl implements PreActivityService {
     @Override
     public PreActivityDetailResult get(PreActivityGetParam param) {
         if(param.getId()==null) {
-            throw new ServiceException("下架的活动主键id为空" );
+            throw new ServiceException("获取详情的活动主键id为空" );
         }
         PreActivityInfo info=  preActivityInfoMapper.selectById(param.getId());
         PreActivityDetailResult preActivityDetailResult = new PreActivityDetailResult();
@@ -296,7 +306,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             throw new ServiceException("下架的活动主键id为空" );
         }
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
-        activityInfo.setActivityState(param.getActivityState());
+        activityInfo.setActivityState(ActivityStateEnum.CANCELED);
         preActivityInfoMapper.updateById(activityInfo);
     }
 
@@ -313,7 +323,9 @@ public class PreActivityServiceImpl implements PreActivityService {
             final BigDecimal total = new BigDecimal(0.00);
             maps.forEach(l ->{
                 BigDecimal bigDecimal = (BigDecimal) l.get("total");
-                total.add(bigDecimal);
+                if(null != bigDecimal){
+                    total.add(bigDecimal);
+                }
             });
             result.setExchangePrice(total);
             if(maps.size() > 0){

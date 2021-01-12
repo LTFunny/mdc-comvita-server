@@ -1,8 +1,6 @@
-package com.aquilaflycloud.mdc.model.pre;
+package com.aquilaflycloud.mdc.model.wechat;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -14,88 +12,45 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 活动信息
+ * 微信小程序访问留存分析表
  */
 @Data
-@TableName(value = "pre_activity_info")
-public class PreActivityInfo implements Serializable {
+@TableName(value = "wechat_mini_qrcode_info")
+public class WechatMiniQrcodeInfo implements Serializable {
     /**
-     * 主键
+     * id
      */
     @TableId(value = "id")
-    @ApiModelProperty(value = "主键")
+    @ApiModelProperty(value = "id")
     private Long id;
 
     /**
-     * 活动名称
+     * 微信小程序appId
      */
-    @TableField(value = "activity_name")
-    @ApiModelProperty(value = "活动名称")
-    private String activityName;
+    @TableField(value = "app_id")
+    @ApiModelProperty(value = "微信小程序appId")
+    private String appId;
 
     /**
-     * 活动类型
+     * 小程序路径
      */
-    @TableField(value = "activity_type")
-    @ApiModelProperty(value = "活动类型(pre.ActivityTypeEnum)")
-    private ActivityTypeEnum activityType;
+    @TableField(value = "`path`")
+    @ApiModelProperty(value = "小程序路径")
+    private String path;
 
     /**
-     * 状态（1-未开始 2-进行中 3-已结束 4-已下架）
+     * 二维码宽度
      */
-    @TableField(value = "activity_state")
-    @ApiModelProperty(value = "状态（pre.ActivityStateEnum）")
-    private ActivityStateEnum activityState;
+    @TableField(value = "width")
+    @ApiModelProperty(value = "二维码宽度")
+    private Integer width;
 
     /**
-     * 活动开始时间
+     * 二维码url
      */
-    @TableField(value = "begin_time")
-    @ApiModelProperty(value = "活动开始时间")
-    private Date beginTime;
-
-    /**
-     * 活动结束时间
-     */
-    @TableField(value = "end_time")
-    @ApiModelProperty(value = "活动结束时间")
-    private Date endTime;
-
-    /**
-     * 关联商品
-     */
-    @TableField(value = "ref_goods")
-    @ApiModelProperty(value = "关联商品")
-    private Long refGoods;
-
-    /**
-     * 关联的销售规则
-     */
-    @TableField(value = "ref_rule")
-    @ApiModelProperty(value = "关联的销售规则")
-    private Long refRule;
-
-    /**
-     * 奖励规则
-     */
-    @TableField(value = "reward_rule_content")
-    @ApiModelProperty(value = "奖励规则", hidden = true)
-    @JSONField(serialize = false)
-    private String rewardRuleContent;
-
-    /**
-     * 活动照片
-     */
-    @TableField(value = "activity_picture")
-    @ApiModelProperty(value = "活动照片")
-    private String activityPicture;
-
-    /**
-     * 活动介绍
-     */
-    @TableField(value = "activity_profile")
-    @ApiModelProperty(value = "活动介绍")
-    private String activityProfile;
+    @TableField(value = "url")
+    @ApiModelProperty(value = "二维码url")
+    private String url;
 
     /**
      * 创建时间
@@ -156,21 +111,6 @@ public class PreActivityInfo implements Serializable {
     @TableField(value = "creator_org_names", fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建用户所属部门名称")
     private String creatorOrgNames;
-
-    /**
-     * 最后操作人id
-     */
-    @TableField(value = "last_operator_id", fill = FieldFill.INSERT_UPDATE)
-    @ApiModelProperty(value = "最后操作人id", hidden = true)
-    @JSONField(serialize = false)
-    private Long lastOperatorId;
-
-    /**
-     * 最后操作人名称
-     */
-    @TableField(value = "last_operator_name", fill = FieldFill.INSERT_UPDATE)
-    @ApiModelProperty(value = "最后操作人名称")
-    private String lastOperatorName;
 
     /**
      * isv的appId

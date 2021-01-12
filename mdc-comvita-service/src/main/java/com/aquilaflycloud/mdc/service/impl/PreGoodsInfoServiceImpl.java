@@ -6,6 +6,7 @@ import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.mapper.PreGoodsInfoMapper;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
+import com.aquilaflycloud.mdc.param.folksonomy.FolksonomyGetParam;
 import com.aquilaflycloud.mdc.param.pre.ChangeGoodsInfoParam;
 import com.aquilaflycloud.mdc.param.pre.GoodsInfoParam;
 import com.aquilaflycloud.mdc.param.pre.PreGoodsInfoListParam;
@@ -23,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zouliyong
@@ -45,20 +48,27 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
                 .eq( StrUtil.isNotBlank(param.getGoodsState()),PreGoodsInfo::getGoodsState, param.getGoodsState())
                 .eq( StrUtil.isNotBlank(param.getGoodsType()),PreGoodsInfo::getGoodsType, param.getGoodsType())
                 .eq( StrUtil.isNotBlank(param.getGoodsCode()),PreGoodsInfo::getGoodsCode, param.getGoodsCode())
+                .orderByDesc(PreGoodsInfo::getCreateTime)
         );
         return list;
     }
 
     @Override
     @Transactional
-    public String addPreGoodsInfo(ReturnGoodsInfoParam param) {
+    public void addPreGoodsInfo(ReturnGoodsInfoParam param) {
         //判读是否存在名称和编号
         if(StringUtils.isNotBlank(getCount(param.getGoodsName(),param.getGoodsCode()))){
             throw new ServiceException(getCount(param.getGoodsName(),param.getGoodsCode()));
         }
         String tagId=null;
-        if(CollectionUtils.isEmpty(param.getFolksonomyIds())) {
-             tagId=param.getFolksonomyIds().toString();
+        if(!CollectionUtils.isEmpty(param.getFolksonomyIds())) {
+            for(Long id:param.getFolksonomyIds()){
+                if(StringUtils.isNotBlank(tagId)){
+                    tagId=id.toString();
+                }else{
+                    tagId=id.toString()+","+tagId;
+                }
+            }
         }
         PreGoodsInfo preGoodsInfo=new PreGoodsInfo();
         preGoodsInfo.setGoodsCode( param.getGoodsCode());
@@ -66,8 +76,10 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         preGoodsInfo.setGoodsType(param.getGoodsType());
         preGoodsInfo.setGoodsPrice( param.getGoodsPrice());
         preGoodsInfo.setGoodsDescription(param.getGoodsDescription());
-        preGoodsInfo.setGoodsState(param.getGoodsState().getType());
+        preGoodsInfo.setGoodsState(param.getGoodsState());
         preGoodsInfo.setFolksonomyId(tagId);
+        preGoodsInfo.setGoodsPicture(param.getGoodsPicture());
+        preGoodsInfo.setFolksonomyName(param.getFolksonomyName());
         int count = preGoodsInfoMapper.insert(preGoodsInfo);
         if (count == 1) {
             //保存业务功能标签
@@ -76,11 +88,11 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         } else {
             throw new ServiceException("保存商品信息失败: count=" + count);
         }
-        return "保存成功";
     }
 
     @Override
-    public String editPreGoodsInfo(ReturnGoodsInfoParam param) {
+    @Transactional
+    public void editPreGoodsInfo(ReturnGoodsInfoParam param) {
         if(param.getId()==null) {
             throw new ServiceException("修改的数据主键未传" );
         }
@@ -99,20 +111,28 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
 
         BeanUtil.copyProperties(param, info,"id","goodsState");
         if(CollectionUtils.isEmpty(param.getFolksonomyIds())) {
-            String tagId=param.getFolksonomyIds().toString();
-            info.setFolksonomyId(tagId);
+            String tagId=null;
+            if(!CollectionUtils.isEmpty(param.getFolksonomyIds())) {
+                for(Long id:param.getFolksonomyIds()){
+                    if(StringUtils.isNotBlank(tagId)){
+                        tagId=id.toString();
+                    }else{
+                        tagId=id.toString()+","+tagId;
+                    }
+                }
+            }
         }
         preGoodsInfoMapper.updateById(info);
         log.info("修改商品信息成功");
         //保存业务功能标签
         folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREGOODS, info.getId(), param.getFolksonomyIds());
-        return "修改成功";
     }
 
     @Override
+    @Transactional
     public void changeGoodsType(ChangeGoodsInfoParam param) {
         PreGoodsInfo info=  preGoodsInfoMapper.selectById(param.getId());
-        info.setGoodsState(param.getGoodsState().getType());
+        info.setGoodsState(param.getGoodsState());
         preGoodsInfoMapper.updateById(info);
     }
 
@@ -125,6 +145,8 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
             String[] tagId=info.getFolksonomyId().split(",");
             List<Long> list=new ArrayList<>();
             for(String id:tagId){
+                FolksonomyGetParam folksonomyGetParam=new FolksonomyGetParam();
+                folksonomyGetParam.setId(Long.parseLong(id));
                 list.add(Long.parseLong(id));
             }
             returnGoodsInfoParam.setFolksonomyIds(list);

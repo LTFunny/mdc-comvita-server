@@ -15,7 +15,6 @@ public enum FolksonomyTypeEnum {
     // 标签类型
     BUSINESS(1, "业务功能标签"),
     MEMBER(2, "会员兴趣标签"),
-    DATA(3, "数据分析标签"),
     ;
 
     FolksonomyTypeEnum(int type, String name) {

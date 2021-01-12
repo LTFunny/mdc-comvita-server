@@ -1,17 +1,17 @@
 package com.aquilaflycloud.mdc.controller;
 
-import com.aquilaflycloud.mdc.model.pre.PreRuleInfo;
 import com.aquilaflycloud.mdc.param.pre.PreRuleAddParam;
 import com.aquilaflycloud.mdc.param.pre.PreRuleIdParam;
 import com.aquilaflycloud.mdc.param.pre.PreRulePageParam;
 import com.aquilaflycloud.mdc.param.pre.PreRuleUpdateParam;
 import com.aquilaflycloud.mdc.result.pre.PreEnableRuleResult;
+import com.aquilaflycloud.mdc.result.pre.PreRuleDetailResult;
 import com.aquilaflycloud.mdc.service.PreRuleService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.security.access.prepost.PreAuthorize;
+//import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +32,7 @@ public class PreRuleController {
     @ApiOperation(value = "销售规则分页信息", notes = "销售规则分页信息")
 //    @PreAuthorize("hasAuthority('mdc:pre:rule:page')")
     @ApiMapping(value = "backend.comvita.pre.rule.page", method = RequestMethod.POST, permission = true)
-    public IPage<PreRuleInfo> page(PreRulePageParam param) {
+    public IPage<PreRuleDetailResult> page(PreRulePageParam param) {
         return preRuleService.page(param);
     }
 
@@ -41,6 +41,13 @@ public class PreRuleController {
     @ApiMapping(value = "backend.comvita.pre.rule.add", method = RequestMethod.POST, permission = true)
     public void add(PreRuleAddParam param) {
         preRuleService.add(param);
+    }
+
+    @ApiOperation(value = "销售规则详情", notes = "销售规则详情")
+//    @PreAuthorize("hasAuthority('mdc:pre:rule:get')")
+    @ApiMapping(value = "backend.comvita.pre.rule.get", method = RequestMethod.POST, permission = true)
+    public PreRuleDetailResult get(PreRuleIdParam param) {
+        return preRuleService.get(param);
     }
 
     @ApiOperation(value = "销售规则编辑", notes = "销售规则编辑")

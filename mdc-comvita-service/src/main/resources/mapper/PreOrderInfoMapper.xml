@@ -39,6 +39,7 @@
             AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
         </if>
         group by a.shop_id
+        order by a.create_time desc
     </select>
     <select id="achievementsGuide"  parameterType="com.aquilaflycloud.mdc.param.pre.ReportFormParam"
             resultType="com.aquilaflycloud.mdc.result.pre.ReportGuidePageResult">
@@ -73,7 +74,7 @@
             AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
         </if>
         group by a.guide_id
-
+        order by a.create_time desc
     </select>
 
     <select id="pageOrderInfoPageResult" parameterType="com.aquilaflycloud.mdc.param.pre.PreOrderInfoPageParam"
@@ -100,13 +101,97 @@
     </select>
     <select id="pageOrderPageResultList"  parameterType="com.aquilaflycloud.mdc.param.pre.AdministrationListParam"
             resultType="com.aquilaflycloud.mdc.result.pre.OrderPageResult">
-
-
-
+            select
+                a.delivery_district  deliveryDistrict,
+                a.delivery_province deliveryProvince,
+                a.delivery_city deliveryCity,
+                a.order_code orderCode,
+                a.create_time createTime,
+                a.reserve_start_time reserveStartTime,
+                a.delivery_time takeTime,
+                b.order_state orderState,
+                a.reserve_id memberId,
+                a.reserve_name buyerName,
+                a.reserve_phone buyerPhone,
+                a.reserve_shop shopName,
+                a.guide_name guideName,
+                a.goods_code goodsCode,
+                a.goods_name goodsName,
+                count(a.id) orderNumber,
+                a.goods_price goodsPrice,
+                a.goods_price unitPrice
+            from
+            pre_order_goods a
+            left join pre_order_info b on b.id=a.order_id
+            where id is not null
+        <if test="param.shopId != null and param.shopId != ''">
+            and a.shop_id= #{param.shopId}
+        </if>
+        <if test="param.guideName != null and param.guideName != ''">
+            and  a.guide_name= #{param.guideName}
+        </if>
+        <if test="param.orderState != null and param.orderState != ''">
+            and  b.order_state= #{param.orderState.type}
+        </if>
+        <if test="param.orderCode != null and param.orderCode != ''">
+            and  a.order_code= #{param.orderCode}
+        </if>
+        <if test="param.buyerName != null and param.buyerName != ''">
+            and  a.reserve_name= #{param.buyerName}
+        </if>
+        <if test="param.createStartTime != null">
+            AND a.create_time <![CDATA[>=]]> #{param.createStartTime}
+        </if>
+        <if test="param.createEndTime != null">
+            AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
+        </if>
+        order by  a.create_time desc
     </select>
     <select id="pageSalePageResultList"  parameterType="com.aquilaflycloud.mdc.param.pre.AdministrationListParam"
             resultType="com.aquilaflycloud.mdc.result.pre.SalePageResult">
+        select
+        a.buyer_district  deliveryDistrict,
+        a.buyer_province deliveryProvince,
+        a.buyer_city deliveryCity,
+        a.order_code orderCode,
+        a.shopName shopName,
+        a.order_state orderState,
+        a.guide_name guideName,
+        a.goods_code goodsCode,
+        a.goods_name goodsName,
+        c.num orderNumber,
+        b.goods_price goodsPrice,
+        b.goods_price unitPrice,
+        a.total_price totaGoodsPrice
+        from
+        pre_order_info a
+        left join pre_goods_info b on b.goods_code=a.goods_code
+        left join (select count(id) num,order_id orderId
+        from pre_order_goods where goods_type not in (2) ) c on c.orderId=a.id
+        where id is not null
+        <if test="param.shopId != null and param.shopId != ''">
+            and a.shop_id= #{param.shopId}
+        </if>
 
+        <if test="param.guideName != null and param.guideName != ''">
+            and  a.guide_name= #{param.guideName}
+        </if>
+        <if test="param.orderState != null and param.orderState != ''">
+            and  a.order_state= #{param.orderState.type}
+        </if>
+        <if test="param.orderCode != null and param.orderCode != ''">
+            and  a.order_code= #{param.orderCode}
+        </if>
+        <if test="param.buyerName != null and param.buyerName != ''">
+            and  a.buyer_name= #{param.buyerName}
+        </if>
+        <if test="param.createStartTime != null">
+            AND a.create_time <![CDATA[>=]]> #{param.createStartTime}
+        </if>
+        <if test="param.createEndTime != null">
+            AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
+        </if>
+        order by  a.create_time desc
 
     </select>
 </mapper>

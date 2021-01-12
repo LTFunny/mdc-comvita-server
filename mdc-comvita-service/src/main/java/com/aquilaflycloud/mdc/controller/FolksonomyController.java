@@ -28,13 +28,6 @@ public class FolksonomyController {
     @Resource
     private FolksonomyService folksonomyService;
 
-    @ApiOperation(value = "初始化数据标签", notes = "初始化数据标签")
-    @PreAuthorize("hasAuthority('mdc:folksonomy:init')")
-    @ApiMapping(value = "backend.comvita.folksonomy.data.init", method = RequestMethod.POST, permission = true)
-    public void initData() {
-        folksonomyService.initDataFolksonomy();
-    }
-
     @ApiOperation(value = "获取功能标签列表", notes = "获取功能标签列表")
     @PreAuthorize("hasAuthority('mdc:folksonomy:list')")
     @ApiMapping(value = "backend.comvita.folksonomy.business.list", method = RequestMethod.POST, permission = true)

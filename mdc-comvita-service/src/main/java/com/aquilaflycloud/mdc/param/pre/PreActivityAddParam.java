@@ -21,7 +21,7 @@ public class PreActivityAddParam {
     /**
      * 活动名称
      */
-    @ApiModelProperty(value = "活动名称" , required = true)
+    @ApiModelProperty(value = "活动名称", required = true)
     @NotNull(message = "活动名称不能为空")
     @Size(message = "名称不能超过{max}字符",max=100)
     private String activityName;
@@ -29,7 +29,7 @@ public class PreActivityAddParam {
     /**
      * 活动类型
      */
-    @ApiModelProperty(value = "活动类型(pre.ActivityTypeEnum)")
+    @ApiModelProperty(value = "活动类型(pre.ActivityTypeEnum)", required = true)
     @NotNull(message = "活动类型不能为空")
     private ActivityTypeEnum activityType;
 
@@ -42,14 +42,14 @@ public class PreActivityAddParam {
     /**
      * 活动开始时间
      */
-    @ApiModelProperty(value = "活动开始时间")
+    @ApiModelProperty(value = "活动开始时间", required = true)
     @NotNull(message = "活动开始时间不能为空")
     private Date beginTime;
 
     /**
      * 活动结束时间
      */
-    @ApiModelProperty(value = "活动结束时间")
+    @ApiModelProperty(value = "活动结束时间", required = true)
     @NotNull(message = "活动结束时间不能为空")
     private Date endTime;
 
@@ -68,14 +68,14 @@ public class PreActivityAddParam {
     /**
      * 活动照片
      */
-    @ApiModelProperty(value = "活动照片")
+    @ApiModelProperty(value = "活动照片", required = true)
     @NotNull(message = "活动照片不能为空")
     private String activityPicture;
 
     /**
      * 活动介绍
      */
-    @ApiModelProperty(value = "活动介绍")
+    @ApiModelProperty(value = "活动介绍", required = true)
     @NotNull(message = "活动介绍不能为空")
     private String activityProfile;
 
