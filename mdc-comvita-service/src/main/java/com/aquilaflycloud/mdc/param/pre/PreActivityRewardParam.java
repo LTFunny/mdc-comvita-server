@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 /**
  * PreActivityRewardParam
@@ -20,5 +21,6 @@ public class PreActivityRewardParam {
 
     @ApiModelProperty(value = "奖励值", required = true)
     @NotNull(message = "奖励值不能为空")
+    @Pattern(regexp = "[0-9]+", message = "奖励值只能为整型")
     private Integer rewardValue;
 }
