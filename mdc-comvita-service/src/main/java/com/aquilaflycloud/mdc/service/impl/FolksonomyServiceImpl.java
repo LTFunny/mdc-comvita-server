@@ -167,8 +167,12 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     @Override
     public void addFolksonomyMemberRel(FolksonomyGetParam param) {
         Long memberId = MdcUtil.getRequireCurrentMemberId();
+        addFolksonomyMemberRel(param.getId(), memberId, FolksonomyTypeEnum.MEMBER);
+    }
+
+    private void addFolksonomyMemberRel(Long folksonomyId, Long memberId, FolksonomyTypeEnum folksonomyType) {
         int count = folksonomyMemberRelMapper.selectCount(Wrappers.<FolksonomyMemberRel>lambdaQuery()
-                .eq(FolksonomyMemberRel::getFolksonomyId, param.getId())
+                .eq(FolksonomyMemberRel::getFolksonomyId, folksonomyId)
                 .eq(FolksonomyMemberRel::getMemberId, memberId)
         );
         if (count <= 0) {
@@ -180,8 +184,8 @@ public class FolksonomyServiceImpl implements FolksonomyService {
             FolksonomyMemberRel memberRel = new FolksonomyMemberRel();
             memberRel.setCatalogId(catalog.getId());
             memberRel.setCatalogName(catalog.getName());
-            memberRel.setFolksonomyId(param.getId());
-            memberRel.setType(FolksonomyTypeEnum.MEMBER);
+            memberRel.setFolksonomyId(folksonomyId);
+            memberRel.setType(folksonomyType);
             memberRel.setWeight(1);
             memberRel.setMemberId(memberId);
             count = folksonomyMemberRelMapper.insert(memberRel);
@@ -194,9 +198,13 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     @Override
     public void deleteFolksonomyMemberRel(FolksonomyGetParam param) {
         Long memberId = MdcUtil.getRequireCurrentMemberId();
+        deleteFolksonomyMemberRel(param.getId(), memberId);
+    }
+
+    private void deleteFolksonomyMemberRel(Long folksonomyId, Long memberId) {
         int count = folksonomyMemberRelMapper.delete(Wrappers.<FolksonomyMemberRel>lambdaQuery()
+                .eq(FolksonomyMemberRel::getFolksonomyId, folksonomyId)
                 .eq(FolksonomyMemberRel::getMemberId, memberId)
-                .eq(FolksonomyMemberRel::getFolksonomyId, param.getId())
         );
         if (count <= 0) {
             throw new ServiceException("删除标签失败");
@@ -226,7 +234,9 @@ public class FolksonomyServiceImpl implements FolksonomyService {
             throw new ServiceException("该标签已存在");
         }
         FolksonomyCatalog catalog = folksonomyCatalogMapper.selectOne(Wrappers.<FolksonomyCatalog>lambdaQuery()
-                .eq(FolksonomyCatalog::getType, folksonomyType));
+                .eq(FolksonomyCatalog::getType, folksonomyType)
+                .eq(FolksonomyCatalog::getId, param.getCatalogId())
+        );
         if (catalog == null) {
             throw new ServiceException("标签目录不存在");
         }
@@ -250,6 +260,13 @@ public class FolksonomyServiceImpl implements FolksonomyService {
         );
         if (existCount > 0) {
             throw new ServiceException("该功能标签已存在");
+        }
+        if (param.getCatalogId() != null) {
+            FolksonomyInfo folksonomyInfo = folksonomyInfoMapper.selectById(param.getId());
+            FolksonomyCatalog catalog = folksonomyCatalogMapper.selectById(param.getCatalogId());
+            if (folksonomyInfo.getType() != catalog.getType()) {
+                throw new ServiceException("不同类型的标签和目录不能切换");
+            }
         }
         FolksonomyInfo info = new FolksonomyInfo();
         BeanUtil.copyProperties(param, info);
@@ -380,6 +397,16 @@ public class FolksonomyServiceImpl implements FolksonomyService {
                 .eq(FolksonomyBusinessRel::getFolksonomyId, param.getId()));
         folksonomyMemberRelMapper.delete(Wrappers.<FolksonomyMemberRel>lambdaQuery()
                 .eq(FolksonomyMemberRel::getFolksonomyId, param.getId()));
+    }
+
+    @Override
+    public void addFolksonomyMemberRel(FolksonomyMemberRelParam param) {
+        addFolksonomyMemberRel(param.getId(), param.getMemberId(), FolksonomyTypeEnum.BUSINESS);
+    }
+
+    @Override
+    public void deleteFolksonomyMemberRel(FolksonomyMemberRelParam param) {
+        deleteFolksonomyMemberRel(param.getId(), param.getMemberId());
     }
 
     @Override

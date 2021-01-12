@@ -15,6 +15,10 @@ import javax.validation.constraints.NotBlank;
 @Data
 @Accessors(chain = true)
 public class FolksonomyAddParam {
+    @ApiModelProperty(value = "目录id", required = true)
+    @NotBlank(message = "目录id不能为空")
+    private String catalogId;
+
     @ApiModelProperty(value = "名称", required = true)
     @NotBlank(message = "名称不能为空")
     private String name;

@@ -54,6 +54,10 @@ public interface FolksonomyService {
 
     void deleteFolksonomy(FolksonomyGetParam param);
 
+    void addFolksonomyMemberRel(FolksonomyMemberRelParam param);
+
+    void deleteFolksonomyMemberRel(FolksonomyMemberRelParam param);
+
     IPage<FolksonomyInfo> pageMemberFolksonomy(FolksonomyPageParam param);
 
     BaseResult<Long> addMemberFolksonomy(FolksonomyAddParam param);

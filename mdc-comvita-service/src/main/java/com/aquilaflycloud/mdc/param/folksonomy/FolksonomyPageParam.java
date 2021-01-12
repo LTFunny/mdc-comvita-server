@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.param.folksonomy;
 
 import com.aquilaflycloud.dataAuth.common.PageParam;
+import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,7 +16,7 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Accessors(chain = true)
-public class FolksonomyPageParam extends PageParam {
+public class FolksonomyPageParam extends PageParam<FolksonomyInfo> {
     @ApiModelProperty(value = "名称")
     private String name;
 

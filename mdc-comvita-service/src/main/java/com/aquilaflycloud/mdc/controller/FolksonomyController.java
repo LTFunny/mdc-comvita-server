@@ -107,38 +107,24 @@ public class FolksonomyController {
         folksonomyService.deleteFolksonomy(param);
     }
 
+    @ApiOperation(value = "会员打上功能标签", notes = "会员打上功能标签")
+    @PreAuthorize("hasAuthority('mdc:folksonomyRel:add')")
+    @ApiMapping(value = "backend.comvita.folksonomy.memberRel.add", method = RequestMethod.POST, permission = true)
+    public void addFolksonomyMemberRel(FolksonomyMemberRelParam param) {
+        folksonomyService.addFolksonomyMemberRel(param);
+    }
+
+    @ApiOperation(value = "删除会员功能标签", notes = "删除会员功能标签")
+    @PreAuthorize("hasAuthority('mdc:folksonomyRel:delete')")
+    @ApiMapping(value = "backend.comvita.folksonomy.memberRel.delete", method = RequestMethod.POST, permission = true)
+    public void deleteFolksonomyMemberRel(FolksonomyMemberRelParam param) {
+        folksonomyService.deleteFolksonomyMemberRel(param);
+    }
+
     @ApiOperation(value = "获取会员标签列表(分页)", notes = "获取会员标签列表(分页)")
     @PreAuthorize("hasAuthority('mdc:folksonomy:list')")
     @ApiMapping(value = "backend.comvita.folksonomy.member.page", method = RequestMethod.POST, permission = true)
     public IPage<FolksonomyInfo> pageMember(FolksonomyPageParam param) {
         return folksonomyService.pageMemberFolksonomy(param);
-    }
-
-    @ApiOperation(value = "新增会员标签", notes = "新增会员标签")
-    @PreAuthorize("hasAuthority('mdc:folksonomy:add')")
-    @ApiMapping(value = "backend.comvita.folksonomy.member.add", method = RequestMethod.POST, permission = true)
-    public BaseResult<Long> addMember(FolksonomyAddParam param) {
-        return folksonomyService.addMemberFolksonomy(param);
-    }
-
-    @ApiOperation(value = "修改会员标签", notes = "修改会员标签")
-    @PreAuthorize("hasAuthority('mdc:folksonomy:edit')")
-    @ApiMapping(value = "backend.comvita.folksonomy.member.edit", method = RequestMethod.POST, permission = true)
-    public void editMember(FolksonomyEditParam param) {
-        folksonomyService.editMemberFolksonomy(param);
-    }
-
-    @ApiOperation(value = "获取会员标签", notes = "获取会员标签")
-    @PreAuthorize("hasAuthority('mdc:folksonomy:get')")
-    @ApiMapping(value = "backend.comvita.folksonomy.member.get", method = RequestMethod.POST, permission = true)
-    public FolksonomyInfo getMember(FolksonomyGetParam param) {
-        return folksonomyService.getFolksonomy(param);
-    }
-
-    @ApiOperation(value = "删除会员标签", notes = "删除会员标签")
-    @PreAuthorize("hasAuthority('mdc:folksonomy:delete')")
-    @ApiMapping(value = "backend.comvita.folksonomy.member.delete", method = RequestMethod.POST, permission = true)
-    public void deleteMember(FolksonomyGetParam param) {
-        folksonomyService.deleteFolksonomy(param);
     }
 }
