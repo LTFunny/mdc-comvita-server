@@ -13,9 +13,21 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
 public enum ActivityStateEnum {
 
+    /**
+     * 未开始
+     */
     NOT_STARTED(1, "未开始"),
+    /**
+     * 进行中
+     */
     IN_PROGRESS(2, "进行中"),
+    /**
+     * 已结束
+     */
     FINISHED(3, "已结束"),
+    /**
+     * 已下架
+     */
     CANCELED(4, "已下架")
     ;
 

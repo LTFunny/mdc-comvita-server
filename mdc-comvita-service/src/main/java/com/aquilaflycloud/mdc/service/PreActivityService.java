@@ -19,7 +19,7 @@ public interface PreActivityService {
 
     PreActivityDetailResult get(PreActivityGetParam param);
 
-    void cancel(PreActivityCancelParam param);
+    void changeState(PreActivityCancelParam param);
 
     PreActivityAnalysisResult analyse(PreActivityAnalysisParam param);
 

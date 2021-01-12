@@ -16,6 +16,7 @@ import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyCatalog;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyMemberRel;
 import com.aquilaflycloud.mdc.param.folksonomy.*;
+import com.aquilaflycloud.mdc.result.folksonomy.FolksonomyCatalogNode;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -268,9 +270,93 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     }
 
     @Override
+    public BaseResult<Long> addFolksonomyCatalog(FolksonomyCatalogAddParam param) {
+        FolksonomyCatalog catalogParent = folksonomyCatalogMapper.selectById(param.getPid());
+        FolksonomyCatalog catalog = BeanUtil.copyProperties(param, FolksonomyCatalog.class);
+        catalog.setType(catalogParent.getType());
+        int count = folksonomyCatalogMapper.insert(catalog);
+        if (count <= 0) {
+            throw new ServiceException("新增标签目录失败");
+        }
+        return BaseResult.buildResult(catalog.getId());
+    }
+
+    @Override
+    public void editFolksonomyCatalog(FolksonomyCatalogEditParam param) {
+        FolksonomyCatalog catalog = folksonomyCatalogMapper.selectById(param.getId());
+        if (param.getPid() != null) {
+            FolksonomyCatalog catalogParent = folksonomyCatalogMapper.selectById(param.getPid());
+            if (catalogParent.getType() != catalog.getType()) {
+                throw new ServiceException("不同类型的标签目录不能切换");
+            }
+        }
+        FolksonomyCatalog update = BeanUtil.copyProperties(param, FolksonomyCatalog.class);
+        int count = folksonomyCatalogMapper.updateById(update);
+        if (count <= 0) {
+            throw new ServiceException("编辑标签目录失败");
+        }
+    }
+
+    @Override
+    public void deleteFolksonomyCatalog(FolksonomyCatalogDeleteParam param) {
+        if (!param.getEnforceDelete()) {
+            int canDelete = folksonomyCatalogMapper.selectCount(Wrappers.<FolksonomyCatalog>lambdaQuery()
+                    .eq(FolksonomyCatalog::getPid, param.getId())
+            );
+            if (canDelete <= 0) {
+                canDelete = folksonomyInfoMapper.selectCount(Wrappers.<FolksonomyInfo>lambdaQuery()
+                        .eq(FolksonomyInfo::getCatalogId, param.getId())
+                );
+            }
+            if (canDelete > 0) {
+                throw new ServiceException("此目录下存在其他目录或标签");
+            }
+        }
+        int count = folksonomyCatalogMapper.deleteById(param.getId());
+        if (count <= 0) {
+            throw new ServiceException("删除标签目录失败");
+        }
+    }
+
+    @Override
+    public FolksonomyCatalog getFolksonomyCatalog(FolksonomyCatalogGetParam param) {
+        FolksonomyCatalog catalog = folksonomyCatalogMapper.selectById(param.getId());
+        if (catalog == null) {
+            throw new ServiceException("标签目录不存在");
+        }
+        return catalog;
+    }
+
+    @Override
+    public List<FolksonomyCatalogNode> listFolksonomyCatalogTree(FolksonomyCatalogListParam param) {
+        List<FolksonomyCatalog> catalogList = folksonomyCatalogMapper.selectList(Wrappers.<FolksonomyCatalog>lambdaQuery()
+                .eq(param.getType() != null, FolksonomyCatalog::getType, param.getType())
+        );
+        if (CollUtil.isNotEmpty(catalogList)) {
+            Map<Long, List<FolksonomyInfo>> folksonomyMap = folksonomyInfoMapper.selectList(Wrappers.<FolksonomyInfo>lambdaQuery()
+                    .in(FolksonomyInfo::getCatalogId, catalogList.stream().map(FolksonomyCatalog::getId).collect(Collectors.toList()))
+            ).stream().collect(Collectors.groupingBy(FolksonomyInfo::getCatalogId));
+            return catalogList.stream().filter(catalog -> catalog.getPid() == 0)
+                    .map(catalog -> covert(catalog, catalogList, folksonomyMap))
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
+    private FolksonomyCatalogNode covert(FolksonomyCatalog catalog, List<FolksonomyCatalog> catalogList, Map<Long, List<FolksonomyInfo>> folksonomyMap) {
+        FolksonomyCatalogNode node = BeanUtil.copyProperties(catalog, FolksonomyCatalogNode.class);
+        List<FolksonomyCatalogNode> children = catalogList.stream()
+                .filter(child -> child.getPid().equals(catalog.getId()))
+                .map(child -> covert(child, catalogList, folksonomyMap)).collect(Collectors.toList());
+        node.setChildren(children);
+        node.setFolksonomyList(folksonomyMap.get(catalog.getId()));
+        return node;
+    }
+
+    @Override
     public BaseResult<Long> addBusinessFolksonomy(FolksonomyAddParam param) {
         Long id = addFolksonomy(param, FolksonomyTypeEnum.BUSINESS);
-        return new BaseResult<Long>().setResult(id);
+        return BaseResult.buildResult(id);
     }
 
     @Override
@@ -304,7 +390,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     @Override
     public BaseResult<Long> addMemberFolksonomy(FolksonomyAddParam param) {
         Long id = addFolksonomy(param, FolksonomyTypeEnum.MEMBER);
-        return new BaseResult<Long>().setResult(id);
+        return BaseResult.buildResult(id);
     }
 
     @Override

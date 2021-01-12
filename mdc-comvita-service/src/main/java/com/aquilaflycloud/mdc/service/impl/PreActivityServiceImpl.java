@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
@@ -136,7 +137,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         if(CollUtil.isEmpty(folksonomyIds)){
             return null;
         }
-        List<Long> businessIds = new ArrayList<>();
+        Set<Long> businessIds = new HashSet<>();
         //先获取标签关联的业务id
         if(CollUtil.isNotEmpty(folksonomyIds)){
             QueryWrapper<FolksonomyBusinessRel> qw = new QueryWrapper<>();
@@ -148,7 +149,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                 });
             }
         }
-        return businessIds;
+        return new ArrayList<>(businessIds);
     }
 
     @Transactional
@@ -230,7 +231,9 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
         Set<Long> newIds = new HashSet<>();
         if(CollUtil.isNotEmpty(param.getFolksonomyIds())){
-            newIds = new HashSet(Arrays.asList(param.getFolksonomyIds()));
+            for(Long id : param.getFolksonomyIds()){
+                newIds.add(id);
+            }
         }
         List<Long> addIds = new ArrayList<>();
         List<Long> deleteIds = new ArrayList<>();
@@ -299,12 +302,25 @@ public class PreActivityServiceImpl implements PreActivityService {
     }
 
     @Override
-    public void cancel(PreActivityCancelParam param) {
+    public void changeState(PreActivityCancelParam param) {
         if(param.getId()==null) {
-            throw new ServiceException("下架的活动主键id为空" );
+            throw new ServiceException("上架(下架)的活动主键id为空" );
         }
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
-        activityInfo.setActivityState(ActivityStateEnum.CANCELED);
+        if(activityInfo.getActivityState() == ActivityStateEnum.CANCELED){
+            //根据时间 判断上架状态
+            DateTime now = DateTime.now();
+            if (now.isAfterOrEquals(activityInfo.getBeginTime()) && now.isBeforeOrEquals(activityInfo.getEndTime())) {
+                activityInfo.setActivityState(ActivityStateEnum.IN_PROGRESS);
+            } else if (now.isBefore(activityInfo.getBeginTime())) {
+                activityInfo.setActivityState(ActivityStateEnum.NOT_STARTED);
+            } else if (now.isAfter(activityInfo.getEndTime())) {
+                activityInfo.setActivityState(ActivityStateEnum.FINISHED);
+            }
+        }else{
+            //下架
+            activityInfo.setActivityState(ActivityStateEnum.CANCELED);
+        }
         preActivityInfoMapper.updateById(activityInfo);
     }
 
@@ -321,7 +337,9 @@ public class PreActivityServiceImpl implements PreActivityService {
             final BigDecimal total = new BigDecimal(0.00);
             maps.forEach(l ->{
                 BigDecimal bigDecimal = (BigDecimal) l.get("total");
-                total.add(bigDecimal);
+                if(null != bigDecimal){
+                    total.add(bigDecimal);
+                }
             });
             result.setExchangePrice(total);
             if(maps.size() > 0){
