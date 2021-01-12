@@ -96,9 +96,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYCONFIRM);
         preOrderInfo.setScore(new BigDecimal("0"));
         preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderCode", "O" + DateTime.now().toString("yyMMdd"), 5));
-        if(param.getGuideId() == null){
-            throw new ServiceException("请找导购员进行信息录入参加活动。");
-        }
         PUmsUserDetail pUmsUserDetail = userConsumer.getUserOrganization(param.getGuideId());
         if(null == pUmsUserDetail){
             throw new ServiceException("获取导购员失败。");
