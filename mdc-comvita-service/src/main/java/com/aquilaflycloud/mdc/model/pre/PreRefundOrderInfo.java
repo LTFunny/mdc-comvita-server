@@ -86,7 +86,7 @@ public class PreRefundOrderInfo implements Serializable {
     /**
      * 积分
      */
-    @TableField(value = "order_code")
+    @TableField(value = "score")
     @ApiModelProperty(value = "积分")
     private BigDecimal score;
 
