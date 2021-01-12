@@ -45,8 +45,8 @@
             resultType="com.aquilaflycloud.mdc.result.pre.ReportGuidePageResult">
         select
         a.guide_name guideName,
-        count(a.id)-b.refundOrderNumber  orderNumber,
-        sum(a.total_price)-b.refundOrderTotalPrice  orderPrice
+        count(a.id)- IFNULL(b.refundOrderNumber,0)  orderNumber,
+        sum(a.total_price)-IFNULL(b.refundOrderTotalPrice,0)  orderPrice
         from pre_order_info a
         left join (
         select guide_id , sum(total_price) refundOrderTotalPrice,count(id) refundOrderNumber
