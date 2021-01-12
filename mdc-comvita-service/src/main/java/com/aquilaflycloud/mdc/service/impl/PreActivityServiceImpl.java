@@ -230,7 +230,9 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
         Set<Long> newIds = new HashSet<>();
         if(CollUtil.isNotEmpty(param.getFolksonomyIds())){
-            newIds = new HashSet(Arrays.asList(param.getFolksonomyIds()));
+            for(Long id : param.getFolksonomyIds()){
+                newIds.add(id);
+            }
         }
         List<Long> addIds = new ArrayList<>();
         List<Long> deleteIds = new ArrayList<>();
