@@ -389,6 +389,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 preOrderGoods.getGoodsName() + "商品已签收");
     }
 
+    @Transactional
     @Override
     public void confirmReceiptOrder(PreOrderGetParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
@@ -405,10 +406,12 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
                 .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
-        preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
-        int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
-        if(orderGoods < 0){
-            throw new ServiceException("更改商品明细状态失败。");
+        if(preOrderGoods != null) {
+            preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
+            int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+            if (orderGoods < 0) {
+                throw new ServiceException("更改商品明细状态失败。");
+            }
         }
         String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了订单签收。";
