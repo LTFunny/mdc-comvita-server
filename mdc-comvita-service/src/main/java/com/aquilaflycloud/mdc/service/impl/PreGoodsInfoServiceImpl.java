@@ -11,6 +11,7 @@ import com.aquilaflycloud.mdc.param.pre.ChangeGoodsInfoParam;
 import com.aquilaflycloud.mdc.param.pre.GoodsInfoParam;
 import com.aquilaflycloud.mdc.param.pre.PreGoodsInfoListParam;
 import com.aquilaflycloud.mdc.param.pre.ReturnGoodsInfoParam;
+import com.aquilaflycloud.mdc.result.pre.GoodsSalesVolumeResult;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.service.PreGoodsInfoService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -152,6 +153,12 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
             returnGoodsInfoParam.setFolksonomyIds(list);
         }
         return returnGoodsInfoParam;
+    }
+
+    @Override
+    public GoodsSalesVolumeResult goodsVolume(GoodsInfoParam param) {
+        //GoodsSalesVolumeResult info=  preGoodsInfoMapper.getNum(param);
+        return null;
     }
 
     //查询是否存在相应的数据

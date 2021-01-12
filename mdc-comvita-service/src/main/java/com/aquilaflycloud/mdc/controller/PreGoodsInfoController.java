@@ -6,6 +6,7 @@ import com.aquilaflycloud.mdc.param.pre.ChangeGoodsInfoParam;
 import com.aquilaflycloud.mdc.param.pre.GoodsInfoParam;
 import com.aquilaflycloud.mdc.param.pre.PreGoodsInfoListParam;
 import com.aquilaflycloud.mdc.param.pre.ReturnGoodsInfoParam;
+import com.aquilaflycloud.mdc.result.pre.GoodsSalesVolumeResult;
 import com.aquilaflycloud.mdc.service.PreGoodsInfoService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -62,4 +63,11 @@ public class PreGoodsInfoController {
     public BaseResult<ReturnGoodsInfoParam> goodsData(GoodsInfoParam param) {
         return new BaseResult<ReturnGoodsInfoParam>().setResult(preGoodsInfoService.goodsData(param));
     }
+    @ApiOperation(value = "商品销量信息", notes = "商品销量信息")
+//    @PreAuthorize("hasAuthority('mdc:preGoodsInfo:list')")
+    @ApiMapping(value = "backend.comvita.volume.data", method = RequestMethod.POST, permission = false)
+    public GoodsSalesVolumeResult goodsVolume(GoodsInfoParam param) {
+        return preGoodsInfoService.goodsVolume(param);
+    }
+
 }

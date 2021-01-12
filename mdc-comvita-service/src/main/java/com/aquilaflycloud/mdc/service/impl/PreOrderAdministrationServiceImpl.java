@@ -235,11 +235,11 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
     @Override
     public IPage<PreOrderPageResult> getOrder(GetOrderPageParam param) {
-        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
-        param.setMemberId(infoResult.getId());
+        Long id = MdcUtil.getCurrentUserId();
+        param.setMemberId(id);
         IPage<PreOrderInfo> list=preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
                 .eq( param.getOrderState()!=null,PreOrderInfo::getOrderState, param.getOrderState())
-                .eq( param.getMemberId()!=null,PreOrderInfo::getMemberId, param.getMemberId())
+                .eq( param.getMemberId()!=null,PreOrderInfo::getGuideId, param.getMemberId())
                 .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
                 .orderByDesc(PreOrderInfo::getCreateTime)
