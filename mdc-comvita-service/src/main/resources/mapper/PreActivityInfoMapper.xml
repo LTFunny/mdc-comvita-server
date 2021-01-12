@@ -9,7 +9,7 @@
         FROM
         `folksonomy_info` info
         LEFT JOIN `folksonomy_business_rel` ref
-        ON info.id = ref.folksonomy_id
+        ON ref.is_delete = 0 and info.id = ref.folksonomy_id
         WHERE ref.business_id = #{id}
     </select>
 
