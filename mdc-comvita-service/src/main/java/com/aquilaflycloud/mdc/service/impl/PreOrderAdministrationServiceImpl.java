@@ -1,5 +1,6 @@
 package com.aquilaflycloud.mdc.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
@@ -11,19 +12,24 @@ import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
+import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
+import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -192,6 +198,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         IPage<PreOrderGoods> list=preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
                 .like( param.getGuideName()!=null,PreOrderGoods::getGuideName, param.getGuideName())
                 .eq( param.getReserveName()!=null,PreOrderGoods::getReserveName, param.getReserveName())
+                .eq( PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
                 .eq( param.getOrderCode()!=null,PreOrderGoods::getOrderCode, param.getOrderCode())
                 .like( param.getReserveShop()!=null,PreOrderGoods::getReserveShop, param.getReserveShop())
                 .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
@@ -224,5 +231,62 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     public IPage<SalePageResult> pageSalePageResultList(AdministrationListParam param) {
         IPage<SalePageResult> page=preOrderInfoMapper.pageSalePageResultList(param.page(),param);
         return page;
+    }
+
+    @Override
+    public IPage<PreOrderPageResult> getOrder(GetOrderPageParam param) {
+        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
+        param.setMemberId(infoResult.getId());
+        IPage<PreOrderInfo> list=preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
+                .eq( param.getOrderState()!=null,PreOrderInfo::getOrderState, param.getOrderState())
+                .eq( param.getMemberId()!=null,PreOrderInfo::getMemberId, param.getMemberId())
+                .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
+                .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
+                .orderByDesc(PreOrderInfo::getCreateTime)
+        );
+        IPage<PreOrderPageResult> pageResultIPage = list.convert(order ->{
+            PreOrderPageResult result  = orderInfo(order);
+            return result;
+        });
+        return pageResultIPage;
+    }
+    public PreOrderPageResult orderInfo(PreOrderInfo order){
+        PreOrderPageResult result =new PreOrderPageResult();
+        List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,order.getId()));
+        int reservationNum=0; //商品数量
+         int giftNum=0;  //礼包数量
+         String goodsName=null;//商品名称
+         String goodsPicture=null;//商品照片
+         String giftName=null;//赠品名称
+         String giftPicture=null;//赠品照
+         BigDecimal goodsPrice=new BigDecimal(0);//零售价
+        if(CollectionUtils.isNotEmpty(list)){
+            for(PreOrderGoods info:list){
+                if(OrderGoodsTypeEnum.GIFTS.equals(info.getGoodsType())){//赠品
+                    giftNum=giftNum+1;
+                    if(!giftName.equals(info.getGoodsName())){
+                        giftName=info.getGoodsName();
+                        giftPicture=info.getGoodsPicture();
+                    }
+                } else{
+                    reservationNum=reservationNum+1;
+                    if(!goodsName.equals(info.getGoodsName())){
+                        goodsName=info.getGoodsName();
+                        goodsPicture=info.getGoodsPicture();
+                        goodsPrice=info.getGoodsPrice();
+                    }
+                }
+            }
+        }
+        result.setGoodsName(goodsName);
+        result.setGoodsPicture(goodsPicture);
+        result.setGoodsPrice(goodsPrice);
+        result.setGiftName(giftName);
+        result.setGiftPicture(giftPicture);
+        result.setGiftNum(giftNum);
+        result.setReservationNum(reservationNum);
+        result.setCreateTime(order.getCreateTime());
+        return result;
     }
 }
