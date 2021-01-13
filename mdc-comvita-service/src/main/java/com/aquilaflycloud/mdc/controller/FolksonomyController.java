@@ -72,11 +72,11 @@ public class FolksonomyController {
         return folksonomyService.getFolksonomyCatalog(param);
     }
 
-    @ApiOperation(value = "获取标签目录树", notes = "获取标签目录树")
-    @PreAuthorize("hasAuthority('mdc:folksonomyCatalog:list')")
-    @ApiMapping(value = "backend.comvita.folksonomy.catalogTree.list", method = RequestMethod.POST, permission = true)
-    public List<FolksonomyCatalogNode> listCatalogTree(FolksonomyCatalogListParam param) {
-        return folksonomyService.listFolksonomyCatalogTree(param);
+    @ApiOperation(value = "获取标签树", notes = "获取标签树")
+    @PreAuthorize("hasAuthority('mdc:folksonomy:list')")
+    @ApiMapping(value = "backend.comvita.folksonomy.tree.list", method = RequestMethod.POST, permission = true)
+    public List<FolksonomyCatalogNode> listTree(FolksonomyCatalogListParam param) {
+        return folksonomyService.listFolksonomyTree(param);
     }
 
     @ApiOperation(value = "新增功能标签", notes = "新增功能标签")
