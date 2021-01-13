@@ -301,6 +301,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     public PreOrderInfoPageResult orderInfo(PreOrderInfo order,int after){
         PreOrderInfoPageResult result = BeanUtil.copyProperties(order, PreOrderInfoPageResult.class);
+        result.setState(order.getOrderState().getName());
         int orderGoodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
                 .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.PRETAKE));
@@ -351,12 +352,16 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Override
     public IPage<PreOrderInfoPageResult> refundOrderPage(PreOrderInfoPageParam param) {
-        IPage<PreOrderInfo> page =  preOrderInfoMapper.pageOrderInfoPageResult(param.page(),param);
-        IPage<PreOrderInfoPageResult> pageResultIPage = page.convert(order ->{
+        param.setAfter(1);
+        List<Long> longs = preOrderInfoMapper.pageOrderInfoPageResult(param.page(),param).getRecords()
+                .stream().map(PreOrderInfo::getId).collect(Collectors.toList());
+        IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
+        .eq(PreOrderInfo::getBuyerPhone,param.getBuyerPhone())
+        .notIn(PreOrderInfo::getId,longs)).convert(order ->{
             PreOrderInfoPageResult result  = orderInfo(order,param.getAfter());
             return result;
         });
-        return pageResultIPage;
+        return page;
     }
 
     @Override
