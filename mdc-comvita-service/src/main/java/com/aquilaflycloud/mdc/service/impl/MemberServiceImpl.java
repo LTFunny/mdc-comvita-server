@@ -763,7 +763,9 @@ public class MemberServiceImpl implements MemberService {
             memberInfo.setCity(userInfo.getCity());
             memberInfo.setUnionId(userInfo.getUnionId());
             memberInfo.setWxContent(JSONUtil.toJsonStr(userInfo));
-            memberInfo.setGuideId(param.getGuideId());
+            if (sessionKey.getGuideId() == null) {
+                memberInfo.setGuideId(param.getGuideId());
+            }
             int count = memberInfoMapper.update(memberInfo, Wrappers.<MemberInfo>lambdaUpdate()
                     .eq(MemberInfo::getWxAppId, sessionKey.getWxAppId())
                     .eq(MemberInfo::getOpenId, sessionKey.getOpenId())

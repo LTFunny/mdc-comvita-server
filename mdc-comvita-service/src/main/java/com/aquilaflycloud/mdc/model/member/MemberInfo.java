@@ -235,7 +235,7 @@ public class MemberInfo implements Serializable {
      */
     @TableField(value = "guide_id")
     @ApiModelProperty(value = "导购员id")
-    private String guideId;
+    private Long guideId;
 
     /**
      * 创建时间
