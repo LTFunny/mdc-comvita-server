@@ -16,7 +16,6 @@ public enum ExportTypeEnum {
     DATA_EXPORT(0, "数据导出"),
     MEMBER_INFO(1, "会员信息"),
     MEMBER_REWARD(2, "会员奖励记录"),
-    SHOP_INFO(8, "店铺信息"),
     EXCHANGE_ORDER(9, "兑换订单"),
     COUPON_REL(10, "优惠券记录"),
     PRE_PICKING_CARD(11, "提留卡信息"),
@@ -27,7 +26,6 @@ public enum ExportTypeEnum {
     READY_INFO(16,"统计订单报表"),
     GUIDE_INFO(17,"导购员报表")
     ;
-
 
     ExportTypeEnum(int type, String name) {
         this.type = type;
