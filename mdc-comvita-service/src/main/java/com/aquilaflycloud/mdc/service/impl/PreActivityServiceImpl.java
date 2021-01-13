@@ -81,9 +81,9 @@ public class PreActivityServiceImpl implements PreActivityService {
                         PreActivityInfo::getActivityType,
                         param.getActivityType())
                 .apply(param.getCreateTimeStart() != null,
-                        "date_format (optime,'%Y-%m-%d') >= date_format('" + param.getCreateTimeStart() + "','%Y-%m-%d')")
+                        "date_format (create_time,'%Y-%m-%d') >= date_format('" + param.getCreateTimeStart() + "','%Y-%m-%d')")
                 .apply(param.getCreateTimeEnd() != null,
-                        "date_format (optime,'%Y-%m-%d') <= date_format('" + param.getCreateTimeEnd() + "','%Y-%m-%d')")
+                        "date_format (create_time,'%Y-%m-%d') <= date_format('" + param.getCreateTimeEnd() + "','%Y-%m-%d')")
         ).convert(this::dataConvertResult);
     }
 
@@ -343,13 +343,14 @@ public class PreActivityServiceImpl implements PreActivityService {
         PreActivityAnalysisResult result = new  PreActivityAnalysisResult();
         if(CollUtil.isNotEmpty(maps)){
             result.setParticipantsCount(Convert.toLong(maps.size()));
-            final BigDecimal total = new BigDecimal(0.00);
-            maps.forEach(l ->{
-                BigDecimal bigDecimal = (BigDecimal) l.get("total");
+            BigDecimal total = new BigDecimal(0.00);
+            for(Map<String, Object> map : maps){
+                BigDecimal start = new BigDecimal(0.00);
+                BigDecimal bigDecimal = (BigDecimal) map.get("total");
                 if(null != bigDecimal){
-                    total.add(bigDecimal);
+                    total = total.add(bigDecimal);
                 }
-            });
+            }
             result.setExchangePrice(total);
             if(maps.size() > 0){
                 BigDecimal ppc = total.divide(new BigDecimal(maps.size()));
