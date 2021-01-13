@@ -6,7 +6,7 @@ import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyCatalog;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.param.folksonomy.*;
-import com.aquilaflycloud.mdc.result.folksonomy.FolksonomyCatalogNode;
+import com.aquilaflycloud.mdc.result.folksonomy.FolksonomyNode;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public interface FolksonomyService {
 
     FolksonomyCatalog getFolksonomyCatalog(FolksonomyCatalogGetParam param);
 
-    List<FolksonomyCatalogNode> listFolksonomyTree(FolksonomyCatalogListParam param);
+    List<FolksonomyNode> listFolksonomyTree(FolksonomyCatalogListParam param);
 
     BaseResult<Long> addBusinessFolksonomy(FolksonomyAddParam param);
 

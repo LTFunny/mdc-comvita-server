@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
+import com.aquilaflycloud.mdc.enums.folksonomy.FolksonomyNodeTypeEnum;
 import com.aquilaflycloud.mdc.enums.folksonomy.FolksonomyTypeEnum;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.mapper.FolksonomyBusinessRelMapper;
@@ -16,7 +17,7 @@ import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyCatalog;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyMemberRel;
 import com.aquilaflycloud.mdc.param.folksonomy.*;
-import com.aquilaflycloud.mdc.result.folksonomy.FolksonomyCatalogNode;
+import com.aquilaflycloud.mdc.result.folksonomy.FolksonomyNode;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -345,7 +346,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     }
 
     @Override
-    public List<FolksonomyCatalogNode> listFolksonomyTree(FolksonomyCatalogListParam param) {
+    public List<FolksonomyNode> listFolksonomyTree(FolksonomyCatalogListParam param) {
         List<FolksonomyCatalog> catalogList = folksonomyCatalogMapper.selectList(Wrappers.<FolksonomyCatalog>lambdaQuery()
                 .eq(param.getType() != null, FolksonomyCatalog::getType, param.getType())
         );
@@ -360,13 +361,20 @@ public class FolksonomyServiceImpl implements FolksonomyService {
         return new ArrayList<>();
     }
 
-    private FolksonomyCatalogNode covert(FolksonomyCatalog catalog, List<FolksonomyCatalog> catalogList, Map<Long, List<FolksonomyInfo>> folksonomyMap) {
-        FolksonomyCatalogNode node = BeanUtil.copyProperties(catalog, FolksonomyCatalogNode.class);
-        List<FolksonomyCatalogNode> children = catalogList.stream()
+    private FolksonomyNode covert(FolksonomyCatalog catalog, List<FolksonomyCatalog> catalogList, Map<Long, List<FolksonomyInfo>> folksonomyMap) {
+        FolksonomyNode node = BeanUtil.copyProperties(catalog, FolksonomyNode.class);
+        node.setNodeType(FolksonomyNodeTypeEnum.CATALOG);
+        List<FolksonomyNode> children = catalogList.stream()
                 .filter(child -> child.getPid().equals(catalog.getId()))
                 .map(child -> covert(child, catalogList, folksonomyMap)).collect(Collectors.toList());
+        List<FolksonomyNode> folksonomyChildren = folksonomyMap.get(catalog.getId()).stream().map(child -> {
+            FolksonomyNode folksonomyNode = BeanUtil.copyProperties(child, FolksonomyNode.class);
+            folksonomyNode.setNodeType(FolksonomyNodeTypeEnum.FOLKSONOMY);
+            folksonomyNode.setPid(child.getCatalogId());
+            return folksonomyNode;
+        }).collect(Collectors.toList());
+        children.addAll(folksonomyChildren);
         node.setChildren(children);
-        node.setFolksonomyList(folksonomyMap.get(catalog.getId()));
         return node;
     }
 
