@@ -351,6 +351,18 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     }
 
     @Override
+    public IPage<PreOrderInfoPageResult> guideMyOrderPage(PreOrderInfoPageParam param) {
+        Long id = MdcUtil.getCurrentUserId();
+        param.setGuideId(id);
+        IPage<PreOrderInfo> page =  preOrderInfoMapper.pageOrderInfoPageResult(param.page(),param);
+        IPage<PreOrderInfoPageResult> pageResultIPage = page.convert(order ->{
+            PreOrderInfoPageResult result  = orderInfo(order,param.getAfter());
+            return result;
+        });
+        return pageResultIPage;
+    }
+
+    @Override
     public PreOrderInfoPageResult orderInfoGet(PreOrderInfoGetParam param) {
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderInfoId());
         if(preOrderInfo == null){
