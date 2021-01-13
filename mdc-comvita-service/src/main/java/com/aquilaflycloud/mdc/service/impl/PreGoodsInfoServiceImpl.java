@@ -4,13 +4,11 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.mapper.PreGoodsInfoMapper;
+import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
 import com.aquilaflycloud.mdc.param.folksonomy.FolksonomyGetParam;
-import com.aquilaflycloud.mdc.param.pre.ChangeGoodsInfoParam;
-import com.aquilaflycloud.mdc.param.pre.GoodsInfoParam;
-import com.aquilaflycloud.mdc.param.pre.PreGoodsInfoListParam;
-import com.aquilaflycloud.mdc.param.pre.ReturnGoodsInfoParam;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.GoodsSalesVolumeResult;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.service.PreGoodsInfoService;
@@ -24,10 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by zouliyong
@@ -37,7 +34,8 @@ import java.util.Map;
 public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
     @Resource
     private PreGoodsInfoMapper preGoodsInfoMapper;
-
+    @Resource
+    private PreOrderInfoMapper preOrderInfoMapper;
     @Resource
     private FolksonomyService folksonomyService;
 
@@ -156,9 +154,31 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
     }
 
     @Override
-    public GoodsSalesVolumeResult goodsVolume(GoodsInfoParam param) {
-        //GoodsSalesVolumeResult info=  preGoodsInfoMapper.getNum(param);
-        return null;
+    public GoodsSalesVolumeResult goodsVolume(GoodsSaleNumParam param) {
+        try{
+            param.setGoodsSevenTime(getBeforOrAfterDate(new Date(),7));
+            param.setGoodsFifteenTime(getBeforOrAfterDate(new Date(),15));
+            param.setGoodsThirtyTime(getBeforOrAfterDate(new Date(),30));
+            GoodsSalesVolumeResult info=  preOrderInfoMapper.getNum(param);
+            return info;
+        }catch (ParseException e){
+            throw new ServiceException("查询商品销售失败");
+        }
+
+    }
+    /**
+     * 获取指定时间的推前或推后count天日期
+     *
+     * @param selectDate
+     * @param count
+     * @return
+     */
+    public  Date getBeforOrAfterDate(Date selectDate, int count) throws ParseException {
+        Calendar c = Calendar.getInstance();
+        c.setTime(selectDate);
+        int day = c.get(Calendar.DATE);
+        c.set(Calendar.DATE, day + count);
+        return c.getTime();
     }
 
     //查询是否存在相应的数据

@@ -19,7 +19,7 @@ public class GoodsSalesVolumeResult {
     private Integer goodsThirtyNum;
 
     @ApiModelProperty(value = "15日")
-    private Integer goodsFifteenNumber;
+    private Integer goodsFifteenNum;
 
     @ApiModelProperty(value = "7日")
     private Integer goodsSevenNum;

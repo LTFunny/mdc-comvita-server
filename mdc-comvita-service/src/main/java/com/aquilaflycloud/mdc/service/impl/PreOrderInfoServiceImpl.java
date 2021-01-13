@@ -90,6 +90,14 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     public int addStatConfirmOrder(PreStayConfirmOrderParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = new PreOrderInfo();
+        PreActivityInfo preActivityInfo = activityInfoMapper.selectById(param.getActivityInfoId());
+        if(preActivityInfo == null){
+            throw new ServiceException("活动不存在");
+        }
+        PreGoodsInfo goodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
+        if(goodsInfo == null){
+            throw new ServiceException("活动里不存在商品,无法生成订单。");
+        }
         BeanUtil.copyProperties(param,preOrderInfo);
         MdcUtil.setMemberInfo(preOrderInfo,infoResult);
         preOrderInfo.setMemberId(infoResult.getId());
@@ -351,6 +359,18 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     }
 
     @Override
+    public IPage<PreOrderInfoPageResult> guideMyOrderPage(PreOrderInfoPageParam param) {
+        Long id = MdcUtil.getCurrentUserId();
+        param.setGuideId(id);
+        IPage<PreOrderInfo> page =  preOrderInfoMapper.pageOrderInfoPageResult(param.page(),param);
+        IPage<PreOrderInfoPageResult> pageResultIPage = page.convert(order ->{
+            PreOrderInfoPageResult result  = orderInfo(order,param.getAfter());
+            return result;
+        });
+        return pageResultIPage;
+    }
+
+    @Override
     public PreOrderInfoPageResult orderInfoGet(PreOrderInfoGetParam param) {
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderInfoId());
         if(preOrderInfo == null){
@@ -406,10 +426,12 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
                 .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
-        preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
-        int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
-        if(orderGoods < 0){
-            throw new ServiceException("更改商品明细状态失败。");
+        if(preOrderGoods != null) {
+            preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
+            int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+            if (orderGoods < 0) {
+                throw new ServiceException("更改商品明细状态失败。");
+            }
         }
         String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了订单签收。";

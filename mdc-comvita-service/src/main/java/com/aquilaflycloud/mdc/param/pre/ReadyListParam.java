@@ -33,4 +33,10 @@ public class ReadyListParam extends PageParam {
 
     @ApiModelProperty(value = "创建结束时间")
     private Date createEndTime;
+
+    @ApiModelProperty(value = "提交预约开始时间")
+    private Date reserveStartTime;
+
+    @ApiModelProperty(value = "提交预约结束时间")
+    private Date reserveEndTime;
 }

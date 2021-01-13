@@ -162,7 +162,13 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         result.setBuyerPhone(info.getBuyerPhone());
        //(value = "买家详细地址")
         result.setBuyerAddress(info.getBuyerAddress());
-       //(value = "买家地址邮编")
+       //(value = "买家地址-省")
+        result.setBuyerProvince(info.getBuyerProvince());
+      //(value = "买家地址-市")
+        result.setBuyerCity(info.getBuyerCity());
+       //(value = "买家地址-区")
+        result.setBuyerDistrict(info.getBuyerDistrict());
+        //(value = "买家地址邮编")
         result.setBuyerPostalCode(info.getBuyerPostalCode());
        //(value = "订单明细")
         result.setDetailsList(preOrderGoodsList);
@@ -203,6 +209,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .like( param.getReserveShop()!=null,PreOrderGoods::getReserveShop, param.getReserveShop())
                 .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
+                .ge(param.getReserveStartTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveStartTime())
+                .le(param.getReserveEndTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveEndTime())
                 .orderByDesc(PreOrderGoods::getCreateTime)
         );
         return list;
@@ -222,71 +230,18 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
+    //订单管理订单报表
     public IPage<OrderPageResult> pageOrderPageResultList(AdministrationListParam param) {
         IPage<OrderPageResult> page=preOrderInfoMapper.pageOrderPageResultList(param.page(),param);
         return page;
     }
 
     @Override
+    //订单管理销量导出
     public IPage<SalePageResult> pageSalePageResultList(AdministrationListParam param) {
         IPage<SalePageResult> page=preOrderInfoMapper.pageSalePageResultList(param.page(),param);
         return page;
     }
 
-    @Override
-    public IPage<PreOrderPageResult> getOrder(GetOrderPageParam param) {
-        Long id = MdcUtil.getCurrentUserId();
-        param.setMemberId(id);
-        IPage<PreOrderInfo> list=preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
-                .eq( param.getOrderState()!=null,PreOrderInfo::getOrderState, param.getOrderState())
-                .eq( param.getMemberId()!=null,PreOrderInfo::getGuideId, param.getMemberId())
-                .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
-                .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
-                .orderByDesc(PreOrderInfo::getCreateTime)
-        );
-        IPage<PreOrderPageResult> pageResultIPage = list.convert(order ->{
-            PreOrderPageResult result  = orderInfo(order);
-            return result;
-        });
-        return pageResultIPage;
-    }
-    public PreOrderPageResult orderInfo(PreOrderInfo order){
-        PreOrderPageResult result =new PreOrderPageResult();
-        List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,order.getId()));
-        int reservationNum=0; //商品数量
-         int giftNum=0;  //礼包数量
-         String goodsName=null;//商品名称
-         String goodsPicture=null;//商品照片
-         String giftName=null;//赠品名称
-         String giftPicture=null;//赠品照
-         BigDecimal goodsPrice=new BigDecimal(0);//零售价
-        if(CollectionUtils.isNotEmpty(list)){
-            for(PreOrderGoods info:list){
-                if(OrderGoodsTypeEnum.GIFTS.equals(info.getGoodsType())){//赠品
-                    giftNum=giftNum+1;
-                    if(!giftName.equals(info.getGoodsName())){
-                        giftName=info.getGoodsName();
-                        giftPicture=info.getGoodsPicture();
-                    }
-                } else{
-                    reservationNum=reservationNum+1;
-                    if(!goodsName.equals(info.getGoodsName())){
-                        goodsName=info.getGoodsName();
-                        goodsPicture=info.getGoodsPicture();
-                        goodsPrice=info.getGoodsPrice();
-                    }
-                }
-            }
-        }
-        result.setGoodsName(goodsName);
-        result.setGoodsPicture(goodsPicture);
-        result.setGoodsPrice(goodsPrice);
-        result.setGiftName(giftName);
-        result.setGiftPicture(giftPicture);
-        result.setGiftNum(giftNum);
-        result.setReservationNum(reservationNum);
-        result.setCreateTime(order.getCreateTime());
-        return result;
-    }
+
 }
