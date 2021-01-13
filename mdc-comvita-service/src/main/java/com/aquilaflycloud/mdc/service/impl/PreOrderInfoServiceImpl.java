@@ -90,6 +90,14 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     public int addStatConfirmOrder(PreStayConfirmOrderParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = new PreOrderInfo();
+        PreActivityInfo preActivityInfo = activityInfoMapper.selectById(param.getActivityInfoId());
+        if(preActivityInfo == null){
+            throw new ServiceException("活动不存在");
+        }
+        PreGoodsInfo goodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
+        if(goodsInfo == null){
+            throw new ServiceException("活动里不存在商品,无法生成订单。");
+        }
         BeanUtil.copyProperties(param,preOrderInfo);
         MdcUtil.setMemberInfo(preOrderInfo,infoResult);
         preOrderInfo.setMemberId(infoResult.getId());
