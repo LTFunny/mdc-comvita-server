@@ -4,7 +4,7 @@ import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyCatalog;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.param.folksonomy.*;
-import com.aquilaflycloud.mdc.result.folksonomy.FolksonomyCatalogNode;
+import com.aquilaflycloud.mdc.result.folksonomy.FolksonomyNode;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -75,7 +75,7 @@ public class FolksonomyController {
     @ApiOperation(value = "获取标签树", notes = "获取标签树")
     @PreAuthorize("hasAuthority('mdc:folksonomy:list')")
     @ApiMapping(value = "backend.comvita.folksonomy.tree.list", method = RequestMethod.POST, permission = true)
-    public List<FolksonomyCatalogNode> listTree(FolksonomyCatalogListParam param) {
+    public List<FolksonomyNode> listTree(FolksonomyCatalogListParam param) {
         return folksonomyService.listFolksonomyTree(param);
     }
 
