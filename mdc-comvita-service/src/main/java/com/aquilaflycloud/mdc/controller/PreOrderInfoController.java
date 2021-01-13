@@ -109,10 +109,4 @@ public class PreOrderInfoController {
     public PreOrderInfoPageResult refundOrderInfoGet(PreOrderInfoGetParam param) {
         return orderInfoService.orderInfoGet(param);
     }
-    @ApiOperation(value = "订单状态分页查询详情", notes = "订单状态分页查询详情")
-    //    @PreAuthorize("hasAuthority('mdc:orderRefund.get')")
-    @ApiMapping(value = "backend.comvita.order.get", method = RequestMethod.POST, permission = true)
-    public IPage<PreOrderPageResult> getOrder(GetOrderPageParam param) {
-        return preOrderAdministrationService.getOrder(param);
-    }
 }
