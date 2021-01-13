@@ -1,7 +1,11 @@
 package com.aquilaflycloud.mdc.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
@@ -18,6 +22,7 @@ import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -28,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -47,8 +53,31 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     private PreRefundOrderInfoMapper preRefundOrderInfoMapper;
     @Resource
     private PreOrderOperateRecordMapper preOrderOperateRecordMapper;
+
     @Override
-    public IPage<PreOrderInfo> pageAdministrationList(AdministrationListParam param) {
+    public PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param) {
+        return preOrderInfoMapper.selectMaps(new QueryWrapper<PreOrderInfo>()
+                .select("count(1) orderCount,"
+                        + "coalesce(sum(total_price), 0) orderAllPrice")
+                .lambda()
+                .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
+                .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
+                .eq(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
+                .eq(StringUtils.isNotBlank(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
+                .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
+                .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
+                .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
+                .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
+                .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
+        ).stream().map(map -> {
+            map.put("orderPerPrice", NumberUtil.div(StrUtil.toString(map.get("orderAllPrice")), StrUtil.toString(map.get("orderCount")), 2));
+            return BeanUtil.fillBeanWithMap(map, new PreOrderStatisticsResult(), true,
+                    CopyOptions.create().ignoreError());
+        }).collect(Collectors.toList()).get(0);
+    }
+
+    @Override
+    public IPage<PreOrderInfo> pagePreOder(PreOrderPageParam param) {
         return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
                 .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
                 .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
