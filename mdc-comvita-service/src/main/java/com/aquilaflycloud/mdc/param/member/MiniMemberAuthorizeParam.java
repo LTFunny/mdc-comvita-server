@@ -30,5 +30,5 @@ public class MiniMemberAuthorizeParam implements Serializable {
     private WechatUserInfo userInfo;
 
     @ApiModelProperty(value = "导购员id")
-    private String guideId;
+    private Long guideId;
 }

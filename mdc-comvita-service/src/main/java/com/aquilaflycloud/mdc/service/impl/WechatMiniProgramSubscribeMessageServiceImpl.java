@@ -283,7 +283,25 @@ public class WechatMiniProgramSubscribeMessageServiceImpl implements WechatMiniP
                                 WxMaSubscribeMessage.Data data = new WxMaSubscribeMessage.Data();
                                 String name = paramName[i];
                                 data.setName(name);
-                                data.setValue(contents[i]);
+                                String value = contents[i];
+                                if (StrUtil.startWith(name, "thing")) {
+                                    value = StrUtil.subPre(value, 20);
+                                } else if (StrUtil.startWith(name, "number")) {
+                                    value = StrUtil.subPre(value, 32);
+                                } else if (StrUtil.startWith(name, "letter")) {
+                                    value = StrUtil.subPre(value, 32);
+                                } else if (StrUtil.startWith(name, "symbol")) {
+                                    value = StrUtil.subPre(value, 5);
+                                } else if (StrUtil.startWith(name, "character_string")) {
+                                    value = StrUtil.subPre(value, 32);
+                                } else if (StrUtil.startWith(name, "phone_number")) {
+                                    value = StrUtil.subPre(value, 17);
+                                } else if (StrUtil.startWith(name, "car_number")) {
+                                    value = StrUtil.subPre(value, 8);
+                                } else if (StrUtil.startWith(name, "phrase")) {
+                                    value = StrUtil.subPre(value, 5);
+                                }
+                                data.setValue(value);
                                 subscribeMessage.addData(data);
                             }
                             try {
