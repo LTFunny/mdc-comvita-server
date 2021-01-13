@@ -33,6 +33,4 @@ public interface PreOrderAdministrationService {
 
     IPage<SalePageResult> pageSalePageResultList(AdministrationListParam param);
 
-    IPage<PreOrderPageResult> getOrder(GetOrderPageParam param);
-
 }
