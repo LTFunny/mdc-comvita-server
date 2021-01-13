@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 
@@ -107,6 +108,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         info.setExpressCode(param.getExpressCode());
         info.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
         info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
+        info.setDeliveryTime(new Date());
         preOrderGoodsMapper.updateById(info);
         if (info.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
             //赠品发货,发送订单发货微信订阅消息
