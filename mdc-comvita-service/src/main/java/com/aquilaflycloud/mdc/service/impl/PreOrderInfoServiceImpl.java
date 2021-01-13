@@ -14,6 +14,7 @@ import com.aquilaflycloud.mdc.feign.consumer.org.IUserConsumer;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
+import com.aquilaflycloud.mdc.param.member.MemberEditParam;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
 import com.aquilaflycloud.mdc.result.member.MemberScanRewardResult;
@@ -21,10 +22,7 @@ import com.aquilaflycloud.mdc.result.pre.PreActivityRewardResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsGetResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderInfoPageResult;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
-import com.aquilaflycloud.mdc.service.MemberRewardService;
-import com.aquilaflycloud.mdc.service.PreOrderInfoService;
-import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
-import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
+import com.aquilaflycloud.mdc.service.*;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.org.service.provider.entity.PUmsUserDetail;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -83,6 +81,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     private MemberRewardService memberRewardService;
 
     @Resource
+    private MemberService memberService;
+
+    @Resource
     private IUserConsumer userConsumer;
 
     @Transactional
@@ -119,6 +120,35 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         String content =  infoResult.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"通过扫码填写信息生成待确认订单";
         orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
+        //更新对应会员信息
+        MemberEditParam memberEditParam = new MemberEditParam();
+        if (StrUtil.isBlank(infoResult.getRealName())) {
+            memberEditParam.setRealName(param.getBuyerName());
+        }
+        if (infoResult.getSex() == null) {
+            memberEditParam.setSex(param.getBuyerSex());
+        }
+        if (infoResult.getBirthday() == null) {
+            memberEditParam.setBirthday(param.getBuyerBirthday().toString());
+        }
+        if (StrUtil.isBlank(infoResult.getProvince())) {
+            memberEditParam.setProvince(param.getBuyerProvince());
+        }
+        if (StrUtil.isBlank(infoResult.getCity())) {
+            memberEditParam.setCity(param.getBuyerCity());
+        }
+        if (StrUtil.isBlank(infoResult.getCounty())) {
+            memberEditParam.setCounty(param.getBuyerDistrict());
+        }
+        if (StrUtil.isBlank(infoResult.getAddress())) {
+            memberEditParam.setAddress(param.getBuyerAddress());
+        }
+        if (BeanUtil.isNotEmpty(memberEditParam)) {
+            memberService.edit(memberEditParam);
+        }
+        if (StrUtil.isBlank(infoResult.getPhoneNumber())) {
+            memberService.editPhone(infoResult, param.getBuyerPhone());
+        }
         return orderInfo;
     }
 

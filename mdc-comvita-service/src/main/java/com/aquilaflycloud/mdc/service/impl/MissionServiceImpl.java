@@ -284,7 +284,7 @@ public class MissionServiceImpl implements MissionService {
                     case FOLKSONOMY: {
                         int count = folksonomyMemberRelMapper.selectCount(Wrappers.<FolksonomyMemberRel>lambdaQuery()
                                 .eq(FolksonomyMemberRel::getMemberId, memberId)
-                                .eq(FolksonomyMemberRel::getType, FolksonomyTypeEnum.MEMBER)
+                                .eq(FolksonomyMemberRel::getType, FolksonomyTypeEnum.BUSINESS)
                         );
                         finishMission(memberInfo, recordList, count);
                         break;

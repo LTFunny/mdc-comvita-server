@@ -119,7 +119,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     @Override
     public List<FolksonomyInfo> listMemberRelFolksonomy() {
         Long memberId = MdcUtil.getRequireCurrentMemberId();
-        return getFolksonomyMemberList(FolksonomyTypeEnum.MEMBER, memberId);
+        return getFolksonomyMemberList(FolksonomyTypeEnum.BUSINESS, memberId);
     }
 
     @Override
@@ -168,7 +168,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     @Override
     public void addFolksonomyMemberRel(FolksonomyGetParam param) {
         Long memberId = MdcUtil.getRequireCurrentMemberId();
-        addFolksonomyMemberRel(param.getId(), memberId, FolksonomyTypeEnum.MEMBER);
+        addFolksonomyMemberRel(param.getId(), memberId, FolksonomyTypeEnum.BUSINESS);
     }
 
     private void addFolksonomyMemberRel(Long folksonomyId, Long memberId, FolksonomyTypeEnum folksonomyType) {
@@ -177,8 +177,14 @@ public class FolksonomyServiceImpl implements FolksonomyService {
                 .eq(FolksonomyMemberRel::getMemberId, memberId)
         );
         if (count <= 0) {
+            FolksonomyInfo folksonomyInfo = folksonomyInfoMapper.selectById(folksonomyId);
+            if (folksonomyInfo == null) {
+                throw new ServiceException("标签不存在");
+            }
             FolksonomyCatalog catalog = folksonomyCatalogMapper.selectOne(Wrappers.<FolksonomyCatalog>lambdaQuery()
-                    .eq(FolksonomyCatalog::getType, FolksonomyTypeEnum.MEMBER));
+                    .eq(FolksonomyCatalog::getType, folksonomyType)
+                    .eq(FolksonomyCatalog::getId, folksonomyInfo.getCatalogId())
+            );
             if (catalog == null) {
                 throw new ServiceException("标签目录不存在");
             }
@@ -435,6 +441,6 @@ public class FolksonomyServiceImpl implements FolksonomyService {
 
     @Override
     public List<FolksonomyInfo> listMemberFolksonomy(FolksonomyListParam param) {
-        return listFolksonomy(param, FolksonomyTypeEnum.MEMBER);
+        return listFolksonomy(param, FolksonomyTypeEnum.BUSINESS);
     }
 }
