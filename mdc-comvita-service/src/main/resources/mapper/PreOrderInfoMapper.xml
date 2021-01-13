@@ -135,7 +135,7 @@
             from
             pre_order_goods a
             left join pre_order_info b on b.id=a.order_id
-            where id is not null
+            where a.id is not null
         <if test="param.shopId != null and param.shopId != ''">
             and a.shop_id= #{param.shopId}
         </if>
@@ -157,6 +157,7 @@
         <if test="param.createEndTime != null">
             AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
         </if>
+        group by a.id
         order by  a.create_time desc
     </select>
     <select id="pageSalePageResultList"  parameterType="com.aquilaflycloud.mdc.param.pre.AdministrationListParam"
@@ -166,21 +167,24 @@
         a.buyer_province deliveryProvince,
         a.buyer_city deliveryCity,
         a.order_code orderCode,
-        a.shopName shopName,
+        a.shop_name shopName,
         a.order_state orderState,
         a.guide_name guideName,
-        a.goods_code goodsCode,
-        a.goods_name goodsName,
-        c.num orderNumber,
-        b.goods_price goodsPrice,
-        b.goods_price unitPrice,
+        d.goodsCode goodsCode,
+        d.goods_name goodsName,
+        d.num orderNumber,
+        d.goodsPrice goodsPrice,
+        d.goodsPrice unitPrice,
         a.total_price totaGoodsPrice
         from
         pre_order_info a
-        left join pre_goods_info b on b.goods_code=a.goods_code
-        left join (select count(id) num,order_id orderId
-        from pre_order_goods where goods_type not in (2) ) c on c.orderId=a.id
-        where id is not null
+
+        left join (select count(c.id) num,c.order_id orderId,  b.goods_price goodsPrice,
+        b.goods_price unitPrice,b.goods_code goodsCode,c.goods_name
+        from pre_order_goods c
+        left join pre_goods_info b on b.goods_code=c.goods_code
+        where c.goods_type not in (2) ) d on d.orderId=a.id
+        where a.id is not null
         <if test="param.shopId != null and param.shopId != ''">
             and a.shop_id= #{param.shopId}
         </if>
