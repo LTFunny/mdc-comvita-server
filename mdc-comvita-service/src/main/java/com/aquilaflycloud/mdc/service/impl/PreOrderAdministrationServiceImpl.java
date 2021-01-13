@@ -162,7 +162,13 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         result.setBuyerPhone(info.getBuyerPhone());
        //(value = "买家详细地址")
         result.setBuyerAddress(info.getBuyerAddress());
-       //(value = "买家地址邮编")
+       //(value = "买家地址-省")
+        result.setBuyerProvince(info.getBuyerProvince());
+      //(value = "买家地址-市")
+        result.setBuyerCity(info.getBuyerCity());
+       //(value = "买家地址-区")
+        result.setBuyerDistrict(info.getBuyerDistrict());
+        //(value = "买家地址邮编")
         result.setBuyerPostalCode(info.getBuyerPostalCode());
        //(value = "订单明细")
         result.setDetailsList(preOrderGoodsList);
@@ -203,6 +209,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .like( param.getReserveShop()!=null,PreOrderGoods::getReserveShop, param.getReserveShop())
                 .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
+                .ge(param.getReserveStartTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveStartTime())
+                .le(param.getReserveEndTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveEndTime())
                 .orderByDesc(PreOrderGoods::getCreateTime)
         );
         return list;
@@ -222,12 +230,14 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
+    //订单管理订单报表
     public IPage<OrderPageResult> pageOrderPageResultList(AdministrationListParam param) {
         IPage<OrderPageResult> page=preOrderInfoMapper.pageOrderPageResultList(param.page(),param);
         return page;
     }
 
     @Override
+    //订单管理销量导出
     public IPage<SalePageResult> pageSalePageResultList(AdministrationListParam param) {
         IPage<SalePageResult> page=preOrderInfoMapper.pageSalePageResultList(param.page(),param);
         return page;

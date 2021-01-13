@@ -4,6 +4,7 @@ import com.aquilaflycloud.mdc.enums.member.SexEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.model.pre.PreOrderOperateRecord;
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -59,6 +60,15 @@ public class AdministrationDetailsResult {
 
     @ApiModelProperty(value = "买家地址邮编")
     private String buyerPostalCode;
+
+    @ApiModelProperty(value = "买家地址-省")
+    private String buyerProvince;
+
+    @ApiModelProperty(value = "买家地址-市")
+    private String buyerCity;
+
+    @ApiModelProperty(value = "买家地址-区")
+    private String buyerDistrict;
 
     @ApiModelProperty(value = "快递名称")
     private String expressName;
