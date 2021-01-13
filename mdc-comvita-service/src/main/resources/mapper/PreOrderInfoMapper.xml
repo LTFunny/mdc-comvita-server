@@ -46,7 +46,8 @@
         select
         a.guide_name guideName,
         count(a.id)- IFNULL(b.refundOrderNumber,0)  orderNumber,
-        sum(a.total_price)-IFNULL(b.refundOrderTotalPrice,0)  orderPrice
+        sum(a.total_price)-IFNULL(b.refundOrderTotalPrice,0)  orderPrice,
+        IFNULL(mem.num,0) newCustomerNum
         from pre_order_info a
         left join (
         select guide_id , sum(total_price) refundOrderTotalPrice,count(id) refundOrderNumber
@@ -63,6 +64,8 @@
         </if>
         group by guide_id
         )b on b.guide_id=a.guide_id
+        left join(select guide_id,count(id) num from member_info)  mem
+        on mem.guide_id=a.guide_id
         where a.order_state=6
         <if test="param.guideName != null and param.guideName != ''">
             and a.guide_name = #{param.guideName}

@@ -127,6 +127,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 throw new ServiceException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
             }
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
+            preOrderInfo.setDeliveryTime(new Date());
             preOrderInfoMapper.updateById(preOrderInfo);
         }
         info.setExpressName(param.getExpressName());
