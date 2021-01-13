@@ -200,6 +200,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             //计算总金额
             preOrderInfo.setTotalPrice(orderGoodsList.get(0).getGoodsPrice().multiply(new BigDecimal(orderGoodsList.size())));
             preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
+            preOrderInfo.setConfirmTime(new Date());
             //判断是否存在赠品，存在就添加
             PreRuleInfo preRuleInfo = preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
                     .eq(PreRuleInfo::getId,preActivityInfo.getRefRule())
