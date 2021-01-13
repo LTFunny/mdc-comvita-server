@@ -60,10 +60,16 @@ public class PreOrderInfoController {
         orderInfoService.refundOrder(param);
     }
 
+    @ApiOperation(value = "获取预售订单统计", notes = "获取预售订单统计")
+    @ApiMapping(value = "backend.comvita.preOrder.statistics.get", method = RequestMethod.POST, permission = true)
+    public PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param) {
+        return preOrderAdministrationService.getPreOderStatistics(param);
+    }
+
     @ApiOperation(value = "订单管理列表", notes = "订单管理列表")
     @ApiMapping(value = "backend.comvita.administration.page", method = RequestMethod.POST, permission = true)
-    public IPage<PreOrderInfo> pageAdministrationList(AdministrationListParam param) {
-        return preOrderAdministrationService.pageAdministrationList(param);
+    public IPage<PreOrderInfo> pagePreOder(PreOrderPageParam param) {
+        return preOrderAdministrationService.pagePreOder(param);
     }
 
     @ApiOperation(value = "录入快递单号", notes = "录入快递单号")
