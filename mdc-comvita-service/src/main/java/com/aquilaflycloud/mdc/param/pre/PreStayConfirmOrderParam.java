@@ -1,6 +1,5 @@
 package com.aquilaflycloud.mdc.param.pre;
 
-import cn.hutool.core.date.DateTime;
 import com.aquilaflycloud.mdc.enums.member.SexEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -66,7 +65,7 @@ public class PreStayConfirmOrderParam {
      * 买家生日
      */
     @ApiModelProperty(value = "买家生日")
-    private DateTime buyerBirthday;
+    private String buyerBirthday;
 
     /**
      * 买家性别
