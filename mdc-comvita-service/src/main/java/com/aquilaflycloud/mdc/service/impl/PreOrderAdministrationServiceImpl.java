@@ -70,7 +70,11 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
         ).stream().map(map -> {
-            map.put("orderPerPrice", NumberUtil.div(StrUtil.toString(map.get("orderAllPrice")), StrUtil.toString(map.get("orderCount")), 2));
+            if ("0".equals(StrUtil.toString(map.get("orderCount")))) {
+                map.put("orderPerPrice", 0);
+            } else {
+                map.put("orderPerPrice", NumberUtil.div(StrUtil.toString(map.get("orderAllPrice")), StrUtil.toString(map.get("orderCount")), 2));
+            }
             return BeanUtil.fillBeanWithMap(map, new PreOrderStatisticsResult(), true,
                     CopyOptions.create().ignoreError());
         }).collect(Collectors.toList()).get(0);
@@ -127,7 +131,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 throw new ServiceException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
             }
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
-            preOrderInfo.setDeliveryTime(new Date());
+            preOrderInfo.setDeliveryTime(new DateTime());
             preOrderInfoMapper.updateById(preOrderInfo);
         }
         info.setExpressName(param.getExpressName());
