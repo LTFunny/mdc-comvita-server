@@ -387,7 +387,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 .stream().map(PreOrderInfo::getId).collect(Collectors.toList());
         IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
         .eq(PreOrderInfo::getBuyerPhone,param.getBuyerPhone())
-        .notIn(PreOrderInfo::getId,longs)).convert(order ->{
+        .notIn(PreOrderInfo::getId,longs.size() == 0 ? 0L : longs)).convert(order ->{
             PreOrderInfoPageResult result  = orderInfo(order,param.getAfter());
             return result;
         });
