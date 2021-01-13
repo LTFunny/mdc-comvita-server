@@ -162,6 +162,15 @@ public class PreActivityServiceImpl implements PreActivityService {
         BeanUtil.copyProperties(param, activityInfo);
         activityInfo.setId(MdcUtil.getSnowflakeId());
         activityInfo.setRewardRuleContent(JSONUtil.toJsonStr(param.getRewardRuleList()));
+        //根据时间 判断状态
+        DateTime now = DateTime.now();
+        if (now.isAfterOrEquals(param.getBeginTime()) && now.isBeforeOrEquals(param.getEndTime())) {
+            activityInfo.setActivityState(ActivityStateEnum.IN_PROGRESS);
+        } else if (now.isBefore(param.getBeginTime())) {
+            activityInfo.setActivityState(ActivityStateEnum.NOT_STARTED);
+        } else if (now.isAfter(param.getEndTime())) {
+            activityInfo.setActivityState(ActivityStateEnum.FINISHED);
+        }
         int count = preActivityInfoMapper.insert(activityInfo);
         if (count == 1) {
             log.info("新增活动成功");
