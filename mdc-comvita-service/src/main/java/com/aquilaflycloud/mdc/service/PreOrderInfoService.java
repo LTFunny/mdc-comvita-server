@@ -45,9 +45,20 @@ public interface PreOrderInfoService{
      */
     IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageParam param);
 
-
+    /**
+     * 退货列表
+     * @param param
+     * @return
+     */
     IPage<PreOrderInfoPageResult> refundOrderPage(PreOrderInfoPageParam param);
 
+
+    /**
+     * 导购员列表
+     * @param param
+     * @return
+     */
+    IPage<PreOrderInfoPageResult> guideMyOrderPage(PreOrderInfoPageParam param);
 
     /**
      * 我的订单详情

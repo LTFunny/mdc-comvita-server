@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @Author pengyongliang
@@ -27,4 +28,16 @@ public class PreOrderInfoPageParam extends PageParam<PreOrderInfo> implements Se
 
     @ApiModelProperty(value = "买家手机")
     private String buyerPhone;
+
+    @ApiModelProperty(value = "导购员id(不用传)")
+    private Long guideId;
+
+    @ApiModelProperty(value = "导购员标识")
+    private String guideAfter;
+
+    @ApiModelProperty(value = "开始时间")
+    private Date startTime;
+
+    @ApiModelProperty(value = "结束时间")
+    private Date endTime;
 }
