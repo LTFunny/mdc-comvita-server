@@ -32,12 +32,8 @@ import com.aquilaflycloud.mdc.param.coupon.CouponRelPageParam;
 import com.aquilaflycloud.mdc.param.exchange.OrderPageParam;
 import com.aquilaflycloud.mdc.param.member.MemberPageParam;
 import com.aquilaflycloud.mdc.param.member.RewardRecordPageParam;
-import com.aquilaflycloud.mdc.param.pre.AdministrationListParam;
-import com.aquilaflycloud.mdc.param.pre.PrePickingCardPageParam;
-import com.aquilaflycloud.mdc.param.pre.ReadyListParam;
-import com.aquilaflycloud.mdc.param.pre.ReportFormParam;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.param.system.*;
-import com.aquilaflycloud.mdc.result.pre.ReportOrderPageResult;
 import com.aquilaflycloud.mdc.result.system.SqlResult;
 import com.aquilaflycloud.mdc.service.*;
 import com.aquilaflycloud.mdc.util.MdcUtil;
@@ -144,7 +140,7 @@ public class SystemFileServiceImpl implements SystemFileService {
                 break;
             }
             case AFTER_SALES: {
-                AdministrationListParam exportParam = buildParam(param.getExportParam(), AdministrationListParam.class);
+                PreRefundOrderListParam exportParam = buildParam(param.getExportParam(), PreRefundOrderListParam.class);
                 page = preOrderAdministrationService.pageOrderInfoList(exportParam);
                 break;
             }

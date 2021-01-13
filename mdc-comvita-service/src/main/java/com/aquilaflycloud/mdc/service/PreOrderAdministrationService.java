@@ -15,7 +15,7 @@ public interface PreOrderAdministrationService {
 
     IPage<PreOrderInfo> pageAdministrationList(AdministrationListParam param);
 
-    IPage<PreRefundOrderInfo>pageOrderInfoList (AdministrationListParam param);
+    IPage<PreRefundOrderInfo>pageOrderInfoList (PreRefundOrderListParam param);
 
    void inputOrderNumber(InputOrderNumberParam param);
 

@@ -1,6 +1,5 @@
 package com.aquilaflycloud.mdc.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
@@ -10,27 +9,24 @@ import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
-import com.aquilaflycloud.mdc.model.pre.*;
+import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
+import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
+import com.aquilaflycloud.mdc.model.pre.PreOrderOperateRecord;
+import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
-import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
-import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
-import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 
@@ -53,21 +49,22 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     private PreOrderOperateRecordMapper preOrderOperateRecordMapper;
     @Override
     public IPage<PreOrderInfo> pageAdministrationList(AdministrationListParam param) {
-        IPage<PreOrderInfo> list=preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
-                .eq(StringUtils.isNotBlank(param.getShopId()),PreOrderInfo::getShopId, param.getShopId())
-                .eq( StringUtils.isNotBlank(param.getGuideName()),PreOrderInfo::getGuideName, param.getGuideName())
-                .eq( StringUtils.isNotBlank(param.getOrderState()),PreOrderInfo::getOrderState, param.getOrderState())
-                .eq( StringUtils.isNotBlank(param.getOrderCode()),PreOrderInfo::getOrderCode, param.getOrderCode())
-                .like( StringUtils.isNotBlank(param.getBuyerName()),PreOrderInfo::getBuyerName, param.getBuyerName())
+        return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
+                .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
+                .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
+                .eq(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
+                .eq(StringUtils.isNotBlank(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
+                .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
+                .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
+                .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
                 .orderByDesc(PreOrderInfo::getCreateTime)
         );
-        return list;
     }
 
     @Override
-    public IPage<PreRefundOrderInfo> pageOrderInfoList(AdministrationListParam param) {
+    public IPage<PreRefundOrderInfo> pageOrderInfoList(PreRefundOrderListParam param) {
         IPage<PreRefundOrderInfo> list=preRefundOrderInfoMapper.selectPage(param.page(), Wrappers.<PreRefundOrderInfo>lambdaQuery()
                 .eq( StringUtils.isNotBlank(param.getShopId()),PreRefundOrderInfo::getShopId, param.getShopId())
                 .eq( StringUtils.isNotBlank(param.getGuideName()),PreRefundOrderInfo::getGuideName, param.getGuideName())
@@ -108,7 +105,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         info.setExpressCode(param.getExpressCode());
         info.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
         info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
-        info.setDeliveryTime(new Date());
+        info.setDeliveryTime(new DateTime());
         preOrderGoodsMapper.updateById(info);
         if (info.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
             //赠品发货,发送订单发货微信订阅消息

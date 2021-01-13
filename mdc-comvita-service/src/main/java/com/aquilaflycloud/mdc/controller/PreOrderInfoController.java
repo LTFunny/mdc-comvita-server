@@ -80,7 +80,7 @@ public class PreOrderInfoController {
 
     @ApiOperation(value = "售后订单列表", notes = "售后订单列表")
     @ApiMapping(value = "backend.comvita.after.sales.page", method = RequestMethod.POST, permission = true)
-    public IPage<PreRefundOrderInfo> pageAfterSalesList(AdministrationListParam param) {
+    public IPage<PreRefundOrderInfo> pageAfterSalesList(PreRefundOrderListParam param) {
         return preOrderAdministrationService.pageOrderInfoList(param);
     }
 

@@ -1,25 +1,23 @@
 package com.aquilaflycloud.mdc.param.pre;
 
 import com.aquilaflycloud.dataAuth.common.PageParam;
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
+import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
 
 /**
- * AdministrationListParam
- * <p>
- * zly
+ * PreRefundOrderListParam
+ *
+ * @author star
+ * @date 2021/1/13
  */
 @Data
-public class AdministrationListParam extends PageParam<PreOrderInfo> {
+public class PreRefundOrderListParam extends PageParam<PreRefundOrderInfo> {
 
     @ApiModelProperty(value = "销售门店id")
     private String shopId;
-
-    @ApiModelProperty(value = "销售门店名称")
-    private String shopName;
 
   /*  @ApiModelProperty(value = "核销门店ids")
     private String verificaterOrgIds;*/
@@ -40,9 +38,6 @@ public class AdministrationListParam extends PageParam<PreOrderInfo> {
 
     @ApiModelProperty(value = "订单编码")
     private String orderCode;
-
-    @ApiModelProperty(value = "会员id")
-    private Long memberId;
 
     @ApiModelProperty(value = "买家姓名")
     private String buyerName;

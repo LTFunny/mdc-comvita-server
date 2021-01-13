@@ -129,7 +129,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             memberEditParam.setSex(param.getBuyerSex());
         }
         if (infoResult.getBirthday() == null) {
-            memberEditParam.setBirthday(param.getBuyerBirthday().toString());
+            memberEditParam.setBirthday(param.getBuyerBirthday());
         }
         if (StrUtil.isBlank(infoResult.getProvince())) {
             memberEditParam.setProvince(param.getBuyerProvince());
