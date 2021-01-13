@@ -44,7 +44,7 @@ public interface FolksonomyService {
 
     FolksonomyCatalog getFolksonomyCatalog(FolksonomyCatalogGetParam param);
 
-    List<FolksonomyCatalogNode> listFolksonomyCatalogTree(FolksonomyCatalogListParam param);
+    List<FolksonomyCatalogNode> listFolksonomyTree(FolksonomyCatalogListParam param);
 
     BaseResult<Long> addBusinessFolksonomy(FolksonomyAddParam param);
 

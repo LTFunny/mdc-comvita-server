@@ -345,7 +345,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     }
 
     @Override
-    public List<FolksonomyCatalogNode> listFolksonomyCatalogTree(FolksonomyCatalogListParam param) {
+    public List<FolksonomyCatalogNode> listFolksonomyTree(FolksonomyCatalogListParam param) {
         List<FolksonomyCatalog> catalogList = folksonomyCatalogMapper.selectList(Wrappers.<FolksonomyCatalog>lambdaQuery()
                 .eq(param.getType() != null, FolksonomyCatalog::getType, param.getType())
         );
