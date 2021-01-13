@@ -38,6 +38,8 @@ public interface MemberService {
 
     void edit(MemberEditParam param);
 
+    void editPhone(MemberInfo member, String phoneNumber);
+
     void editPhone(MemberPhoneEditParam param);
 
     MemberFace addFace(MemberFaceAddParam param);

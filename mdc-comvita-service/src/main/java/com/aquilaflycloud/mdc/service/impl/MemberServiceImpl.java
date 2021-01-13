@@ -598,7 +598,8 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    private void editPhone(MemberInfo member, String phoneNumber) {
+    @Override
+    public void editPhone(MemberInfo member, String phoneNumber) {
         int count = memberInfoMapper.selectCount(Wrappers.<MemberInfo>lambdaQuery()
                 .eq(MemberInfo::getPhoneNumber, phoneNumber)
                 .ne(MemberInfo::getId, member.getId())
