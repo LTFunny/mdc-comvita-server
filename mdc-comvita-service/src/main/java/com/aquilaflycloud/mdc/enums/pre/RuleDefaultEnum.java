@@ -15,11 +15,11 @@ public enum RuleDefaultEnum {
     /**
      * 不是默认
      */
-    NOT_DEFAULT(0, "非默认"),
+    NOT_DEFAULT(0, "否"),
     /**
      * 是默认
      */
-    DEFAULT(1, "默认")
+    DEFAULT(1, "是")
     ;
 
     RuleDefaultEnum(int type, String name) {
