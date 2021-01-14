@@ -117,8 +117,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if(orderInfo < 0){
             throw new ServiceException("生成待确认订单失败。");
         }
-        String content =  infoResult.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
+        String content =  param.getBuyerName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"通过扫码填写信息生成待确认订单";
+        orderOperateRecordService.addOrderOperateRecordLog(param.getBuyerName(),preOrderInfo.getId(),content);
         orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
         //更新对应会员信息
         MemberEditParam memberEditParam = new MemberEditParam();
@@ -161,9 +162,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if(orderInfo < 0){
             throw new ServiceException("修改待确认订单失败。");
         }
-        String content =  infoResult.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
+        String content =  param.getBuyerName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"修改待确认订单";
-        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(param.getBuyerName(),preOrderInfo.getId(),content);
     }
 
     @Transactional
@@ -387,7 +388,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 .stream().map(PreOrderInfo::getId).collect(Collectors.toList());
         IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
         .eq(PreOrderInfo::getBuyerPhone,param.getBuyerPhone())
-        .notIn(PreOrderInfo::getId,longs)).convert(order ->{
+        .notIn(PreOrderInfo::getId,longs.size() == 0 ? 0L : longs)).convert(order ->{
             PreOrderInfoPageResult result  = orderInfo(order,param.getAfter());
             return result;
         });

@@ -143,14 +143,17 @@ public class MemberServiceImpl implements MemberService {
             throw MemberErrorEnum.MEMBER_ERROR_10002.getErrorMeta().getException();
         }
         MemberDetailResult result = BeanUtil.copyProperties(memberInfo, MemberDetailResult.class);
-        result.setAppName(wechatMiniService.getWxAuthorByAppId(memberInfo.getWxAppId()).getNickName());
-        result.setModel(wechatMiniProgramDeviceInfoMapper.selectOne(Wrappers.<WechatMiniProgramDeviceInfo>lambdaQuery()
+        WechatAuthorSite site = wechatMiniService.getWxAuthorByAppId(memberInfo.getWxAppId());
+        result.setAppName(site != null ? site.getNickName() : null);
+        WechatMiniProgramDeviceInfo deviceInfo = wechatMiniProgramDeviceInfoMapper.selectOne(Wrappers.<WechatMiniProgramDeviceInfo>lambdaQuery()
                 .eq(WechatMiniProgramDeviceInfo::getMemberId, memberInfo.getId())
-        ).getModel());
+        );
+        result.setModel(deviceInfo != null ? deviceInfo.getModel() : null);
         Integer growth = memberRewardService.getMemberTotalReward(memberInfo.getId(), RewardTypeEnum.GROWTH);
         result.setGrowthValue(growth);
         result.setScoreValue(memberRewardService.getMemberTotalReward(memberInfo.getId(), RewardTypeEnum.SCORE));
-        result.setGradeTitle(memberGradeService.getRewardGrade(memberInfo.getWxAppId(), RewardTypeEnum.GROWTH, growth).getGradeTitle());
+        MemberGrade grade = memberGradeService.getRewardGrade(memberInfo.getWxAppId(), RewardTypeEnum.GROWTH, growth);
+        result.setGradeTitle(grade != null ? grade.getGradeTitle() : null);
         result.setFolksonomyInfoList(folksonomyService.listMemberRelFolksonomy(null, memberInfo.getId()));
         return result;
     }
@@ -530,7 +533,7 @@ public class MemberServiceImpl implements MemberService {
         int count = saveMember(memberInfo);
         if (count > 0) {
             memberInfo = memberInfoMapper.selectById(memberInfo.getId());
-            String memberSession = login2Session(parseUnifiedMember(memberInfo) );
+            String memberSession = login2Session(parseUnifiedMember(memberInfo));
             return new BaseResult<String>().setResult(memberSession);
         }
         throw new ServiceException("注册失败");

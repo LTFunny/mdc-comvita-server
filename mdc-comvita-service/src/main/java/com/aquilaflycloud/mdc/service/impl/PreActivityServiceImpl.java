@@ -73,6 +73,9 @@ public class PreActivityServiceImpl implements PreActivityService {
                 .like( param.getActivityName()!=null,
                         PreActivityInfo::getActivityName,
                         param.getActivityName())
+                .like( param.getCreatorName()!=null,
+                        PreActivityInfo::getCreatorName,
+                        param.getCreatorName())
                 .in(CollUtil.isNotEmpty(businessIds),PreActivityInfo::getId,businessIds)
                 .eq( param.getActivityState()!=null,
                         PreActivityInfo::getActivityState,
@@ -221,9 +224,35 @@ public class PreActivityServiceImpl implements PreActivityService {
         if(param.getId()==null) {
             throw new ServiceException("编辑的活动主键id为空" );
         }
-        checkTimeParam(param.getBeginTime(),param.getEndTime());
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
+        Date beginTime = param.getBeginTime();
+        Date endTime = param.getEndTime();
+        boolean isChanged = false;
+        if(null == beginTime){
+            beginTime = activityInfo.getBeginTime();
+        }else{
+            isChanged = true;
+        }
+        if(null == endTime){
+            endTime = activityInfo.getEndTime();
+        }else{
+            isChanged = true;
+        }
+        checkTimeParam(beginTime,endTime);
         BeanUtil.copyProperties(param, activityInfo,"id");
+        //时间有更新的话 同步更新状态 但是已下架状态的要先上架
+        if(isChanged){
+            if(activityInfo.getActivityState() != ActivityStateEnum.CANCELED){
+                DateTime now = DateTime.now();
+                if (now.isAfterOrEquals(beginTime) && now.isBeforeOrEquals(endTime)) {
+                    activityInfo.setActivityState(ActivityStateEnum.IN_PROGRESS);
+                } else if (now.isBefore(beginTime)) {
+                    activityInfo.setActivityState(ActivityStateEnum.NOT_STARTED);
+                } else if (now.isAfter(endTime)) {
+                    activityInfo.setActivityState(ActivityStateEnum.FINISHED);
+                }
+            }
+        }
         if (CollUtil.isNotEmpty(param.getRewardRuleList())) {
             activityInfo.setRewardRuleContent(JSONUtil.toJsonStr(param.getRewardRuleList()));
         }

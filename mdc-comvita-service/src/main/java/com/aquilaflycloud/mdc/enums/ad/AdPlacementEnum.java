@@ -14,7 +14,7 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 public enum AdPlacementEnum {
     // 广告位置类型
     BANNER(1, "首页推荐"),
-    POPUPS(2, "首页弹窗"),
+//    POPUPS(2, "首页弹窗"),
     ;
 
     AdPlacementEnum(int type, String name) {
