@@ -56,7 +56,7 @@ public class MemberMissionAspect {
     private final static String[] FINISH_METHOD = new String[]{
             "comvita.member.info.edit",
             "comvita.folksonomy.memberRel.add",
-            "comvita.member.phoneNumber.edit",
+            "comvita.mini.phone.edit",
             "comvita.member.phone.edit",
             "comvita.sign.info.add",
             "comvita.coupon.rel.add",
@@ -90,7 +90,7 @@ public class MemberMissionAspect {
                         missionService.checkMission(memberId, MissionTypeEnum.FOLKSONOMY);
                         break;
                     }
-                    case "comvita.member.phoneNumber.edit":
+                    case "comvita.mini.phone.edit":
                     case "comvita.member.phone.edit": {
                         missionService.checkMission(memberId, MissionTypeEnum.BINDINGPHONE);
                         break;
