@@ -6,10 +6,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
-import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
@@ -24,6 +21,7 @@ import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
@@ -89,6 +87,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .eq(StringUtils.isNotBlank(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
                 .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
                 .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
+                .eq( PreOrderInfo::getFailSymbol, FailSymbolEnum.NO)
                 .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
@@ -133,6 +132,23 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
             preOrderInfo.setDeliveryTime(new DateTime());
             preOrderInfoMapper.updateById(preOrderInfo);
+        }else{//不是赠品。判断是否有
+            //查询是否有赠品
+            List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .eq(PreOrderGoods::getOrderId, info.getOrderId())
+                    .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS)
+            );
+            if(CollectionUtils.isEmpty(list)){//没有赠品，查询是否这是最后一个商品，是的话填写订单表商品状态和发货时间
+                List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                        .eq(PreOrderGoods::getOrderId, info.getOrderId())
+                        .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
+                );
+                if(CollectionUtils.isEmpty(list2)){//是空则商品都发完了，更新订单表
+                    preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
+                    preOrderInfo.setDeliveryTime(new DateTime());
+                    preOrderInfoMapper.updateById(preOrderInfo);
+                }
+            }
         }
         info.setExpressName(param.getExpressName());
         info.setExpressOrderCode(param.getExpressOrder());
