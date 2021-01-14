@@ -3,16 +3,20 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
+import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.RuleDefaultEnum;
 import com.aquilaflycloud.mdc.enums.pre.RuleStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.RuleTypeEnum;
+import com.aquilaflycloud.mdc.mapper.PreActivityInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreRuleInfoMapper;
+import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.model.pre.PreRuleInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PreEnableRuleResult;
 import com.aquilaflycloud.mdc.result.pre.PreRuleDetailResult;
 import com.aquilaflycloud.mdc.service.PreRuleService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
@@ -34,6 +38,9 @@ public class PreRuleServiceImpl implements PreRuleService {
 
     @Resource
     private PreRuleInfoMapper preRuleInfoMapper;
+
+    @Resource
+    private PreActivityInfoMapper preActivityInfoMapper;
 
     @Override
     public IPage<PreRuleDetailResult> page(PreRulePageParam param) {
@@ -135,9 +142,25 @@ public class PreRuleServiceImpl implements PreRuleService {
         if(RuleStateEnum.DISABLE == info.getRuleState()){
             info.setRuleState(RuleStateEnum.ENABLE);
         }else if(RuleStateEnum.ENABLE == info.getRuleState()){
+            checkRef(param.getId());
             info.setRuleState(RuleStateEnum.DISABLE);
         }
         preRuleInfoMapper.updateById(info);
+    }
+
+    /**
+     * 检查规则关联的活动
+     * 销售规则有关联的正在进行的活动时，不允许停用，浮层提示异常信息“该销售规则有关联的正在进行的活动，无法停用”
+     * @param id
+     */
+    private void checkRef(Long id) {
+        QueryWrapper<PreActivityInfo> qw = new QueryWrapper<>();
+        qw.eq("ref_rule", id);
+        qw.eq("activity_state", ActivityStateEnum.IN_PROGRESS.getType());
+        List<PreActivityInfo> info = preActivityInfoMapper.selectList(qw);
+        if(null != info && info.size() > 0){
+            throw new ServiceException("该销售规则有关联的正在进行的活动，无法停用" );
+        }
     }
 
     @Override
