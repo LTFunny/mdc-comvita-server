@@ -116,9 +116,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if(orderInfo < 0){
             throw new ServiceException("生成待确认订单失败。");
         }
-        String content =  infoResult.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
+        String content =  param.getBuyerName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"通过扫码填写信息生成待确认订单";
-        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(param.getBuyerName(),preOrderInfo.getId(),content);
         return orderInfo;
     }
 
@@ -131,9 +131,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if(orderInfo < 0){
             throw new ServiceException("修改待确认订单失败。");
         }
-        String content =  infoResult.getMemberName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
+        String content =  param.getBuyerName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"修改待确认订单";
-        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(param.getBuyerName(),preOrderInfo.getId(),content);
     }
 
     @Transactional
