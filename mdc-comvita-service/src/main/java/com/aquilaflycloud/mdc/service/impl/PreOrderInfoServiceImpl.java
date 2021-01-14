@@ -239,17 +239,20 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     .eq(PreRuleInfo::getRuleType,RuleTypeEnum.ORDER_GIFTS));
             if(preRuleInfo != null){
                 PreOrderGoods preOrderGoods = new PreOrderGoods();
-                PreGoodsInfo preGoodsInfo1 = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
-                BeanUtil.copyProperties(preGoodsInfo1,preOrderGoods);
-                preOrderGoods.setId(null);
-                preOrderGoods.setOrderId(preOrderInfo.getId());
-                preOrderGoods.setGoodsId(preGoodsInfo1.getId());
-                preOrderGoods.setGoodsType(OrderGoodsTypeEnum.GIFTS);
-                preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
-                preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
-                preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
-                preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
-                orderGoodsList.add(preOrderGoods);
+                List<PreRuleGoodsParam> preRuleGoodsParams = JSONUtil.toList(JSONUtil.parseArray(preRuleInfo.getTypeDetail()), PreRuleGoodsParam.class);
+                preRuleGoodsParams.forEach(k ->{
+                    PreGoodsInfo preGoodsInfo1 = goodsInfoMapper.selectById(k.getGoodsId());
+                    BeanUtil.copyProperties(preGoodsInfo1,preOrderGoods);
+                    preOrderGoods.setId(null);
+                    preOrderGoods.setOrderId(preOrderInfo.getId());
+                    preOrderGoods.setGoodsId(preGoodsInfo1.getId());
+                    preOrderGoods.setGoodsType(OrderGoodsTypeEnum.GIFTS);
+                    preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
+                    preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
+                    preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
+                    preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
+                    orderGoodsList.add(preOrderGoods);
+                });
             }
             preOrderGoodsMapper.insertAllBatch(orderGoodsList);
         }
@@ -336,7 +339,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         result.setState(order.getOrderState().getName());
         int orderGoodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
-                .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.PRETAKE));
+                .ne(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.PREPARE));
         if(orderGoodsCount > 0){
             result.setReservationNum(orderGoodsCount);
         }else {
