@@ -63,9 +63,9 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         if(!CollectionUtils.isEmpty(param.getFolksonomyIds())) {
             for(Long id:param.getFolksonomyIds()){
                 if(StringUtils.isNotBlank(tagId)){
-                    tagId=id.toString();
-                }else{
                     tagId=id.toString()+","+tagId;
+                }else{
+                    tagId=id.toString();
                 }
             }
         }

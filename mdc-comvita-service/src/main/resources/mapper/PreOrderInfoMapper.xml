@@ -222,18 +222,18 @@
         from
            pre_order_info
         where
-        create_time <![CDATA[>=]]> #{param.goodsSevenNum}) a,
+        create_time <![CDATA[>=]]> #{goodsSevenNum}) a,
          (select
           count(id) num
         from
            pre_order_info
         where
-        create_time <![CDATA[>=]]> #{param.goodsFifteenTime}) b,
+        create_time <![CDATA[>=]]> #{goodsFifteenTime}) b,
          (select
           count(id) num
         from
            pre_order_info
         where
-        create_time <![CDATA[>=]]> #{param.goodsThirtyTime}) c
+        create_time <![CDATA[>=]]> #{goodsThirtyTime}) c
     </select>
 </mapper>
