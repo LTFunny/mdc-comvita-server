@@ -87,7 +87,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .eq(StringUtils.isNotBlank(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
                 .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
                 .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
-                .eq( PreOrderInfo::getFailSymbol, FailSymbolEnum.NO)
+                .notIn( PreOrderInfo::getFailSymbol, FailSymbolEnum.YES)
                 .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
