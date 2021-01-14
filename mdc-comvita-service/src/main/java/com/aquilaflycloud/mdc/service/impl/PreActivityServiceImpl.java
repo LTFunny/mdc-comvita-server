@@ -73,6 +73,9 @@ public class PreActivityServiceImpl implements PreActivityService {
                 .like( param.getActivityName()!=null,
                         PreActivityInfo::getActivityName,
                         param.getActivityName())
+                .like( param.getCreatorName()!=null,
+                        PreActivityInfo::getCreatorName,
+                        param.getCreatorName())
                 .in(CollUtil.isNotEmpty(businessIds),PreActivityInfo::getId,businessIds)
                 .eq( param.getActivityState()!=null,
                         PreActivityInfo::getActivityState,
