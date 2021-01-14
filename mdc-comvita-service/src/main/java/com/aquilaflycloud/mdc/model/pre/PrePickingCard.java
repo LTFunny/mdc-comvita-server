@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 提货卡信息
+ * 配送卡信息
  */
 @Data
 @TableName(value = "pre_picking_card")
@@ -29,14 +29,14 @@ public class PrePickingCard implements Serializable {
      * 卡号
      */
     @TableField(value = "picking_code")
-    @ApiModelProperty(value = "提货卡号")
+    @ApiModelProperty(value = "配送卡号")
     private String pickingCode;
 
     /**
      * 密码
      */
     @TableField(value = "`password`")
-    @ApiModelProperty(value = "提货卡密码")
+    @ApiModelProperty(value = "配送卡密码")
     private String password;
 
     /**
