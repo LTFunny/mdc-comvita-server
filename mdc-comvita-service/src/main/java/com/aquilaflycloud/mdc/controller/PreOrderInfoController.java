@@ -72,8 +72,8 @@ public class PreOrderInfoController {
         return preOrderAdministrationService.pagePreOder(param);
     }
     @ApiOperation(value = "移动端订单列表", notes = "移动端订单列表")
-    @ApiMapping(value = "backend.comvita.administration.page", method = RequestMethod.POST, permission = true)
-    public IPage<PreOrderInfo> pageYdPreOder(PreOrderPageParam param) {
+    @ApiMapping(value = "backend.comvita.administration.mobile.page", method = RequestMethod.POST, permission = true)
+    public IPage<PreOrderInfo> pageMobilePreOder(PreOrderPageParam param) {
         return preOrderAdministrationService.pageMobilePreOder(param);
     }
     @ApiOperation(value = "录入快递单号", notes = "录入快递单号")
