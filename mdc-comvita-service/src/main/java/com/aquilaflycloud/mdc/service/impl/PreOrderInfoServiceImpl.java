@@ -120,7 +120,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         String content =  param.getBuyerName() + "于"+DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"通过扫码填写信息生成待确认订单";
         orderOperateRecordService.addOrderOperateRecordLog(param.getBuyerName(),preOrderInfo.getId(),content);
-        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
         //更新对应会员信息
         MemberEditParam memberEditParam = new MemberEditParam();
         if (StrUtil.isBlank(infoResult.getRealName())) {
