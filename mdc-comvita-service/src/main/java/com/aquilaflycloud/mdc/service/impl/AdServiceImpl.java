@@ -189,8 +189,8 @@ public class AdServiceImpl implements AdService {
     public StatisticsResult getStatistics(AuthParam param) {
         return adInfoMapper.selectMaps(new QueryWrapper<AdInfo>()
                 .select("count(1) effectiveTotal,"
-                        + "coalesce(sum(case when ad_placement=" + AdPlacementEnum.BANNER.getType() + " then 1 else 0 end), 0) bannerEffectiveTotal,"
-                        + "coalesce(sum(case when ad_placement=" + AdPlacementEnum.POPUPS.getType() + " then 1 else 0 end), 0) popupsEffectiveTotal")
+                        + "coalesce(sum(case when ad_placement=" + AdPlacementEnum.BANNER.getType() + " then 1 else 0 end), 0) bannerEffectiveTotal")
+//                        + "coalesce(sum(case when ad_placement=" + AdPlacementEnum.POPUPS.getType() + " then 1 else 0 end), 0) popupsEffectiveTotal")
                 .lambda()
                 .and(i -> i.eq(AdInfo::getState, AdStateEnum.NORMAL)
                         .apply("case when effective_mode=" + EffectiveModeEnum.FOREVER.getType() + " then 1 else now() between online_time and offline_time end"))
