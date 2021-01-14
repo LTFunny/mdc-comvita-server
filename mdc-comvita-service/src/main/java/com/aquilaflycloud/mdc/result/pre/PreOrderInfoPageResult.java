@@ -6,6 +6,8 @@ import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * @Author pengyongliang
  * @Date 2021/1/4 9:56
@@ -32,5 +34,7 @@ public class PreOrderInfoPageResult extends PreOrderInfo {
     @ApiModelProperty(value = "订单状态(state)")
     private String state;
 
+    @ApiModelProperty(value = "售后时间")
+    private Date refundTime;
 
 }
