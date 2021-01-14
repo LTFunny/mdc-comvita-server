@@ -221,6 +221,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     private List<FolksonomyInfo> listFolksonomy(FolksonomyListParam param, FolksonomyTypeEnum folksonomyType) {
         return folksonomyInfoMapper.selectList(Wrappers.<FolksonomyInfo>lambdaQuery()
                 .eq(FolksonomyInfo::getType, folksonomyType)
+                .eq(param.getCatalogId() != null, FolksonomyInfo::getCatalogId, param.getCatalogId())
                 .like(StrUtil.isNotBlank(param.getName()), FolksonomyInfo::getName, param.getName())
                 .orderByDesc(FolksonomyInfo::getCreateTime));
     }
@@ -228,6 +229,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     private IPage<FolksonomyInfo> pageFolksonomy(FolksonomyPageParam param, FolksonomyTypeEnum folksonomyType) {
         return folksonomyInfoMapper.selectPage(param.page(), Wrappers.<FolksonomyInfo>lambdaQuery()
                 .eq(FolksonomyInfo::getType, folksonomyType)
+                .eq(param.getCatalogId() != null, FolksonomyInfo::getCatalogId, param.getCatalogId())
                 .like(StrUtil.isNotBlank(param.getName()), FolksonomyInfo::getName, param.getName())
                 .orderByDesc(FolksonomyInfo::getCreateTime));
     }

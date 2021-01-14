@@ -13,6 +13,9 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class FolksonomyListParam {
+    @ApiModelProperty(value = "目录id")
+    private Long catalogId;
+
     @ApiModelProperty(value = "名称")
     private String name;
 }
