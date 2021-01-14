@@ -9,6 +9,7 @@ import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.RuleDefaultEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
@@ -174,6 +175,17 @@ public class PreActivityServiceImpl implements PreActivityService {
         } else if (now.isAfter(param.getEndTime())) {
             activityInfo.setActivityState(ActivityStateEnum.FINISHED);
         }
+        //设置默认规则
+        if(null == param.getRefRule()){
+            QueryWrapper<PreRuleInfo> qw = new QueryWrapper<>();
+            qw.eq("is_default", RuleDefaultEnum.DEFAULT.getType());
+            PreRuleInfo info = preRuleInfoMapper.selectOne(qw);
+            if(null != info){
+                activityInfo.setRefRule(info.getId());
+            }else{
+                log.info("无法找到默认规则,活动设置规则失败!");
+            }
+        }
         int count = preActivityInfoMapper.insert(activityInfo);
         if (count == 1) {
             log.info("新增活动成功");
@@ -263,9 +275,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         qw.in("business_id", param.getId());
         List<FolksonomyBusinessRel> folksonomyBusinessRels = folksonomyBusinessRelMapper.selectList(qw);
         if(CollUtil.isNotEmpty(folksonomyBusinessRels)){
-            folksonomyBusinessRels.forEach(f -> {
-                oldIds.add(f.getFolksonomyId());
-            });
+            folksonomyBusinessRels.forEach(f -> oldIds.add(f.getFolksonomyId()));
         }
         Set<Long> newIds = new HashSet<>();
         if(CollUtil.isNotEmpty(param.getFolksonomyIds())){
@@ -290,12 +300,9 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
 
         if(CollUtil.isNotEmpty(deleteIds)){
-            deleteIds.forEach(i -> {
-                folksonomyBusinessRelMapper.delete(new QueryWrapper<FolksonomyBusinessRel>()
-                        .eq("folksonomy_id", i)
-                        .eq("business_id",param.getId()));
-
-            });
+            deleteIds.forEach(i -> folksonomyBusinessRelMapper.delete(new QueryWrapper<FolksonomyBusinessRel>()
+                    .eq("folksonomy_id", i)
+                    .eq("business_id",param.getId())));
         }
         log.info("处理标签成功");
     }
