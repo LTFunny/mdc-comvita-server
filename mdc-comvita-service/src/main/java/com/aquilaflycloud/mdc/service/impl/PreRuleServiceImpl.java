@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.RuleDefaultEnum;
@@ -150,16 +151,34 @@ public class PreRuleServiceImpl implements PreRuleService {
 
     /**
      * 检查规则关联的活动
-     * 销售规则有关联的正在进行的活动时，不允许停用，浮层提示异常信息“该销售规则有关联的正在进行的活动，无法停用”
+     * 销售规则有关联的正在进行的活动时，不允许停用，浮层提示异常信息“该销售规则有关联的正在进行/未开始的活动，无法停用”
      * @param id
      */
     private void checkRef(Long id) {
         QueryWrapper<PreActivityInfo> qw = new QueryWrapper<>();
         qw.eq("ref_rule", id);
-        qw.eq("activity_state", ActivityStateEnum.IN_PROGRESS.getType());
-        List<PreActivityInfo> info = preActivityInfoMapper.selectList(qw);
-        if(null != info && info.size() > 0){
-            throw new ServiceException("该销售规则有关联的正在进行的活动，无法停用" );
+        List<PreActivityInfo> infos = preActivityInfoMapper.selectList(qw);
+        if(null != infos && infos.size() > 0){
+            boolean notStartActivityExist = false;
+            boolean runningActivityExist = false;
+            DateTime now = DateTime.now();
+            for(PreActivityInfo info : infos){
+                if(ActivityStateEnum.CANCELED != info.getActivityState()){
+                    if (now.isAfterOrEquals(info.getBeginTime()) && now.isBeforeOrEquals(info.getEndTime())) {
+                        runningActivityExist = true;
+                        break;
+                    } else if (now.isBefore(info.getBeginTime())) {
+                        notStartActivityExist = true;
+                        break;
+                    }
+                }
+            }
+            if(notStartActivityExist){
+                throw new ServiceException("该销售规则有关联的未开始的活动，无法停用" );
+            }
+            if(runningActivityExist){
+                throw new ServiceException("该销售规则有关联的正在进行的活动，无法停用" );
+            }
         }
     }
 

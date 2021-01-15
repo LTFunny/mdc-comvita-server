@@ -158,8 +158,17 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                         .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
                 );
                 if(CollectionUtils.isEmpty(list2)){//是空则商品都发完了，更新订单表
-                    preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
+                    preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
                     preOrderInfo.setDeliveryTime(new DateTime());
+                    preOrderInfoMapper.updateById(preOrderInfo);
+                }
+            }else{//待发货状态
+                List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                        .eq(PreOrderGoods::getOrderId, info.getOrderId())
+                        .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
+                );
+                if(CollectionUtils.isEmpty(list2)){
+                    preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
                     preOrderInfoMapper.updateById(preOrderInfo);
                 }
             }
