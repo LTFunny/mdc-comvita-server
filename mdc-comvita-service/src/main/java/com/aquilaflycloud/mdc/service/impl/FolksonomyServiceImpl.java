@@ -298,6 +298,9 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     @Override
     public BaseResult<Long> addFolksonomyCatalog(FolksonomyCatalogAddParam param) {
         FolksonomyCatalog catalogParent = folksonomyCatalogMapper.selectById(param.getPid());
+        if (catalogParent == null) {
+            throw new ServiceException("父目录不存在");
+        }
         FolksonomyCatalog catalog = BeanUtil.copyProperties(param, FolksonomyCatalog.class);
         catalog.setType(catalogParent.getType());
         int count = folksonomyCatalogMapper.insert(catalog);
