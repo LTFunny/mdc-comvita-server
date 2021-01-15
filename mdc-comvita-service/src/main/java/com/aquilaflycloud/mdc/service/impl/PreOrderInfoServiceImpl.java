@@ -349,7 +349,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         int orderGoodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
                 .ne(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.PREPARE)
-                .notIn(PreOrderGoods::getId,preOrderGoods.getId()));
+                .notIn(PreOrderGoods::getId,preOrderGoods.getId() == null ? 0L : preOrderGoods.getId()));
         if(orderGoodsCount > 0){
             result.setReservationNum(orderGoodsCount);
         }else {
@@ -358,7 +358,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         int takenCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
                 .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.TAKEN)
-                .notIn(PreOrderGoods::getId,preOrderGoods.getId()));
+                .notIn(PreOrderGoods::getId,preOrderGoods.getId() == null ? 0L : preOrderGoods.getId()));
         result.setIngdeliveryNum(takenCount);
         PreActivityInfo activityInfo = activityInfoMapper.selectById(order.getActivityInfoId());
         PreGoodsInfo goodsInfo = goodsInfoMapper.selectById(activityInfo.getRefGoods());
