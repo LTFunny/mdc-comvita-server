@@ -47,6 +47,7 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
                 .eq( StrUtil.isNotBlank(param.getGoodsState()),PreGoodsInfo::getGoodsState, param.getGoodsState())
                 .eq( StrUtil.isNotBlank(param.getGoodsType()),PreGoodsInfo::getGoodsType, param.getGoodsType())
                 .eq( StrUtil.isNotBlank(param.getGoodsCode()),PreGoodsInfo::getGoodsCode, param.getGoodsCode())
+                .in(param.getGoodsStates()!=null,PreGoodsInfo::getGoodsState, param.getGoodsStates())
                 .orderByDesc(PreGoodsInfo::getCreateTime)
         );
         return list;
@@ -63,9 +64,9 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         if(!CollectionUtils.isEmpty(param.getFolksonomyIds())) {
             for(Long id:param.getFolksonomyIds()){
                 if(StringUtils.isNotBlank(tagId)){
-                    tagId=id.toString();
-                }else{
                     tagId=id.toString()+","+tagId;
+                }else{
+                    tagId=id.toString();
                 }
             }
         }
@@ -156,9 +157,9 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
     @Override
     public GoodsSalesVolumeResult goodsVolume(GoodsSaleNumParam param) {
         try{
-            param.setGoodsSevenTime(getBeforOrAfterDate(new Date(),7));
-            param.setGoodsFifteenTime(getBeforOrAfterDate(new Date(),15));
-            param.setGoodsThirtyTime(getBeforOrAfterDate(new Date(),30));
+            param.setGoodsSevenTime(getBeforOrAfterDate(new Date(),-7));
+            param.setGoodsFifteenTime(getBeforOrAfterDate(new Date(),-15));
+            param.setGoodsThirtyTime(getBeforOrAfterDate(new Date(),-30));
             GoodsSalesVolumeResult info=  preOrderInfoMapper.getNum(param);
             return info;
         }catch (ParseException e){

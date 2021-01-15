@@ -14,7 +14,7 @@ import lombok.Data;
  */
 @Data
 public class PrePickingCardPageParam extends PageParam<PrePickingCard> {
-    @ApiModelProperty(value = "提货卡号")
+    @ApiModelProperty(value = "配送卡号")
     private String pickingCode;
 
     @ApiModelProperty(value = "状态(pre.PickingCardStateEnum)(1-未销售、2-已售卖、3-已预约、4-已核销、5-已作废)")

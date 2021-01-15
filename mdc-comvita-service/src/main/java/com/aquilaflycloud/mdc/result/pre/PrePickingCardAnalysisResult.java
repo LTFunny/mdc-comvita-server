@@ -11,16 +11,16 @@ import lombok.Data;
  */
 @Data
 public class PrePickingCardAnalysisResult{
-    @ApiModelProperty(value = "提货卡总数")
+    @ApiModelProperty(value = "配送卡总数")
     private Long allCount;
 
-    @ApiModelProperty(value = "已售卖提货卡")
+    @ApiModelProperty(value = "已售卖配送卡")
     private Long saleCount;
 
-    @ApiModelProperty(value = "已预约提货卡")
+    @ApiModelProperty(value = "已预约配送卡")
     private Long reserveCount;
 
-    @ApiModelProperty(value = "已核销提货卡")
+    @ApiModelProperty(value = "已核销配送卡")
     private Long verificateCount;
 
     public PrePickingCardAnalysisResult() {

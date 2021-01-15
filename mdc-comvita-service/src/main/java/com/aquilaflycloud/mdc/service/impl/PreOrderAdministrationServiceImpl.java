@@ -6,10 +6,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
-import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
@@ -22,8 +19,11 @@ import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
+import com.aquilaflycloud.org.service.IUserProvider;
+import com.aquilaflycloud.org.service.provider.entity.PUserInfo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
@@ -53,7 +53,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     private PreRefundOrderInfoMapper preRefundOrderInfoMapper;
     @Resource
     private PreOrderOperateRecordMapper preOrderOperateRecordMapper;
-
+    @Resource
+    private IUserProvider iUserProvider;
     @Override
     public PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param) {
         return preOrderInfoMapper.selectMaps(new QueryWrapper<PreOrderInfo>()
@@ -95,7 +96,22 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .orderByDesc(PreOrderInfo::getCreateTime)
         );
     }
-
+    @Override
+    public IPage<PreOrderInfo> pageMobilePreOder(PreOrderPageParam param) {
+        return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
+                .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
+                .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
+                .eq(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
+                .eq(StringUtils.isNotBlank(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
+                .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
+                .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
+                .eq( PreOrderInfo::getFailSymbol, FailSymbolEnum.NO).or().isNull(PreOrderInfo::getFailSymbol)
+                .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
+                .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
+                .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
+                .orderByDesc(PreOrderInfo::getCreateTime)
+        );
+    }
     @Override
     public IPage<PreRefundOrderInfo> pageOrderInfoList(PreRefundOrderListParam param) {
         IPage<PreRefundOrderInfo> list=preRefundOrderInfoMapper.selectPage(param.page(), Wrappers.<PreRefundOrderInfo>lambdaQuery()
@@ -133,6 +149,32 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
             preOrderInfo.setDeliveryTime(new DateTime());
             preOrderInfoMapper.updateById(preOrderInfo);
+        }else{//不是赠品。判断是否有
+            //查询是否有赠品
+            List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .eq(PreOrderGoods::getOrderId, info.getOrderId())
+                    .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS)
+            );
+            if(CollectionUtils.isEmpty(list)){//没有赠品，查询是否这是最后一个商品，是的话填写订单表商品状态和发货时间
+                List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                        .eq(PreOrderGoods::getOrderId, info.getOrderId())
+                        .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
+                );
+                if(CollectionUtils.isEmpty(list2)){//是空则商品都发完了，更新订单表
+                    preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+                    preOrderInfo.setDeliveryTime(new DateTime());
+                    preOrderInfoMapper.updateById(preOrderInfo);
+                }
+            }else{//待发货状态
+                List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                        .eq(PreOrderGoods::getOrderId, info.getOrderId())
+                        .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
+                );
+                if(CollectionUtils.isEmpty(list2)){
+                    preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
+                    preOrderInfoMapper.updateById(preOrderInfo);
+                }
+            }
         }
         info.setExpressName(param.getExpressName());
         info.setExpressOrderCode(param.getExpressOrder());
@@ -256,9 +298,21 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
-    //todo 拉新数量没有加
+    //导购员绩效
     public IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param) {
+        List<PUserInfo> list= iUserProvider.listUserInfo();
         IPage<ReportGuidePageResult> page=preOrderInfoMapper.achievementsGuide(param.page(),param);
+        List<ReportGuidePageResult> list2=page.getRecords();
+        if(CollectionUtils.isEmpty(list)){
+            for(PUserInfo info:list){
+                Boolean ishave=false;
+                for(ReportGuidePageResult result:list2){
+                    if(result.getGuideName().equals(info.getRealName())){
+                        break;
+                    }
+                }
+            }
+        }
         return page;
     }
 

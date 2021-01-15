@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.folksonomy.FolksonomyNodeTypeEnum;
@@ -221,6 +222,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     private List<FolksonomyInfo> listFolksonomy(FolksonomyListParam param, FolksonomyTypeEnum folksonomyType) {
         return folksonomyInfoMapper.selectList(Wrappers.<FolksonomyInfo>lambdaQuery()
                 .eq(FolksonomyInfo::getType, folksonomyType)
+                .eq(param.getCatalogId() != null, FolksonomyInfo::getCatalogId, param.getCatalogId())
                 .like(StrUtil.isNotBlank(param.getName()), FolksonomyInfo::getName, param.getName())
                 .orderByDesc(FolksonomyInfo::getCreateTime));
     }
@@ -228,6 +230,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     private IPage<FolksonomyInfo> pageFolksonomy(FolksonomyPageParam param, FolksonomyTypeEnum folksonomyType) {
         return folksonomyInfoMapper.selectPage(param.page(), Wrappers.<FolksonomyInfo>lambdaQuery()
                 .eq(FolksonomyInfo::getType, folksonomyType)
+                .eq(param.getCatalogId() != null, FolksonomyInfo::getCatalogId, param.getCatalogId())
                 .like(StrUtil.isNotBlank(param.getName()), FolksonomyInfo::getName, param.getName())
                 .orderByDesc(FolksonomyInfo::getCreateTime));
     }
@@ -296,6 +299,9 @@ public class FolksonomyServiceImpl implements FolksonomyService {
     @Override
     public BaseResult<Long> addFolksonomyCatalog(FolksonomyCatalogAddParam param) {
         FolksonomyCatalog catalogParent = folksonomyCatalogMapper.selectById(param.getPid());
+        if (catalogParent == null) {
+            throw new ServiceException("父目录不存在");
+        }
         FolksonomyCatalog catalog = BeanUtil.copyProperties(param, FolksonomyCatalog.class);
         catalog.setType(catalogParent.getType());
         int count = folksonomyCatalogMapper.insert(catalog);
@@ -323,7 +329,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
 
     @Override
     public void deleteFolksonomyCatalog(FolksonomyCatalogDeleteParam param) {
-        if (!param.getEnforceDelete()) {
+        if (!BooleanUtil.isTrue(param.getEnforceDelete())) {
             int canDelete = folksonomyCatalogMapper.selectCount(Wrappers.<FolksonomyCatalog>lambdaQuery()
                     .eq(FolksonomyCatalog::getPid, param.getId())
             );
@@ -373,13 +379,15 @@ public class FolksonomyServiceImpl implements FolksonomyService {
         List<FolksonomyNode> children = catalogList.stream()
                 .filter(child -> child.getPid().equals(catalog.getId()))
                 .map(child -> covert(child, catalogList, folksonomyMap)).collect(Collectors.toList());
-        List<FolksonomyNode> folksonomyChildren = folksonomyMap.get(catalog.getId()).stream().map(child -> {
-            FolksonomyNode folksonomyNode = BeanUtil.copyProperties(child, FolksonomyNode.class);
-            folksonomyNode.setNodeType(FolksonomyNodeTypeEnum.FOLKSONOMY);
-            folksonomyNode.setPid(child.getCatalogId());
-            return folksonomyNode;
-        }).collect(Collectors.toList());
-        children.addAll(folksonomyChildren);
+        if (folksonomyMap.get(catalog.getId()) != null) {
+            List<FolksonomyNode> folksonomyChildren = folksonomyMap.get(catalog.getId()).stream().map(child -> {
+                FolksonomyNode folksonomyNode = BeanUtil.copyProperties(child, FolksonomyNode.class);
+                folksonomyNode.setNodeType(FolksonomyNodeTypeEnum.FOLKSONOMY);
+                folksonomyNode.setPid(child.getCatalogId());
+                return folksonomyNode;
+            }).collect(Collectors.toList());
+            children.addAll(folksonomyChildren);
+        }
         node.setChildren(children);
         return node;
     }

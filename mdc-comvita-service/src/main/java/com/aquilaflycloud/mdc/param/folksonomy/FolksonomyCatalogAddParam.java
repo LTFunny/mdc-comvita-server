@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * FolksonomyCatalogAddParam
@@ -16,7 +17,7 @@ import javax.validation.constraints.NotBlank;
 @Accessors(chain = true)
 public class FolksonomyCatalogAddParam {
     @ApiModelProperty(value = "父id", required = true)
-    @NotBlank(message = "父id不能为空")
+    @NotNull(message = "父id不能为空")
     private Long pid;
 
     @ApiModelProperty(value = "名称", required = true)

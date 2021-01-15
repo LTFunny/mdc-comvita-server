@@ -9,6 +9,7 @@ import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.RuleDefaultEnum;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
@@ -70,28 +71,30 @@ public class PreActivityServiceImpl implements PreActivityService {
     public IPage<PreActivityPageResult> page(PreActivityPageParam param) {
         List<Long> businessIds = getFolksonomyBusinessRels(param.getFolksonomyIds());
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
-                .like( param.getActivityName()!=null,
-                        PreActivityInfo::getActivityName,
-                        param.getActivityName())
-                .like( param.getCreatorName()!=null,
-                        PreActivityInfo::getCreatorName,
-                        param.getCreatorName())
+                .like( param.getActivityName()!= null,PreActivityInfo::getActivityName,param.getActivityName())
+                .like( param.getCreatorName() != null,PreActivityInfo::getCreatorName,param.getCreatorName())
                 .in(CollUtil.isNotEmpty(businessIds),PreActivityInfo::getId,businessIds)
-                .eq( param.getActivityState()!=null,
-                        PreActivityInfo::getActivityState,
-                        param.getActivityState())
-                .eq( param.getActivityType()!=null,
-                        PreActivityInfo::getActivityType,
-                        param.getActivityType())
+                .eq( param.getActivityType() != null,PreActivityInfo::getActivityType,param.getActivityType())
                 .apply(param.getCreateTimeStart() != null,
                         "date_format (create_time,'%Y-%m-%d') >= date_format('" + param.getCreateTimeStart() + "','%Y-%m-%d')")
                 .apply(param.getCreateTimeEnd() != null,
                         "date_format (create_time,'%Y-%m-%d') <= date_format('" + param.getCreateTimeEnd() + "','%Y-%m-%d')")
+                .eq(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.CANCELED,
+                        PreActivityInfo::getActivityState,param.getActivityState())
+                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.NOT_STARTED,
+                        "date_format (begin_time,'%Y-%m-%d') > date_format(now(),'%Y-%m-%d')")
+                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.IN_PROGRESS,
+                        "date_format (begin_time,'%Y-%m-%d') <= date_format(now(),'%Y-%m-%d')")
+                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.IN_PROGRESS,
+                        "date_format (end_time,'%Y-%m-%d') >= date_format(now(),'%Y-%m-%d')")
+                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.FINISHED,
+                        "date_format (end_time,'%Y-%m-%d') < date_format(now(),'%Y-%m-%d')")
         ).convert(this::dataConvertResult);
     }
 
     private PreActivityPageResult dataConvertResult(PreActivityInfo info){
         if(null != info){
+            DateTime now = DateTime.now();
             PreActivityPageResult result = new PreActivityPageResult();
             BeanUtil.copyProperties(info, result);
             result.setRefGoodsCode(getGoodsCode(info.getRefGoods()));
@@ -99,12 +102,20 @@ public class PreActivityServiceImpl implements PreActivityService {
             if(StrUtil.isNotBlank(info.getRewardRuleContent())){
                 result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
             }
+            if(info.getActivityState() != ActivityStateEnum.CANCELED){
+                if (now.isAfterOrEquals(info.getBeginTime()) && now.isBeforeOrEquals(info.getEndTime())) {
+                    result.setActivityState(ActivityStateEnum.IN_PROGRESS);
+                } else if (now.isBefore(info.getBeginTime())) {
+                    result.setActivityState(ActivityStateEnum.NOT_STARTED);
+                } else if (now.isAfter(info.getEndTime())) {
+                    result.setActivityState(ActivityStateEnum.FINISHED);
+                }
+            }
             return result;
         }else {
             return null;
         }
     }
-
 
     private List<PreActivityFolksonomyResult> getFolksonomys(Long business_id) {
         List<PreActivityFolksonomyResult> results = new ArrayList<>();
@@ -174,6 +185,17 @@ public class PreActivityServiceImpl implements PreActivityService {
         } else if (now.isAfter(param.getEndTime())) {
             activityInfo.setActivityState(ActivityStateEnum.FINISHED);
         }
+        //设置默认规则
+        if(null == param.getRefRule()){
+            QueryWrapper<PreRuleInfo> qw = new QueryWrapper<>();
+            qw.eq("is_default", RuleDefaultEnum.DEFAULT.getType());
+            PreRuleInfo info = preRuleInfoMapper.selectOne(qw);
+            if(null != info){
+                activityInfo.setRefRule(info.getId());
+            }else{
+                log.info("无法找到默认规则,活动设置规则失败!");
+            }
+        }
         int count = preActivityInfoMapper.insert(activityInfo);
         if (count == 1) {
             log.info("新增活动成功");
@@ -227,30 +249,23 @@ public class PreActivityServiceImpl implements PreActivityService {
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
         Date beginTime = param.getBeginTime();
         Date endTime = param.getEndTime();
-        boolean isChanged = false;
         if(null == beginTime){
             beginTime = activityInfo.getBeginTime();
-        }else{
-            isChanged = true;
         }
         if(null == endTime){
             endTime = activityInfo.getEndTime();
-        }else{
-            isChanged = true;
         }
         checkTimeParam(beginTime,endTime);
-        BeanUtil.copyProperties(param, activityInfo,"id");
+        BeanUtil.copyProperties(param, activityInfo,"id","activityState");
         //时间有更新的话 同步更新状态 但是已下架状态的要先上架
-        if(isChanged){
-            if(activityInfo.getActivityState() != ActivityStateEnum.CANCELED){
-                DateTime now = DateTime.now();
-                if (now.isAfterOrEquals(beginTime) && now.isBeforeOrEquals(endTime)) {
-                    activityInfo.setActivityState(ActivityStateEnum.IN_PROGRESS);
-                } else if (now.isBefore(beginTime)) {
-                    activityInfo.setActivityState(ActivityStateEnum.NOT_STARTED);
-                } else if (now.isAfter(endTime)) {
-                    activityInfo.setActivityState(ActivityStateEnum.FINISHED);
-                }
+        if(null != activityInfo.getActivityState() && activityInfo.getActivityState() != ActivityStateEnum.CANCELED){
+            DateTime now = DateTime.now();
+            if (now.isAfterOrEquals(beginTime) && now.isBeforeOrEquals(endTime)) {
+                activityInfo.setActivityState(ActivityStateEnum.IN_PROGRESS);
+            } else if (now.isBefore(beginTime)) {
+                activityInfo.setActivityState(ActivityStateEnum.NOT_STARTED);
+            } else if (now.isAfter(endTime)) {
+                activityInfo.setActivityState(ActivityStateEnum.FINISHED);
             }
         }
         if (CollUtil.isNotEmpty(param.getRewardRuleList())) {
@@ -263,9 +278,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         qw.in("business_id", param.getId());
         List<FolksonomyBusinessRel> folksonomyBusinessRels = folksonomyBusinessRelMapper.selectList(qw);
         if(CollUtil.isNotEmpty(folksonomyBusinessRels)){
-            folksonomyBusinessRels.forEach(f -> {
-                oldIds.add(f.getFolksonomyId());
-            });
+            folksonomyBusinessRels.forEach(f -> oldIds.add(f.getFolksonomyId()));
         }
         Set<Long> newIds = new HashSet<>();
         if(CollUtil.isNotEmpty(param.getFolksonomyIds())){
@@ -290,12 +303,9 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
 
         if(CollUtil.isNotEmpty(deleteIds)){
-            deleteIds.forEach(i -> {
-                folksonomyBusinessRelMapper.delete(new QueryWrapper<FolksonomyBusinessRel>()
-                        .eq("folksonomy_id", i)
-                        .eq("business_id",param.getId()));
-
-            });
+            deleteIds.forEach(i -> folksonomyBusinessRelMapper.delete(new QueryWrapper<FolksonomyBusinessRel>()
+                    .eq("folksonomy_id", i)
+                    .eq("business_id",param.getId())));
         }
         log.info("处理标签成功");
     }
@@ -382,7 +392,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             }
             result.setExchangePrice(total);
             if(maps.size() > 0){
-                BigDecimal ppc = total.divide(new BigDecimal(maps.size()));
+                BigDecimal ppc = total.divide(new BigDecimal(maps.size()),2,BigDecimal.ROUND_HALF_UP);
                 result.setPricePerCustomer(ppc);
             }else{
                 result.setPricePerCustomer(new BigDecimal(0.00));

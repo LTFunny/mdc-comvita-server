@@ -97,7 +97,7 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
             List<String> passList = jsonObject.getJSONArray("passList").toList(String.class);
 
             if (codeList.size() != count || idList.size() != count || passList.size() != count) {
-                throw new ServiceException("生成提货卡信息失败，请重试");
+                throw new ServiceException("生成配送卡信息失败，请重试");
             }
 
             //保存数据
@@ -114,7 +114,7 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
             int insertCount = prePickingCardMapper.insertAllBatch(insertCards);
 
             if (insertCount != count) {
-                throw new ServiceException("保存提货卡信息失败，请重试");
+                throw new ServiceException("保存配送卡信息失败，请重试");
             }
             return null;
         });
@@ -131,10 +131,10 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
             int count = prePickingCardMapper.updateById(update);
 
             if (count != 1) {
-                throw new ServiceException("提货卡作废失败，请重试");
+                throw new ServiceException("配送卡作废失败，请重试");
             }
         } else {
-            throw new ServiceException("仅状态为未销售的提货卡可做此操作");
+            throw new ServiceException("仅状态为未销售的配送卡可做此操作");
         }
     }
 

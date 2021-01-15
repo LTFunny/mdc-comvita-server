@@ -131,7 +131,8 @@ public class MemberChannelServiceImpl implements MemberChannelService {
                 if (StrUtil.isBlank(channel.getMiniCodeUrl())) {
                     try {
                         File file = wechatMiniService.getWxMaServiceByAppId(channel.getAppId())
-                                .getQrcodeService().createWxaCodeUnlimit(Convert.toStr(channel.getId()), channel.getPagePath());
+                                .getQrcodeService().createWxaCodeUnlimit(Convert.toStr(channel.getId()), channel.getPagePath(),
+                                        430, false, null, true);
                         String path = channel.getAppId() + "/" + channel.getPagePath().replace("/", ".");
                         OssResult ossResult = AliOssUtil.uploadFileReturn(path, StrUtil.appendIfMissing(channel.getChannelName() + "_" + DateTime.now().getTime(),
                                 ".png"), new FileInputStream(file), AliOssUtil.MEMBER_STYLE);

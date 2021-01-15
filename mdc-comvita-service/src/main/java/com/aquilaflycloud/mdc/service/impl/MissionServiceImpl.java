@@ -244,7 +244,7 @@ public class MissionServiceImpl implements MissionService {
                 update.setFinishState(WhetherEnum.YES);
                 int count = missionMemberRecordMapper.updateById(update);
                 if (count > 0) {
-                    memberRewardService.addMissionRewardRecord(memberInfo, result.getRewardType(), result.getRewardValue());
+                    memberRewardService.addMissionRewardRecord(memberInfo, result.getRewardType(), result.getRewardValue(), record.getMissionId());
                 }
             }
         }

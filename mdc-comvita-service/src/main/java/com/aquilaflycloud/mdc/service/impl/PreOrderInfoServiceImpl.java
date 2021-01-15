@@ -228,7 +228,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
                 List<PreActivityRewardResult> rewardRuleList = JSONUtil.toList(JSONUtil.parseArray(preActivityInfo.getRewardRuleContent()), PreActivityRewardResult.class);
                 for (PreActivityRewardResult rewardRule : rewardRuleList) {
-                    memberRewardService.addPreActivityRewardRecord(memberInfo, rewardRule.getRewardType(), rewardRule.getRewardValue());
+                    memberRewardService.addPreActivityRewardRecord(memberInfo, rewardRule.getRewardType(), rewardRule.getRewardValue(), preActivityInfo.getId());
                 }
             }
             //计算总金额
@@ -324,7 +324,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         }else {
             preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
             MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
-            Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo,null,preOrderInfo.getTotalPrice(),true);
+            Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo,null,preOrderInfo.getId(),preOrderInfo.getTotalPrice(),true);
             preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
         }
         int order = preOrderInfoMapper.updateById(preOrderInfo);
@@ -469,7 +469,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
         MemberInfo memberInfo = memberInfoMapper.selectById(infoResult.getId());
         Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord
-                (memberInfo, null, preOrderInfo.getTotalPrice(), true);
+                (memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
         preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
         int order = preOrderInfoMapper.updateById(preOrderInfo);
         if (order < 0) {
@@ -550,21 +550,24 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         List<Long> cardIdList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .select(PreOrderGoods::getCardId)
                 .eq(PreOrderGoods::getOrderId, param.getOrderId())
+                .isNotNull(PreOrderGoods::getCardId)
         ).stream().map(PreOrderGoods::getCardId).collect(Collectors.toList());
-        //更新提货卡状态
-        PrePickingCard cardUpdate = new PrePickingCard();
-        cardUpdate.setPickingState(PickingCardStateEnum.NO_SALE);
-        //已出售更新为未出售
-        prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
-                .in(PrePickingCard::getId, cardIdList)
-                .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
-        );
-        cardUpdate.setPickingState(PickingCardStateEnum.CANCEL);
-        //非已出售更新为已作废
-        prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
-                .in(PrePickingCard::getId, cardIdList)
-                .ne(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
-        );
+        if (CollUtil.isNotEmpty(cardIdList)) {
+            //更新提货卡状态
+            PrePickingCard cardUpdate = new PrePickingCard();
+            cardUpdate.setPickingState(PickingCardStateEnum.NO_SALE);
+            //已出售更新为未出售
+            prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+                    .in(PrePickingCard::getId, cardIdList)
+                    .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
+            );
+            cardUpdate.setPickingState(PickingCardStateEnum.CANCEL);
+            //非已出售更新为已作废
+            prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+                    .in(PrePickingCard::getId, cardIdList)
+                    .ne(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
+            );
+        }
         //记录订单操作日志
         orderOperateRecordService.addOrderOperateRecordLog(MdcUtil.getCurrentUserName(), param.getOrderId(), "登记售后");
         //发送微信订阅消息
