@@ -295,7 +295,6 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
-    //todo 拉新数量没有加
     public IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param) {
         IPage<ReportGuidePageResult> page=preOrderInfoMapper.achievementsGuide(param.page(),param);
         return page;

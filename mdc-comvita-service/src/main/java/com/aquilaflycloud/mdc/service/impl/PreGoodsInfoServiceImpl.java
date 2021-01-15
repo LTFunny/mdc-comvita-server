@@ -156,9 +156,9 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
     @Override
     public GoodsSalesVolumeResult goodsVolume(GoodsSaleNumParam param) {
         try{
-            param.setGoodsSevenTime(getBeforOrAfterDate(new Date(),7));
-            param.setGoodsFifteenTime(getBeforOrAfterDate(new Date(),15));
-            param.setGoodsThirtyTime(getBeforOrAfterDate(new Date(),30));
+            param.setGoodsSevenTime(getBeforOrAfterDate(new Date(),-7));
+            param.setGoodsFifteenTime(getBeforOrAfterDate(new Date(),-15));
+            param.setGoodsThirtyTime(getBeforOrAfterDate(new Date(),-30));
             GoodsSalesVolumeResult info=  preOrderInfoMapper.getNum(param);
             return info;
         }catch (ParseException e){

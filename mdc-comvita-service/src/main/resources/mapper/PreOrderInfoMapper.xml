@@ -220,20 +220,20 @@
       (select
         count(id) num
         from
-           pre_order_info
-        where
-        create_time <![CDATA[>=]]> #{goodsSevenNum}) a,
+           pre_order_goods
+        where goods_code=#{param.goodsCode} and
+        create_time <![CDATA[>=]]> #{param.goodsSevenTime}) a,
          (select
           count(id) num
         from
-           pre_order_info
-        where
-        create_time <![CDATA[>=]]> #{goodsFifteenTime}) b,
+           pre_order_goods
+        where  goods_code=#{param.goodsCode} and
+        create_time <![CDATA[>=]]> #{param.goodsFifteenTime}) b,
          (select
           count(id) num
         from
-           pre_order_info
-        where
-        create_time <![CDATA[>=]]> #{goodsThirtyTime}) c
+           pre_order_goods
+        where  goods_code=#{param.goodsCode} and
+        create_time <![CDATA[>=]]> #{param.goodsThirtyTime}) c
     </select>
 </mapper>
