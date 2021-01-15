@@ -392,7 +392,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             }
             result.setExchangePrice(total);
             if(maps.size() > 0){
-                BigDecimal ppc = total.divide(new BigDecimal(maps.size()));
+                BigDecimal ppc = total.divide(new BigDecimal(maps.size()),2,BigDecimal.ROUND_HALF_UP);
                 result.setPricePerCustomer(ppc);
             }else{
                 result.setPricePerCustomer(new BigDecimal(0.00));
