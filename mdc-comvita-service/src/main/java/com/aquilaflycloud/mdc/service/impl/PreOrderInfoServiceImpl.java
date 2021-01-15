@@ -28,8 +28,10 @@ import com.aquilaflycloud.org.service.provider.entity.PUmsUserDetail;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import springfox.documentation.spring.web.json.Json;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -248,6 +250,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     preOrderGoods.setGoodsId(preGoodsInfo1.getId());
                     preOrderGoods.setGoodsType(OrderGoodsTypeEnum.GIFTS);
                     preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
+                    preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
                     preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
                     preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
                     preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
@@ -389,12 +392,16 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
 
     @Override
     public IPage<PreOrderInfoPageResult> refundOrderPage(PreOrderInfoPageParam param) {
-        param.setAfter(1);
-        List<Long> longs = preOrderInfoMapper.pageOrderInfoPageResult(param.page(),param).getRecords()
+        PreOrderInfoPageParam pageParam = new PreOrderInfoPageParam();
+        pageParam.setAfter(1);
+        pageParam.setPageNum(1L);
+        pageParam.setBuyerPhone(param.getBuyerPhone());
+        pageParam.setPageSize(9999L);
+        List<Long> longs = preOrderInfoMapper.pageOrderInfoPageResult(pageParam.page(),pageParam).getRecords()
                 .stream().map(PreOrderInfo::getId).collect(Collectors.toList());
         IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
         .eq(PreOrderInfo::getBuyerPhone,param.getBuyerPhone())
-        .notIn(PreOrderInfo::getId,longs.size() == 0 ? 0L : longs)).convert(order ->{
+        .notIn(PreOrderInfo::getId,longs.size() == 0 ? 0L : StringUtils.join(longs, ","))).convert(order ->{
             PreOrderInfoPageResult result  = orderInfo(order);
             return result;
         });
@@ -541,21 +548,24 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         List<Long> cardIdList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .select(PreOrderGoods::getCardId)
                 .eq(PreOrderGoods::getOrderId, param.getOrderId())
+                .isNotNull(PreOrderGoods::getCardId)
         ).stream().map(PreOrderGoods::getCardId).collect(Collectors.toList());
-        //更新提货卡状态
-        PrePickingCard cardUpdate = new PrePickingCard();
-        cardUpdate.setPickingState(PickingCardStateEnum.NO_SALE);
-        //已出售更新为未出售
-        prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
-                .in(PrePickingCard::getId, cardIdList)
-                .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
-        );
-        cardUpdate.setPickingState(PickingCardStateEnum.CANCEL);
-        //非已出售更新为已作废
-        prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
-                .in(PrePickingCard::getId, cardIdList)
-                .ne(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
-        );
+        if (CollUtil.isNotEmpty(cardIdList)) {
+            //更新提货卡状态
+            PrePickingCard cardUpdate = new PrePickingCard();
+            cardUpdate.setPickingState(PickingCardStateEnum.NO_SALE);
+            //已出售更新为未出售
+            prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+                    .in(PrePickingCard::getId, cardIdList)
+                    .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
+            );
+            cardUpdate.setPickingState(PickingCardStateEnum.CANCEL);
+            //非已出售更新为已作废
+            prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+                    .in(PrePickingCard::getId, cardIdList)
+                    .ne(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
+            );
+        }
         //记录订单操作日志
         orderOperateRecordService.addOrderOperateRecordLog(MdcUtil.getCurrentUserName(), param.getOrderId(), "登记售后");
         //发送微信订阅消息

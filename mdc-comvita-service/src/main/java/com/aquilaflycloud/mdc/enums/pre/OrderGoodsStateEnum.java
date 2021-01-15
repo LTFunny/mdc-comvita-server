@@ -19,7 +19,7 @@ public enum OrderGoodsStateEnum {
     PREPARE(1,"待预约"),
     PRETAKE(2,"已预约"),
     ALSENDGOODS(3, "已发货"),
-    TAKEN(4,"已提货"),
+    TAKEN(4,"已签收"),
     REFUND(5,"已退货"),
     ;
 

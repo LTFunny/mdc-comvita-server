@@ -256,9 +256,9 @@ public class PreActivityServiceImpl implements PreActivityService {
             endTime = activityInfo.getEndTime();
         }
         checkTimeParam(beginTime,endTime);
-        BeanUtil.copyProperties(param, activityInfo,"id");
+        BeanUtil.copyProperties(param, activityInfo,"id","activityState");
         //时间有更新的话 同步更新状态 但是已下架状态的要先上架
-        if(activityInfo.getActivityState() != ActivityStateEnum.CANCELED){
+        if(null != activityInfo.getActivityState() && activityInfo.getActivityState() != ActivityStateEnum.CANCELED){
             DateTime now = DateTime.now();
             if (now.isAfterOrEquals(beginTime) && now.isBeforeOrEquals(endTime)) {
                 activityInfo.setActivityState(ActivityStateEnum.IN_PROGRESS);
@@ -392,7 +392,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             }
             result.setExchangePrice(total);
             if(maps.size() > 0){
-                BigDecimal ppc = total.divide(new BigDecimal(maps.size()));
+                BigDecimal ppc = total.divide(new BigDecimal(maps.size()),2,BigDecimal.ROUND_HALF_UP);
                 result.setPricePerCustomer(ppc);
             }else{
                 result.setPricePerCustomer(new BigDecimal(0.00));
