@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.folksonomy.FolksonomyNodeTypeEnum;
@@ -328,7 +329,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
 
     @Override
     public void deleteFolksonomyCatalog(FolksonomyCatalogDeleteParam param) {
-        if (!param.getEnforceDelete()) {
+        if (!BooleanUtil.isTrue(param.getEnforceDelete())) {
             int canDelete = folksonomyCatalogMapper.selectCount(Wrappers.<FolksonomyCatalog>lambdaQuery()
                     .eq(FolksonomyCatalog::getPid, param.getId())
             );
