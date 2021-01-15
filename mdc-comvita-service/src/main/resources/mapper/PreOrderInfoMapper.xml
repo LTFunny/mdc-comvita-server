@@ -79,7 +79,6 @@
         group by a.guide_id
         order by a.create_time desc
     </select>
-
     <select id="pageOrderInfoPageResult" parameterType="com.aquilaflycloud.mdc.param.pre.PreOrderInfoPageParam"
             resultType="com.aquilaflycloud.mdc.model.pre.PreOrderInfo">
         SELECT
