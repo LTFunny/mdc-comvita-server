@@ -541,21 +541,24 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         List<Long> cardIdList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .select(PreOrderGoods::getCardId)
                 .eq(PreOrderGoods::getOrderId, param.getOrderId())
+                .isNotNull(PreOrderGoods::getCardId)
         ).stream().map(PreOrderGoods::getCardId).collect(Collectors.toList());
-        //更新提货卡状态
-        PrePickingCard cardUpdate = new PrePickingCard();
-        cardUpdate.setPickingState(PickingCardStateEnum.NO_SALE);
-        //已出售更新为未出售
-        prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
-                .in(PrePickingCard::getId, cardIdList)
-                .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
-        );
-        cardUpdate.setPickingState(PickingCardStateEnum.CANCEL);
-        //非已出售更新为已作废
-        prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
-                .in(PrePickingCard::getId, cardIdList)
-                .ne(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
-        );
+        if (CollUtil.isNotEmpty(cardIdList)) {
+            //更新提货卡状态
+            PrePickingCard cardUpdate = new PrePickingCard();
+            cardUpdate.setPickingState(PickingCardStateEnum.NO_SALE);
+            //已出售更新为未出售
+            prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+                    .in(PrePickingCard::getId, cardIdList)
+                    .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
+            );
+            cardUpdate.setPickingState(PickingCardStateEnum.CANCEL);
+            //非已出售更新为已作废
+            prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+                    .in(PrePickingCard::getId, cardIdList)
+                    .ne(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
+            );
+        }
         //记录订单操作日志
         orderOperateRecordService.addOrderOperateRecordLog(MdcUtil.getCurrentUserName(), param.getOrderId(), "登记售后");
         //发送微信订阅消息
