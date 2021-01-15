@@ -1920,7 +1920,7 @@ public class ExchangeServiceImpl implements ExchangeService {
             //不需支付
             if (totalReward > 0) {
                 //不需支付直接扣减奖励值
-                memberRewardService.addExchangeRewardRecord(memberInfo, rewardType, -totalReward);
+                memberRewardService.addExchangeRewardRecord(memberInfo, rewardType, -totalReward, goods.getId());
             }
             if (goods.getGoodsType() == GoodsTypeEnum.PHYSICAL) {
                 orderState = OrderStateEnum.PENDING;
@@ -2097,7 +2097,7 @@ public class ExchangeServiceImpl implements ExchangeService {
         }
         //扣减奖励值
         if (exchangeOrder.getTotalReward() > 0) {
-            memberRewardService.addExchangeRewardRecord(memberInfo, exchangeOrder.getRewardType(), -exchangeOrder.getTotalReward());
+            memberRewardService.addExchangeRewardRecord(memberInfo, exchangeOrder.getRewardType(), -exchangeOrder.getTotalReward(), exchangeOrder.getGoodsId());
         }
         OrderStateEnum orderState;
         if (exchangeOrder.getGoodsType() == GoodsTypeEnum.PHYSICAL) {
