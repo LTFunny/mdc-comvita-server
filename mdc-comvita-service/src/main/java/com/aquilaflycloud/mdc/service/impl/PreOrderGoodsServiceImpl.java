@@ -90,6 +90,7 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
             }
             preOrderGoods.setCardPsw(param.getPassword());
             preOrderGoods.setIsUpdate(IsUpdateEnum.NO);
+            preOrderGoods.setReserveStartTime(new Date());
         }else {
             preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
             preOrderGoods.setIsUpdate(IsUpdateEnum.YES);
