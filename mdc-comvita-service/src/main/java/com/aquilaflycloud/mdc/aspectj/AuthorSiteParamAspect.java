@@ -52,8 +52,10 @@ public class AuthorSiteParamAspect {
             try {
                 if (StrUtil.startWith(appId, "wx")) {
                     if (!MdcConstant.UNIVERSAL_APP_ID.equals(appId)) {
-                        Integer count = wechatAuthorSiteMapper.selectCount(Wrappers.<WechatAuthorSite>lambdaQuery()
+                        Integer count = wechatAuthorSiteMapper.normalSelectCount(Wrappers.<WechatAuthorSite>lambdaQuery()
                                 .eq(WechatAuthorSite::getAppId, appId)
+                                .eq(WechatAuthorSite::getTenantId, MdcUtil.getCurrentTenantId())
+                                .eq(WechatAuthorSite::getSubTenantId, MdcUtil.getCurrentSubTenantId())
                         );
                         if (count <= 0) {
                             throw AuthorSiteErrorEnum.AUTHOR_SITE_ERROR_10101.getErrorMeta().getException();
