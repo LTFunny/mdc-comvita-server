@@ -19,6 +19,8 @@ import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
+import com.aquilaflycloud.org.service.IUserProvider;
+import com.aquilaflycloud.org.service.provider.entity.PUserInfo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -51,7 +53,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     private PreRefundOrderInfoMapper preRefundOrderInfoMapper;
     @Resource
     private PreOrderOperateRecordMapper preOrderOperateRecordMapper;
-
+    @Resource
+    private IUserProvider iUserProvider;
     @Override
     public PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param) {
         return preOrderInfoMapper.selectMaps(new QueryWrapper<PreOrderInfo>()
@@ -295,8 +298,21 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
+    //导购员绩效
     public IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param) {
+        List<PUserInfo> list= iUserProvider.listUserInfo();
         IPage<ReportGuidePageResult> page=preOrderInfoMapper.achievementsGuide(param.page(),param);
+        List<ReportGuidePageResult> list2=page.getRecords();
+        if(CollectionUtils.isEmpty(list)){
+            for(PUserInfo info:list){
+                Boolean ishave=false;
+                for(ReportGuidePageResult result:list2){
+                    if(result.getGuideName().equals(info.getRealName())){
+                        break;
+                    }
+                }
+            }
+        }
         return page;
     }
 

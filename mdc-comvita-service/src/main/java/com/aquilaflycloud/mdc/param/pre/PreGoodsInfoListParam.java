@@ -30,4 +30,7 @@ public class PreGoodsInfoListParam extends PageParam {
 
     @ApiModelProperty(value = "标签id")
     private String  folksonomyId;
+
+    @ApiModelProperty(value = "GoodsStateStateEnum商品状态(0-在售 1-下架),逗号隔开")
+    private String[] goodsStates;
 }
