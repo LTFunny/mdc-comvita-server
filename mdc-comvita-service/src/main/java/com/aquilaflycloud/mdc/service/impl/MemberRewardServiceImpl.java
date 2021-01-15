@@ -222,7 +222,7 @@ public class MemberRewardServiceImpl implements MemberRewardService {
         if (memberInfo == null) {
             throw MemberErrorEnum.MEMBER_ERROR_10002.getErrorMeta().getException();
         }
-        addMemberRewardRecord(memberInfo, param.getRewardType(), param.getRewardValue(), RewardSourceEnum.SYSTEM, param.getRemark());
+        addMemberRewardRecord(memberInfo, param.getRewardType(), param.getRewardValue(), RewardSourceEnum.SYSTEM, null, param.getRemark());
     }
 
     private void refreshMemberReward(String appId, Long memberId, RewardTypeEnum rewardType) {
@@ -521,7 +521,7 @@ public class MemberRewardServiceImpl implements MemberRewardService {
     }
 
     @Override
-    public Map<RewardTypeEnum, MemberScanRewardResult> addScanRewardRecord(MemberInfo memberInfo, Long formatId, BigDecimal amount, Boolean ignore) {
+    public Map<RewardTypeEnum, MemberScanRewardResult> addScanRewardRecord(MemberInfo memberInfo, Long formatId, Long sourceId, BigDecimal amount, Boolean ignore) {
         String appId = MdcUtil.getMemberAppId(memberInfo);
         List<MemberRewardRule> ruleList = memberRewardRuleMapper.selectList(Wrappers.<MemberRewardRule>lambdaQuery()
                 .eq(MemberRewardRule::getAppId, appId)
@@ -598,6 +598,7 @@ public class MemberRewardServiceImpl implements MemberRewardService {
                 MemberRewardRecord rewardRecord = new MemberRewardRecord();
                 MdcUtil.setMemberInfo(rewardRecord, memberInfo);
                 rewardRecord.setRewardSource(RewardSourceEnum.SCAN);
+                rewardRecord.setRewardSourceId(sourceId);
                 rewardRecord.setRewardType(rewardResult.getRewardType());
                 rewardRecord.setRewardValue(rewardResult.getCanReward());
                 rewardRecord.setRemark(RewardSourceEnum.SCAN.getName());
@@ -615,7 +616,7 @@ public class MemberRewardServiceImpl implements MemberRewardService {
         return result;
     }
 
-    private void addMemberRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, RewardSourceEnum rewardSource, String remark) {
+    private void addMemberRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, RewardSourceEnum rewardSource, Long sourceId, String remark) {
         int memberReward = getMemberTotalReward(memberInfo.getId(), rewardType);
         if (memberReward + rewardValue < 0) {
             throw RewardErrorEnum.REWARD_ERROR_10602.getErrorMeta().getException(rewardType.getName());
@@ -623,6 +624,7 @@ public class MemberRewardServiceImpl implements MemberRewardService {
         MemberRewardRecord rewardRecord = new MemberRewardRecord();
         MdcUtil.setMemberInfo(rewardRecord, memberInfo);
         rewardRecord.setRewardSource(rewardSource);
+        rewardRecord.setRewardSourceId(sourceId);
         rewardRecord.setRewardType(rewardType);
         rewardRecord.setRewardValue(rewardValue);
         rewardRecord.setRemark(StrUtil.isNotBlank(remark) ? remark : rewardSource.getName());
@@ -635,28 +637,28 @@ public class MemberRewardServiceImpl implements MemberRewardService {
     }
 
     @Override
-    public void addExchangeRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue) {
-        addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.EXCHANGE, null);
+    public void addExchangeRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, Long sourceId) {
+        addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.EXCHANGE, sourceId, null);
     }
 
     @Override
-    public void addLotteryRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue) {
-        addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.LOTTERY, null);
+    public void addLotteryRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, Long sourceId) {
+        addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.LOTTERY, sourceId, null);
     }
 
     @Override
-    public void addMissionRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue) {
-        addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.MISSION, null);
+    public void addMissionRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, Long sourceId) {
+        addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.MISSION, sourceId, null);
     }
 
     @Override
-    public void addOfflineSignRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue) {
-        addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.OFFLINESIGN, null);
+    public void addOfflineSignRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, Long sourceId) {
+        addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.OFFLINESIGN, sourceId, null);
     }
 
     @Override
-    public void addPreActivityRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue) {
-        addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.PREACTIVITY, null);
+    public void addPreActivityRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, Long sourceId) {
+        addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.PREACTIVITY, sourceId, null);
     }
 
     private Map<String, DateTime> getCleanDate(MemberRewardRule rule) {
