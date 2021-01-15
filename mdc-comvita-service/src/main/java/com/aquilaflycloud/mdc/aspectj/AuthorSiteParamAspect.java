@@ -50,12 +50,14 @@ public class AuthorSiteParamAspect {
             }
             ServiceContext.getCurrentContext().set(DataAuthConstant.SUB_TENANT_FILTER);
             try {
+                Long tenantId = MdcUtil.getCurrentTenantId();
+                Long subTenantId = MdcUtil.getCurrentSubTenantId();
                 if (StrUtil.startWith(appId, "wx")) {
                     if (!MdcConstant.UNIVERSAL_APP_ID.equals(appId)) {
                         Integer count = wechatAuthorSiteMapper.normalSelectCount(Wrappers.<WechatAuthorSite>lambdaQuery()
                                 .eq(WechatAuthorSite::getAppId, appId)
-                                .eq(WechatAuthorSite::getTenantId, MdcUtil.getCurrentTenantId())
-                                .eq(WechatAuthorSite::getSubTenantId, MdcUtil.getCurrentSubTenantId())
+                                .eq(WechatAuthorSite::getTenantId, tenantId)
+                                .eq(subTenantId != null, WechatAuthorSite::getSubTenantId, subTenantId)
                         );
                         if (count <= 0) {
                             throw AuthorSiteErrorEnum.AUTHOR_SITE_ERROR_10101.getErrorMeta().getException();
