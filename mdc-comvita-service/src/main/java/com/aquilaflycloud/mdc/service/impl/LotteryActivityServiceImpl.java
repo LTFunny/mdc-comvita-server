@@ -503,7 +503,7 @@ public class LotteryActivityServiceImpl implements LotteryActivityService {
             }
         }
         if (needCost && lotteryRule.getRewardType() != null && lotteryRule.getConsumeReward() != null && lotteryRule.getConsumeReward() > 0) {
-            memberRewardService.addLotteryRewardRecord(memberInfo, lotteryRule.getRewardType(), -lotteryRule.getConsumeReward());
+            memberRewardService.addLotteryRewardRecord(memberInfo, lotteryRule.getRewardType(), -lotteryRule.getConsumeReward(), lottery.getId());
         }
         DateTime now = DateTime.now();
         if (lotteryRule.getTotalLimit()) {
@@ -570,7 +570,7 @@ public class LotteryActivityServiceImpl implements LotteryActivityService {
                 switch (luckPrize.getPrizeType()) {
                     case REWARD: {
                         LotteryReward reward = JSONUtil.toBean(luckPrize.getRelContent(), LotteryReward.class);
-                        memberRewardService.addLotteryRewardRecord(memberInfo, reward.getRewardType(), reward.getRewardValue());
+                        memberRewardService.addLotteryRewardRecord(memberInfo, reward.getRewardType(), reward.getRewardValue(), lottery.getId());
                         break;
                     }
                     case COUPON: {

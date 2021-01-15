@@ -94,6 +94,13 @@ public class MemberRewardRecord implements Serializable {
     private RewardSourceEnum rewardSource;
 
     /**
+     * 奖励来源关联id
+     */
+    @TableField(value = "reward_source_id")
+    @ApiModelProperty(value = "奖励来源关联id")
+    private Long rewardSourceId;
+
+    /**
      * 奖励描述
      */
     @TableField(value = "remark")

@@ -226,7 +226,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
                 List<PreActivityRewardResult> rewardRuleList = JSONUtil.toList(JSONUtil.parseArray(preActivityInfo.getRewardRuleContent()), PreActivityRewardResult.class);
                 for (PreActivityRewardResult rewardRule : rewardRuleList) {
-                    memberRewardService.addPreActivityRewardRecord(memberInfo, rewardRule.getRewardType(), rewardRule.getRewardValue());
+                    memberRewardService.addPreActivityRewardRecord(memberInfo, rewardRule.getRewardType(), rewardRule.getRewardValue(), preActivityInfo.getId());
                 }
             }
             //计算总金额
@@ -321,7 +321,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         }else {
             preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
             MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
-            Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo,null,preOrderInfo.getTotalPrice(),true);
+            Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo,null,preOrderInfo.getId(),preOrderInfo.getTotalPrice(),true);
             preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
         }
         int order = preOrderInfoMapper.updateById(preOrderInfo);
@@ -460,7 +460,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
         MemberInfo memberInfo = memberInfoMapper.selectById(infoResult.getId());
         Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord
-                (memberInfo, null, preOrderInfo.getTotalPrice(), true);
+                (memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
         preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
         int order = preOrderInfoMapper.updateById(preOrderInfo);
         if (order < 0) {

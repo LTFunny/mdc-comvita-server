@@ -354,7 +354,7 @@ public class OfflineSignActivityServiceImpl implements OfflineSignActivityServic
             switch (finalSign.getSignRewardType()) {
                 case REWARD: {
                     SignReward reward = JSONUtil.toBean(finalSign.getRelContent(), SignReward.class);
-                    memberRewardService.addOfflineSignRewardRecord(memberInfo, reward.getRewardType(), reward.getRewardValue());
+                    memberRewardService.addOfflineSignRewardRecord(memberInfo, reward.getRewardType(), reward.getRewardValue(), finalSign.getId());
                     result.setSignReward(reward);
                     break;
                 }

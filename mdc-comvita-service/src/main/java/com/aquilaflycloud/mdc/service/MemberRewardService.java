@@ -58,17 +58,17 @@ public interface MemberRewardService {
 
     Map<RewardTypeEnum, MemberRewardResult> addSignRewardRecord(MemberInfo memberInfo, Integer continueCount);
 
-    Map<RewardTypeEnum, MemberScanRewardResult> addScanRewardRecord(MemberInfo memberInfo, Long formatId, BigDecimal amount, Boolean ignore);
+    Map<RewardTypeEnum, MemberScanRewardResult> addScanRewardRecord(MemberInfo memberInfo, Long formatId, Long sourceId, BigDecimal amount, Boolean ignore);
 
-    void addExchangeRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue);
+    void addExchangeRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, Long sourceId);
 
-    void addLotteryRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue);
+    void addLotteryRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, Long sourceId);
 
-    void addMissionRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue);
+    void addMissionRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, Long sourceId);
 
-    void addOfflineSignRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue);
+    void addOfflineSignRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, Long sourceId);
 
-    void addPreActivityRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue);
+    void addPreActivityRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, Long sourceId);
 
     void addCleanRewardRecord();
 }
