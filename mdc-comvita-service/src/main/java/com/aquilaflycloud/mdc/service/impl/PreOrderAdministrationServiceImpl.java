@@ -182,6 +182,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
                     .notIn(PreOrderGoods::getId, info.getId())
+                    .notIn(PreOrderGoods::getGoodsType, OrderGoodsTypeEnum.GIFTS)
                     .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
             );
             if (list.size() > 0) {
@@ -200,6 +201,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
                     .notIn(PreOrderGoods::getId, info.getId())
+                    .notIn(PreOrderGoods::getGoodsType, OrderGoodsTypeEnum.GIFTS)
                     .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
             );
             if (CollectionUtils.isEmpty(list)) {//没有赠品，查询是否这是最后一个商品，是的话填写订单表商品状态和发货时间
