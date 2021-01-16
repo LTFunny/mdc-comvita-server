@@ -47,7 +47,7 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
                 .eq( StrUtil.isNotBlank(param.getGoodsState()),PreGoodsInfo::getGoodsState, param.getGoodsState())
                 .eq( StrUtil.isNotBlank(param.getGoodsType()),PreGoodsInfo::getGoodsType, param.getGoodsType())
                 .eq( StrUtil.isNotBlank(param.getGoodsCode()),PreGoodsInfo::getGoodsCode, param.getGoodsCode())
-                .in(param.getGoodsStates()!=null,PreGoodsInfo::getGoodsState, param.getGoodsStates())
+                .in(param.getGoodsTypes() != null && param.getGoodsTypes().length > 0,PreGoodsInfo::getGoodsType, param.getGoodsTypes())
                 .orderByDesc(PreGoodsInfo::getCreateTime)
         );
         return list;

@@ -25,7 +25,7 @@ public class ReportGuidePageResult {
     private String guideName;
 
     @ApiModelProperty(value = "拉新数量")
-    private String newCustomerNum;
+    private Integer newCustomerNum;
 
     @ApiModelProperty(value = "销售订单数量")
     private Integer orderNumber;

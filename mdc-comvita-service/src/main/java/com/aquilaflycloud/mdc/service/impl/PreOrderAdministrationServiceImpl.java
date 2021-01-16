@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -305,13 +306,25 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         List<ReportGuidePageResult> list2=page.getRecords();
         if(CollectionUtils.isEmpty(list)){
             for(PUserInfo info:list){
-                Boolean ishave=false;
-                for(ReportGuidePageResult result:list2){
-                    if(result.getGuideName().equals(info.getRealName())){
-                        break;
+                Boolean ishave=true;
+                if(CollectionUtils.isNotEmpty(list2)){
+                    for(ReportGuidePageResult result:list2){
+                        if(result.getGuideName().equals(info.getRealName())){
+                            ishave=false;
+                            break;
+                        }
                     }
                 }
+                if(ishave){
+                    ReportGuidePageResult reportGuidePageResult=new ReportGuidePageResult();
+                    reportGuidePageResult.setGuideName(info.getRealName());
+                    reportGuidePageResult.setNewCustomerNum(0);
+                    reportGuidePageResult.setOrderNumber(0);
+                    reportGuidePageResult.setOrderPrice(new BigDecimal(0));
+                    list2.add(reportGuidePageResult);
+                }
             }
+            page.setRecords(list2);
         }
         return page;
     }

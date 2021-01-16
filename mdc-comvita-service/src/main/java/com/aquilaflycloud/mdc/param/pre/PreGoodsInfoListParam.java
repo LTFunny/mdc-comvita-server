@@ -28,6 +28,9 @@ public class PreGoodsInfoListParam extends PageParam {
     @ApiModelProperty(value = "OrderGoodsTypeEnum商品类型(1-预售商品、2-赠品、3-普通商品)")
     private String goodsType;
 
+    @ApiModelProperty(value = "OrderGoodsTypeEnum商品类型(1-预售商品、2-赠品、3-普通商品),逗号隔开")
+    private String[] goodsTypes;
+
     @ApiModelProperty(value = "标签id")
     private String  folksonomyId;
 
