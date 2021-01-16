@@ -380,6 +380,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         .eq(PreRefundOrderInfo::getOrderId,order.getId()));
         if(null != refundOrderInfo){
             result.setRefundTime(refundOrderInfo.getRefundTime());
+            result.setRefundPrice(refundOrderInfo.getRefundPrice());
         }
         return result;
     }
