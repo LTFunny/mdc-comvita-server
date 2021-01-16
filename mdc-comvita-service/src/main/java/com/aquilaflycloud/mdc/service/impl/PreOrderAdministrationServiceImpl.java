@@ -165,6 +165,10 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
                     preOrderInfo.setDeliveryTime(new DateTime());
                     preOrderInfoMapper.updateById(preOrderInfo);
+                }else{
+                    preOrderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
+                    preOrderInfo.setDeliveryTime(new DateTime());
+                    preOrderInfoMapper.updateById(preOrderInfo);
                 }
             }else{//待发货状态
                 List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
