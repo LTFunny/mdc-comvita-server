@@ -60,10 +60,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -184,6 +181,21 @@ public class SystemFileServiceImpl implements SystemFileService {
                 aliasMap.put("auditName", "审核人");
                 break;
             }*/
+            case READY_GOODS: {
+                aliasMap = new HashMap<>();
+                aliasMap.put("orderCode", "订单编号");
+                aliasMap.put("goodsCode", "商品编号");
+                aliasMap.put("goodsName", "商品名称");
+                aliasMap.put("cardCode", "配送卡号");
+                aliasMap.put("reserveName", "收件人");
+                aliasMap.put("deliveryAddress", "收件地址");
+                aliasMap.put("guideName", "导购员");
+                aliasMap.put("reserveShop", "销售门店");
+                aliasMap.put("reserveStartTime", "提交预约时间");
+                aliasMap.put("expressCode", "快递编码");
+                aliasMap.put("expressOrderCode", "快递单号");
+                break;
+            }
             default:
         }
         return aliasMap;

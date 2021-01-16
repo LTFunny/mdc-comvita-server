@@ -142,7 +142,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         if (OrderGoodsTypeEnum.GIFTS.equals(info.getGoodsType())) { //填赠品的时候是否所有商品都发货了
             List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
-                    .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
+                    .notIn(PreOrderGoods::getId,info.getId())
+                    .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
             );
             if (list.size() > 0) {
                 throw new ServiceException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
@@ -156,25 +157,17 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
                     .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS)
             );
+            List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .eq(PreOrderGoods::getOrderId, info.getOrderId())
+                    .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
+            );
             if(CollectionUtils.isEmpty(list)){//没有赠品，查询是否这是最后一个商品，是的话填写订单表商品状态和发货时间
-                List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                        .eq(PreOrderGoods::getOrderId, info.getOrderId())
-                        .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
-                );
                 if(CollectionUtils.isEmpty(list2)){//是空则商品都发完了，更新订单表
                     preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
                     preOrderInfo.setDeliveryTime(new DateTime());
                     preOrderInfoMapper.updateById(preOrderInfo);
-                }else{
-                    preOrderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
-                    preOrderInfo.setDeliveryTime(new DateTime());
-                    preOrderInfoMapper.updateById(preOrderInfo);
                 }
             }else{//待发货状态
-                List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                        .eq(PreOrderGoods::getOrderId, info.getOrderId())
-                        .notIn(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
-                );
                 if(CollectionUtils.isEmpty(list2)){
                     preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
                     preOrderInfoMapper.updateById(preOrderInfo);
