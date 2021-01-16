@@ -5,6 +5,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
@@ -14,12 +15,14 @@ import com.aquilaflycloud.mdc.model.coupon.CouponInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.param.system.FileUploadParam;
 import com.aquilaflycloud.mdc.result.member.MemberScanRewardResult;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.MemberRewardService;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
+import com.aquilaflycloud.mdc.util.PoiUtil;
 import com.aquilaflycloud.org.service.IUserProvider;
 import com.aquilaflycloud.org.service.provider.entity.PUserInfo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -28,11 +31,19 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.NotNull;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +53,7 @@ import java.util.stream.Collectors;
 /**
  * @Author zly
  */
+@Slf4j
 @Service
 public class PreOrderAdministrationServiceImpl implements PreOrderAdministrationService {
     @Resource
@@ -62,6 +74,9 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     private PrePickingCardMapper prePickingCardMapper;
     @Resource
     private MemberRewardService memberRewardService;
+    @Resource
+    private PreExpressInfoMapper preExpressInfoMapper;
+
     @Override
     public PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param) {
         return preOrderInfoMapper.selectMaps(new QueryWrapper<PreOrderInfo>()
@@ -103,6 +118,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .orderByDesc(PreOrderInfo::getCreateTime)
         );
     }
+
     @Override
     public IPage<PreOrderInfo> pageMobilePreOder(PreOrderPageParam param) {
         return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
@@ -112,21 +128,22 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .eq(StringUtils.isNotBlank(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
                 .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
                 .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
-                .eq( PreOrderInfo::getFailSymbol, FailSymbolEnum.NO).or().isNull(PreOrderInfo::getFailSymbol)
+                .eq(PreOrderInfo::getFailSymbol, FailSymbolEnum.NO).or().isNull(PreOrderInfo::getFailSymbol)
                 .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
                 .orderByDesc(PreOrderInfo::getCreateTime)
         );
     }
+
     @Override
     public IPage<PreRefundOrderInfo> pageOrderInfoList(PreRefundOrderListParam param) {
-        IPage<PreRefundOrderInfo> list=preRefundOrderInfoMapper.selectPage(param.page(), Wrappers.<PreRefundOrderInfo>lambdaQuery()
-                .eq( StringUtils.isNotBlank(param.getShopId()),PreRefundOrderInfo::getShopId, param.getShopId())
-                .eq( StringUtils.isNotBlank(param.getGuideName()),PreRefundOrderInfo::getGuideName, param.getGuideName())
-                .eq( StringUtils.isNotBlank(param.getAfterGuideName()),PreRefundOrderInfo::getAfterGuideName, param.getAfterGuideName())
-                .eq( StringUtils.isNotBlank(param.getOrderCode()),PreRefundOrderInfo::getOrderCode, param.getOrderCode())
-                .like( StringUtils.isNotBlank(param.getBuyerName()),PreRefundOrderInfo::getBuyerName, param.getBuyerName())
+        IPage<PreRefundOrderInfo> list = preRefundOrderInfoMapper.selectPage(param.page(), Wrappers.<PreRefundOrderInfo>lambdaQuery()
+                .eq(StringUtils.isNotBlank(param.getShopId()), PreRefundOrderInfo::getShopId, param.getShopId())
+                .eq(StringUtils.isNotBlank(param.getGuideName()), PreRefundOrderInfo::getGuideName, param.getGuideName())
+                .eq(StringUtils.isNotBlank(param.getAfterGuideName()), PreRefundOrderInfo::getAfterGuideName, param.getAfterGuideName())
+                .eq(StringUtils.isNotBlank(param.getOrderCode()), PreRefundOrderInfo::getOrderCode, param.getOrderCode())
+                .like(StringUtils.isNotBlank(param.getBuyerName()), PreRefundOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getAfterSalesStartTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalesStartTime())
                 .le(param.getAfterSalEndTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalEndTime())
                 .ge(param.getCreateStartTime() != null, PreRefundOrderInfo::getCreateTime, param.getCreateStartTime())
@@ -148,7 +165,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         if (OrderGoodsTypeEnum.GIFTS.equals(info.getGoodsType())) { //填赠品的时候是否所有商品都发货了
             List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
-                    .notIn(PreOrderGoods::getId,info.getId())
+                    .notIn(PreOrderGoods::getId, info.getId())
                     .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
             );
             if (list.size() > 0) {
@@ -157,24 +174,24 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
             preOrderInfo.setDeliveryTime(new DateTime());
             preOrderInfoMapper.updateById(preOrderInfo);
-        }else{//不是赠品。判断是否有
+        } else {//不是赠品。判断是否有
             //查询是否有赠品
             List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
-                    .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS)
+                    .eq(PreOrderGoods::getGoodsType, OrderGoodsTypeEnum.GIFTS)
             );
             List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
                     .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
             );
-            if(CollectionUtils.isEmpty(list)){//没有赠品，查询是否这是最后一个商品，是的话填写订单表商品状态和发货时间
-                if(CollectionUtils.isEmpty(list2)){//是空则商品都发完了，更新订单表
+            if (CollectionUtils.isEmpty(list)) {//没有赠品，查询是否这是最后一个商品，是的话填写订单表商品状态和发货时间
+                if (CollectionUtils.isEmpty(list2)) {//是空则商品都发完了，更新订单表
                     preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
                     preOrderInfo.setDeliveryTime(new DateTime());
                     preOrderInfoMapper.updateById(preOrderInfo);
                 }
-            }else{//待发货状态
-                if(CollectionUtils.isEmpty(list2)){
+            } else {//待发货状态
+                if (CollectionUtils.isEmpty(list2)) {
                     preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
                     preOrderInfoMapper.updateById(preOrderInfo);
                 }
@@ -187,16 +204,16 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
         info.setDeliveryTime(new DateTime());
         preOrderGoodsMapper.updateById(info);
-        PrePickingCard prePickingCard=prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+        PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
                 .eq(PrePickingCard::getPickingCode, info.getCardCode())
         );
-        if(prePickingCard!=null){
+        if (prePickingCard != null) {
             prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
             prePickingCardMapper.updateById(prePickingCard);
         }
-        if(OrderInfoStateEnum.BEENCOMPLETED.equals(preOrderInfo.getOrderState())){
+        if (OrderInfoStateEnum.BEENCOMPLETED.equals(preOrderInfo.getOrderState())) {
             MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
-            Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo,null,preOrderInfo.getId(),preOrderInfo.getTotalPrice(),true);
+            Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
             preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
         }
         if (info.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
@@ -220,51 +237,51 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
     @Override
     public AdministrationDetailsResult getOrderDetails(OrderDetailsParam param) {
-        PreOrderInfo info=preOrderInfoMapper.selectById(param.getId());
-        if(info==null){
+        PreOrderInfo info = preOrderInfoMapper.selectById(param.getId());
+        if (info == null) {
             throw new ServiceException("输入的主键值有误");
         }
         List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,info.getId()));
+                .eq(PreOrderGoods::getOrderId, info.getId()));
         List<PreOrderOperateRecord> preOrderOperateRecordlist = preOrderOperateRecordMapper.selectList(Wrappers.<PreOrderOperateRecord>lambdaQuery()
-                .eq(PreOrderOperateRecord::getOrderId,info.getId()));
-        AdministrationDetailsResult result=new AdministrationDetailsResult();
-       //(value = "订单编码")
+                .eq(PreOrderOperateRecord::getOrderId, info.getId()));
+        AdministrationDetailsResult result = new AdministrationDetailsResult();
+        //(value = "订单编码")
         result.setOrderCode(info.getOrderCode());
         //(value = "门店名称")
         result.setShopName(info.getShopName());
-       //(value = "导购员名称")
+        //(value = "导购员名称")
         result.setGuideName(info.getGuideName());
-       //(value = "总金额")
+        //(value = "总金额")
         result.setTotalPrice(info.getTotalPrice());
-       //(value = "订单状态")
+        //(value = "订单状态")
         result.setOrderState(info.getOrderState());
-       //(value = "创建时间")
+        //(value = "创建时间")
         result.setCreateTime(info.getCreateTime());
-       //(value = "确认时间")
+        //(value = "确认时间")
         result.setConfirmTime(info.getConfirmTime());
-       //(value = "发货时间")
+        //(value = "发货时间")
         result.setDeliveryTime(info.getDeliveryTime());
-       //(value = "销售小票url")
+        //(value = "销售小票url")
         result.setTicketUrl(info.getTicketUrl());
-       //(value = "买家姓名")
+        //(value = "买家姓名")
         result.setBuyerName(info.getBuyerName());
-       //(value = "买家手机")
+        //(value = "买家手机")
         result.setBuyerPhone(info.getBuyerPhone());
-       //(value = "买家详细地址")
+        //(value = "买家详细地址")
         result.setBuyerAddress(info.getBuyerAddress());
-       //(value = "买家地址-省")
+        //(value = "买家地址-省")
         result.setBuyerProvince(info.getBuyerProvince());
-      //(value = "买家地址-市")
+        //(value = "买家地址-市")
         result.setBuyerCity(info.getBuyerCity());
-       //(value = "买家地址-区")
+        //(value = "买家地址-区")
         result.setBuyerDistrict(info.getBuyerDistrict());
         //(value = "买家地址邮编")
         result.setBuyerPostalCode(info.getBuyerPostalCode());
-       //(value = "订单明细")
+        //(value = "订单明细")
         result.setDetailsList(preOrderGoodsList);
-       //(value = "操作记录")
-        result.setOperationList(preOrderOperateRecordlist) ;
+        //(value = "操作记录")
+        result.setOperationList(preOrderOperateRecordlist);
         result.setBuyerSex(info.getBuyerSex());
         result.setBuyerBirthday(info.getBuyerBirthday());
         result.setScore(info.getScore());
@@ -273,31 +290,31 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
     @Override
     public AfterSalesDetailsResult getAfterOrderDetails(OrderDetailsParam param) {
-        PreRefundOrderInfo info=preRefundOrderInfoMapper.selectById(param.getId());
-        if(info==null){
+        PreRefundOrderInfo info = preRefundOrderInfoMapper.selectById(param.getId());
+        if (info == null) {
             throw new ServiceException("输入的主键值有误");
         }
         List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,info.getOrderId()));
+                .eq(PreOrderGoods::getOrderId, info.getOrderId()));
         List<PreOrderOperateRecord> preOrderOperateRecordlist = preOrderOperateRecordMapper.selectList(Wrappers.<PreOrderOperateRecord>lambdaQuery()
-                .eq(PreOrderOperateRecord::getOrderId,info.getOrderId()));
-        AfterSalesDetailsResult result=new AfterSalesDetailsResult();
+                .eq(PreOrderOperateRecord::getOrderId, info.getOrderId()));
+        AfterSalesDetailsResult result = new AfterSalesDetailsResult();
         BeanUtils.copyProperties(info, result);
         //(value = "订单明细")
         result.setDetailsList(preOrderGoodsList);
         //(value = "操作记录")
-        result.setOperationList(preOrderOperateRecordlist) ;
+        result.setOperationList(preOrderOperateRecordlist);
         return result;
     }
 
     @Override
     public IPage<PreOrderGoods> pagereadySalesList(ReadyListParam param) {
-        IPage<PreOrderGoods> list=preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
-                .like( param.getGuideName()!=null,PreOrderGoods::getGuideName, param.getGuideName())
-                .eq( param.getReserveName()!=null,PreOrderGoods::getReserveName, param.getReserveName())
-                .eq( PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
-                .eq( param.getOrderCode()!=null,PreOrderGoods::getOrderCode, param.getOrderCode())
-                .like( param.getReserveShop()!=null,PreOrderGoods::getReserveShop, param.getReserveShop())
+        IPage<PreOrderGoods> list = preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
+                .like(param.getGuideName() != null, PreOrderGoods::getGuideName, param.getGuideName())
+                .eq(param.getReserveName() != null, PreOrderGoods::getReserveName, param.getReserveName())
+                .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
+                .eq(param.getOrderCode() != null, PreOrderGoods::getOrderCode, param.getOrderCode())
+                .like(param.getReserveShop() != null, PreOrderGoods::getReserveShop, param.getReserveShop())
                 .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
                 .ge(param.getReserveStartTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveStartTime())
@@ -309,29 +326,29 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
     @Override
     public IPage<ReportOrderPageResult> pageOrderReportList(ReportFormParam param) {
-        IPage<ReportOrderPageResult> page=preOrderInfoMapper.pageOrderReportList(param.page(),param);
+        IPage<ReportOrderPageResult> page = preOrderInfoMapper.pageOrderReportList(param.page(), param);
         return page;
     }
 
     @Override
     //导购员绩效
     public IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param) {
-        List<PUserInfo> list= iUserProvider.listUserInfo();
-        IPage<ReportGuidePageResult> page=preOrderInfoMapper.achievementsGuide(param.page(),param);
-        List<ReportGuidePageResult> list2=page.getRecords();
-        if(CollectionUtils.isEmpty(list)){
-            for(PUserInfo info:list){
-                Boolean ishave=true;
-                if(CollectionUtils.isNotEmpty(list2)){
-                    for(ReportGuidePageResult result:list2){
-                        if(result.getGuideName().equals(info.getRealName())){
-                            ishave=false;
+        List<PUserInfo> list = iUserProvider.listUserInfo();
+        IPage<ReportGuidePageResult> page = preOrderInfoMapper.achievementsGuide(param.page(), param);
+        List<ReportGuidePageResult> list2 = page.getRecords();
+        if (CollectionUtils.isEmpty(list)) {
+            for (PUserInfo info : list) {
+                Boolean ishave = true;
+                if (CollectionUtils.isNotEmpty(list2)) {
+                    for (ReportGuidePageResult result : list2) {
+                        if (result.getGuideName().equals(info.getRealName())) {
+                            ishave = false;
                             break;
                         }
                     }
                 }
-                if(ishave){
-                    ReportGuidePageResult reportGuidePageResult=new ReportGuidePageResult();
+                if (ishave) {
+                    ReportGuidePageResult reportGuidePageResult = new ReportGuidePageResult();
                     reportGuidePageResult.setGuideName(info.getRealName());
                     reportGuidePageResult.setNewCustomerNum(0);
                     reportGuidePageResult.setOrderNumber(0);
@@ -347,16 +364,104 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Override
     //订单管理订单报表
     public IPage<OrderPageResult> pageOrderPageResultList(AdministrationListParam param) {
-        IPage<OrderPageResult> page=preOrderInfoMapper.pageOrderPageResultList(param.page(),param);
+        IPage<OrderPageResult> page = preOrderInfoMapper.pageOrderPageResultList(param.page(), param);
         return page;
     }
 
     @Override
     //订单管理销量导出
     public IPage<SalePageResult> pageSalePageResultList(AdministrationListParam param) {
-        IPage<SalePageResult> page=preOrderInfoMapper.pageSalePageResultList(param.page(),param);
+        IPage<SalePageResult> page = preOrderInfoMapper.pageSalePageResultList(param.page(), param);
         return page;
     }
 
+    @Override
+    @Transactional
+    public void importOrderCode(FileUploadParam param) {
+        try {
+            //读导入文件的数据到集合
+            MultipartFile file = param.getFile();
+            String fileName = file.getOriginalFilename();
+            InputStream inputStream = file.getInputStream();
+            List<Map<String, String>> dataMap = PoiUtil.readExcel(inputStream, fileName, 0, 0, 0);
 
+            if (null == dataMap || dataMap.size() == 0) {
+                throw new ServiceException("表格数据为空，请导入数据");
+            }
+
+            //反射查询物流编号和物流单号
+            Map<String, String> fieldMap = new HashMap<>();
+            Field[] fields = ReflectUtil.getFields(PreOrderGoods.class);
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                ApiModelProperty annotation = field.getAnnotation(ApiModelProperty.class);
+                if ("expressCode".equals(field.getName())) {
+                    fieldMap.put("expressCode", annotation.value());
+                } else if ("expressOrderCode".equals(field.getName())) {
+                    fieldMap.put("expressOrderCode", annotation.value());
+                } else if ("id".equals(field.getName())) {
+                    fieldMap.put("id", annotation.value());
+                }
+            }
+            //确保导入字段名称
+            if (fieldMap.size() != 3) {
+                throw new ServiceException("导入失败");
+            }
+
+            //判断数据是否合法
+            List<Long> ids = new ArrayList<>();
+            for (int i = 0; i < dataMap.size(); i++) {
+                Map<String, String> item = dataMap.get(i);
+                //关键字段判空
+                if (StrUtil.isBlank(item.get(fieldMap.get("expressCode")))) {
+                    throw new ServiceException("表格的物流编码不能为空");
+                } else if (StrUtil.isBlank(item.get(fieldMap.get("expressOrderCode")))) {
+                    throw new ServiceException("表格的物流单号不能为空");
+                } else if (StrUtil.isBlank(item.get(fieldMap.get("id")))) {
+                    throw new ServiceException("表格的id不能为空");
+                }
+
+                ids.add(Long.parseLong(item.get(fieldMap.get("id"))));
+            }
+
+            //判断导入的id数和查询数据库的id数是否相同
+            List<PreOrderGoods> preOrderGoods = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .in(PreOrderGoods::getId, ids)
+                    .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
+            );
+            if (ids.size() != preOrderGoods.size()) {
+                throw new ServiceException("表格id有误");
+            }
+
+            //查询物流名称
+            List<PreExpressInfo> preExpressInfos = preExpressInfoMapper.normalSelectList(null);
+            Map<String, String> expressMap = preExpressInfos.stream().collect(Collectors.toMap(PreExpressInfo::getExpressCode, PreExpressInfo::getExpressName));
+
+            //循环调用更新逻辑
+            log.info("物流单号批量导入开始");
+            for (int i = 0; i < dataMap.size(); i++) {
+                Map<String, String> item = dataMap.get(i);
+                String expressCode = item.get(fieldMap.get("expressCode"));
+                String expressOrderCode = item.get(fieldMap.get("expressOrderCode"));
+                String id = item.get(fieldMap.get("id"));
+
+                String expressName = expressMap.get(expressCode);
+                if (StrUtil.isBlank(expressName)) {
+                    throw new ServiceException("请检查物流编码是否正确");
+                }
+
+                InputOrderNumberParam inputOrderNumberParam = new InputOrderNumberParam();
+                inputOrderNumberParam.setId(id);
+                inputOrderNumberParam.setExpressCode(expressCode);
+                inputOrderNumberParam.setExpressOrder(expressOrderCode);
+                inputOrderNumberParam.setExpressName(expressName);
+
+                log.info("物流单号更新信息：{id=" + id + ", expressCode=" + expressCode + ", expressOrderCode" + expressOrderCode + "}");
+                this.inputOrderNumber(inputOrderNumberParam);
+            }
+            log.info("物流单号批量导入结束");
+        } catch (Exception e) {
+            throw new ServiceException("导入失败");
+        }
+    }
 }
