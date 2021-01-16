@@ -6,6 +6,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
@@ -13,8 +14,10 @@ import com.aquilaflycloud.mdc.model.coupon.CouponInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.result.member.MemberScanRewardResult;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
+import com.aquilaflycloud.mdc.service.MemberRewardService;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
 import com.aquilaflycloud.org.service.IUserProvider;
@@ -32,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -56,6 +60,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     private IUserProvider iUserProvider;
     @Resource
     private PrePickingCardMapper prePickingCardMapper;
+    @Resource
+    private MemberRewardService memberRewardService;
     @Override
     public PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param) {
         return preOrderInfoMapper.selectMaps(new QueryWrapper<PreOrderInfo>()
@@ -187,6 +193,11 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         if(prePickingCard!=null){
             prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
             prePickingCardMapper.updateById(prePickingCard);
+        }
+        if(OrderInfoStateEnum.BEENCOMPLETED.equals(preOrderInfo.getOrderState())){
+            MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
+            Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo,null,preOrderInfo.getId(),preOrderInfo.getTotalPrice(),true);
+            preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
         }
         if (info.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
             //赠品发货,发送订单发货微信订阅消息
