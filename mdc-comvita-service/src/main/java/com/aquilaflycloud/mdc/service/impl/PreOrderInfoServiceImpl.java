@@ -216,6 +216,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 preOrderGoods.setGoodsDescription(preGoodsInfo.getGoodsDescription());
                 preOrderGoods.setGoodsPicture(preGoodsInfo.getGoodsPicture());
                 preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
+                preOrderGoods.setOrderCode(preOrderInfo.getOrderCode());
+                preOrderGoods.setReserveShopId(preOrderInfo.getShopId()+"");
+                preOrderGoods.setReserveShop(preOrderInfo.getShopName());
                 preOrderGoods.setGoodsName(preGoodsInfo.getGoodsName());
                 preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
                 preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
@@ -251,6 +254,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     preOrderGoods.setGoodsType(OrderGoodsTypeEnum.GIFTS);
                     preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
                     preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
+                    preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
+                    preOrderGoods.setOrderCode(preOrderInfo.getOrderCode());
+                    preOrderGoods.setReserveShopId(preOrderInfo.getShopId()+"");
                     preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
                     preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
                     preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
