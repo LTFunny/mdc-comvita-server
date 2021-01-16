@@ -4,6 +4,7 @@ import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.param.system.FileUploadParam;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -80,6 +82,13 @@ public class PreOrderInfoController {
     @ApiMapping(value = "backend.comvita.input.order.number", method = RequestMethod.POST, permission = true)
     public void inputOrderNumber (InputOrderNumberParam param) {
         preOrderAdministrationService.inputOrderNumber(param);
+    }
+
+    @ApiOperation(value = "批量导入快递单号", notes = "批量导入快递单号")
+//    @PreAuthorize("hasAuthority('mdc:pre:order:info:batchImport')")
+    @ApiMapping(value = "backend.comvita.import.order.code", method = RequestMethod.POST, permission = true)
+    public void importOrderCode (FileUploadParam param) {
+        preOrderAdministrationService.importOrderCode(param);
     }
 
     @ApiOperation(value = "订单详情", notes = "订单详情")

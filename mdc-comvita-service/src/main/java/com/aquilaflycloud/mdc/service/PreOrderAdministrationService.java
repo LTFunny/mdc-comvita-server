@@ -5,6 +5,7 @@ import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.param.system.FileUploadParam;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -36,4 +37,6 @@ public interface PreOrderAdministrationService {
     IPage<OrderPageResult> pageOrderPageResultList(AdministrationListParam param);
 
     IPage<SalePageResult> pageSalePageResultList(AdministrationListParam param);
+
+    void importOrderCode(FileUploadParam param);
 }
