@@ -24,7 +24,6 @@ public class InputOrderNumberParam {
 
 
     @ApiModelProperty(value = "快递名称")
-    @NotNull(message = "快递名称不能为空")
     private String expressName;
 
     @ApiModelProperty(value = "快递单号")

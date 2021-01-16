@@ -5,6 +5,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
@@ -15,10 +16,12 @@ import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.model.pre.PreOrderOperateRecord;
 import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.param.system.FileUploadParam;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
+import com.aquilaflycloud.mdc.util.PoiUtil;
 import com.aquilaflycloud.org.service.IUserProvider;
 import com.aquilaflycloud.org.service.provider.entity.PUserInfo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -27,18 +30,28 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.NotNull;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
 /**
  * @Author zly
  */
+@Slf4j
 @Service
 public class PreOrderAdministrationServiceImpl implements PreOrderAdministrationService {
     @Resource
@@ -330,5 +343,82 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         return page;
     }
 
+    @Override
+    @Transactional
+    public void importOrderCode(FileUploadParam param) {
+        try {
+            //读导入文件的数据到集合
+            MultipartFile file = param.getFile();
+            String fileName = file.getOriginalFilename();
+            InputStream inputStream = file.getInputStream();
+            List<Map<String, String>> dataMap = PoiUtil.readExcel(inputStream, fileName, 0, 0, 0);
 
+            if (null == dataMap || dataMap.size() == 0) {
+                throw new ServiceException("表格数据为空，请导入数据");
+            }
+
+            //反射查询物流编号和物流单号
+            Map<String, String> fieldMap = new HashMap<>();
+            Field[] fields = ReflectUtil.getFields(PreOrderGoods.class);
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                ApiModelProperty annotation = field.getAnnotation(ApiModelProperty.class);
+                if ("expressCode".equals(field.getName())) {
+                    fieldMap.put("expressCode", annotation.value());
+                } else if ("expressOrderCode".equals(field.getName())) {
+                    fieldMap.put("expressOrderCode", annotation.value());
+                } else if ("id".equals(field.getName())) {
+                    fieldMap.put("id", annotation.value());
+                }
+            }
+            //确保导入字段名称
+            if (fieldMap.size() != 3) {
+                throw new ServiceException("导入失败");
+            }
+
+            //判断数据是否合法
+            List<Long> ids = new ArrayList<>();
+            for (int i = 0; i < dataMap.size(); i++) {
+                Map<String, String> item = dataMap.get(i);
+                //关键字段判空
+                if (StrUtil.isBlank(item.get(fieldMap.get("expressCode")))) {
+                    throw new ServiceException("表格的物流编码不能为空");
+                } else if (StrUtil.isBlank(item.get(fieldMap.get("expressOrderCode")))) {
+                    throw new ServiceException("表格的物流单号不能为空");
+                } else if (StrUtil.isBlank(item.get(fieldMap.get("id")))) {
+                    throw new ServiceException("表格的id不能为空");
+                }
+
+                ids.add(Long.parseLong(item.get(fieldMap.get("id"))));
+            }
+
+            //判断导入的id数和查询数据库的id数是否相同
+            List<PreOrderGoods> preOrderGoods = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .in(PreOrderGoods::getId, ids)
+                    .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
+            );
+            if (ids.size() != preOrderGoods.size()) {
+                throw new ServiceException("表格id有误");
+            }
+
+            //循环调用更新逻辑
+            log.info("物流单号批量导入开始");
+            for (int i = 0; i < dataMap.size(); i++) {
+                Map<String, String> item = dataMap.get(i);
+                String expressCode = item.get(fieldMap.get("expressCode"));
+                String expressOrderCode = item.get(fieldMap.get("expressOrderCode"));
+                String id = item.get(fieldMap.get("id"));
+
+                InputOrderNumberParam inputOrderNumberParam = new InputOrderNumberParam();
+                inputOrderNumberParam.setId(id);
+                inputOrderNumberParam.setExpressCode(expressCode);
+                inputOrderNumberParam.setExpressOrder(expressOrderCode);
+                log.info("物流单号更新信息：{id=" + id + ", expressCode=" + expressCode + ", expressOrderCode" + expressOrderCode + "}");
+                this.inputOrderNumber(inputOrderNumberParam);
+            }
+            log.info("物流单号批量导入结束");
+        } catch (Exception e) {
+            throw new ServiceException("导入失败");
+        }
+    }
 }
