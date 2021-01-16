@@ -9,11 +9,9 @@ import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
+import com.aquilaflycloud.mdc.model.coupon.CouponInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
-import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
-import com.aquilaflycloud.mdc.model.pre.PreOrderOperateRecord;
-import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
+import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
@@ -56,6 +54,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     private PreOrderOperateRecordMapper preOrderOperateRecordMapper;
     @Resource
     private IUserProvider iUserProvider;
+    @Resource
+    private PrePickingCardMapper prePickingCardMapper;
     @Override
     public PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param) {
         return preOrderInfoMapper.selectMaps(new QueryWrapper<PreOrderInfo>()
@@ -184,6 +184,13 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
         info.setDeliveryTime(new DateTime());
         preOrderGoodsMapper.updateById(info);
+        PrePickingCard prePickingCard=prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+                .eq(PrePickingCard::getPickingCode, info.getCardCode())
+        );
+        if(prePickingCard!=null){
+            prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
+            prePickingCardMapper.updateById(prePickingCard);
+        }
         if (info.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
             //赠品发货,发送订单发货微信订阅消息
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
