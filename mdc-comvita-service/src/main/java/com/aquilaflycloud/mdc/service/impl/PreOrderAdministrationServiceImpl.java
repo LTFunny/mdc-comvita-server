@@ -329,11 +329,11 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Override
     public IPage<PreOrderGoods> pagereadySalesList(ReadyListParam param) {
         IPage<PreOrderGoods> list = preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
-                .like(param.getGuideName() != null, PreOrderGoods::getGuideName, param.getGuideName())
-                .eq(param.getReserveName() != null, PreOrderGoods::getReserveName, param.getReserveName())
+                .like(StringUtils.isNotBlank(param.getGuideName()), PreOrderGoods::getGuideName, param.getGuideName())
+                .eq(StringUtils.isNotBlank(param.getReserveName()), PreOrderGoods::getReserveName, param.getReserveName())
                 .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
-                .eq(param.getOrderCode() != null, PreOrderGoods::getOrderCode, param.getOrderCode())
-                .like(param.getReserveShop() != null, PreOrderGoods::getReserveShop, param.getReserveShop())
+                .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderGoods::getOrderCode, param.getOrderCode())
+                .like(StringUtils.isNotBlank(param.getReserveShop()), PreOrderGoods::getReserveShop, param.getReserveShop())
                 .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
                 .ge(param.getReserveStartTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveStartTime())
