@@ -196,6 +196,11 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     preOrderInfoMapper.updateById(preOrderInfo);
                 }
             }
+            if (OrderInfoStateEnum.BEENCOMPLETED.equals(preOrderInfo.getOrderState())) {
+                MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
+                Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
+                preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+            }
         }
         info.setExpressName(param.getExpressName());
         info.setExpressOrderCode(param.getExpressOrder());
@@ -211,11 +216,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
             prePickingCardMapper.updateById(prePickingCard);
         }
-        if (OrderInfoStateEnum.BEENCOMPLETED.equals(preOrderInfo.getOrderState())) {
-            MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
-            Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
-            preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
-        }
+
         if (info.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
             //赠品发货,发送订单发货微信订阅消息
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
