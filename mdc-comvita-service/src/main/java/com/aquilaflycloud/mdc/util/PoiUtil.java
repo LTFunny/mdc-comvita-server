@@ -153,7 +153,7 @@ public class PoiUtil {
      * @param sheetnum 工作簿，索引从0开始
      * @return
      */
-    public static List<Map<String,String>> readExcel2003(InputStream fileInputStream, int startrow, int startcol, int sheetnum) {
+    private static List<Map<String,String>> readExcel2003(InputStream fileInputStream, int startrow, int startcol, int sheetnum) {
         List<Map<String, String>> varList = new ArrayList<>();
         try {
             HSSFWorkbook wb = new HSSFWorkbook(fileInputStream);
@@ -212,7 +212,7 @@ public class PoiUtil {
      * @param sheetnum 工作簿，索引从0开始
      * @return
      */
-    public static List<Map<String,String>> readExcel2007(InputStream fileInputStream, int startrow, int startcol, int sheetnum) {
+    private static List<Map<String,String>> readExcel2007(InputStream fileInputStream, int startrow, int startcol, int sheetnum) {
         List<Map<String, String>> varList = new ArrayList<>();
         try {
             XSSFWorkbook wb = new XSSFWorkbook(fileInputStream);
