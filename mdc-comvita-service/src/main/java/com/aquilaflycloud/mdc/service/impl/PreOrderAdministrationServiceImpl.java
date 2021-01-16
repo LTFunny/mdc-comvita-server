@@ -69,6 +69,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     private IUserProvider iUserProvider;
     @Resource
     private PrePickingCardMapper prePickingCardMapper;
+    @Resource
+    private PreExpressInfoMapper preExpressInfoMapper;
     @Override
     public PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param) {
         return preOrderInfoMapper.selectMaps(new QueryWrapper<PreOrderInfo>()
@@ -425,6 +427,10 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 throw new ServiceException("表格id有误");
             }
 
+            //查询物流名称
+            List<PreExpressInfo> preExpressInfos = preExpressInfoMapper.normalSelectList(null);
+            Map<String, String> expressMap = preExpressInfos.stream().collect(Collectors.toMap(PreExpressInfo::getExpressCode, PreExpressInfo::getExpressName));
+
             //循环调用更新逻辑
             log.info("物流单号批量导入开始");
             for (int i = 0; i < dataMap.size(); i++) {
@@ -433,10 +439,17 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 String expressOrderCode = item.get(fieldMap.get("expressOrderCode"));
                 String id = item.get(fieldMap.get("id"));
 
+                String expressName = expressMap.get(expressCode);
+                if (StrUtil.isBlank(expressName)) {
+                    throw new ServiceException("请检查物流编码是否正确");
+                }
+
                 InputOrderNumberParam inputOrderNumberParam = new InputOrderNumberParam();
                 inputOrderNumberParam.setId(id);
                 inputOrderNumberParam.setExpressCode(expressCode);
                 inputOrderNumberParam.setExpressOrder(expressOrderCode);
+                inputOrderNumberParam.setExpressName(expressName);
+
                 log.info("物流单号更新信息：{id=" + id + ", expressCode=" + expressCode + ", expressOrderCode" + expressOrderCode + "}");
                 this.inputOrderNumber(inputOrderNumberParam);
             }
