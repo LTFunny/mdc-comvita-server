@@ -6,6 +6,7 @@ import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -36,5 +37,8 @@ public class PreOrderInfoPageResult extends PreOrderInfo {
 
     @ApiModelProperty(value = "售后时间")
     private Date refundTime;
+
+    @ApiModelProperty(value = "退款金额")
+    private BigDecimal refundPrice;
 
 }

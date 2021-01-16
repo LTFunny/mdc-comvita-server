@@ -10,11 +10,9 @@ import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
+import com.aquilaflycloud.mdc.model.coupon.CouponInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
-import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
-import com.aquilaflycloud.mdc.model.pre.PreOrderOperateRecord;
-import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
+import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.param.system.FileUploadParam;
 import com.aquilaflycloud.mdc.result.pre.*;
@@ -43,6 +41,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,6 +67,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     private PreOrderOperateRecordMapper preOrderOperateRecordMapper;
     @Resource
     private IUserProvider iUserProvider;
+    @Resource
+    private PrePickingCardMapper prePickingCardMapper;
     @Override
     public PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param) {
         return preOrderInfoMapper.selectMaps(new QueryWrapper<PreOrderInfo>()
@@ -177,6 +178,10 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
                     preOrderInfo.setDeliveryTime(new DateTime());
                     preOrderInfoMapper.updateById(preOrderInfo);
+                }else{
+                    preOrderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
+                    preOrderInfo.setDeliveryTime(new DateTime());
+                    preOrderInfoMapper.updateById(preOrderInfo);
                 }
             }else{//待发货状态
                 List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
@@ -196,6 +201,13 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
         info.setDeliveryTime(new DateTime());
         preOrderGoodsMapper.updateById(info);
+        PrePickingCard prePickingCard=prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+                .eq(PrePickingCard::getPickingCode, info.getCardCode())
+        );
+        if(prePickingCard!=null){
+            prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
+            prePickingCardMapper.updateById(prePickingCard);
+        }
         if (info.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
             //赠品发货,发送订单发货微信订阅消息
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
@@ -318,13 +330,25 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         List<ReportGuidePageResult> list2=page.getRecords();
         if(CollectionUtils.isEmpty(list)){
             for(PUserInfo info:list){
-                Boolean ishave=false;
-                for(ReportGuidePageResult result:list2){
-                    if(result.getGuideName().equals(info.getRealName())){
-                        break;
+                Boolean ishave=true;
+                if(CollectionUtils.isNotEmpty(list2)){
+                    for(ReportGuidePageResult result:list2){
+                        if(result.getGuideName().equals(info.getRealName())){
+                            ishave=false;
+                            break;
+                        }
                     }
                 }
+                if(ishave){
+                    ReportGuidePageResult reportGuidePageResult=new ReportGuidePageResult();
+                    reportGuidePageResult.setGuideName(info.getRealName());
+                    reportGuidePageResult.setNewCustomerNum(0);
+                    reportGuidePageResult.setOrderNumber(0);
+                    reportGuidePageResult.setOrderPrice(new BigDecimal(0));
+                    list2.add(reportGuidePageResult);
+                }
             }
+            page.setRecords(list2);
         }
         return page;
     }

@@ -216,6 +216,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 preOrderGoods.setGoodsDescription(preGoodsInfo.getGoodsDescription());
                 preOrderGoods.setGoodsPicture(preGoodsInfo.getGoodsPicture());
                 preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
+                preOrderGoods.setOrderCode(preOrderInfo.getOrderCode());
+                preOrderGoods.setReserveShopId(preOrderInfo.getShopId()+"");
+                preOrderGoods.setReserveShop(preOrderInfo.getShopName());
                 preOrderGoods.setGoodsName(preGoodsInfo.getGoodsName());
                 preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
                 preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
@@ -251,6 +254,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     preOrderGoods.setGoodsType(OrderGoodsTypeEnum.GIFTS);
                     preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
                     preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
+                    preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
+                    preOrderGoods.setOrderCode(preOrderInfo.getOrderCode());
+                    preOrderGoods.setReserveShopId(preOrderInfo.getShopId()+"");
                     preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
                     preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
                     preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
@@ -340,14 +346,26 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     public PreOrderInfoPageResult orderInfo(PreOrderInfo order){
         PreOrderInfoPageResult result = BeanUtil.copyProperties(order, PreOrderInfoPageResult.class);
         result.setState(order.getOrderState().getName());
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,order.getId())
+                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
+        if(null != preOrderGoods){
+            result.setGiftsGoodsInfo(preOrderGoods);
+        }
         int orderGoodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
-                .ne(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.PREPARE));
+                .ne(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.PREPARE)
+                .notIn(PreOrderGoods::getId,preOrderGoods == null ? 0L : preOrderGoods.getId()));
         if(orderGoodsCount > 0){
             result.setReservationNum(orderGoodsCount);
         }else {
             result.setReservationNum(0);
         }
+        int takenCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,order.getId())
+                .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.TAKEN)
+                .notIn(PreOrderGoods::getId,preOrderGoods == null ? 0L : preOrderGoods.getId()));
+        result.setIngdeliveryNum(takenCount);
         PreActivityInfo activityInfo = activityInfoMapper.selectById(order.getActivityInfoId());
         PreGoodsInfo goodsInfo = goodsInfoMapper.selectById(activityInfo.getRefGoods());
         result.setPreGoodsInfo(goodsInfo);
@@ -355,12 +373,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 .eq(PreOrderGoods::getOrderId,order.getId())
                 .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.PREPARE));
         result.setGoodsInfoNum(goodsCount);
-        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,order.getId())
-                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
-        if(null != preOrderGoods){
-            result.setGiftsGoodsInfo(preOrderGoods);
-        }
         int cardCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
                 .eq(PreOrderGoods::getPickingCardState,PickingCardStateEnum.RESERVE));
@@ -374,6 +386,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         .eq(PreRefundOrderInfo::getOrderId,order.getId()));
         if(null != refundOrderInfo){
             result.setRefundTime(refundOrderInfo.getRefundTime());
+            result.setRefundPrice(refundOrderInfo.getRefundPrice());
         }
         return result;
     }
@@ -427,10 +440,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             throw new ServiceException("查询订单失败。");
         }
         PreOrderInfoPageResult result = orderInfo(preOrderInfo);
-        int takenCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
-                .eq(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.TAKEN));
-        result.setIngdeliveryNum(takenCount);
         return result;
     }
 
