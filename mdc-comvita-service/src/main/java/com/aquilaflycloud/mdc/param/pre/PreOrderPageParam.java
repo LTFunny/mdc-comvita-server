@@ -49,4 +49,8 @@ public class PreOrderPageParam extends PageParam<PreOrderInfo> {
 
     @ApiModelProperty(value = "创建结束时间")
     private Date createEndTime;
+
+    @ApiModelProperty(value = "确认状态，0待确认，1已确认")
+    private String confirmState;
+
 }
