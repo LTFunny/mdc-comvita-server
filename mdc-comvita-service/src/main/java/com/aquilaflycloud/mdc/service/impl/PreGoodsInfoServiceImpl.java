@@ -6,6 +6,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.GoodsStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.GoodsTypeEnum;
 import com.aquilaflycloud.mdc.mapper.PreActivityInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreGoodsInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
@@ -55,6 +56,7 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
                 .eq(param.getGoodsState() != null, PreGoodsInfo::getGoodsState, param.getGoodsState())
                 .eq(param.getGoodsType() != null, PreGoodsInfo::getGoodsType, param.getGoodsType())
                 .like(StrUtil.isNotBlank(param.getGoodsCode()), PreGoodsInfo::getGoodsCode, param.getGoodsCode())
+                .notIn(PreGoodsInfo::getGoodsType,GoodsTypeEnum.GIFTS)
                 .orderByDesc(PreGoodsInfo::getCreateTime)
         );
     }
