@@ -1,11 +1,11 @@
 package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.mapper.PreGoodsInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
-import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
 import com.aquilaflycloud.mdc.param.folksonomy.FolksonomyGetParam;
 import com.aquilaflycloud.mdc.param.pre.*;
@@ -13,7 +13,6 @@ import com.aquilaflycloud.mdc.result.pre.GoodsSalesVolumeResult;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.service.PreGoodsInfoService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
@@ -23,8 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by zouliyong
@@ -61,7 +62,7 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
             throw new ServiceException(getCount(param.getGoodsName(),param.getGoodsCode()));
         }
         String tagId=null;
-        if(!CollectionUtils.isEmpty(param.getFolksonomyIds())) {
+        if(CollUtil.isNotEmpty(param.getFolksonomyIds())) {
             for(Long id:param.getFolksonomyIds()){
                 if(StringUtils.isNotBlank(tagId)){
                     tagId=id.toString()+","+tagId;
@@ -110,9 +111,9 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         }
 
         BeanUtil.copyProperties(param, info,"id","goodsState");
-        if(CollectionUtils.isEmpty(param.getFolksonomyIds())) {
+        if(CollUtil.isEmpty(param.getFolksonomyIds())) {
             String tagId=null;
-            if(!CollectionUtils.isEmpty(param.getFolksonomyIds())) {
+            if(CollUtil.isNotEmpty(param.getFolksonomyIds())) {
                 for(Long id:param.getFolksonomyIds()){
                     if(StringUtils.isNotBlank(tagId)){
                         tagId=id.toString();
