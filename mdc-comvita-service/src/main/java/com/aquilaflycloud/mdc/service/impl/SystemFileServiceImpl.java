@@ -382,6 +382,8 @@ public class SystemFileServiceImpl implements SystemFileService {
                         if (enumField != null) {
                             value = ReflectUtil.getFieldValue(enumField, "name");
                         }
+                    } else if ("Long".equals(field.getType().getSimpleName())) {
+                        value = Convert.toStr(ReflectUtil.getFieldValue(object, field));
                     } else {
                         value = ReflectUtil.getFieldValue(object, field);
                     }
