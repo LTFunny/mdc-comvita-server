@@ -5,6 +5,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
@@ -431,24 +432,29 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
             //判断数据是否合法
             List<Long> ids = new ArrayList<>();
+            Map<Long, Map<String, String>> importMap = new HashMap<>();
             for (int i = 0; i < dataMap.size(); i++) {
                 Map<String, String> item = dataMap.get(i);
                 //关键字段判空
+                Long id = Long.valueOf(item.get(fieldMap.get("id")));
+
                 if (StrUtil.isBlank(item.get(fieldMap.get("expressCode")))) {
                     throw new ServiceException("表格的物流编码不能为空");
                 } else if (StrUtil.isBlank(item.get(fieldMap.get("expressOrderCode")))) {
                     throw new ServiceException("表格的物流单号不能为空");
-                } else if (StrUtil.isBlank(item.get(fieldMap.get("id")))) {
+                } else if (ObjectUtil.isNull(id)) {
                     throw new ServiceException("表格的id不能为空");
                 }
 
-                ids.add(Long.parseLong(item.get(fieldMap.get("id"))));
+                ids.add(id);
+                importMap.put(id, item);
             }
 
-            //判断导入的id数和查询数据库的id数是否相同
+            //判断导入的id数和查询数据库的id数是否相同，根据商品类型排序，先发货预售商品，再发货赠品
             List<PreOrderGoods> preOrderGoods = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .in(PreOrderGoods::getId, ids)
                     .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
+                    .orderByAsc(PreOrderGoods::getGoodsType)
             );
             if (ids.size() != preOrderGoods.size()) {
                 throw new ServiceException("表格id有误");
@@ -460,11 +466,17 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
             //循环调用更新逻辑
             log.info("物流单号批量导入开始");
-            for (int i = 0; i < dataMap.size(); i++) {
-                Map<String, String> item = dataMap.get(i);
-                String expressCode = item.get(fieldMap.get("expressCode"));
-                String expressOrderCode = item.get(fieldMap.get("expressOrderCode"));
-                String id = item.get(fieldMap.get("id"));
+            for (int i = 0; i < preOrderGoods.size(); i++) {
+                PreOrderGoods item = preOrderGoods.get(i);
+                Map<String, String> itemDataMap = importMap.get(item.getId());
+
+                if (null == itemDataMap || itemDataMap.size() == 0) {
+                    throw new ServiceException("表格的数据有误，请检查再重试");
+                }
+
+                String expressCode = itemDataMap.get(fieldMap.get("expressCode"));
+                String expressOrderCode = itemDataMap.get(fieldMap.get("expressOrderCode"));
+                String id = itemDataMap.get(fieldMap.get("id"));
 
                 String expressName = expressMap.get(expressCode);
                 if (StrUtil.isBlank(expressName)) {
