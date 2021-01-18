@@ -88,8 +88,10 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         preGoodsInfo.setId(goodsId);
         preGoodsInfo.setGoodsState(GoodsStateEnum.ONSALE);
         Map<Long, String> folksonomyMap = folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREGOODS, preGoodsInfo.getId(), param.getFolksonomyIds());
-        preGoodsInfo.setFolksonomyId(CollUtil.join(folksonomyMap.keySet(), ","));
-        preGoodsInfo.setFolksonomyName(CollUtil.join(folksonomyMap.values(), ","));
+        if (CollUtil.isNotEmpty(folksonomyMap)) {
+            preGoodsInfo.setFolksonomyId(CollUtil.join(folksonomyMap.keySet(), ","));
+            preGoodsInfo.setFolksonomyName(CollUtil.join(folksonomyMap.values(), ","));
+        }
         int count = preGoodsInfoMapper.insert(preGoodsInfo);
         if (count <= 0) {
             throw new ServiceException("新增商品信息失败");
@@ -111,8 +113,10 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
         update.setId(goods.getId());
         //保存业务功能标签
         Map<Long, String> folksonomyMap = folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREGOODS, update.getId(), param.getFolksonomyIds());
-        update.setFolksonomyId(CollUtil.join(folksonomyMap.keySet(), ","));
-        update.setFolksonomyName(CollUtil.join(folksonomyMap.values(), ","));
+        if (CollUtil.isNotEmpty(folksonomyMap)) {
+            update.setFolksonomyId(CollUtil.join(folksonomyMap.keySet(), ","));
+            update.setFolksonomyName(CollUtil.join(folksonomyMap.values(), ","));
+        }
         int count = preGoodsInfoMapper.updateById(update);
         if (count <= 0) {
             throw new ServiceException("编辑商品信息失败");
