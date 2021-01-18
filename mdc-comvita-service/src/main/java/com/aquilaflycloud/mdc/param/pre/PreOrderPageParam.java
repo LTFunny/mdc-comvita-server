@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.param.pre;
 
 import com.aquilaflycloud.dataAuth.common.PageParam;
+import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -33,7 +34,7 @@ public class PreOrderPageParam extends PageParam<PreOrderInfo> {
     private String afterGuideName;
 
     @ApiModelProperty(value = "订单状态")
-    private String orderState;
+    private OrderInfoStateEnum orderState;
 
     @ApiModelProperty(value = "订单编码")
     private String orderCode;

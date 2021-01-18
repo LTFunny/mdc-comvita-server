@@ -5,6 +5,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
@@ -114,7 +115,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
                 .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
                 .like(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
-                .eq(StringUtils.isNotBlank(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
+                .eq(ObjectUtil.isNotNull(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
                 .like(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
                 .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
                 .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
@@ -132,7 +133,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
                 .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
                 .eq(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
-                .eq(StringUtils.isNotBlank(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
+                .eq(ObjectUtil.isNotNull(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
                 .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
                 .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
                 .eq(PreOrderInfo::getFailSymbol, FailSymbolEnum.NO)
