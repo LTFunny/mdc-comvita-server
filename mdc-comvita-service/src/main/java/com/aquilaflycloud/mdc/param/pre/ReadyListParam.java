@@ -1,21 +1,22 @@
 package com.aquilaflycloud.mdc.param.pre;
 
+import cn.hutool.core.date.DateTime;
 import com.aquilaflycloud.dataAuth.common.PageParam;
-import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
+import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import java.util.Date;
 
 /**
  * AdministrationListParam
  * <p>
  * zly
  */
+@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @Data
-public class ReadyListParam extends PageParam {
+public class ReadyListParam extends PageParam<PreOrderGoods> {
     @ApiModelProperty(value = "销售门店")
     private String reserveShop;
 
@@ -29,14 +30,14 @@ public class ReadyListParam extends PageParam {
     private String reserveName;
 
     @ApiModelProperty(value = "创建开始时间")
-    private Date createStartTime;
+    private DateTime createStartTime;
 
     @ApiModelProperty(value = "创建结束时间")
-    private Date createEndTime;
+    private DateTime createEndTime;
 
     @ApiModelProperty(value = "提交预约开始时间")
-    private Date reserveStartTime;
+    private DateTime reserveStartTime;
 
     @ApiModelProperty(value = "提交预约结束时间")
-    private Date reserveEndTime;
+    private DateTime reserveEndTime;
 }

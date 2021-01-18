@@ -342,7 +342,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
     @Override
     public IPage<PreOrderGoods> pagereadySalesList(ReadyListParam param) {
-        IPage<PreOrderGoods> list = preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
+        return preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
                 .like(StringUtils.isNotBlank(param.getGuideName()), PreOrderGoods::getGuideName, param.getGuideName())
                 .like(StringUtils.isNotBlank(param.getReserveName()), PreOrderGoods::getReserveName, param.getReserveName())
                 .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
@@ -355,7 +355,6 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .notIn(PreOrderGoods::getGiftsSymbol,GiftsSymbolEnum.NOTAFTER)
                 .orderByDesc(PreOrderGoods::getCreateTime)
         );
-        return list;
     }
 
     @Override
