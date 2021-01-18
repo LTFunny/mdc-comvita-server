@@ -184,6 +184,20 @@ public class PreOrderInfo implements Serializable {
     private String buyerPhone;
 
     /**
+     * 买家生日
+     */
+    @TableField(value = "buyer_birthday")
+    @ApiModelProperty(value = "买家生日")
+    private Date buyerBirthday;
+
+    /**
+     * 买家性别
+     */
+    @TableField(value = "buyer_sex")
+    @ApiModelProperty(value = "买家性别")
+    private SexEnum buyerSex;
+
+    /**
      * 买家地址邮编
      */
     @TableField(value = "buyer_postal_code")
@@ -218,20 +232,6 @@ public class PreOrderInfo implements Serializable {
     @TableField(value = "buyer_address")
     @ApiModelProperty(value = "买家详细地址")
     private String buyerAddress;
-
-    /**
-     * 买家生日
-     */
-    @TableField(value = "buyer_birthday")
-    @ApiModelProperty(value = "买家生日")
-    private Date buyerBirthday;
-
-    /**
-     * 买家性别
-     */
-    @TableField(value = "buyer_sex")
-    @ApiModelProperty(value = "买家性别")
-    private SexEnum buyerSex;
 
     /**
      * 订单状态

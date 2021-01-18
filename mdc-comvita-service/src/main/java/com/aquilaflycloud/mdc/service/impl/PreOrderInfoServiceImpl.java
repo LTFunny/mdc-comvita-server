@@ -531,6 +531,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preRefundOrderInfo.setRefundTime(DateTime.now());
         preRefundOrderInfo.setAfterGuideId(MdcUtil.getCurrentUserId());
         preRefundOrderInfo.setAfterGuideName(MdcUtil.getCurrentUserName());
+        preRefundOrderInfo.setOrderCreateTime(preOrderInfo.getCreateTime());
         int count = preRefundOrderInfoMapper.insert(preRefundOrderInfo);
         if (count <= 0) {
             throw new ServiceException("登记售后失败");
