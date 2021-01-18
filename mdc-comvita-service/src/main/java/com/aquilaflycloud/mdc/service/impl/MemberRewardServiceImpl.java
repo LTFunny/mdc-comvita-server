@@ -661,6 +661,25 @@ public class MemberRewardServiceImpl implements MemberRewardService {
         addMemberRewardRecord(memberInfo, rewardType, rewardValue, RewardSourceEnum.PREACTIVITY, sourceId, null);
     }
 
+    @Override
+    public void refundRewardRecord(Long memberId, Long sourceId) {
+        List<MemberRewardRecord> rewardRecordList = memberRewardRecordMapper.selectList(Wrappers.<MemberRewardRecord>lambdaQuery()
+                .eq(MemberRewardRecord::getMemberId, memberId)
+                .eq(MemberRewardRecord::getRewardSourceId, sourceId)
+        );
+        List<MemberRewardRecord> newRewardRecordList = new ArrayList<>();
+        for (MemberRewardRecord record : rewardRecordList) {
+            if (record.getRewardValue() > 0) {
+                MemberRewardRecord rewardRecord = BeanUtil.copyProperties(record, MemberRewardRecord.class, MdcUtil.getIgnoreNames());
+                rewardRecord.setRewardValue(-rewardRecord.getRewardValue());
+                newRewardRecordList.add(rewardRecord);
+            }
+        }
+        if (CollUtil.isNotEmpty(newRewardRecordList)) {
+            memberRewardRecordMapper.insertAllBatch(newRewardRecordList);
+        }
+    }
+
     private Map<String, DateTime> getCleanDate(MemberRewardRule rule) {
         DateTime now = DateUtil.beginOfDay(DateTime.now());
         DateTime cleanDate = DateUtil.dateNew(now).setMutable(true);

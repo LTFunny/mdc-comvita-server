@@ -574,6 +574,8 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     .ne(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
             );
         }
+        //退回订单奖励
+        memberRewardService.refundRewardRecord(preOrderInfo.getMemberId(), preOrderInfo.getId());
         //记录订单操作日志
         orderOperateRecordService.addOrderOperateRecordLog(MdcUtil.getCurrentUserName(), param.getOrderId(), "登记售后");
         //发送微信订阅消息
