@@ -225,7 +225,6 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
                     preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
                     preOrderInfoMapper.updateById(preOrderInfo);
-                    info.setGiftsSymbol(GiftsSymbolEnum.AFTER);
                 }
             } else {//待发货状态
                 if (allGoodsSend) {
