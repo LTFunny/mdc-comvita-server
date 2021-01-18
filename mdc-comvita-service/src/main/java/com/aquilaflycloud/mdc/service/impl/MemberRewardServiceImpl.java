@@ -668,15 +668,21 @@ public class MemberRewardServiceImpl implements MemberRewardService {
                 .eq(MemberRewardRecord::getRewardSourceId, sourceId)
         );
         List<MemberRewardRecord> newRewardRecordList = new ArrayList<>();
+        RewardSourceEnum rewardSource = RewardSourceEnum.REFUND;
         for (MemberRewardRecord record : rewardRecordList) {
             if (record.getRewardValue() > 0) {
                 MemberRewardRecord rewardRecord = BeanUtil.copyProperties(record, MemberRewardRecord.class, MdcUtil.getIgnoreNames());
                 rewardRecord.setRewardValue(-rewardRecord.getRewardValue());
+                rewardRecord.setRewardSource(rewardSource);
                 newRewardRecordList.add(rewardRecord);
             }
         }
         if (CollUtil.isNotEmpty(newRewardRecordList)) {
+            String appId = newRewardRecordList.get(0).getAppId();
+            RewardTypeEnum rewardType = newRewardRecordList.get(0).getRewardType();
             memberRewardRecordMapper.insertAllBatch(newRewardRecordList);
+            MdcUtil.publishTransactionalEvent(AfterCommitEvent.build(rewardSource.getName() + "后刷新奖励值缓存",
+                    () -> refreshMemberReward(appId, memberId, rewardType)));
         }
     }
 
