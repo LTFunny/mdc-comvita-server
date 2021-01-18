@@ -113,9 +113,9 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
                 .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
                 .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
-                .eq(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
+                .like(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
                 .eq(StringUtils.isNotBlank(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
-                .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
+                .like(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
                 .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
                 .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
@@ -164,9 +164,9 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     public IPage<PreRefundOrderInfo> pageOrderInfoList(PreRefundOrderListParam param) {
         IPage<PreRefundOrderInfo> list = preRefundOrderInfoMapper.selectPage(param.page(), Wrappers.<PreRefundOrderInfo>lambdaQuery()
                 .eq(StringUtils.isNotBlank(param.getShopId()), PreRefundOrderInfo::getShopId, param.getShopId())
-                .eq(StringUtils.isNotBlank(param.getGuideName()), PreRefundOrderInfo::getGuideName, param.getGuideName())
-                .eq(StringUtils.isNotBlank(param.getAfterGuideName()), PreRefundOrderInfo::getAfterGuideName, param.getAfterGuideName())
-                .eq(StringUtils.isNotBlank(param.getOrderCode()), PreRefundOrderInfo::getOrderCode, param.getOrderCode())
+                .like(StringUtils.isNotBlank(param.getGuideName()), PreRefundOrderInfo::getGuideName, param.getGuideName())
+                .like(StringUtils.isNotBlank(param.getAfterGuideName()), PreRefundOrderInfo::getAfterGuideName, param.getAfterGuideName())
+                .like(StringUtils.isNotBlank(param.getOrderCode()), PreRefundOrderInfo::getOrderCode, param.getOrderCode())
                 .like(StringUtils.isNotBlank(param.getBuyerName()), PreRefundOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getAfterSalesStartTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalesStartTime())
                 .le(param.getAfterSalEndTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalEndTime())
@@ -198,6 +198,10 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             }
             preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
             preOrderInfo.setDeliveryTime(new DateTime());
+            //当赠品录入快递时,反填快递信息给订单
+            preOrderInfo.setExpressOrder(param.getExpressOrder());
+            preOrderInfo.setExpressName(param.getExpressName());
+            preOrderInfo.setExpressCode(param.getExpressCode());
             preOrderInfoMapper.updateById(preOrderInfo);
         } else {//不是赠品。判断是否有
             //查询是否有赠品
@@ -340,9 +344,9 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     public IPage<PreOrderGoods> pagereadySalesList(ReadyListParam param) {
         IPage<PreOrderGoods> list = preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
                 .like(StringUtils.isNotBlank(param.getGuideName()), PreOrderGoods::getGuideName, param.getGuideName())
-                .eq(StringUtils.isNotBlank(param.getReserveName()), PreOrderGoods::getReserveName, param.getReserveName())
+                .like(StringUtils.isNotBlank(param.getReserveName()), PreOrderGoods::getReserveName, param.getReserveName())
                 .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
-                .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderGoods::getOrderCode, param.getOrderCode())
+                .like(StringUtils.isNotBlank(param.getOrderCode()), PreOrderGoods::getOrderCode, param.getOrderCode())
                 .like(StringUtils.isNotBlank(param.getReserveShop()), PreOrderGoods::getReserveShop, param.getReserveShop())
                 .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
