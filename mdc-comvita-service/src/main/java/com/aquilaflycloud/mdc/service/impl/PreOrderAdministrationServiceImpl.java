@@ -158,7 +158,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .eq(StringUtils.isNotBlank(param.getOrderCode()), PreRefundOrderInfo::getOrderCode, param.getOrderCode())
                 .like(StringUtils.isNotBlank(param.getBuyerName()), PreRefundOrderInfo::getBuyerName, param.getBuyerName())
                 .ge(param.getAfterSalesStartTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalesStartTime())
-                .le(param.getAfterSalEndTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalEndTime())
+                .le(param.getAfterSalesEndTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalesEndTime())
                 .ge(param.getCreateStartTime() != null, PreRefundOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreRefundOrderInfo::getCreateTime, param.getCreateEndTime())
                 .orderByDesc(PreRefundOrderInfo::getCreateTime)
