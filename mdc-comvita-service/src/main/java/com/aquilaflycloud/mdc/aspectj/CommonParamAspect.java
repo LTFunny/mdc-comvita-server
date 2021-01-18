@@ -37,7 +37,7 @@ public class CommonParamAspect {
             Object param = joinPoint.getArgs()[0];
             //处理查询时间段,start默认00:00:00,end默认23:59:59
             String className = param.getClass().getSimpleName();
-            if (StrUtil.containsAnyIgnoreCase(className, "add", "edit", "save")) {
+            if (StrUtil.containsAnyIgnoreCase(className, "add", "edit", "save","update")) {
                 return;
             }
             Map<String, Object> map = BeanUtil.beanToMap(param);
