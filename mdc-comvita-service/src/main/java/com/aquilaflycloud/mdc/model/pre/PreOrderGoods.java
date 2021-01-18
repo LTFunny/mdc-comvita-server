@@ -274,6 +274,12 @@ public class PreOrderGoods implements Serializable {
     @ApiModelProperty(value = "核销人所属部门名称")
     private String verificaterOrgNames;
 
+    /**
+     * 赠品标识(当商品都发货了,为1)
+     */
+    @TableField(value = "gifts_symbol")
+    @ApiModelProperty(value = "赠品标识(当商品都发货了,为1)")
+    private GiftsSymbolEnum giftsSymbol;
 
     /**
      * 创建时间

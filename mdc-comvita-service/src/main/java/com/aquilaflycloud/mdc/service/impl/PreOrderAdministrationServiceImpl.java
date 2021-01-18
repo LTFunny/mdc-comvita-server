@@ -125,20 +125,36 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Override
     public IPage<PreOrderInfo> pageMobilePreOder(PreOrderPageParam param) {
         Long id = MdcUtil.getCurrentUserId();
-        return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
-                .eq(PreOrderInfo::getGuideId,id)
-                .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
-                .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
-                .eq(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
-                .eq(ObjectUtil.isNotNull(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
-                .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
-                .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
-                .eq(PreOrderInfo::getFailSymbol, FailSymbolEnum.NO)
-                .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
-                .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
-                .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
-                .orderByDesc(PreOrderInfo::getCreateTime)
-        );
+        if(param.getConfirmState().equals("0")) {
+             return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
+                    .eq(PreOrderInfo::getGuideId, id)
+                    .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
+                    .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
+                    .eq(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
+                    .eq(ObjectUtil.isNotNull(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
+                    .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
+                    .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
+                    .eq(PreOrderInfo::getFailSymbol, FailSymbolEnum.NO)
+                    .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
+                    .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
+                    .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
+                    .orderByDesc(PreOrderInfo::getCreateTime)
+            );
+        }else {
+             return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
+                    .eq(PreOrderInfo::getGuideId, id)
+                    .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
+                    .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
+                    .eq(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
+                    .ne(PreOrderInfo::getOrderState,OrderInfoStateEnum.STAYCONFIRM)
+                    .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
+                    .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
+                    .eq(PreOrderInfo::getFailSymbol, FailSymbolEnum.NO)
+                    .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
+                    .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
+                    .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
+                    .orderByDesc(PreOrderInfo::getCreateTime));
+        }
     }
     @Override
     public IPage<PreRefundOrderInfo> pageOrderInfoList(PreRefundOrderListParam param) {
@@ -208,11 +224,15 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
                     preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
                     preOrderInfoMapper.updateById(preOrderInfo);
+                    info.setGiftsSymbol(GiftsSymbolEnum.AFTER);
                 }
             } else {//待发货状态
                 if (allGoodsSend) {
                     preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
                     preOrderInfoMapper.updateById(preOrderInfo);
+                    info.setGiftsSymbol(GiftsSymbolEnum.AFTER);
+                }else {
+                    info.setGiftsSymbol(GiftsSymbolEnum.NOTAFTER);
                 }
             }
         }
@@ -333,6 +353,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
                 .ge(param.getReserveStartTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveStartTime())
                 .le(param.getReserveEndTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveEndTime())
+                .notIn(PreOrderGoods::getGiftsSymbol,GiftsSymbolEnum.NOTAFTER)
                 .orderByDesc(PreOrderGoods::getCreateTime)
         );
         return list;
