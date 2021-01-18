@@ -5,17 +5,22 @@ import com.aquilaflycloud.dataAuth.component.EnumDeserializer;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 
 /**
- * GoodsTypeStateEnum
- *
- * @author zly
+ * @Author pengyongliang
+ * @Date 2020/12/30 16:28
+ * @Version 1.0
  */
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
-public enum GoodsStateStateEnum {
-    // 商品状态0-在售 1-下架
-    ONSALE(0, "在售"),
-    OFFTHESHELF(1, "下架");
+public enum GoodsTypeEnum {
 
-    GoodsStateStateEnum(int type, String name) {
+    /**
+     * 商品类型(1-预售商品、2-赠品、3-普通商品)
+     */
+    PREPARE(1,"预售商品"),
+    GIFTS(2,"赠品"),
+    ORDINARY(3,"普通商品"),
+    ;
+
+    GoodsTypeEnum(int type, String name) {
         this.type = type;
         this.name = name;
     }

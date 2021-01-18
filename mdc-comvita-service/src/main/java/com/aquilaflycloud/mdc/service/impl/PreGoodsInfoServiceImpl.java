@@ -2,18 +2,23 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.GoodsStateEnum;
+import com.aquilaflycloud.mdc.mapper.PreActivityInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreGoodsInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
+import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
+import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
-import com.aquilaflycloud.mdc.param.folksonomy.FolksonomyGetParam;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.GoodsSalesVolumeResult;
+import com.aquilaflycloud.mdc.result.pre.PreGoodsInfoResult;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.service.PreGoodsInfoService;
+import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zouliyong
@@ -38,136 +43,133 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
     @Resource
     private PreOrderInfoMapper preOrderInfoMapper;
     @Resource
+    private PreActivityInfoMapper preActivityInfoMapper;
+    @Resource
     private FolksonomyService folksonomyService;
 
     @Override
     public IPage<PreGoodsInfo> pagePreGoodsInfoList(PreGoodsInfoListParam param) {
-        IPage<PreGoodsInfo> list=preGoodsInfoMapper.selectPage(param.page(), Wrappers.<PreGoodsInfo>lambdaQuery()
-                .like( StrUtil.isNotBlank(param.getGoodsName()),PreGoodsInfo::getGoodsName, param.getGoodsName())
-                .like( StrUtil.isNotBlank(param.getFolksonomyId()),PreGoodsInfo::getFolksonomyId, param.getFolksonomyId())
-                .eq( StrUtil.isNotBlank(param.getGoodsState()),PreGoodsInfo::getGoodsState, param.getGoodsState())
-                .eq( StrUtil.isNotBlank(param.getGoodsType()),PreGoodsInfo::getGoodsType, param.getGoodsType())
-                .like( StrUtil.isNotBlank(param.getGoodsCode()),PreGoodsInfo::getGoodsCode, param.getGoodsCode())
-                .in(param.getGoodsTypes() != null && param.getGoodsTypes().length > 0,PreGoodsInfo::getGoodsType, param.getGoodsTypes())
+        return preGoodsInfoMapper.selectPage(param.page(), Wrappers.<PreGoodsInfo>lambdaQuery()
+                .like(StrUtil.isNotBlank(param.getGoodsName()), PreGoodsInfo::getGoodsName, param.getGoodsName())
+                .like(StrUtil.isNotBlank(param.getFolksonomyId()), PreGoodsInfo::getFolksonomyId, param.getFolksonomyId())
+                .eq(param.getGoodsState() != null, PreGoodsInfo::getGoodsState, param.getGoodsState())
+                .eq(param.getGoodsType() != null, PreGoodsInfo::getGoodsType, param.getGoodsType())
+                .like(StrUtil.isNotBlank(param.getGoodsCode()), PreGoodsInfo::getGoodsCode, param.getGoodsCode())
                 .orderByDesc(PreGoodsInfo::getCreateTime)
         );
-        return list;
+    }
+
+    private void checkDuplicate(Long id, String code, String name) {
+        if (StrUtil.isAllBlank(code, name)) {
+            throw new ServiceException("编码和名称不能同时为空");
+        }
+        int count = preGoodsInfoMapper.selectCount(Wrappers.<PreGoodsInfo>lambdaQuery()
+                .ne(id != null, PreGoodsInfo::getId, id)
+                .eq(StrUtil.isNotBlank(code), PreGoodsInfo::getGoodsCode, code)
+                .eq(StrUtil.isNotBlank(name), PreGoodsInfo::getGoodsName, name)
+        );
+        if (count > 0) {
+            if (StrUtil.isNotBlank(code)) {
+                throw new ServiceException("商品编码不能重复");
+            }
+            if (StrUtil.isNotBlank(name)) {
+                throw new ServiceException("商品名称不能重复");
+            }
+        }
     }
 
     @Override
     @Transactional
-    public void addPreGoodsInfo(ReturnGoodsInfoParam param) {
-        //判读是否存在名称和编号
-        if(StringUtils.isNotBlank(getCount(param.getGoodsName(),param.getGoodsCode()))){
-            throw new ServiceException(getCount(param.getGoodsName(),param.getGoodsCode()));
-        }
-        String tagId=null;
-        if(CollUtil.isNotEmpty(param.getFolksonomyIds())) {
-            for(Long id:param.getFolksonomyIds()){
-                if(StringUtils.isNotBlank(tagId)){
-                    tagId=id.toString()+","+tagId;
-                }else{
-                    tagId=id.toString();
-                }
-            }
-        }
-        PreGoodsInfo preGoodsInfo=new PreGoodsInfo();
-        preGoodsInfo.setGoodsCode( param.getGoodsCode());
-        preGoodsInfo.setGoodsName(param.getGoodsName());
-        preGoodsInfo.setGoodsType(param.getGoodsType());
-        preGoodsInfo.setGoodsPrice( param.getGoodsPrice());
-        preGoodsInfo.setGoodsDescription(param.getGoodsDescription());
-        preGoodsInfo.setGoodsState(param.getGoodsState());
-        preGoodsInfo.setFolksonomyId(tagId);
-        preGoodsInfo.setGoodsPicture(param.getGoodsPicture());
-        preGoodsInfo.setFolksonomyName(param.getFolksonomyName());
+    public void addPreGoodsInfo(GoodsInfoAddParam param) {
+        checkDuplicate(null, param.getGoodsCode(), null);
+        checkDuplicate(null, null, param.getGoodsName());
+        PreGoodsInfo preGoodsInfo = BeanUtil.copyProperties(param, PreGoodsInfo.class);
+        Long goodsId = MdcUtil.getSnowflakeId();
+        preGoodsInfo.setId(goodsId);
+        preGoodsInfo.setGoodsState(GoodsStateEnum.ONSALE);
+        Map<Long, String> folksonomyMap = folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREGOODS, preGoodsInfo.getId(), param.getFolksonomyIds());
+        preGoodsInfo.setFolksonomyId(CollUtil.join(folksonomyMap.keySet(), ","));
+        preGoodsInfo.setFolksonomyName(CollUtil.join(folksonomyMap.values(), ","));
         int count = preGoodsInfoMapper.insert(preGoodsInfo);
-        if (count == 1) {
-            //保存业务功能标签
-            folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREGOODS, preGoodsInfo.getId(), param.getFolksonomyIds());
-            log.info("保存商品信息成功");
-        } else {
-            throw new ServiceException("保存商品信息失败: count=" + count);
+        if (count <= 0) {
+            throw new ServiceException("新增商品信息失败");
         }
     }
 
     @Override
     @Transactional
-    public void editPreGoodsInfo(ReturnGoodsInfoParam param) {
-        if(param.getId()==null) {
-            throw new ServiceException("修改的数据主键未传" );
+    public void editPreGoodsInfo(GoodsInfoEditParam param) {
+        PreGoodsInfo goods = preGoodsInfoMapper.selectById(param.getId());
+        if (goods == null) {
+            throw new ServiceException("商品不存在");
         }
-        PreGoodsInfo info=  preGoodsInfoMapper.selectById(param.getId());
         //判读是否存在名称和编号
-        if(!param.getGoodsCode().equals(info.getGoodsCode())){
-            if(StringUtils.isNotBlank(getCount(null,param.getGoodsCode()))){
-                throw new ServiceException(getCount(null,param.getGoodsCode()));
-            }
-        }
-        if(!param.getGoodsName().equals(info.getGoodsName())){
-            if(StringUtils.isNotBlank(getCount(param.getGoodsName(),null))){
-                throw new ServiceException(getCount(param.getGoodsName(),null));
-            }
-        }
-
-        BeanUtil.copyProperties(param, info,"id","goodsState");
-        if(CollUtil.isEmpty(param.getFolksonomyIds())) {
-            String tagId=null;
-            if(CollUtil.isNotEmpty(param.getFolksonomyIds())) {
-                for(Long id:param.getFolksonomyIds()){
-                    if(StringUtils.isNotBlank(tagId)){
-                        tagId=id.toString();
-                    }else{
-                        tagId=id.toString()+","+tagId;
-                    }
-                }
-            }
-        }
-        preGoodsInfoMapper.updateById(info);
-        log.info("修改商品信息成功");
+        checkDuplicate(goods.getId(), param.getGoodsCode(), null);
+        checkDuplicate(goods.getId(), null, param.getGoodsName());
+        PreGoodsInfo update = new PreGoodsInfo();
+        BeanUtil.copyProperties(param, update);
+        update.setId(goods.getId());
         //保存业务功能标签
-        folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREGOODS, info.getId(), param.getFolksonomyIds());
+        Map<Long, String> folksonomyMap = folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREGOODS, update.getId(), param.getFolksonomyIds());
+        update.setFolksonomyId(CollUtil.join(folksonomyMap.keySet(), ","));
+        update.setFolksonomyName(CollUtil.join(folksonomyMap.values(), ","));
+        int count = preGoodsInfoMapper.updateById(update);
+        if (count <= 0) {
+            throw new ServiceException("编辑商品信息失败");
+        }
     }
 
     @Override
     @Transactional
-    public void changeGoodsType(ChangeGoodsInfoParam param) {
-        PreGoodsInfo info=  preGoodsInfoMapper.selectById(param.getId());
-        info.setGoodsState(param.getGoodsState());
-        preGoodsInfoMapper.updateById(info);
+    public void changeGoodsState(ChangeGoodsStateParam param) {
+        PreGoodsInfo goods = preGoodsInfoMapper.selectById(param.getId());
+        if (goods.getGoodsState() == GoodsStateEnum.ONSALE) {
+            //下架时判断是否有活动关联
+            DateTime now = DateTime.now();
+            int count = preActivityInfoMapper.selectCount(Wrappers.<PreActivityInfo>lambdaQuery()
+                    .eq(PreActivityInfo::getRefGoods, goods.getId())
+                    .le(PreActivityInfo::getBeginTime, now)
+                    .ge(PreActivityInfo::getEndTime, now)
+            );
+            if (count > 0) {
+                throw new ServiceException("商品有关联的正在进行的活动,不可下架");
+            }
+        }
+        PreGoodsInfo update = new PreGoodsInfo();
+        update.setId(param.getId());
+        update.setGoodsState(goods.getGoodsState() == GoodsStateEnum.ONSALE ? GoodsStateEnum.OFFTHESHELF : GoodsStateEnum.ONSALE);
+        int count = preGoodsInfoMapper.updateById(update);
+        if (count <= 0) {
+            throw new ServiceException("操作失败");
+        }
     }
 
     @Override
-    public ReturnGoodsInfoParam goodsData(GoodsInfoParam param) {
-        PreGoodsInfo info=  preGoodsInfoMapper.selectById(param.getId());
-        ReturnGoodsInfoParam returnGoodsInfoParam=new ReturnGoodsInfoParam();
-        BeanUtil.copyProperties(info, returnGoodsInfoParam);
-        if(StringUtils.isNotBlank(info.getFolksonomyId())){
-            String[] tagId=info.getFolksonomyId().split(",");
-            List<Long> list=new ArrayList<>();
-            for(String id:tagId){
-                FolksonomyGetParam folksonomyGetParam=new FolksonomyGetParam();
-                folksonomyGetParam.setId(Long.parseLong(id));
-                list.add(Long.parseLong(id));
-            }
-            returnGoodsInfoParam.setFolksonomyIds(list);
+    public PreGoodsInfoResult getGoodsInfo(GoodsInfoGetParam param) {
+        PreGoodsInfo goods = preGoodsInfoMapper.selectById(param.getId());
+        if (goods == null) {
+            throw new ServiceException("商品不存在");
         }
-        return returnGoodsInfoParam;
+        PreGoodsInfoResult preGoodsInfoResult = BeanUtil.copyProperties(goods, PreGoodsInfoResult.class);
+        List<FolksonomyInfo> folksonomyInfoList = folksonomyService.getFolksonomyBusinessList(BusinessTypeEnum.PREGOODS, goods.getId());
+        preGoodsInfoResult.setFolksonomyInfoList(folksonomyInfoList);
+        return preGoodsInfoResult;
     }
 
     @Override
     public GoodsSalesVolumeResult goodsVolume(GoodsSaleNumParam param) {
-        try{
-            param.setGoodsSevenTime(getBeforOrAfterDate(new Date(),-7));
-            param.setGoodsFifteenTime(getBeforOrAfterDate(new Date(),-15));
-            param.setGoodsThirtyTime(getBeforOrAfterDate(new Date(),-30));
-            GoodsSalesVolumeResult info=  preOrderInfoMapper.getNum(param);
+        try {
+            param.setGoodsSevenTime(getBeforOrAfterDate(new Date(), -7));
+            param.setGoodsFifteenTime(getBeforOrAfterDate(new Date(), -15));
+            param.setGoodsThirtyTime(getBeforOrAfterDate(new Date(), -30));
+            GoodsSalesVolumeResult info = preOrderInfoMapper.getNum(param);
             return info;
-        }catch (ParseException e){
+        } catch (ParseException e) {
             throw new ServiceException("查询商品销售失败");
         }
 
     }
+
     /**
      * 获取指定时间的推前或推后count天日期
      *
@@ -175,32 +177,11 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
      * @param count
      * @return
      */
-    public  Date getBeforOrAfterDate(Date selectDate, int count) throws ParseException {
+    public Date getBeforOrAfterDate(Date selectDate, int count) throws ParseException {
         Calendar c = Calendar.getInstance();
         c.setTime(selectDate);
         int day = c.get(Calendar.DATE);
         c.set(Calendar.DATE, day + count);
         return c.getTime();
-    }
-
-    //查询是否存在相应的数据
-    private String getCount(String name,String code ){
-        if(StringUtils.isNotBlank(name)){
-            List<PreGoodsInfo>  list =   preGoodsInfoMapper.selectList( Wrappers.<PreGoodsInfo>lambdaQuery()
-                    .eq( name!=null,PreGoodsInfo::getGoodsName, name)
-            );
-            if(list.size()>0){
-                return "商品名称已存在，请修改再提交";
-            }
-        }
-     if(StringUtils.isNotBlank(code)){
-         List<PreGoodsInfo>  list2 =   preGoodsInfoMapper.selectList( Wrappers.<PreGoodsInfo>lambdaQuery()
-                 .eq( code!=null,PreGoodsInfo::getGoodsState, code)
-         );
-         if(list2.size()>0){
-             return "商品编号已存在，请修改再提交";
-         }
-     }
-        return null;
     }
 }

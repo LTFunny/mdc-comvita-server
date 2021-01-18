@@ -90,7 +90,7 @@ public class PreOrderGoods implements Serializable {
      */
     @TableField(value = "goods_type")
     @ApiModelProperty(value = "商品类型(1-预售商品、2-赠品、3-普通商品)")
-    private OrderGoodsTypeEnum goodsType;
+    private GoodsTypeEnum goodsType;
 
     /**
      * 零售价

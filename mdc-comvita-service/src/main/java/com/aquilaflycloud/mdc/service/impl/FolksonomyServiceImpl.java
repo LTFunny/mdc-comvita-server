@@ -56,10 +56,10 @@ public class FolksonomyServiceImpl implements FolksonomyService {
 
     @Transactional
     @Override
-    public void saveFolksonomyBusinessRel(BusinessTypeEnum businessType, Long businessId, List<Long> folksonomyIds) {
+    public Map<Long, String> saveFolksonomyBusinessRel(BusinessTypeEnum businessType, Long businessId, List<Long> folksonomyIds) {
         //标签列表为空,表示不新增不删除
         if (folksonomyIds == null) {
-            return;
+            return null;
         }
         List<Long> oldFolksonomyIds = folksonomyBusinessRelMapper.selectMaps(Wrappers.<FolksonomyBusinessRel>lambdaQuery()
                 .select(FolksonomyBusinessRel::getFolksonomyId)
@@ -80,7 +80,8 @@ public class FolksonomyServiceImpl implements FolksonomyService {
         }
         if (del.size() > 0) {
             folksonomyBusinessRelMapper.delete(Wrappers.<FolksonomyBusinessRel>lambdaQuery()
-                    .in(FolksonomyBusinessRel::getFolksonomyId, del));
+                    .in(FolksonomyBusinessRel::getFolksonomyId, del)
+            );
         }
         if (add.size() > 0) {
             List<FolksonomyInfo> folksonomyList = folksonomyInfoMapper.selectList(Wrappers.<FolksonomyInfo>lambdaQuery()
@@ -91,6 +92,7 @@ public class FolksonomyServiceImpl implements FolksonomyService {
                 rel.setBusinessType(businessType);
                 rel.setBusinessId(businessId);
                 rel.setFolksonomyId(folksonomy.getId());
+                rel.setFolksonomyName(folksonomy.getName());
                 rel.setType(folksonomy.getType());
                 rel.setCatalogId(folksonomy.getCatalogId());
                 rel.setCatalogName(folksonomy.getCatalogName());
@@ -101,6 +103,11 @@ public class FolksonomyServiceImpl implements FolksonomyService {
                 folksonomyBusinessRelMapper.insertAllBatch(relList);
             }
         }
+        return folksonomyBusinessRelMapper.selectList(Wrappers.<FolksonomyBusinessRel>lambdaQuery()
+                .select(FolksonomyBusinessRel::getFolksonomyId, FolksonomyBusinessRel::getFolksonomyName)
+                .eq(FolksonomyBusinessRel::getBusinessType, businessType)
+                .eq(FolksonomyBusinessRel::getBusinessId, businessId)
+        ).stream().collect(Collectors.toMap(FolksonomyBusinessRel::getFolksonomyId, FolksonomyBusinessRel::getFolksonomyName));
     }
 
     @Override

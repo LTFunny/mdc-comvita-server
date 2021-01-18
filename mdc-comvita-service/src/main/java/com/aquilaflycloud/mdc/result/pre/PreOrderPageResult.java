@@ -1,9 +1,5 @@
 package com.aquilaflycloud.mdc.result.pre;
 
-import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
-import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
-import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

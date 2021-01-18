@@ -176,11 +176,11 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         }
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(info.getOrderId());
         boolean allGoodsSend = false;
-        if (OrderGoodsTypeEnum.GIFTS.equals(info.getGoodsType())) { //填赠品的时候是否所有商品都发货了
+        if (GoodsTypeEnum.GIFTS.equals(info.getGoodsType())) { //填赠品的时候是否所有商品都发货了
             List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
                     .notIn(PreOrderGoods::getId, info.getId())
-                    .notIn(PreOrderGoods::getGoodsType, OrderGoodsTypeEnum.GIFTS)
+                    .notIn(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
                     .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
             );
             if (list.size() > 0) {
@@ -194,12 +194,12 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
                     .ne(PreOrderGoods::getId, info.getId())
-                    .eq(PreOrderGoods::getGoodsType, OrderGoodsTypeEnum.GIFTS)
+                    .eq(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
             );
             List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
                     .ne(PreOrderGoods::getId, info.getId())
-                    .ne(PreOrderGoods::getGoodsType, OrderGoodsTypeEnum.GIFTS)
+                    .ne(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
                     .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
             );
             if (CollUtil.isEmpty(list2)) {
@@ -238,7 +238,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             prePickingCardMapper.updateById(prePickingCard);
         }
 
-        if (info.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
+        if (info.getGoodsType() == GoodsTypeEnum.GIFTS) {
             //赠品发货,发送订单发货微信订阅消息
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
                             .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERDELIVERY, null,
