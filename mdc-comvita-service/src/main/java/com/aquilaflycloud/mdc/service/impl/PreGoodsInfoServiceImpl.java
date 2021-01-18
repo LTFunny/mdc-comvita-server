@@ -128,7 +128,6 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
             DateTime now = DateTime.now();
             int count = preActivityInfoMapper.selectCount(Wrappers.<PreActivityInfo>lambdaQuery()
                     .eq(PreActivityInfo::getRefGoods, goods.getId())
-                    .le(PreActivityInfo::getBeginTime, now)
                     .ge(PreActivityInfo::getEndTime, now)
             );
             if (count > 0) {
