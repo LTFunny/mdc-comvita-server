@@ -64,5 +64,5 @@ public class PreRefundOrderListParam extends PageParam<PreRefundOrderInfo> {
     private Date afterSalesStartTime;
 
     @ApiModelProperty(value = "售后结束时间")
-    private Date afterSalEndTime;
+    private Date afterSalesEndTime;
 }
