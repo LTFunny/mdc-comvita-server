@@ -17,7 +17,6 @@ import com.aquilaflycloud.mdc.param.pre.PreOrderInfoGetParam;
 import com.aquilaflycloud.mdc.result.pre.PreOrderExpressResult;
 import com.aquilaflycloud.mdc.service.PreOrderExpressService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.gitee.sop.servercommon.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -70,11 +69,6 @@ public class PreOrderExpressServiceImpl implements PreOrderExpressService {
 
         JSONArray traces = jsonObject.getJSONArray("Traces");
 
-        //没有物流信息
-        if ("0".equals(state) && !success && null != traces && traces.size() == 0) {
-            return result;
-        }
-
         //有物流信息
         if (success && null != traces && traces.size() > 0) {
             for (int i = 0; i < traces.size(); i++) {
@@ -87,9 +81,6 @@ public class PreOrderExpressServiceImpl implements PreOrderExpressService {
 
                 result.add(item);
             }
-        } else {
-            log.error("查询物流接口错误：" + queryStr);
-            throw new ServiceException("请确定物流编码和物流单号正确无误");
         }
 
         return result;
