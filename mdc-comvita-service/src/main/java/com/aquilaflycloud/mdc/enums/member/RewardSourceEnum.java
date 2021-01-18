@@ -22,6 +22,7 @@ public enum RewardSourceEnum {
     OFFLINESIGN(6, "线下打卡"),
     MISSION(7, "会员任务"),
     PREACTIVITY(8, "预售活动"),
+    REFUND(9, "退款退分"),
     ;
 
     RewardSourceEnum(int type, String name) {
