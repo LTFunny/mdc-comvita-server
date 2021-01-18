@@ -48,17 +48,6 @@ public class PreReservationOrderGoodsParam  {
     @ApiModelProperty(value = "收货地址-详细地址")
     private String deliveryAddress;
 
-    /**
-     * 预约开始时间
-     */
-    @ApiModelProperty(value = "预约开始时间")
-    private Date reserveStartTime;
-
-    /**
-     * 预约结束时间
-     */
-    @ApiModelProperty(value = "预约结束时间")
-    private Date reserveEndTime;
 
     @ApiModelProperty(value = "是否可修改")
     private IsUpdateEnum isUpdate;

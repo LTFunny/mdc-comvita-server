@@ -6,6 +6,7 @@
     <select id="pageOrderReportList"  parameterType="com.aquilaflycloud.mdc.param.pre.ReportFormParam"
             resultType="com.aquilaflycloud.mdc.result.pre.ReportOrderPageResult">
         select
+        a.shop_id,
         shop_name shopName,
         sum(total_price) orderTotalPrice,
         count(id) orderNumber,
@@ -14,7 +15,7 @@
         from
         pre_order_info a
         left join
-        (select shop_id , sum(total_price) refundOrderTotalPrice,count(id) refundOrderNumber
+        (select shop_id , sum(refund_price) refundOrderTotalPrice,count(id) refundOrderNumber
         from pre_refund_order_info
         where shop_id is not null
         <if test="param.shopId != null and param.shopId != ''">
