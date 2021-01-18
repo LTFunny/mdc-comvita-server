@@ -64,6 +64,7 @@ public class PreActivityServiceImpl implements PreActivityService {
     public IPage<PreActivityPageResult> pagePreActivity(PreActivityPageParam param) {
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
                 .eq(PreActivityInfo::getActivityType, ActivityTypeEnum.PRE_SALES)
+                .ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
         ).convert(this::dataConvertResult);
     }
 
