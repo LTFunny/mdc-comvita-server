@@ -21,7 +21,9 @@ import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.MemberRewardService;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
+import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
 import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
+import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.mdc.util.PoiUtil;
 import com.aquilaflycloud.org.service.IUserProvider;
 import com.aquilaflycloud.org.service.provider.entity.PUserInfo;
@@ -75,6 +77,9 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Resource
     private PreExpressInfoMapper preExpressInfoMapper;
 
+    @Resource
+    private PreOrderOperateRecordService orderOperateRecordService;
+
     @Override
     public PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param) {
         return preOrderInfoMapper.selectMaps(new QueryWrapper<PreOrderInfo>()
@@ -119,8 +124,10 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
     @Override
     public IPage<PreOrderInfo> pageMobilePreOder(PreOrderPageParam param) {
+        Long id = MdcUtil.getCurrentUserId();
         if("1".equals(param.getConfirmState())){
             return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
+                    .eq(PreOrderInfo::getGuideId,id)
                     .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
                     .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
                     .eq(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
@@ -135,6 +142,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             );
         }else{
             return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
+                    .eq(PreOrderInfo::getGuideId,id)
                     .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
                     .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
                     .eq(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
@@ -210,6 +218,9 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 if (allGoodsSend) {//是空则商品都发完了，更新订单表
                     preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
                     preOrderInfo.setDeliveryTime(new DateTime());
+                    MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
+                    Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
+                    preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
                     preOrderInfoMapper.updateById(preOrderInfo);
                 }
             } else {//待发货状态
@@ -217,11 +228,6 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
                     preOrderInfoMapper.updateById(preOrderInfo);
                 }
-            }
-            if (OrderInfoStateEnum.BEENCOMPLETED.equals(preOrderInfo.getOrderState())) {
-                MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
-                Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
-                preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
             }
         }
         info.setExpressName(param.getExpressName());
@@ -238,6 +244,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
             prePickingCardMapper.updateById(prePickingCard);
         }
+        //添加操作记录
+        orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getGuideName(), preOrderInfo.getId(), "进行了发货。");
 
         if (info.getGoodsType() == GoodsTypeEnum.GIFTS) {
             //赠品发货,发送订单发货微信订阅消息

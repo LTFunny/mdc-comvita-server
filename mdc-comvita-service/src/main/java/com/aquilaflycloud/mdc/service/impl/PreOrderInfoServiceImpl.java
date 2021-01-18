@@ -248,17 +248,22 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     PreGoodsInfo preGoodsInfo1 = goodsInfoMapper.selectById(k.getGoodsId());
                     BeanUtil.copyProperties(preGoodsInfo1,preOrderGoods);
                     preOrderGoods.setId(null);
+                    preOrderGoods.setCreateTime(new Date());
+                    preOrderGoods.setLastUpdateTime(new Date());
                     preOrderGoods.setOrderId(preOrderInfo.getId());
                     preOrderGoods.setGoodsId(preGoodsInfo1.getId());
                     preOrderGoods.setGoodsType(GoodsTypeEnum.GIFTS);
                     preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
                     preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
-                    preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
+                    preOrderGoods.setGoodsCode(preGoodsInfo1.getGoodsCode());
                     preOrderGoods.setOrderCode(preOrderInfo.getOrderCode());
                     preOrderGoods.setReserveShopId(preOrderInfo.getShopId()+"");
+                    preOrderGoods.setReserveShop(preOrderInfo.getShopName());
                     preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
                     preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
                     preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
+                    preOrderGoods.setGuideId(preOrderInfo.getGuideId());
+                    preOrderGoods.setGuideName(preOrderInfo.getGuideName());
                     orderGoodsList.add(preOrderGoods);
                 });
             }
@@ -374,7 +379,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         result.setGoodsInfoNum(goodsCount);
         int cardCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
-                .eq(PreOrderGoods::getPickingCardState,PickingCardStateEnum.RESERVE));
+                .in(PreOrderGoods::getPickingCardState,PickingCardStateEnum.RESERVE,PickingCardStateEnum.VERIFICATE));
         int goodsCount2 = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
                 .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.PREPARE));
@@ -458,7 +463,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             throw new ServiceException("确认签收操作失败。");
         }
         String content = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss") + "进行了商品签收。";
-        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(), preOrderInfo.getId(), content);
+        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getRealName(), preOrderInfo.getId(), content);
         //签收预售商品,发送微信订阅消息
         MemberInfo memberInfo = memberInfoMapper.selectById(preOrderGoods.getReserveId());
         wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(memberInfo.getWxAppId())
@@ -493,7 +498,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         }
         String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了订单签收。";
-        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getMemberName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getRealName(),preOrderInfo.getId(),content);
         //签收赠品,发送微信订阅消息
         wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
                         .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERSIGN, null,
