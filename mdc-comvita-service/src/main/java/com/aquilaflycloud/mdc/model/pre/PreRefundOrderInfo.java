@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.member.SexEnum;
 import com.aquilaflycloud.mdc.enums.pre.AfterSaleTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -250,11 +251,46 @@ public class PreRefundOrderInfo implements Serializable {
     private String buyerPhone;
 
     /**
+     * 买家生日
+     */
+    @TableField(value = "buyer_birthday")
+    @ApiModelProperty(value = "买家生日")
+    private Date buyerBirthday;
+
+    /**
+     * 买家性别
+     */
+    @TableField(value = "buyer_sex")
+    @ApiModelProperty(value = "买家性别")
+    private SexEnum buyerSex;
+
+    /**
      * 买家地址邮编
      */
     @TableField(value = "buyer_postal_code")
     @ApiModelProperty(value = "买家地址邮编")
     private String buyerPostalCode;
+
+    /**
+     * 买家地址-省
+     */
+    @TableField(value = "buyer_province")
+    @ApiModelProperty(value = "买家地址-省")
+    private String buyerProvince;
+
+    /**
+     * 买家地址-市
+     */
+    @TableField(value = "buyer_city")
+    @ApiModelProperty(value = "买家地址-市")
+    private String buyerCity;
+
+    /**
+     * 买家地址-区
+     */
+    @TableField(value = "buyer_district")
+    @ApiModelProperty(value = "买家地址-区")
+    private String buyerDistrict;
 
     /**
      * 买家详细地址
@@ -269,6 +305,13 @@ public class PreRefundOrderInfo implements Serializable {
     @TableField(value = "order_state")
     @ApiModelProperty(value = "订单状态")
     private OrderInfoStateEnum orderState;
+
+    /**
+     * 订单创建时间
+     */
+    @TableField(value = "order_create_time")
+    @ApiModelProperty(value = "订单创建时间")
+    private Date orderCreateTime;
 
     /**
      * 创建时间

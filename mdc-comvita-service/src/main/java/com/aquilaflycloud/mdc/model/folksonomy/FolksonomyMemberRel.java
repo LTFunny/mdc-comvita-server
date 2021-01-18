@@ -28,6 +28,13 @@ public class FolksonomyMemberRel implements Serializable {
     private Long folksonomyId;
 
     /**
+     * 标签名称
+     */
+    @TableField(value = "folksonomy_name")
+    @ApiModelProperty(value = "标签名称")
+    private String folksonomyName;
+
+    /**
      * 标签类型
      */
     @TableField(value = "type")

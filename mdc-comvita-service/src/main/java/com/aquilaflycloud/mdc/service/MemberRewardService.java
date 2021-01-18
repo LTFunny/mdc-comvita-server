@@ -70,6 +70,8 @@ public interface MemberRewardService {
 
     void addPreActivityRewardRecord(MemberInfo memberInfo, RewardTypeEnum rewardType, Integer rewardValue, Long sourceId);
 
+    void refundRewardRecord(Long memberId, Long sourceId);
+
     void addCleanRewardRecord();
 }
 
