@@ -274,6 +274,7 @@ public class PreOrderGoods implements Serializable {
     @ApiModelProperty(value = "核销人所属部门名称")
     private String verificaterOrgNames;
 
+
     /**
      * 创建时间
      */

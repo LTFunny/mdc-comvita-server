@@ -103,6 +103,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         BeanUtil.copyProperties(param,preOrderInfo);
         MdcUtil.setMemberInfo(preOrderInfo,infoResult);
         preOrderInfo.setMemberId(infoResult.getId());
+        preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYCONFIRM);
         preOrderInfo.setScore(new BigDecimal("0"));
         preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderCode", "O" + DateTime.now().toString("yyMMdd"), 5));
