@@ -89,7 +89,7 @@ public class PreOrderExpressServiceImpl implements PreOrderExpressService {
             }
         } else {
             log.error("查询物流接口错误：" + queryStr);
-            throw new ServiceException("查询物流失败");
+            throw new ServiceException("请确定物流编码和物流单号正确无误");
         }
 
         return result;
