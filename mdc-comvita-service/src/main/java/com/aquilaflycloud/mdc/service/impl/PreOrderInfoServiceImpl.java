@@ -31,7 +31,6 @@ import com.gitee.sop.servercommon.exception.ServiceException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import springfox.documentation.spring.web.json.Json;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -251,7 +250,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     preOrderGoods.setId(null);
                     preOrderGoods.setOrderId(preOrderInfo.getId());
                     preOrderGoods.setGoodsId(preGoodsInfo1.getId());
-                    preOrderGoods.setGoodsType(OrderGoodsTypeEnum.GIFTS);
+                    preOrderGoods.setGoodsType(GoodsTypeEnum.GIFTS);
                     preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
                     preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
                     preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
@@ -313,13 +312,13 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preOrderGoodsMapper.updateById(orderGoods);
         List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
             .eq(PreOrderGoods::getOrderId,orderGoods.getOrderId())
-            .notIn(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
+            .notIn(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
 
         int result = preOrderGoodsMapper.pickingCardGet(orderGoods.getOrderId(), PickingCardStateEnum.VERIFICATE);
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(orderGoods.getOrderId());
         List<PreOrderGoods> OrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,orderGoods.getOrderId())
-                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
+                .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
         if(preOrderGoodsList.size() == result){
             preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.STATELESS);
             if(OrderGoodsList.size() > 0) {
@@ -348,7 +347,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         result.setState(order.getOrderState().getName());
         PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
-                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
+                .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
         if(null != preOrderGoods){
             result.setGiftsGoodsInfo(preOrderGoods);
         }
@@ -371,14 +370,14 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         result.setPreGoodsInfo(goodsInfo);
         int goodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
-                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.PREPARE));
+                .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.PREPARE));
         result.setGoodsInfoNum(goodsCount);
         int cardCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
                 .eq(PreOrderGoods::getPickingCardState,PickingCardStateEnum.RESERVE));
         int goodsCount2 = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
-                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.PREPARE));
+                .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.PREPARE));
         if(order.getOrderState().equals(OrderInfoStateEnum.WAITINGDELIVERY) && cardCount != goodsCount2){
             result.setState("部分预约");
         }
@@ -484,7 +483,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         }
         PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
-                .eq(PreOrderGoods::getGoodsType,OrderGoodsTypeEnum.GIFTS));
+                .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
         if(preOrderGoods != null) {
             preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
             int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);

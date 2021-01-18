@@ -12,7 +12,6 @@ import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
-import com.aquilaflycloud.mdc.model.coupon.CouponInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
@@ -28,7 +27,6 @@ import com.aquilaflycloud.org.service.IUserProvider;
 import com.aquilaflycloud.org.service.provider.entity.PUserInfo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
@@ -40,12 +38,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.validation.constraints.NotNull;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -179,11 +176,12 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             throw new ServiceException("商品不存在");
         }
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(info.getOrderId());
-        if (OrderGoodsTypeEnum.GIFTS.equals(info.getGoodsType())) { //填赠品的时候是否所有商品都发货了
+        boolean allGoodsSend = false;
+        if (GoodsTypeEnum.GIFTS.equals(info.getGoodsType())) { //填赠品的时候是否所有商品都发货了
             List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
                     .notIn(PreOrderGoods::getId, info.getId())
-                    .notIn(PreOrderGoods::getGoodsType, OrderGoodsTypeEnum.GIFTS)
+                    .notIn(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
                     .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
             );
             if (list.size() > 0) {
@@ -196,23 +194,26 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             //查询是否有赠品
             List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
-                    .notIn(PreOrderGoods::getId, info.getId())
-                    .eq(PreOrderGoods::getGoodsType, OrderGoodsTypeEnum.GIFTS)
+                    .ne(PreOrderGoods::getId, info.getId())
+                    .eq(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
             );
             List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getOrderId, info.getOrderId())
-                    .notIn(PreOrderGoods::getId, info.getId())
-                    .notIn(PreOrderGoods::getGoodsType, OrderGoodsTypeEnum.GIFTS)
+                    .ne(PreOrderGoods::getId, info.getId())
+                    .ne(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
                     .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
             );
-            if (CollectionUtils.isEmpty(list)) {//没有赠品，查询是否这是最后一个商品，是的话填写订单表商品状态和发货时间
-                if (CollectionUtils.isEmpty(list2)) {//是空则商品都发完了，更新订单表
+            if (CollUtil.isEmpty(list2)) {
+                allGoodsSend = true;
+            }
+            if (CollUtil.isEmpty(list)) {//没有赠品，查询是否这是最后一个商品，是的话填写订单表商品状态和发货时间
+                if (allGoodsSend) {//是空则商品都发完了，更新订单表
                     preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
                     preOrderInfo.setDeliveryTime(new DateTime());
                     preOrderInfoMapper.updateById(preOrderInfo);
                 }
             } else {//待发货状态
-                if (CollectionUtils.isEmpty(list2)) {
+                if (allGoodsSend) {
                     preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
                     preOrderInfoMapper.updateById(preOrderInfo);
                 }
@@ -238,15 +239,12 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             prePickingCardMapper.updateById(prePickingCard);
         }
 
-        if (info.getGoodsType() == OrderGoodsTypeEnum.GIFTS) {
+        if (info.getGoodsType() == GoodsTypeEnum.GIFTS) {
             //赠品发货,发送订单发货微信订阅消息
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
                             .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERDELIVERY, null,
                     preOrderInfo.getOrderCode(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress(),
                     info.getExpressName(), info.getExpressOrderCode(), info.getGoodsName() + "商品已发货");
-            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
-                            .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERCHANGE, null,
-                    preOrderInfo.getOrderCode(), "已发货", DateTime.now().toString(), "订单" + preOrderInfo.getOrderCode() + "已发货");
         } else {
             //商品发货,发送商品发货微信订阅消息
             MemberInfo memberInfo = memberInfoMapper.selectById(info.getReserveId());
@@ -254,6 +252,12 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                             .setOpenId(memberInfo.getOpenId())), MiniMessageTypeEnum.PREORDERGOODSELIVERY, null,
                     info.getGoodsName(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress(),
                     info.getExpressName(), info.getExpressOrderCode(), info.getGoodsName() + "商品已发货");
+            //若商品全部发完,发送微信订阅消息
+            if (allGoodsSend) {
+                wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
+                                .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERCHANGE, null,
+                        preOrderInfo.getOrderCode(), "已发货", DateTime.now().toString(), "订单" + preOrderInfo.getOrderCode() + "已发货");
+            }
         }
     }
 
@@ -358,10 +362,10 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         List<PUserInfo> list = iUserProvider.listUserInfo();
         IPage<ReportGuidePageResult> page = preOrderInfoMapper.achievementsGuide(param.page(), param);
         List<ReportGuidePageResult> list2 = page.getRecords();
-        if (CollectionUtils.isEmpty(list)) {
+        if (CollUtil.isEmpty(list)) {
             for (PUserInfo info : list) {
                 Boolean ishave = true;
-                if (CollectionUtils.isNotEmpty(list2)) {
+                if (CollUtil.isNotEmpty(list2)) {
                     for (ReportGuidePageResult result : list2) {
                         if (result.getGuideName().equals(info.getRealName())) {
                             ishave = false;

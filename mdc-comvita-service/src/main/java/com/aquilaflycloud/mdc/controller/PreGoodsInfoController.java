@@ -1,9 +1,9 @@
 package com.aquilaflycloud.mdc.controller;
 
-import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.GoodsSalesVolumeResult;
+import com.aquilaflycloud.mdc.result.pre.PreGoodsInfoResult;
 import com.aquilaflycloud.mdc.service.PreGoodsInfoService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -36,29 +36,29 @@ public class PreGoodsInfoController {
     @ApiOperation(value = "新增商品信息", notes = "新增商品信息")
 //    @PreAuthorize("hasAuthority('mdc:preGoodsInfo:list')")
     @ApiMapping(value = "backend.comvita.goods.info.add", method = RequestMethod.POST, permission = true)
-    public void addPreGoodsInfo(ReturnGoodsInfoParam param) {
+    public void addPreGoodsInfo(GoodsInfoAddParam param) {
          preGoodsInfoService.addPreGoodsInfo(param);
     }
 
     @ApiOperation(value = "编辑商品信息", notes = "编辑商品信息")
 //    @PreAuthorize("hasAuthority('mdc:preGoodsInfo:list')")
     @ApiMapping(value = "backend.comvita.goods.info.edit", method = RequestMethod.POST, permission = true)
-    public void editPreGoodsInfo(ReturnGoodsInfoParam param) {
+    public void editPreGoodsInfo(GoodsInfoEditParam param) {
         preGoodsInfoService.editPreGoodsInfo(param);
     }
 
     @ApiOperation(value = "商品上下架", notes = "商品上下架")
 //    @PreAuthorize("hasAuthority('mdc:preGoodsInfo:list')")
     @ApiMapping(value = "backend.comvita.goods.info.change", method = RequestMethod.POST, permission = true)
-    public void changeGoodsType(ChangeGoodsInfoParam param) {
-        preGoodsInfoService.changeGoodsType(param);
+    public void changeGoodsState(ChangeGoodsStateParam param) {
+        preGoodsInfoService.changeGoodsState(param);
     }
 
     @ApiOperation(value = "商品详细信息", notes = "商品详细信息")
 //    @PreAuthorize("hasAuthority('mdc:preGoodsInfo:list')")
-    @ApiMapping(value = "backend.comvita.goods.data", method = RequestMethod.POST, permission = true)
-    public BaseResult<ReturnGoodsInfoParam> goodsData(GoodsInfoParam param) {
-        return new BaseResult<ReturnGoodsInfoParam>().setResult(preGoodsInfoService.goodsData(param));
+    @ApiMapping(value = "backend.comvita.goods.info.get", method = RequestMethod.POST, permission = true)
+    public PreGoodsInfoResult getGoodsInfo(GoodsInfoGetParam param) {
+        return preGoodsInfoService.getGoodsInfo(param);
     }
     @ApiOperation(value = "商品销量信息", notes = "商品销量信息")
 //    @PreAuthorize("hasAuthority('mdc:preGoodsInfo:list')")

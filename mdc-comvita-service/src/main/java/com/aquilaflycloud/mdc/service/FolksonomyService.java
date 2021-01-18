@@ -10,6 +10,7 @@ import com.aquilaflycloud.mdc.result.folksonomy.FolksonomyNode;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * FolksonomyService
@@ -18,7 +19,7 @@ import java.util.List;
  * @date 2019-11-28
  */
 public interface FolksonomyService {
-    void saveFolksonomyBusinessRel(BusinessTypeEnum businessType, Long businessId, List<Long> folksonomyIds);
+    Map<Long, String> saveFolksonomyBusinessRel(BusinessTypeEnum businessType, Long businessId, List<Long> folksonomyIds);
 
     List<FolksonomyInfo> getFolksonomyBusinessList(BusinessTypeEnum businessType, Long businessId);
 

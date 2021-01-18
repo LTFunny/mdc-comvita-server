@@ -1,10 +1,12 @@
 package com.aquilaflycloud.mdc.param.pre;
 
 import com.aquilaflycloud.dataAuth.common.PageParam;
-import com.aquilaflycloud.mdc.enums.pre.GoodsStateStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.OrderGoodsTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.GoodsStateEnum;
+import com.aquilaflycloud.mdc.enums.pre.GoodsTypeEnum;
+import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 /**
@@ -12,9 +14,10 @@ import lombok.experimental.Accessors;
  * <p>
  * zly
  */
+@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @Data
-public class PreGoodsInfoListParam extends PageParam {
+public class PreGoodsInfoListParam extends PageParam<PreGoodsInfo> {
 
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
@@ -22,18 +25,12 @@ public class PreGoodsInfoListParam extends PageParam {
     @ApiModelProperty(value = "商品编号")
     private String goodsCode;
 
-    @ApiModelProperty(value = "GoodsStateStateEnum商品状态(0-在售 1-下架)")
-    private String goodsState;
+    @ApiModelProperty(value = "商品状态(pre.GoodsStateEnum)")
+    private GoodsStateEnum goodsState;
 
-    @ApiModelProperty(value = "OrderGoodsTypeEnum商品类型(1-预售商品、2-赠品、3-普通商品)")
-    private String goodsType;
-
-    @ApiModelProperty(value = "OrderGoodsTypeEnum商品类型(1-预售商品、2-赠品、3-普通商品),逗号隔开")
-    private String[] goodsTypes;
+    @ApiModelProperty(value = "商品类型(pre.GoodsTypeEnum)")
+    private GoodsTypeEnum goodsType;
 
     @ApiModelProperty(value = "标签id")
-    private String  folksonomyId;
-
-    @ApiModelProperty(value = "GoodsStateStateEnum商品状态(0-在售 1-下架),逗号隔开")
-    private String[] goodsStates;
+    private String folksonomyId;
 }
