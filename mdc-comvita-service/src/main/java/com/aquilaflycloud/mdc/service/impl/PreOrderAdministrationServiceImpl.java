@@ -231,8 +231,6 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
                     preOrderInfoMapper.updateById(preOrderInfo);
                     info.setGiftsSymbol(GiftsSymbolEnum.AFTER);
-                }else {
-                    info.setGiftsSymbol(GiftsSymbolEnum.NOTAFTER);
                 }
             }
         }

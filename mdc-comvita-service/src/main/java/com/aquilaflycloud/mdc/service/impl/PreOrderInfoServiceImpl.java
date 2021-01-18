@@ -224,6 +224,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
                 preOrderGoods.setTenantId(preOrderInfo.getTenantId());
                 preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PREPARE);
+                preOrderGoods.setGiftsSymbol(GiftsSymbolEnum.AFTER);
                 orderGoodsList.add(preOrderGoods);
             });
             //确认订单后奖励
@@ -265,6 +266,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
                     preOrderGoods.setGuideId(preOrderInfo.getGuideId());
                     preOrderGoods.setGuideName(preOrderInfo.getGuideName());
+                    preOrderGoods.setGiftsSymbol(GiftsSymbolEnum.NOTAFTER);
                     orderGoodsList.add(preOrderGoods);
                 });
             }
