@@ -15,7 +15,7 @@ public enum GiftsSymbolEnum {
 
     // 赠品标识(当商品都发货了,为1)
     NOTAFTER(0, "未发完"),
-    AFTER(1, "发完/没赠品");
+    AFTER(1, "发完/不是赠品");
 
     GiftsSymbolEnum(int type, String name) {
         this.type = type;
