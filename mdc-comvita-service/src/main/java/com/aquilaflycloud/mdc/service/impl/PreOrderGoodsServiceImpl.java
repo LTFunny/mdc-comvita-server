@@ -1,12 +1,14 @@
 package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.pre.IsUpdateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
+import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PrePickingCardMapper;
@@ -16,8 +18,10 @@ import com.aquilaflycloud.mdc.model.pre.PrePickingCard;
 import com.aquilaflycloud.mdc.param.pre.PreOrderGoodsPageParam;
 import com.aquilaflycloud.mdc.param.pre.PreReservationOrderGoodsParam;
 import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
+import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.PreOrderGoodsService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
+import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -47,6 +51,9 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
 
     @Resource
     private PreOrderOperateRecordService orderOperateRecordService;
+
+    @Resource
+    private WechatMiniProgramSubscribeMessageService wechatMiniProgramSubscribeMessageService;
 
     @Override
     public IPage<PreOrderGoods> pagePreOrderGoods(PreOrderGoodsPageParam param) {
@@ -115,6 +122,17 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
             String content = preOrderGoods.getReserveName() + DateUtil.format(new Date(), "yyyy-MM-dd") + " 对预约信息" +
                     preOrderGoods.getGoodsName() + "进行了修改。";
             orderOperateRecordService.addOrderOperateRecordLog(preOrderGoods.getReserveName(), orderInfo.getId(), content);
+        }
+        //若全部预约完成发送微信订阅消息
+        int count = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId, orderInfo.getId())
+                .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PREPARE)
+        );
+        //若商品全部发完,发送微信订阅消息
+        if (count == 0) {
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(orderInfo.getAppId())
+                            .setOpenId(orderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERCHANGE, null,
+                    orderInfo.getOrderCode(), "已全部预约", DateTime.now().toString(), "订单" + orderInfo.getOrderCode() + "已全部预约");
         }
     }
 

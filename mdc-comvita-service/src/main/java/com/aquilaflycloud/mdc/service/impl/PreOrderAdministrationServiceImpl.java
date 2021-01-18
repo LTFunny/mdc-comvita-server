@@ -251,12 +251,6 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                             .setOpenId(memberInfo.getOpenId())), MiniMessageTypeEnum.PREORDERGOODSELIVERY, null,
                     info.getGoodsName(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress(),
                     info.getExpressName(), info.getExpressOrderCode(), info.getGoodsName() + "商品已发货");
-            //若商品全部发完,发送微信订阅消息
-            if (allGoodsSend) {
-                wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
-                                .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERCHANGE, null,
-                        preOrderInfo.getOrderCode(), "已发货", DateTime.now().toString(), "订单" + preOrderInfo.getOrderCode() + "已发货");
-            }
         }
     }
 
