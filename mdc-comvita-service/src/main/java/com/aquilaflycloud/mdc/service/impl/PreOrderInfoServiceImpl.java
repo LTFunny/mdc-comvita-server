@@ -25,6 +25,7 @@ import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.*;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.org.service.provider.entity.PUmsUserDetail;
+import com.aquilaflycloud.org.service.provider.entity.PUserInfo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
@@ -103,7 +104,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         BeanUtil.copyProperties(param,preOrderInfo);
         MdcUtil.setMemberInfo(preOrderInfo,infoResult);
         preOrderInfo.setMemberId(infoResult.getId());
-        preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYCONFIRM);
         preOrderInfo.setScore(new BigDecimal("0"));
         preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderCode", "O" + DateTime.now().toString("yyMMdd"), 5));
@@ -159,7 +159,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
         BeanUtil.copyProperties(param,preOrderInfo);
-        preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
+        preOrderInfo.setFailSymbol(null);
         preOrderInfo.setReason("");
         int orderInfo = preOrderInfoMapper.updateById(preOrderInfo);
         if(orderInfo < 0){
@@ -228,7 +228,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 orderGoodsList.add(preOrderGoods);
             });
             //确认订单后奖励
-            if (StrUtil.isNotBlank(preActivityInfo.getRewardRuleContent())) {
+            if (StrUtil.isNotBlank(preActivityInfo.getRewardRuleContent()) && !StrUtil.equals(preActivityInfo.getRewardRuleContent(), "[]")) {
                 MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
                 List<PreActivityRewardResult> rewardRuleList = JSONUtil.toList(JSONUtil.parseArray(preActivityInfo.getRewardRuleContent()), PreActivityRewardResult.class);
                 for (PreActivityRewardResult rewardRule : rewardRuleList) {
@@ -539,13 +539,14 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Override
     public void refundOrder(PreOrderRefundParam param) {
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
+        PUserInfo userInfo = userConsumer.getUserByid(MdcUtil.getCurrentUserId());
         PreRefundOrderInfo preRefundOrderInfo = new PreRefundOrderInfo();
         BeanUtil.copyProperties(preOrderInfo, preRefundOrderInfo, CopyOptions.create().setIgnoreProperties(MdcUtil.getIgnoreNames()));
         BeanUtil.copyProperties(param, preRefundOrderInfo);
         preRefundOrderInfo.setRefundCode(MdcUtil.getTenantIncIdStr("preOrderRefundCode", "R" + DateTime.now().toString("yyMMdd"), 5));
         preRefundOrderInfo.setRefundTime(DateTime.now());
         preRefundOrderInfo.setAfterGuideId(MdcUtil.getCurrentUserId());
-        preRefundOrderInfo.setAfterGuideName(MdcUtil.getCurrentUserName());
+        preRefundOrderInfo.setAfterGuideName(userInfo.getRealName());
         preRefundOrderInfo.setOrderCreateTime(preOrderInfo.getCreateTime());
         int count = preRefundOrderInfoMapper.insert(preRefundOrderInfo);
         if (count <= 0) {
@@ -593,7 +594,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         //退回订单奖励
         memberRewardService.refundRewardRecord(preOrderInfo.getMemberId(), preOrderInfo.getId());
         //记录订单操作日志
-        orderOperateRecordService.addOrderOperateRecordLog(MdcUtil.getCurrentUserName(), param.getOrderId(), "登记售后");
+        orderOperateRecordService.addOrderOperateRecordLog(userInfo.getRealName(), param.getOrderId(), "登记售后");
         //发送微信订阅消息
         wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
                         .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERREFUNDAUDIT, null,

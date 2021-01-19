@@ -135,8 +135,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     .eq(ObjectUtil.isNotNull(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
                     .eq(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
                     .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
-                    .eq(PreOrderInfo::getFailSymbol, FailSymbolEnum.NO)
-                    .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
+                     .isNull(PreOrderInfo::getFailSymbol)
+                     .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
                     .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
                     .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
                     .orderByDesc(PreOrderInfo::getCreateTime)
@@ -165,8 +165,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .like(StringUtils.isNotBlank(param.getAfterGuideName()), PreRefundOrderInfo::getAfterGuideName, param.getAfterGuideName())
                 .like(StringUtils.isNotBlank(param.getOrderCode()), PreRefundOrderInfo::getOrderCode, param.getOrderCode())
                 .like(StringUtils.isNotBlank(param.getBuyerName()), PreRefundOrderInfo::getBuyerName, param.getBuyerName())
-                .ge(param.getAfterSalesStartTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalesStartTime())
-                .le(param.getAfterSalesEndTime() != null, PreRefundOrderInfo::getReceiveTime, param.getAfterSalesEndTime())
+                .ge(param.getAfterSalesStartTime() != null, PreRefundOrderInfo::getRefundTime, param.getAfterSalesStartTime())
+                .le(param.getAfterSalesEndTime() != null, PreRefundOrderInfo::getRefundTime, param.getAfterSalesEndTime())
                 .ge(param.getCreateStartTime() != null, PreRefundOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreRefundOrderInfo::getCreateTime, param.getCreateEndTime())
                 .orderByDesc(PreRefundOrderInfo::getCreateTime)
@@ -375,12 +375,12 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         List<PUserInfo> list = iUserProvider.listUserInfo();
         IPage<ReportGuidePageResult> page = preOrderInfoMapper.achievementsGuide(param.page(), param);
         List<ReportGuidePageResult> list2 = page.getRecords();
-        if (CollUtil.isEmpty(list)) {
+        if (CollUtil.isNotEmpty(list)) {
             for (PUserInfo info : list) {
                 Boolean ishave = true;
                 if (CollUtil.isNotEmpty(list2)) {
                     for (ReportGuidePageResult result : list2) {
-                        if (result.getGuideName().equals(info.getRealName())) {
+                        if (result.getGuideId().equals(info.getId())) {
                             ishave = false;
                             break;
                         }
@@ -459,57 +459,118 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         for (int i = 0; i < dataMap.size(); i++) {
             Map<String, String> item = dataMap.get(i);
             //关键字段判空
-            Long id = Long.valueOf(item.get(fieldMap.get("id")));
+            String expressCodeName = fieldMap.get("expressCode");
+            String expressOrderCodeName = fieldMap.get("expressOrderCode");
+            String expressName = fieldMap.get("expressName");
+            String idName = fieldMap.get("id");
 
-            if (StrUtil.isBlank(item.get(fieldMap.get("expressCode")))) {
-                throw new ServiceException("表格的物流编码不能为空");
-            } else if (StrUtil.isBlank(item.get(fieldMap.get("expressOrderCode")))) {
-                throw new ServiceException("表格的物流单号不能为空");
-            } else if (ObjectUtil.isNull(id)) {
-                throw new ServiceException("表格的id不能为空");
-            } else if (StrUtil.isBlank(item.get(fieldMap.get("expressName")))) {
-                throw new ServiceException("表格的物流名称不能为空");
+            Long id = Long.valueOf(item.get(idName));
+            boolean expressCodeSign = StrUtil.isBlank(item.get(expressCodeName));
+            boolean expressOrderCodeSign = StrUtil.isBlank(item.get(expressOrderCodeName));
+            boolean expressNameSign = StrUtil.isBlank(item.get(expressName));
+            boolean idSign = ObjectUtil.isNull(id);
+
+            //物流相关字段都为空，则跳过这条记录
+            if (expressCodeSign && expressOrderCodeSign && expressNameSign) {
+                continue;
+            }
+
+            if (expressCodeSign) {
+                throw new ServiceException("物流信息需填写完整：" + expressCodeName + "不能为空");
+            } else if (expressOrderCodeSign) {
+                throw new ServiceException("物流信息需填写完整：" + expressOrderCodeName + "不能为空");
+            } else if (idSign) {
+                throw new ServiceException("id不能为空，请重新导出数据进行信息填写后再导入");
+            } else if (expressNameSign) {
+                throw new ServiceException("物流信息需填写完整：" + expressName + "物流名称不能为空");
             }
 
             ids.add(id);
             importMap.put(id, item);
         }
 
-        //判断导入的id数和查询数据库的id数是否相同，根据商品类型排序，先发货预售商品，再发货赠品
-        List<PreOrderGoods> preOrderGoods = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                .in(PreOrderGoods::getId, ids)
-                .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
-                .orderByAsc(PreOrderGoods::getGoodsType)
-                .orderByDesc(PreOrderGoods::getCreateTime)
-        );
-        if (ids.size() != preOrderGoods.size()) {
-            throw new ServiceException("表格id有误");
-        }
+        if (null != ids && ids.size() > 0) {
+            //判断导入的id数和查询数据库的id数是否相同，根据商品类型排序，先发货预售商品，再发货赠品
+            List<PreOrderGoods> preOrderGoods = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .in(PreOrderGoods::getId, ids)
+                    .nested(item->item.eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE).or().eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.ALSENDGOODS))
+                    .orderByAsc(PreOrderGoods::getGoodsType)
+                    .orderByDesc(PreOrderGoods::getCreateTime)
+            );
 
-        //循环调用更新逻辑
-        log.info("物流单号批量导入开始");
-        for (int i = 0; i < preOrderGoods.size(); i++) {
-            PreOrderGoods item = preOrderGoods.get(i);
-            Map<String, String> itemDataMap = importMap.get(item.getId());
+            List<PreOrderGoods> pretakeList = preOrderGoods.stream().filter(item -> ObjectUtil.equal(item.getOrderGoodsState(), OrderGoodsStateEnum.PRETAKE)).collect(Collectors.toList());
+            List<PreOrderGoods> alsendgoodsList = preOrderGoods.stream().filter(item -> ObjectUtil.equal(item.getOrderGoodsState(), OrderGoodsStateEnum.ALSENDGOODS)).collect(Collectors.toList());
+            //循环调用更新逻辑
 
-            if (null == itemDataMap || itemDataMap.size() == 0) {
-                throw new ServiceException("表格的数据有误，请检查再重试");
+            log.info("物流单号批量导入开始");
+
+            //待发货，更新状态和发送发货信息给c端用户
+            if (null != pretakeList && pretakeList.size() > 0) {
+                for (int i = 0; i < pretakeList.size(); i++) {
+                    PreOrderGoods item = preOrderGoods.get(i);
+                    Map<String, String> itemDataMap = importMap.get(item.getId());
+
+                    if (null == itemDataMap || itemDataMap.size() == 0) {
+                        throw new ServiceException("表格的数据有误，请检查再重试");
+                    }
+
+                    String expressCode = itemDataMap.get(fieldMap.get("expressCode"));
+                    String expressOrderCode = itemDataMap.get(fieldMap.get("expressOrderCode"));
+                    String id = itemDataMap.get(fieldMap.get("id"));
+                    String expressName = itemDataMap.get(fieldMap.get("expressName"));
+
+                    InputOrderNumberParam inputOrderNumberParam = new InputOrderNumberParam();
+                    inputOrderNumberParam.setId(id);
+                    inputOrderNumberParam.setExpressCode(expressCode);
+                    inputOrderNumberParam.setExpressOrder(expressOrderCode);
+                    inputOrderNumberParam.setExpressName(expressName);
+
+                    log.info("待发货订单物流单号更新信息：{id=" + id + ", expressCode=" + expressCode + ", expressOrderCode" + expressOrderCode + ", expressName" + expressName + "}");
+                    this.inputOrderNumber(inputOrderNumberParam);
+                }
             }
 
-            String expressCode = itemDataMap.get(fieldMap.get("expressCode"));
-            String expressOrderCode = itemDataMap.get(fieldMap.get("expressOrderCode"));
-            String id = itemDataMap.get(fieldMap.get("id"));
-            String expressName = itemDataMap.get(fieldMap.get("expressName"));
+            //已发货，更新物流字段
+            if (null != alsendgoodsList && alsendgoodsList.size() > 0) {
+                for (int i = 0; i < alsendgoodsList.size(); i++) {
+                    PreOrderGoods item = alsendgoodsList.get(i);
+                    Map<String, String> itemDataMap = importMap.get(item.getId());
 
-            InputOrderNumberParam inputOrderNumberParam = new InputOrderNumberParam();
-            inputOrderNumberParam.setId(id);
-            inputOrderNumberParam.setExpressCode(expressCode);
-            inputOrderNumberParam.setExpressOrder(expressOrderCode);
-            inputOrderNumberParam.setExpressName(expressName);
+                    if (null == itemDataMap || itemDataMap.size() == 0) {
+                        throw new ServiceException("表格的数据有误，请检查再重试");
+                    }
 
-            log.info("物流单号更新信息：{id=" + id + ", expressCode=" + expressCode + ", expressOrderCode" + expressOrderCode + "}");
-            this.inputOrderNumber(inputOrderNumberParam);
+                    String expressCode = itemDataMap.get(fieldMap.get("expressCode"));
+                    String expressOrderCode = itemDataMap.get(fieldMap.get("expressOrderCode"));
+                    String id = itemDataMap.get(fieldMap.get("id"));
+                    String expressName = itemDataMap.get(fieldMap.get("expressName"));
+
+                    //字段都一样，跳过循环
+                    if (StrUtil.equals(id, item.getId().toString())
+                            && StrUtil.equals(expressCode, item.getExpressCode())
+                            && StrUtil.equals(expressOrderCode, item.getExpressOrderCode())
+                            && StrUtil.equals(expressName, item.getExpressName())) {
+                        continue;
+                    }
+
+                    PreOrderGoods updateItem = new PreOrderGoods();
+                    updateItem.setId(item.getId());
+                    updateItem.setExpressCode(expressCode);
+                    updateItem.setExpressOrderCode(expressOrderCode);
+                    updateItem.setExpressName(expressName);
+
+                    int count = preOrderGoodsMapper.updateById(updateItem);
+
+                    if (count > 0) {
+                        log.info("待签收订单物流单号更新信息：{id=" + id + ", expressCode=" + expressCode + ", expressOrderCode" + expressOrderCode + ", expressName" + expressName + "}");
+                    } else {
+                        throw new ServiceException("导入失败，请重试");
+                    }
+                }
+            }
+            log.info("物流单号批量导入结束");
+        } else {
+            throw new ServiceException("请检查导入的数据是否有效");
         }
-        log.info("物流单号批量导入结束");
     }
 }
