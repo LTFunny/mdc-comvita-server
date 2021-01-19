@@ -458,17 +458,26 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         Map<Long, Map<String, String>> importMap = new HashMap<>();
         for (int i = 0; i < dataMap.size(); i++) {
             Map<String, String> item = dataMap.get(i);
-            //关键字段判空
             Long id = Long.valueOf(item.get(fieldMap.get("id")));
+            //关键字段判空
+            boolean expressCodeSign = StrUtil.isBlank(item.get(fieldMap.get("expressCode")));
+            boolean expressOrderCodeSign = StrUtil.isBlank(item.get(fieldMap.get("expressOrderCode")));
+            boolean expressNameSign = StrUtil.isBlank(item.get(fieldMap.get("expressName")));
+            boolean idSign = ObjectUtil.isNull(id);
 
-            if (StrUtil.isBlank(item.get(fieldMap.get("expressCode")))) {
-                throw new ServiceException("表格的物流编码不能为空");
-            } else if (StrUtil.isBlank(item.get(fieldMap.get("expressOrderCode")))) {
-                throw new ServiceException("表格的物流单号不能为空");
-            } else if (ObjectUtil.isNull(id)) {
-                throw new ServiceException("表格的id不能为空");
-            } else if (StrUtil.isBlank(item.get(fieldMap.get("expressName")))) {
-                throw new ServiceException("表格的物流名称不能为空");
+            //物流相关字段都为空，则跳过这条记录
+            if (expressCodeSign && expressOrderCodeSign && expressNameSign) {
+                continue;
+            }
+
+            if (expressCodeSign) {
+                throw new ServiceException("物流信息需填写完整：物流编码不能为空");
+            } else if (expressOrderCodeSign) {
+                throw new ServiceException("物流信息需填写完整：物流单号不能为空");
+            } else if (idSign) {
+                throw new ServiceException("id不能为空，请重新导出数据进行信息填写后再导入");
+            } else if (expressNameSign) {
+                throw new ServiceException("物流信息需填写完整：物流名称不能为空");
             }
 
             ids.add(id);
@@ -482,9 +491,6 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .orderByAsc(PreOrderGoods::getGoodsType)
                 .orderByDesc(PreOrderGoods::getCreateTime)
         );
-        if (ids.size() != preOrderGoods.size()) {
-            throw new ServiceException("表格id有误");
-        }
 
         //循环调用更新逻辑
         log.info("物流单号批量导入开始");
