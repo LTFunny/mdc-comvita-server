@@ -14,7 +14,8 @@ public enum FailSymbolEnum {
 
     // 是否为不通过 0.是 1.否
     YES(0, "是"),
-    NO(1, "否");
+    NO(1, "否"),
+    YES_NO(2,"都不是");
 
     FailSymbolEnum(int type, String name) {
         this.type = type;

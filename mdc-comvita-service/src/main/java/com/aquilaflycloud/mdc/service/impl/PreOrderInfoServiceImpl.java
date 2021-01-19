@@ -103,6 +103,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         BeanUtil.copyProperties(param,preOrderInfo);
         MdcUtil.setMemberInfo(preOrderInfo,infoResult);
         preOrderInfo.setMemberId(infoResult.getId());
+        preOrderInfo.setFailSymbol(FailSymbolEnum.YES_NO);
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYCONFIRM);
         preOrderInfo.setScore(new BigDecimal("0"));
         preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderCode", "O" + DateTime.now().toString("yyMMdd"), 5));
@@ -158,7 +159,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
         BeanUtil.copyProperties(param,preOrderInfo);
-        preOrderInfo.setFailSymbol(null);
+        preOrderInfo.setFailSymbol(FailSymbolEnum.YES_NO);
         preOrderInfo.setReason("");
         int orderInfo = preOrderInfoMapper.updateById(preOrderInfo);
         if(orderInfo < 0){
