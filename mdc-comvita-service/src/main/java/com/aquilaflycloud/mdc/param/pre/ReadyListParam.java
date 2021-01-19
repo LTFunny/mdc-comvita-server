@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 /**
  * AdministrationListParam
  * <p>
@@ -30,14 +32,14 @@ public class ReadyListParam extends PageParam<PreOrderGoods> {
     private String reserveName;
 
     @ApiModelProperty(value = "创建开始时间")
-    private DateTime createStartTime;
+    private Date createStartTime;
 
     @ApiModelProperty(value = "创建结束时间")
-    private DateTime createEndTime;
+    private Date createEndTime;
 
     @ApiModelProperty(value = "提交预约开始时间")
-    private DateTime reserveStartTime;
+    private Date reserveStartTime;
 
     @ApiModelProperty(value = "提交预约结束时间")
-    private DateTime reserveEndTime;
+    private Date reserveEndTime;
 }
