@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.aquilaflycloud</groupId>
     <artifactId>mdc-comvita-server</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0-RELEASE</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>mdc-comvita-service</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0-RELEASE</version>
   <name>mdc-comvita-service</name>
 
   <properties>
@@ -24,22 +24,22 @@
     <dependency>
       <groupId>com.gitee.sop</groupId>
       <artifactId>sop-service-common</artifactId>
-      <version>3.1.5-SNAPSHOT</version>
+      <version>3.1.5-RELEASE</version>
     </dependency>
     <dependency>
       <groupId>com.aquilaflycloud</groupId>
       <artifactId>auth-common</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>3.0.0-RELEASE</version>
     </dependency>
     <dependency>
       <groupId>com.aquilaflycloud</groupId>
       <artifactId>mdc-comvita-interface</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>1.0.0-RELEASE</version>
     </dependency>
     <dependency>
       <groupId>com.aquilaflycloud</groupId>
       <artifactId>org-comvita-interface</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>1.0.0-RELEASE</version>
     </dependency>
 
     <dependency>
