@@ -158,7 +158,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
         BeanUtil.copyProperties(param,preOrderInfo);
-        preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
+        preOrderInfo.setFailSymbol(null);
         preOrderInfo.setReason("");
         int orderInfo = preOrderInfoMapper.updateById(preOrderInfo);
         if(orderInfo < 0){
