@@ -230,7 +230,14 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 if (allGoodsSend) {
                     preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
                     preOrderInfoMapper.updateById(preOrderInfo);
-                    info.setGiftsSymbol(GiftsSymbolEnum.AFTER);
+                    PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
+                    .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
+                    preOrderGoods.setGiftsSymbol(GiftsSymbolEnum.AFTER);
+                    int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+                    if(orderGoods < 0){
+                        throw new ServiceException("修改赠品标识失败。");
+                    }
                 }
             }
         }

@@ -56,7 +56,7 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
                 .eq(param.getGoodsState() != null, PreGoodsInfo::getGoodsState, param.getGoodsState())
                 .eq(param.getGoodsType() != null, PreGoodsInfo::getGoodsType, param.getGoodsType())
                 .like(StrUtil.isNotBlank(param.getGoodsCode()), PreGoodsInfo::getGoodsCode, param.getGoodsCode())
-                .notIn(PreGoodsInfo::getGoodsType,GoodsTypeEnum.GIFTS)
+                .notIn(param.getMiniSymbol() == 1,PreGoodsInfo::getGoodsType,GoodsTypeEnum.GIFTS)
                 .orderByDesc(PreGoodsInfo::getCreateTime)
         );
     }
