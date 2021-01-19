@@ -421,6 +421,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 .stream().map(PreOrderInfo::getId).collect(Collectors.toList());
         IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
         .eq(PreOrderInfo::getBuyerPhone,param.getBuyerPhone())
+        .eq(PreOrderInfo::getGuideId,MdcUtil.getCurrentUserId())
         .notIn(PreOrderInfo::getId,longs.size() == 0 ? 0L : StringUtils.join(longs, ","))).convert(order ->{
             PreOrderInfoPageResult result  = orderInfo(order);
             return result;
@@ -454,7 +455,13 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Override
     public void confirmReceiptOrderGoods(PreOrderGoodsGetParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
-        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
+        confirmReceiptOrderGoods(param.getOrderGoodsId(), infoResult.getRealName());
+    }
+
+    @Transactional
+    @Override
+    public void confirmReceiptOrderGoods(Long orderGoodsId, String operatorName) {
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(orderGoodsId);
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
         preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
         preOrderGoods.setVerificaterId(preOrderInfo.getGuideId());
@@ -466,7 +473,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             throw new ServiceException("确认签收操作失败。");
         }
         String content = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss") + "进行了商品签收。";
-        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getRealName(), preOrderInfo.getId(), content);
+        orderOperateRecordService.addOrderOperateRecordLog(operatorName, preOrderInfo.getId(), content);
         //签收预售商品,发送微信订阅消息
         MemberInfo memberInfo = memberInfoMapper.selectById(preOrderGoods.getReserveId());
         wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(memberInfo.getWxAppId())
