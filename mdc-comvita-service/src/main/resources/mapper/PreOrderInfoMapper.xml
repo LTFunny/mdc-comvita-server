@@ -46,6 +46,7 @@
             resultType="com.aquilaflycloud.mdc.result.pre.ReportGuidePageResult">
         select
         a.guide_name guideName,
+        a.guide_id guideId,
         count(a.id)- IFNULL(b.refundOrderNumber,0)  orderNumber,
         sum(a.total_price)-IFNULL(b.refundOrderTotalPrice,0)  orderPrice,
         IFNULL(mem.num,0) newCustomerNum
