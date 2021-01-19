@@ -227,7 +227,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 orderGoodsList.add(preOrderGoods);
             });
             //确认订单后奖励
-            if (StrUtil.isNotBlank(preActivityInfo.getRewardRuleContent())) {
+            if (StrUtil.isNotBlank(preActivityInfo.getRewardRuleContent()) && !StrUtil.equals(preActivityInfo.getRewardRuleContent(), "[]")) {
                 MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
                 List<PreActivityRewardResult> rewardRuleList = JSONUtil.toList(JSONUtil.parseArray(preActivityInfo.getRewardRuleContent()), PreActivityRewardResult.class);
                 for (PreActivityRewardResult rewardRule : rewardRuleList) {
