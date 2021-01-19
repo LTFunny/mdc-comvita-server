@@ -377,22 +377,26 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         List<ReportGuidePageResult> list2 = page.getRecords();
         if (CollUtil.isNotEmpty(list)) {
             for (PUserInfo info : list) {
-                Boolean ishave = true;
-                if (CollUtil.isNotEmpty(list2)) {
-                    for (ReportGuidePageResult result : list2) {
-                        if (result.getGuideId().equals(info.getId())) {
-                            ishave = false;
-                            break;
+                if(info.getId()!=null){
+                    Boolean ishave = true;
+                    if (CollUtil.isNotEmpty(list2)) {
+                        for (ReportGuidePageResult result : list2) {
+                            if(result.getGuideId()!=null) {
+                                if (result.getGuideId().equals(info.getId())) {
+                                    ishave = false;
+                                    break;
+                                }
+                            }
                         }
                     }
-                }
-                if (ishave) {
-                    ReportGuidePageResult reportGuidePageResult = new ReportGuidePageResult();
-                    reportGuidePageResult.setGuideName(info.getRealName());
-                    reportGuidePageResult.setNewCustomerNum(0);
-                    reportGuidePageResult.setOrderNumber(0);
-                    reportGuidePageResult.setOrderPrice(new BigDecimal(0));
-                    list2.add(reportGuidePageResult);
+                    if (ishave) {
+                        ReportGuidePageResult reportGuidePageResult = new ReportGuidePageResult();
+                        reportGuidePageResult.setGuideName(info.getRealName());
+                        reportGuidePageResult.setNewCustomerNum(0);
+                        reportGuidePageResult.setOrderNumber(0);
+                        reportGuidePageResult.setOrderPrice(new BigDecimal(0));
+                        list2.add(reportGuidePageResult);
+                    }
                 }
             }
             page.setRecords(list2);
