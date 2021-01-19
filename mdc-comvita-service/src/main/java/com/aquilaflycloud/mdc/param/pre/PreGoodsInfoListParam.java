@@ -33,4 +33,7 @@ public class PreGoodsInfoListParam extends PageParam<PreGoodsInfo> {
 
     @ApiModelProperty(value = "标签id")
     private String folksonomyId;
+
+    @ApiModelProperty(value = "小程序标识（1.B端不显示赠品）")
+    private int miniSymbol;
 }
