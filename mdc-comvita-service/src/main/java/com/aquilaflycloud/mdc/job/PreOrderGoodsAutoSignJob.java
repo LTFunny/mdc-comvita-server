@@ -9,7 +9,6 @@ import com.aquilaflycloud.dataAuth.constant.DataAuthConstant;
 import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
 import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
 import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
-import com.aquilaflycloud.mdc.param.pre.PreOrderGoodsGetParam;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.aquilaflycloud.util.SpringUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -43,7 +42,7 @@ public class PreOrderGoodsAutoSignJob extends JavaProcessor {
             for (PreOrderGoods preOrderGoods : preOrderGoodsList) {
                 ServiceContext.getCurrentContext().set(DataAuthConstant.TENANT_ID, preOrderGoods.getTenantId());
                 ServiceContext.getCurrentContext().set(DataAuthConstant.SUB_TENANT_ID, preOrderGoods.getSubTenantId());
-                preOrderInfoService.confirmReceiptOrderGoods(new PreOrderGoodsGetParam().setOrderGoodsId(preOrderGoods.getGoodsId()));
+                preOrderInfoService.confirmReceiptOrderGoods(preOrderGoods.getGoodsId(), "系统自动签收");
             }
             processResult = new ProcessResult(true);
         } catch (Exception e) {

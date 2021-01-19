@@ -75,6 +75,8 @@ public interface PreOrderInfoService{
      */
     void confirmReceiptOrderGoods(PreOrderGoodsGetParam param);
 
+    void confirmReceiptOrderGoods(Long orderGoodsId, String operatorName);
+
     /**
      * 订单确认签收
      * @param param
