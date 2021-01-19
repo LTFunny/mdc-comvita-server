@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
@@ -103,12 +104,20 @@ public class PreActivityServiceImpl implements PreActivityService {
             if(StrUtil.isNotBlank(info.getRewardRuleContent())){
                 result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
             }
+            Date begin_ = info.getBeginTime();
+            //结束时间修改
+            Date end_ = info.getEndTime();
+            DateTime dateTime = DateTime.of(end_);
+            String timeStr = dateTime.toTimeStr();
+            if("00:00:00".equals(timeStr)){
+                end_ = DateUtil.endOfDay(end_);
+            }
             if(info.getActivityState() != ActivityStateEnum.CANCELED){
-                if (now.isAfterOrEquals(info.getBeginTime()) && now.isBeforeOrEquals(info.getEndTime())) {
+                if (now.isAfterOrEquals(begin_) && now.isBeforeOrEquals(end_)) {
                     result.setActivityState(ActivityStateEnum.IN_PROGRESS);
-                } else if (now.isBefore(info.getBeginTime())) {
+                } else if (now.isBefore(begin_)) {
                     result.setActivityState(ActivityStateEnum.NOT_STARTED);
-                } else if (now.isAfter(info.getEndTime())) {
+                } else if (now.isAfter(end_)) {
                     result.setActivityState(ActivityStateEnum.FINISHED);
                 }
             }
