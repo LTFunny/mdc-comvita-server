@@ -66,6 +66,14 @@ public class PreActivityServiceImpl implements PreActivityService {
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
                 .eq(PreActivityInfo::getActivityType, ActivityTypeEnum.PRE_SALES)
                 .ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
+                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.NOT_STARTED,
+                        "date_format (begin_time,'%Y-%m-%d') > date_format(now(),'%Y-%m-%d')")
+                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.IN_PROGRESS,
+                        "date_format (begin_time,'%Y-%m-%d') <= date_format(now(),'%Y-%m-%d')")
+                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.IN_PROGRESS,
+                        "date_format (end_time,'%Y-%m-%d') >= date_format(now(),'%Y-%m-%d')")
+                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.FINISHED,
+                        "date_format (end_time,'%Y-%m-%d') < date_format(now(),'%Y-%m-%d')")
         ).convert(this::dataConvertResult);
     }
 
