@@ -103,7 +103,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         BeanUtil.copyProperties(param,preOrderInfo);
         MdcUtil.setMemberInfo(preOrderInfo,infoResult);
         preOrderInfo.setMemberId(infoResult.getId());
-        preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYCONFIRM);
         preOrderInfo.setScore(new BigDecimal("0"));
         preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderCode", "O" + DateTime.now().toString("yyMMdd"), 5));
@@ -159,7 +158,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
         BeanUtil.copyProperties(param,preOrderInfo);
-        preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
+        preOrderInfo.setFailSymbol(null);
         preOrderInfo.setReason("");
         int orderInfo = preOrderInfoMapper.updateById(preOrderInfo);
         if(orderInfo < 0){
@@ -228,7 +227,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 orderGoodsList.add(preOrderGoods);
             });
             //确认订单后奖励
-            if (StrUtil.isNotBlank(preActivityInfo.getRewardRuleContent())) {
+            if (StrUtil.isNotBlank(preActivityInfo.getRewardRuleContent()) && !StrUtil.equals(preActivityInfo.getRewardRuleContent(), "[]")) {
                 MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
                 List<PreActivityRewardResult> rewardRuleList = JSONUtil.toList(JSONUtil.parseArray(preActivityInfo.getRewardRuleContent()), PreActivityRewardResult.class);
                 for (PreActivityRewardResult rewardRule : rewardRuleList) {
