@@ -381,9 +381,11 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     Boolean ishave = true;
                     if (CollUtil.isNotEmpty(list2)) {
                         for (ReportGuidePageResult result : list2) {
-                            if (result.getGuideId().equals(info.getId())) {
-                                ishave = false;
-                                break;
+                            if(result.getGuideId()!=null) {
+                                if (result.getGuideId().equals(info.getId())) {
+                                    ishave = false;
+                                    break;
+                                }
                             }
                         }
                     }
