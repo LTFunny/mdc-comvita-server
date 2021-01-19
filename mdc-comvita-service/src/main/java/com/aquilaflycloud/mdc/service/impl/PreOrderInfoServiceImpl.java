@@ -25,6 +25,7 @@ import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
 import com.aquilaflycloud.mdc.service.*;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.org.service.provider.entity.PUmsUserDetail;
+import com.aquilaflycloud.org.service.provider.entity.PUserInfo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
@@ -592,7 +593,8 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         //退回订单奖励
         memberRewardService.refundRewardRecord(preOrderInfo.getMemberId(), preOrderInfo.getId());
         //记录订单操作日志
-        orderOperateRecordService.addOrderOperateRecordLog(MdcUtil.getCurrentUserName(), param.getOrderId(), "登记售后");
+        PUserInfo userInfo = userConsumer.getUserByid(MdcUtil.getCurrentUserId());
+        orderOperateRecordService.addOrderOperateRecordLog(userInfo.getRealName(), param.getOrderId(), "登记售后");
         //发送微信订阅消息
         wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
                         .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERREFUNDAUDIT, null,
