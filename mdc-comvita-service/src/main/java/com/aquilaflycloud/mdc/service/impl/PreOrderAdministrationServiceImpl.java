@@ -375,12 +375,12 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         List<PUserInfo> list = iUserProvider.listUserInfo();
         IPage<ReportGuidePageResult> page = preOrderInfoMapper.achievementsGuide(param.page(), param);
         List<ReportGuidePageResult> list2 = page.getRecords();
-        if (CollUtil.isEmpty(list)) {
+        if (CollUtil.isNotEmpty(list)) {
             for (PUserInfo info : list) {
                 Boolean ishave = true;
                 if (CollUtil.isNotEmpty(list2)) {
                     for (ReportGuidePageResult result : list2) {
-                        if (result.getGuideName().equals(info.getRealName())) {
+                        if (result.getGuideId().equals(info.getId())) {
                             ishave = false;
                             break;
                         }
