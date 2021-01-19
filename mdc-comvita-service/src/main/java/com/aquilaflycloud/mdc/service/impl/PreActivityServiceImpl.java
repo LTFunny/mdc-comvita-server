@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
@@ -63,42 +62,44 @@ public class PreActivityServiceImpl implements PreActivityService {
 
     @Override
     public IPage<PreActivityPageResult> pagePreActivity(PreActivityPageParam param) {
+        ActivityStateEnum state = param.getActivityState();
+        DateTime now = DateTime.now();
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
                 .eq(PreActivityInfo::getActivityType, ActivityTypeEnum.PRE_SALES)
                 .ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
-                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.NOT_STARTED,
-                        "date_format (begin_time,'%Y-%m-%d') > date_format(now(),'%Y-%m-%d')")
-                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.IN_PROGRESS,
-                        "date_format (begin_time,'%Y-%m-%d') <= date_format(now(),'%Y-%m-%d')")
-                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.IN_PROGRESS,
-                        "date_format (end_time,'%Y-%m-%d') >= date_format(now(),'%Y-%m-%d')")
-                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.FINISHED,
-                        "date_format (end_time,'%Y-%m-%d') < date_format(now(),'%Y-%m-%d')")
+                .and(state != null && state == ActivityStateEnum.NOT_STARTED,
+                        j -> j.and(k -> k.ge(PreActivityInfo::getBeginTime, now)))
+                .and(state != null && state == ActivityStateEnum.IN_PROGRESS,
+                        j -> j.and(k -> k.le(PreActivityInfo::getBeginTime, now).ge(PreActivityInfo::getEndTime, now)))
+                .and(state != null && state == ActivityStateEnum.FINISHED,
+                        j -> j.and(k -> k.le(PreActivityInfo::getEndTime, now)))
         ).convert(this::dataConvertResult);
     }
 
     @Override
     public IPage<PreActivityPageResult> page(PreActivityPageParam param) {
         List<Long> businessIds = getFolksonomyBusinessRels(param.getFolksonomyIds());
+        ActivityStateEnum state = param.getActivityState();
+        DateTime now = DateTime.now();
+        Date start_ = param.getCreateTimeStart();
+        Date end_ = param.getCreateTimeEnd();
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
                 .like( param.getActivityName()!= null,PreActivityInfo::getActivityName,param.getActivityName())
                 .like( param.getCreatorName() != null,PreActivityInfo::getCreatorName,param.getCreatorName())
                 .in(CollUtil.isNotEmpty(businessIds),PreActivityInfo::getId,businessIds)
                 .eq( param.getActivityType() != null,PreActivityInfo::getActivityType,param.getActivityType())
-                .apply(param.getCreateTimeStart() != null,
-                        "date_format (create_time,'%Y-%m-%d') >= date_format('" + param.getCreateTimeStart() + "','%Y-%m-%d')")
-                .apply(param.getCreateTimeEnd() != null,
-                        "date_format (create_time,'%Y-%m-%d') <= date_format('" + param.getCreateTimeEnd() + "','%Y-%m-%d')")
+                .and(start_ != null,
+                        j -> j.and(k -> k.ge(PreActivityInfo::getCreateTime, start_)))
+                .and(end_ != null,
+                        j -> j.and(k -> k.le(PreActivityInfo::getCreateTime, end_)))
                 .eq(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.CANCELED,
                         PreActivityInfo::getActivityState,param.getActivityState())
-                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.NOT_STARTED,
-                        "date_format (begin_time,'%Y-%m-%d') > date_format(now(),'%Y-%m-%d')")
-                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.IN_PROGRESS,
-                        "date_format (begin_time,'%Y-%m-%d') <= date_format(now(),'%Y-%m-%d')")
-                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.IN_PROGRESS,
-                        "date_format (end_time,'%Y-%m-%d') >= date_format(now(),'%Y-%m-%d')")
-                .apply(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.FINISHED,
-                        "date_format (end_time,'%Y-%m-%d') < date_format(now(),'%Y-%m-%d')")
+                .and(state != null && state == ActivityStateEnum.NOT_STARTED,
+                        j -> j.and(k -> k.ge(PreActivityInfo::getBeginTime, now)))
+                .and(state != null && state == ActivityStateEnum.IN_PROGRESS,
+                        j -> j.and(k -> k.le(PreActivityInfo::getBeginTime, now).ge(PreActivityInfo::getEndTime, now)))
+                .and(state != null && state == ActivityStateEnum.FINISHED,
+                        j -> j.and(k -> k.le(PreActivityInfo::getEndTime, now)))
         ).convert(this::dataConvertResult);
     }
 
