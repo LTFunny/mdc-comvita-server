@@ -7,12 +7,15 @@ import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.GoodsStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.GoodsTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.RuleStateEnum;
 import com.aquilaflycloud.mdc.mapper.PreActivityInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreGoodsInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
+import com.aquilaflycloud.mdc.mapper.PreRuleInfoMapper;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
+import com.aquilaflycloud.mdc.model.pre.PreRuleInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.GoodsSalesVolumeResult;
 import com.aquilaflycloud.mdc.result.pre.PreGoodsInfoResult;
@@ -45,6 +48,8 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
     private PreOrderInfoMapper preOrderInfoMapper;
     @Resource
     private PreActivityInfoMapper preActivityInfoMapper;
+    @Resource
+    private PreRuleInfoMapper preRuleInfoMapper;
     @Resource
     private FolksonomyService folksonomyService;
 
@@ -139,6 +144,18 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
             if (count > 0) {
                 throw new ServiceException("商品有关联的正在进行的活动,不可下架");
             }
+            //赠品下架时判断
+            if(GoodsTypeEnum.GIFTS.equals(goods.getGoodsType())){
+                //查询是否存在启用的规则。有就不能禁用
+                int count2 = preRuleInfoMapper.selectCount(Wrappers.<PreRuleInfo>lambdaQuery()
+                        .like(PreRuleInfo::getTypeDetail, goods.getId())
+                        .eq(PreRuleInfo::getRuleState, RuleStateEnum.ENABLE)
+                );
+                if (count2 > 0) {
+                    throw new ServiceException("商品有关联的规则,不可下架");
+                }
+            }
+
         }
         PreGoodsInfo update = new PreGoodsInfo();
         update.setId(param.getId());
