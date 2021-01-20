@@ -374,22 +374,19 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Override
     //导购员绩效
     public IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param) {
-        IPage<ReportGuidePageResult> page = preOrderInfoMapper.achievementsGuide(param.page(), param);
-        return page;
+        return preOrderInfoMapper.achievementsGuide(param.page(), param);
     }
 
     @Override
     //订单管理订单报表
     public IPage<OrderPageResult> pageOrderPageResultList(AdministrationListParam param) {
-        IPage<OrderPageResult> page = preOrderInfoMapper.pageOrderPageResultList(param.page(), param);
-        return page;
+        return preOrderInfoMapper.pageOrderPageResultList(param.page(), param);
     }
 
     @Override
     //订单管理销量导出
     public IPage<SalePageResult> pageSalePageResultList(AdministrationListParam param) {
-        IPage<SalePageResult> page = preOrderInfoMapper.pageSalePageResultList(param.page(), param);
-        return page;
+        return preOrderInfoMapper.pageSalePageResultList(param.page(), param);
     }
 
     @Override
