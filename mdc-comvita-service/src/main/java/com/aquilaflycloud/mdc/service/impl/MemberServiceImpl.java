@@ -809,15 +809,10 @@ public class MemberServiceImpl implements MemberService {
     public BaseResult<String> editMiniPhone(MiniPhoneGetParam param) {
         MemberInfoResult sessionKey = MdcUtil.getMiniSessionKey();
         String appId = sessionKey.getWxAppId();
-        try {
-            WxMaPhoneNumberInfo phoneNumberInfo = wechatMiniService.getWxMaServiceByAppId(appId)
-                    .getUserService().getPhoneNoInfo(sessionKey.getSessionKey(), param.getEncryptedData(), param.getIv());
-            editPhone(sessionKey, phoneNumberInfo.getPhoneNumber());
-            return new BaseResult<String>().setResult(phoneNumberInfo.getPhoneNumber());
-        } catch (Exception e) {
-            log.error("微信小程序接口解密手机号失败", e);
-            throw new ServiceException("获取小程序手机失败");
-        }
+        WxMaPhoneNumberInfo phoneNumberInfo = wechatMiniService.getWxMaServiceByAppId(appId)
+                .getUserService().getPhoneNoInfo(sessionKey.getSessionKey(), param.getEncryptedData(), param.getIv());
+        editPhone(sessionKey, phoneNumberInfo.getPhoneNumber());
+        return new BaseResult<String>().setResult(phoneNumberInfo.getPhoneNumber());
     }
 
     @Override
