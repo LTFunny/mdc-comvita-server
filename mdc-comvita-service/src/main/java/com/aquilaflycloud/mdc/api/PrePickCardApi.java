@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.api;
 
 import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
+import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.param.pre.PreReservationOrderGoodsParam;
 import com.aquilaflycloud.mdc.service.PrePickingCardService;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -25,7 +26,7 @@ public class PrePickCardApi {
 
     @ApiOperation(value = "验证提货卡密码", notes = "验证提货卡密码")
     @ApiMapping(value = "comvita.card.validation.password", method = RequestMethod.POST)
-    public PreGoodsInfo validationCardPassWord(PreReservationOrderGoodsParam param) {
+    public PreOrderGoods validationCardPassWord(PreReservationOrderGoodsParam param) {
         return prePickingCardService.validationCardPassWord(param);
     }
 
