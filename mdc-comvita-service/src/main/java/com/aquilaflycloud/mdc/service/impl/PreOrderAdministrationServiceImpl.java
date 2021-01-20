@@ -374,35 +374,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Override
     //导购员绩效
     public IPage<ReportGuidePageResult> achievementsGuide(ReportFormParam param) {
-        List<PUserInfo> list = iUserProvider.listUserInfo();
         IPage<ReportGuidePageResult> page = preOrderInfoMapper.achievementsGuide(param.page(), param);
-        List<ReportGuidePageResult> list2 = page.getRecords();
-        if (CollUtil.isNotEmpty(list)) {
-            for (PUserInfo info : list) {
-                if(info.getId()!=null){
-                    Boolean ishave = true;
-                    if (CollUtil.isNotEmpty(list2)) {
-                        for (ReportGuidePageResult result : list2) {
-                            if(result.getGuideId()!=null) {
-                                if (result.getGuideId().equals(info.getId())) {
-                                    ishave = false;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (ishave) {
-                        ReportGuidePageResult reportGuidePageResult = new ReportGuidePageResult();
-                        reportGuidePageResult.setGuideName(info.getRealName());
-                        reportGuidePageResult.setNewCustomerNum(0);
-                        reportGuidePageResult.setOrderNumber(0);
-                        reportGuidePageResult.setOrderPrice(new BigDecimal(0));
-                        list2.add(reportGuidePageResult);
-                    }
-                }
-            }
-            page.setRecords(list2);
-        }
         return page;
     }
 
