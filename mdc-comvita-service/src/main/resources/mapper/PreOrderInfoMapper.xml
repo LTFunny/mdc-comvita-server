@@ -66,7 +66,7 @@
         </if>
         group by guide_id
         )b on b.guide_id=a.guide_id
-        left join(select guide_id,count(id) num from member_info)  mem
+        left join(select guide_id,count(id) num from member_info  group by guide_id)  mem
         on mem.guide_id=a.guide_id
         where a.order_state=6
         <if test="param.guideName != null and param.guideName != ''">
