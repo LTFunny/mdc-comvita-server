@@ -104,12 +104,12 @@
             AND order_info.buyer_phone = #{param.buyerPhone}
         </if>
         <if test="param.startTime != null">
-            AND order_info.last_update_time <![CDATA[>=]]> #{param.startTime}
+            AND order_info.create_time <![CDATA[>=]]> #{param.startTime}
         </if>
         <if test="param.endTime != null">
-            AND order_info.last_update_time <![CDATA[<=]]> #{param.endTime}
+            AND order_info.create_time <![CDATA[<=]]> #{param.endTime}
         </if>
-        order by order_info.last_update_time desc
+        order by order_info.create_time desc
     </select>
     <select id="pageOrderPageResultList"  parameterType="com.aquilaflycloud.mdc.param.pre.AdministrationListParam"
             resultType="com.aquilaflycloud.mdc.result.pre.OrderPageResult">
