@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.service;
 
 import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
+import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.model.pre.PrePickingCard;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PrePickingCardAnalysisResult;
@@ -24,5 +25,5 @@ public interface PrePickingCardService {
 
     void validationPickingCard(PrePickingCardValidationParam param);
 
-    PreGoodsInfo validationCardPassWord(PreReservationOrderGoodsParam param);
+    PreOrderGoods validationCardPassWord(PreReservationOrderGoodsParam param);
 }
