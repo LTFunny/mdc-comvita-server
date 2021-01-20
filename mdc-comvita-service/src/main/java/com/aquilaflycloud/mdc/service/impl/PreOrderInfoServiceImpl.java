@@ -422,7 +422,8 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
         .eq(PreOrderInfo::getBuyerPhone,param.getBuyerPhone())
         .eq(PreOrderInfo::getGuideId,MdcUtil.getCurrentUserId())
-        .notIn(PreOrderInfo::getId,longs.size() == 0 ? 0L : StringUtils.join(longs, ","))).convert(order ->{
+        .ne(PreOrderInfo::getOrderState,OrderInfoStateEnum.STAYCONFIRM)
+        .notIn(CollUtil.isNotEmpty(longs), PreOrderInfo::getId,longs)).convert(order ->{
             PreOrderInfoPageResult result  = orderInfo(order);
             return result;
         });
