@@ -339,7 +339,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
             MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
             Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo,null,preOrderInfo.getId(),preOrderInfo.getTotalPrice(),true);
-            preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+            if (CollUtil.isNotEmpty(map) && map.get(RewardTypeEnum.SCORE) != null) {
+                preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+            }
         }
         int order = preOrderInfoMapper.updateById(preOrderInfo);
         if(order < 0){
@@ -492,7 +494,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         MemberInfo memberInfo = memberInfoMapper.selectById(infoResult.getId());
         Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord
                 (memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
-        preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+        if (CollUtil.isNotEmpty(map) && map.get(RewardTypeEnum.SCORE) != null) {
+            preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+        }
         int order = preOrderInfoMapper.updateById(preOrderInfo);
         if (order < 0) {
             throw new ServiceException("签收订单失败。");

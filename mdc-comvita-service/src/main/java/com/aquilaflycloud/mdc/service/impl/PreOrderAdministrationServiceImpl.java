@@ -223,7 +223,9 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     preOrderInfo.setDeliveryTime(new DateTime());
                     MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
                     Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
-                    preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+                    if (CollUtil.isNotEmpty(map) && map.get(RewardTypeEnum.SCORE) != null) {
+                        preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+                    }
                     preOrderInfoMapper.updateById(preOrderInfo);
                 }
             } else {//待发货状态
