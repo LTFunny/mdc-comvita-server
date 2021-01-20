@@ -261,7 +261,7 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
     }
 
     @Override
-    public PreGoodsInfo validationCardPassWord(PreReservationOrderGoodsParam param) {
+    public PreOrderGoods validationCardPassWord(PreReservationOrderGoodsParam param) {
         PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
                 .eq(PrePickingCard::getPassword,param.getPassword())
                 .eq(PrePickingCard::getPickingState,PickingCardStateEnum.SALE));
@@ -276,10 +276,6 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
         if (StrUtil.isBlank(preOrderGoods.getCardCode())) {
             throw new ServiceException("请输入提货码。");
         }
-        PreGoodsInfo preGoodsInfo = preGoodsInfoMapper.selectById(preOrderGoods.getGoodsId());
-        if(null == preGoodsInfo){
-            throw new ServiceException("该提货卡绑定没有商品信息");
-        }
-        return preGoodsInfo;
+        return preOrderGoods;
     }
 }
