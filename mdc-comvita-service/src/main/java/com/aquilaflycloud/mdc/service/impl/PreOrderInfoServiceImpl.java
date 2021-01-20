@@ -30,6 +30,7 @@ import com.aquilaflycloud.util.RedisUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -425,6 +426,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
         .eq(PreOrderInfo::getBuyerPhone,param.getBuyerPhone())
         .eq(PreOrderInfo::getGuideId,MdcUtil.getCurrentUserId())
+        .ne(PreOrderInfo::getOrderState,OrderInfoStateEnum.STAYCONFIRM)
         .notIn(CollUtil.isNotEmpty(longs), PreOrderInfo::getId,longs)).convert(order ->{
             PreOrderInfoPageResult result  = orderInfo(order);
             return result;
