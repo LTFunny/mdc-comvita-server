@@ -26,10 +26,10 @@ import com.aquilaflycloud.mdc.service.*;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.org.service.provider.entity.PUmsUserDetail;
 import com.aquilaflycloud.org.service.provider.entity.PUserInfo;
+import com.aquilaflycloud.util.RedisUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -425,7 +425,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         IPage<PreOrderInfoPageResult> page =  preOrderInfoMapper.selectPage(param.page(),Wrappers.<PreOrderInfo>lambdaQuery()
         .eq(PreOrderInfo::getBuyerPhone,param.getBuyerPhone())
         .eq(PreOrderInfo::getGuideId,MdcUtil.getCurrentUserId())
-        .notIn(PreOrderInfo::getId,longs.size() == 0 ? 0L : StringUtils.join(longs, ","))).convert(order ->{
+        .notIn(CollUtil.isNotEmpty(longs), PreOrderInfo::getId,longs)).convert(order ->{
             PreOrderInfoPageResult result  = orderInfo(order);
             return result;
         });
@@ -543,7 +543,17 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Transactional
     @Override
     public void refundOrder(PreOrderRefundParam param) {
+        RedisUtil.transactionalLock("refundOrderLock" + param.getOrderId());
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
+        if (preOrderInfo == null) {
+            throw new ServiceException("订单不存在");
+        }
+        int refundCount = preRefundOrderInfoMapper.selectCount(Wrappers.<PreRefundOrderInfo>lambdaQuery()
+                .eq(PreRefundOrderInfo::getOrderId, param.getOrderId())
+        );
+        if (refundCount > 0) {
+            throw new ServiceException("此订单已登记退款,请勿重复操作");
+        }
         PUserInfo userInfo = userConsumer.getUserByid(MdcUtil.getCurrentUserId());
         PreRefundOrderInfo preRefundOrderInfo = new PreRefundOrderInfo();
         BeanUtil.copyProperties(preOrderInfo, preRefundOrderInfo, CopyOptions.create().setIgnoreProperties(MdcUtil.getIgnoreNames()));
