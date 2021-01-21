@@ -79,7 +79,7 @@
             AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
         </if>
         group by a.guide_id
-        order by a.create_time desc
+        order by a.guide_id desc
     </select>
     <select id="pageOrderInfoPageResult" parameterType="com.aquilaflycloud.mdc.param.pre.PreOrderInfoPageParam"
             resultType="com.aquilaflycloud.mdc.model.pre.PreOrderInfo">
