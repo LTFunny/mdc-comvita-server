@@ -612,7 +612,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             //非已出售更新为已作废
             prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
                     .in(PrePickingCard::getId, cardIdList)
-                    .ne(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
+                    .ne(PrePickingCard::getPickingState, PickingCardStateEnum.NO_SALE)
             );
         }
         //退回订单奖励
