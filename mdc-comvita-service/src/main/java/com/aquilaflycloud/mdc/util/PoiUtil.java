@@ -6,7 +6,6 @@ package com.aquilaflycloud.mdc.util;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.gitee.sop.servercommon.exception.ServiceException;
-import org.apache.ibatis.annotations.Case;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -171,14 +170,8 @@ public class PoiUtil {
             for (int i = startcol; i < cellTitleNum; i++) {
                 HSSFCell cell = rowTitle.getCell(Short.parseShort(i + ""));
                 if (cell != null) {
-                    CellType cellType = cell.getCellType();
-                    switch (cellType) {
-                        case STRING:
-                            break;
-                        default:
-                            cell.setCellType(CellType.STRING);
-                    }
-                    title[i] = cell.getStringCellValue();
+                    DataFormatter formatter = new DataFormatter();
+                    title[i] = formatter.formatCellValue(cell);
                 } else {
                     title[i] = "";
                 }
@@ -196,14 +189,8 @@ public class PoiUtil {
                     String cellValue = "";
                     if (cell != null) {
                         // 把类型先设置为字符串类型
-                        CellType cellType = cell.getCellType();
-                        switch (cellType) {
-                            case STRING:
-                                break;
-                            default:
-                                cell.setCellType(CellType.STRING);
-                        }
-                        cellValue = cell.getStringCellValue();
+                        DataFormatter formatter = new DataFormatter();
+                        cellValue = formatter.formatCellValue(cell);
                     }
                     varpd.put(title[j], cellValue);
                 }
@@ -242,14 +229,8 @@ public class PoiUtil {
                 XSSFCell cell = rowTitle.getCell(i);
                 if (cell != null) {
                     // 把类型先设置为字符串类型
-                    CellType cellType = cell.getCellType();
-                    switch (cellType) {
-                        case STRING:
-                            break;
-                        default:
-                            cell.setCellType(CellType.STRING);
-                    }
-                    title[i] = cell.getStringCellValue();
+                    DataFormatter formatter = new DataFormatter();
+                    title[i] = formatter.formatCellValue(cell);
                 } else {
                     title[i] = "";
                 }
@@ -267,14 +248,8 @@ public class PoiUtil {
                     String cellValue = "";
                     if (cell != null) {
                         // 把类型先设置为字符串类型
-                        CellType cellType = cell.getCellType();
-                        switch (cellType) {
-                            case STRING:
-                                break;
-                            default:
-                                cell.setCellType(CellType.STRING);
-                        }
-                        cellValue = cell.getStringCellValue();
+                        DataFormatter formatter = new DataFormatter();
+                        cellValue = formatter.formatCellValue(cell);
                     }
                     varpd.put(title[j], cellValue);
                 }
