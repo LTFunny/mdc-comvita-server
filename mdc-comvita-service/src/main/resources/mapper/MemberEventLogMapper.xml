@@ -15,7 +15,7 @@
 
   <select id="selectLogSexAndAge" resultType="com.aquilaflycloud.mdc.result.member.MemberEventSexAndAgeResult">
     select
-    sum( case when isnull( sex ) then 1 else 0 end ) sex_unknown_sum,
+    sum( case when isnull( sex ) or sex = 0 then 1 else 0 end ) sex_unknown_sum,
     sum( case when sex = 1 then 1 else 0 end ) sex_male_sum,
     sum( case when sex = 2 then 1 else 0 end ) sex_female_sum,
     sum( case when isnull( birthday ) then 1 else 0 end ) age_unknown_sum,
