@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.mapper;
 
 import com.aquilaflycloud.dataAuth.component.AfcBaseMapper;
+import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
@@ -27,4 +28,6 @@ public interface PreOrderInfoMapper extends AfcBaseMapper<PreOrderInfo> {
     IPage<PreOrderInfo> pageOrderInfoPageResult(IPage page, @Param("param")PreOrderInfoPageParam param);
 
     GoodsSalesVolumeResult getNum(@Param("param")GoodsSaleNumParam param);
+
+    int countOrderInfoGiftsInfo(@Param("memberId") Long memberId,@Param("activityInfoId") Long activityInfoId);
 }
