@@ -15,9 +15,9 @@
 
   <select id="selectLogSexAndAge" resultType="com.aquilaflycloud.mdc.result.member.MemberEventSexAndAgeResult">
     select
-    sum( case when isnull( sex ) and isnull( wx_gender ) and isnull( ali_gender ) then 1 else 0 end ) sex_unknown_sum,
-    sum( case when sex = 1 or (sex is null and wx_gender = 1) or (sex is null and ali_gender = 1) then 1 else 0 end ) sex_male_sum,
-    sum( case when sex = 2 or (sex is null and wx_gender = 2) or (sex is null and ali_gender = 2) then 1 else 0 end ) sex_female_sum,
+    sum( case when isnull( sex ) then 1 else 0 end ) sex_unknown_sum,
+    sum( case when sex = 1 then 1 else 0 end ) sex_male_sum,
+    sum( case when sex = 2 then 1 else 0 end ) sex_female_sum,
     sum( case when isnull( birthday ) then 1 else 0 end ) age_unknown_sum,
     sum( case when timestampdiff( year, birthday, curdate() ) <![CDATA[<]]> 17 then 1 else 0 end ) age_below17_sum,
     sum( case when timestampdiff( year, birthday, curdate() ) between 17 and 24 then 1 else 0 end ) age18_to24_sum,
