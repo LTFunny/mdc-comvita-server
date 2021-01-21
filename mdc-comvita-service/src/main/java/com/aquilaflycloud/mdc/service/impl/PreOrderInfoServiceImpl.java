@@ -239,36 +239,43 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             preOrderInfo.setTotalPrice(orderGoodsList.get(0).getGoodsPrice().multiply(new BigDecimal(orderGoodsList.size())));
             preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
             preOrderInfo.setConfirmTime(new Date());
-            //判断是否存在赠品，存在就添加
-            PreRuleInfo preRuleInfo = preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
-                    .eq(PreRuleInfo::getId,preActivityInfo.getRefRule())
-                    .eq(PreRuleInfo::getRuleType,RuleTypeEnum.ORDER_GIFTS));
-            if(preRuleInfo != null){
-                PreOrderGoods preOrderGoods = new PreOrderGoods();
-                List<PreRuleGoodsParam> preRuleGoodsParams = JSONUtil.toList(JSONUtil.parseArray(preRuleInfo.getTypeDetail()), PreRuleGoodsParam.class);
-                preRuleGoodsParams.forEach(k ->{
-                    PreGoodsInfo preGoodsInfo1 = goodsInfoMapper.selectById(k.getGoodsId());
-                    BeanUtil.copyProperties(preGoodsInfo1,preOrderGoods);
-                    preOrderGoods.setId(null);
-                    preOrderGoods.setCreateTime(new Date());
-                    preOrderGoods.setLastUpdateTime(new Date());
-                    preOrderGoods.setOrderId(preOrderInfo.getId());
-                    preOrderGoods.setGoodsId(preGoodsInfo1.getId());
-                    preOrderGoods.setGoodsType(GoodsTypeEnum.GIFTS);
-                    preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
-                    preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
-                    preOrderGoods.setGoodsCode(preGoodsInfo1.getGoodsCode());
-                    preOrderGoods.setOrderCode(preOrderInfo.getOrderCode());
-                    preOrderGoods.setReserveShopId(preOrderInfo.getShopId()+"");
-                    preOrderGoods.setReserveShop(preOrderInfo.getShopName());
-                    preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
-                    preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
-                    preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
-                    preOrderGoods.setGuideId(preOrderInfo.getGuideId());
-                    preOrderGoods.setGuideName(preOrderInfo.getGuideName());
-                    preOrderGoods.setGiftsSymbol(GiftsSymbolEnum.NOTAFTER);
-                    orderGoodsList.add(preOrderGoods);
-                });
+            //新增规则需当同一个活动同一个用户不存在赠品且售后订单存在该订单才可新增赠品信息
+            int giftsCount = preOrderInfoMapper.countOrderInfoGiftsInfo(preOrderInfo.getMemberId(),preOrderInfo.getActivityInfoId());
+            if(giftsCount <= 0) {
+                //判断是否存在赠品，存在就添加
+                PreRuleInfo preRuleInfo = preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
+                        .eq(PreRuleInfo::getId, preActivityInfo.getRefRule())
+                        .eq(PreRuleInfo::getRuleType, RuleTypeEnum.ORDER_GIFTS));
+                if (preRuleInfo != null) {
+                    PreOrderGoods preOrderGoods = new PreOrderGoods();
+                    List<PreRuleGoodsParam> preRuleGoodsParams = JSONUtil.toList(JSONUtil.parseArray(preRuleInfo.getTypeDetail()), PreRuleGoodsParam.class);
+                    preRuleGoodsParams.forEach(k -> {
+                        PreGoodsInfo preGoodsInfo1 = goodsInfoMapper.selectById(k.getGoodsId());
+                        BeanUtil.copyProperties(preGoodsInfo1, preOrderGoods);
+                        preOrderGoods.setId(null);
+                        preOrderGoods.setCreateTime(new Date());
+                        preOrderGoods.setLastUpdateTime(new Date());
+                        preOrderGoods.setOrderId(preOrderInfo.getId());
+                        preOrderGoods.setGoodsId(preGoodsInfo1.getId());
+                        preOrderGoods.setGoodsType(GoodsTypeEnum.GIFTS);
+                        preOrderGoods.setDeliveryProvince(preOrderInfo.getBuyerProvince());
+                        preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
+                        preOrderGoods.setGoodsCode(preGoodsInfo1.getGoodsCode());
+                        preOrderGoods.setOrderCode(preOrderInfo.getOrderCode());
+                        preOrderGoods.setReserveShopId(preOrderInfo.getShopId() + "");
+                        preOrderGoods.setReserveShop(preOrderInfo.getShopName());
+                        preOrderGoods.setDeliveryCity(preOrderInfo.getBuyerCity());
+                        preOrderGoods.setDeliveryDistrict(preOrderInfo.getBuyerDistrict());
+                        preOrderGoods.setReserveId(preOrderInfo.getMemberId());
+                        preOrderGoods.setReserveName(preOrderInfo.getBuyerName());
+                        preOrderGoods.setReservePhone(preOrderInfo.getBuyerPhone());
+                        preOrderGoods.setDeliveryAddress(preOrderInfo.getBuyerAddress());
+                        preOrderGoods.setGuideId(preOrderInfo.getGuideId());
+                        preOrderGoods.setGuideName(preOrderInfo.getGuideName());
+                        preOrderGoods.setGiftsSymbol(GiftsSymbolEnum.NOTAFTER);
+                        orderGoodsList.add(preOrderGoods);
+                    });
+                }
             }
             preOrderGoodsMapper.insertAllBatch(orderGoodsList);
         }

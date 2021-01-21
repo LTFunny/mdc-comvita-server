@@ -236,4 +236,24 @@
         where  goods_code=#{param.goodsCode} and
         create_time <![CDATA[>=]]> #{param.goodsThirtyTime}) c
     </select>
+
+    <select id="countOrderInfoGiftsInfo" resultType="java.lang.Integer">
+        SELECT
+          COUNT(info.`id`)
+        FROM
+          `pre_order_info` info
+          INNER JOIN `pre_order_goods` or_goods
+            ON info.`id` = or_goods.`order_id`
+        WHERE or_goods.`goods_type` = 2
+          AND info.`member_id` = #{memberId}
+          AND info.`activity_info_id` = #{activityInfoId}
+          AND info.`id` NOT IN
+          (SELECT
+            refund.order_id
+          FROM
+            `pre_refund_order_info` refund
+            INNER JOIN `pre_order_info` order_info
+              ON refund.`order_id` = order_info.`id`
+          WHERE refund.`member_id` = #{memberId} AND refund.activity_info_id = #{activityInfoId})
+    </select>
 </mapper>
