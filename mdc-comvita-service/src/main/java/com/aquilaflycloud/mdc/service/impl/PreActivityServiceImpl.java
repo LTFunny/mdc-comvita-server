@@ -79,6 +79,10 @@ public class PreActivityServiceImpl implements PreActivityService {
     @Override
     public IPage<PreActivityPageResult> page(PreActivityPageParam param) {
         List<Long> businessIds = getFolksonomyBusinessRels(param.getFolksonomyIds());
+        //选中标签 但是没有找到关联的活动时 返回空
+        if(!CollUtil.isEmpty(param.getFolksonomyIds()) && CollUtil.isEmpty(businessIds)){
+            return null;
+        }
         ActivityStateEnum state = param.getActivityState();
         DateTime now = DateTime.now();
         Date start_ = param.getCreateTimeStart();
