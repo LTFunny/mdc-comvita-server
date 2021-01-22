@@ -144,7 +144,7 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
                     .ne(PreActivityInfo::getActivityState, ActivityStateEnum.CANCELED)
             );
             if (count > 0) {
-                throw new ServiceException("商品有关联的正在进行的活动,不可下架");
+                throw new ServiceException("商品有关联的有效的活动,不可下架");
             }
             //赠品下架时判断
             if (GoodsTypeEnum.GIFTS.equals(goods.getGoodsType())) {
@@ -154,7 +154,7 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
                         .eq(PreRuleInfo::getRuleState, RuleStateEnum.ENABLE)
                 );
                 if (count2 > 0) {
-                    throw new ServiceException("商品有关联的规则,不可下架");
+                    throw new ServiceException("商品有关联的有效的规则,不可下架");
                 }
             }
 
