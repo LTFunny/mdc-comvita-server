@@ -56,6 +56,7 @@ public class MemberMissionAspect {
     private final static String[] FINISH_METHOD = new String[]{
             "comvita.member.info.edit",
             "comvita.folksonomy.memberRel.add",
+            "comvita.order.info.statconfirm.add",
             "comvita.mini.phone.edit",
             "comvita.member.phone.edit",
             "comvita.sign.info.add",
@@ -82,6 +83,7 @@ public class MemberMissionAspect {
                 Long memberId = MdcUtil.getCurrentMemberId();
                 //会员完成任务
                 switch (annotation.value()[0]) {
+                    case "comvita.order.info.statconfirm.add":
                     case "comvita.member.info.edit": {
                         missionService.checkMission(memberId, MissionTypeEnum.COMPLETE);
                         break;
