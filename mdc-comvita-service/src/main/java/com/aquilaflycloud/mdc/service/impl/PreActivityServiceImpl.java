@@ -88,18 +88,20 @@ public class PreActivityServiceImpl implements PreActivityService {
                 .like( param.getCreatorName() != null,PreActivityInfo::getCreatorName,param.getCreatorName())
                 .in(CollUtil.isNotEmpty(businessIds),PreActivityInfo::getId,businessIds)
                 .eq( param.getActivityType() != null,PreActivityInfo::getActivityType,param.getActivityType())
-                .and(start_ != null,
-                        j -> j.and(k -> k.ge(PreActivityInfo::getCreateTime, start_)))
-                .and(end_ != null,
-                        j -> j.and(k -> k.le(PreActivityInfo::getCreateTime, end_)))
+                .and(start_ != null,k -> k.ge(PreActivityInfo::getCreateTime, start_))
+                .and(end_ != null,k -> k.le(PreActivityInfo::getCreateTime, end_))
                 .eq(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.CANCELED,
                         PreActivityInfo::getActivityState,param.getActivityState())
                 .and(state != null && state == ActivityStateEnum.NOT_STARTED,
-                        j -> j.and(k -> k.ge(PreActivityInfo::getBeginTime, now)))
+                        k -> k.ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
+                                .ge(PreActivityInfo::getBeginTime, now))
                 .and(state != null && state == ActivityStateEnum.IN_PROGRESS,
-                        j -> j.and(k -> k.le(PreActivityInfo::getBeginTime, now).ge(PreActivityInfo::getEndTime, now)))
+                        k -> k.ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
+                                .le(PreActivityInfo::getBeginTime, now)
+                                .ge(PreActivityInfo::getEndTime, now))
                 .and(state != null && state == ActivityStateEnum.FINISHED,
-                        j -> j.and(k -> k.le(PreActivityInfo::getEndTime, now)))
+                        k -> k.ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
+                                .le(PreActivityInfo::getEndTime, now))
         ).convert(this::dataConvertResult);
     }
 
