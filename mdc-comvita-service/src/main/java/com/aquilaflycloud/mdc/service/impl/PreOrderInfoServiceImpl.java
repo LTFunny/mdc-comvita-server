@@ -150,9 +150,6 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if (BeanUtil.isNotEmpty(memberEditParam)) {
             memberService.edit(memberEditParam);
         }
-        if (StrUtil.isBlank(infoResult.getPhoneNumber())) {
-            memberService.editPhone(infoResult, param.getBuyerPhone());
-        }
         return orderInfo;
     }
 
@@ -587,6 +584,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         //更新订单商品状态
         PreOrderGoods update = new PreOrderGoods();
         update.setOrderGoodsState(OrderGoodsStateEnum.REFUND);
+        update.setPickingCardState(PickingCardStateEnum.NO_SALE);
         count = preOrderGoodsMapper.update(update, Wrappers.<PreOrderGoods>lambdaUpdate()
                 .eq(PreOrderGoods::getOrderId, param.getOrderId())
         );
