@@ -16,7 +16,7 @@ public enum RewardSourceEnum {
     CLEAN(0, "自动清零"),
     SYSTEM(1, "系统操作"),
     SIGN(2, "每日签到"),
-    SCAN(3, "消费扫码"),
+    SCAN(3, "消费奖励"),
     EXCHANGE(4, "兑换商品"),
     LOTTERY(5, "欢乐抽奖"),
     OFFLINESIGN(6, "线下打卡"),
