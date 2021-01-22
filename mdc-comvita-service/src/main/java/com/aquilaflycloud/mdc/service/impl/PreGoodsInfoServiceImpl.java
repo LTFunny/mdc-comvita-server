@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.GoodsStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.GoodsTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.RuleStateEnum;
@@ -140,12 +141,13 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
             int count = preActivityInfoMapper.selectCount(Wrappers.<PreActivityInfo>lambdaQuery()
                     .eq(PreActivityInfo::getRefGoods, goods.getId())
                     .ge(PreActivityInfo::getEndTime, now)
+                    .ne(PreActivityInfo::getActivityState, ActivityStateEnum.CANCELED)
             );
             if (count > 0) {
                 throw new ServiceException("商品有关联的正在进行的活动,不可下架");
             }
             //赠品下架时判断
-            if(GoodsTypeEnum.GIFTS.equals(goods.getGoodsType())){
+            if (GoodsTypeEnum.GIFTS.equals(goods.getGoodsType())) {
                 //查询是否存在启用的规则。有就不能禁用
                 int count2 = preRuleInfoMapper.selectCount(Wrappers.<PreRuleInfo>lambdaQuery()
                         .like(PreRuleInfo::getTypeDetail, goods.getId())
