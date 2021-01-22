@@ -5,6 +5,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import com.aquilaflycloud.mdc.enums.pre.IsUpdateEnum;
+import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
 import com.aquilaflycloud.mdc.mapper.PreGoodsInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
@@ -269,7 +270,8 @@ public class PrePickingCardServiceImpl implements PrePickingCardService {
             throw new ServiceException("提货卡状态异常，无法进行绑定");
         }
         PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getCardId, prePickingCard.getId()));
+                .eq(PreOrderGoods::getCardId, prePickingCard.getId())
+                .notIn(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.REFUND));
         if (preOrderGoods == null) {
             throw new ServiceException("订单明细未找到该提货卡关联的数据。");
         }
