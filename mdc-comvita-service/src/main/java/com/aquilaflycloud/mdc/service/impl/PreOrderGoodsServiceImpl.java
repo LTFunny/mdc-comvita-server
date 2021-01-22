@@ -62,7 +62,8 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         return preOrderGoodsMapper.selectPage(param.page(),Wrappers.<PreOrderGoods>lambdaQuery()
         .eq(PreOrderGoods::getReserveId,infoResult.getId())
-        .eq(PreOrderGoods::getOrderGoodsState,param.getOrderGoodsState()));
+        .eq(PreOrderGoods::getOrderGoodsState,param.getOrderGoodsState())
+        .ne(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
     }
 
     @Override
@@ -85,7 +86,8 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
                     .eq(PrePickingCard::getPassword, param.getPassword())
                     .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE));
             preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
-            .eq(PreOrderGoods::getCardId,prePickingCard.getId()));
+            .eq(PreOrderGoods::getCardId,prePickingCard.getId())
+            .notIn(PreOrderGoods::getOrderGoodsState,OrderGoodsStateEnum.REFUND));
         }else {
             preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getId,param.getOrderGoodsId()));
