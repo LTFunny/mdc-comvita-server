@@ -607,7 +607,7 @@ public class MemberRewardServiceImpl implements MemberRewardService {
                     throw new ServiceException("新增奖励失败");
                 }
             }
-            MdcUtil.publishTransactionalEvent(AfterCommitEvent.build("扫码奖励后刷新奖励值缓存_" + memberInfo.getId(), () -> {
+            MdcUtil.publishTransactionalEvent(AfterCommitEvent.build("消费奖励后刷新奖励值缓存_" + memberInfo.getId(), () -> {
                 for (MemberScanRewardResult reward : result.values()) {
                     refreshMemberReward(appId, memberInfo.getId(), reward.getRewardType());
                 }
