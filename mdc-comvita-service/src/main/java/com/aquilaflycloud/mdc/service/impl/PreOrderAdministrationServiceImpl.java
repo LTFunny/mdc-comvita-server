@@ -26,7 +26,6 @@ import com.aquilaflycloud.mdc.service.WechatMiniProgramSubscribeMessageService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.mdc.util.PoiUtil;
 import com.aquilaflycloud.org.service.IUserProvider;
-import com.aquilaflycloud.org.service.provider.entity.PUserInfo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -264,15 +263,15 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             //赠品发货,发送订单发货微信订阅消息
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
                             .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERDELIVERY, null,
-                    preOrderInfo.getOrderCode(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress(),
-                    info.getExpressName(), info.getExpressOrderCode(), info.getGoodsName() + "商品已发货");
+                    preOrderInfo.getOrderCode(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress() + "收",
+                    info.getExpressName(), info.getExpressOrderCode(), "商品已发货，请注意查收。");
         } else {
             //商品发货,发送商品发货微信订阅消息
             MemberInfo memberInfo = memberInfoMapper.selectById(info.getReserveId());
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(memberInfo.getWxAppId())
                             .setOpenId(memberInfo.getOpenId())), MiniMessageTypeEnum.PREORDERGOODSELIVERY, null,
-                    info.getGoodsName(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress(),
-                    info.getExpressName(), info.getExpressOrderCode(), info.getGoodsName() + "商品已发货");
+                    info.getGoodsName(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress() + "收",
+                    info.getExpressName(), info.getExpressOrderCode(), "商品已发货，请注意查收。");
         }
     }
 
