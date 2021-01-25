@@ -4,13 +4,8 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import com.aquilaflycloud.mdc.enums.pre.IsUpdateEnum;
-import com.aquilaflycloud.mdc.enums.pre.OrderGoodsStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.PickingCardStateEnum;
-import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
-import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.mdc.enums.pre.*;
+import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.PreOrderGoodsMapper;
 import com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PrePickingCardMapper;
@@ -136,7 +131,7 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         if (count == 0) {
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(orderInfo.getAppId())
                             .setOpenId(orderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERCHANGE, null,
-                    orderInfo.getOrderCode(), "已全部预约", DateTime.now().toString(), "订单" + orderInfo.getOrderCode() + "已全部预约");
+                    orderInfo.getOrderCode(), "已成功预约商品。届时请留意快递信息。", DateTime.now().toString("yyyy年MM月dd日HH时mm分"), "订单已全部预约商品。");
         }
     }
 

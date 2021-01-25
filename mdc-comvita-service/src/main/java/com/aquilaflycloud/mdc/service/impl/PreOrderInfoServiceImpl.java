@@ -290,7 +290,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
                             .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERAUDIT, null,
                     preOrderInfo.getOrderCode(), "您提交的订单已审核", "确认通过",
-                    "订单" + preOrderInfo.getOrderCode() + "审核通过");
+                    "您已成功购买商品。感谢您对康维他的支持。");
         } else {
             content = ("导购员：" + preOrderInfo.getGuideName() + DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss") + " 对订单：" +
                     preOrderInfo.getOrderCode() + "进行了不通过，不通过的原因为：" + preOrderInfo.getReason());
@@ -298,7 +298,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
                             .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERAUDIT, null,
                     preOrderInfo.getOrderCode(), "您提交的订单已审核", "不通过",
-                    "订单" + preOrderInfo.getOrderCode() + "审核不通过");
+                    "感谢您对康维他的支持。");
         }
         orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getGuideName(), preOrderInfo.getId(), content);
     }
@@ -488,7 +488,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(memberInfo.getWxAppId())
                         .setOpenId(memberInfo.getOpenId())), MiniMessageTypeEnum.PREORDERGOODSSIGN, null,
                 preOrderGoods.getGoodsName(), preOrderGoods.getExpressName(), preOrderGoods.getExpressOrderCode(),
-                preOrderGoods.getGoodsName() + "商品已签收");
+                "商品已签收。感谢您对康维他的支持。");
     }
 
     @Transactional
@@ -516,15 +516,15 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             if (orderGoods < 0) {
                 throw new ServiceException("更改商品明细状态失败。");
             }
+            //签收赠品,发送微信订阅消息
+            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
+                            .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERSIGN, null,
+                    preOrderInfo.getOrderCode(), preOrderGoods.getGoodsName(), preOrderGoods.getExpressName(),
+                    preOrderGoods.getExpressOrderCode(), "商品已签收。感谢您对康维他的支持。");
         }
         String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了订单签收。";
         orderOperateRecordService.addOrderOperateRecordLog(infoResult.getRealName(),preOrderInfo.getId(),content);
-        //签收赠品,发送微信订阅消息
-        wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
-                        .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERSIGN, null,
-                preOrderInfo.getOrderCode(), preOrderGoods.getGoodsName(), preOrderGoods.getExpressName(),
-                preOrderGoods.getExpressOrderCode(), "订单" + preOrderInfo.getOrderCode() + "的赠品" + preOrderGoods.getGoodsName() + "已签收");
     }
 
     @Override
@@ -620,8 +620,8 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         //发送微信订阅消息
         wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
                         .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERREFUNDAUDIT, null,
-                preOrderInfo.getOrderCode(), preRefundOrderInfo.getRefundPrice().toString(), "通过",
-                "订单" + preOrderInfo.getOrderCode() + "已成功办理售后");
+                preOrderInfo.getOrderCode(), preRefundOrderInfo.getRefundPrice().toString(), "审核通过，已成功退货。",
+                "退款将于7个工作日内退回到您的付款账户。");
     }
 
 
