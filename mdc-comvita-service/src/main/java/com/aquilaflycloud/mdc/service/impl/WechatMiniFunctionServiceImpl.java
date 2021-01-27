@@ -57,6 +57,7 @@ public class WechatMiniFunctionServiceImpl implements WechatMiniFunctionService 
                         qrcodeInfo = new WechatMiniQrcodeInfo();
                         BeanUtil.copyProperties(param, qrcodeInfo);
                         qrcodeInfo.setUrl(url);
+                        wechatMiniQrcodeInfoMapper.insert(qrcodeInfo);
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                         throw new ServiceException("上传小程序二维码失败");
