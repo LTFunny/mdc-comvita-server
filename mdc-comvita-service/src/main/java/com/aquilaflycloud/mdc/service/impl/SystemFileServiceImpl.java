@@ -27,6 +27,7 @@ import com.aquilaflycloud.mdc.mapper.MemberFileUploadRecordMapper;
 import com.aquilaflycloud.mdc.mapper.SystemExportLogMapper;
 import com.aquilaflycloud.mdc.model.member.MemberFileUploadRecord;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
+import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.model.system.SystemExportLog;
 import com.aquilaflycloud.mdc.param.coupon.CouponRelPageParam;
 import com.aquilaflycloud.mdc.param.exchange.OrderPageParam;
@@ -34,6 +35,7 @@ import com.aquilaflycloud.mdc.param.member.MemberPageParam;
 import com.aquilaflycloud.mdc.param.member.RewardRecordPageParam;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.param.system.*;
+import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsReportPageResult;
 import com.aquilaflycloud.mdc.result.system.SqlResult;
 import com.aquilaflycloud.mdc.service.*;
 import com.aquilaflycloud.mdc.util.MdcUtil;
@@ -43,6 +45,7 @@ import com.aquilaflycloud.util.RedisUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import com.gitee.sop.servercommon.param.ParamValidator;
 import com.gitee.sop.servercommon.param.ServiceParamValidator;
@@ -51,6 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartFile;
@@ -143,7 +147,18 @@ public class SystemFileServiceImpl implements SystemFileService {
             }
             case READY_GOODS: {
                 ReadyListParam exportParam = buildParam(param.getExportParam(), ReadyListParam.class);
-                page = preOrderAdministrationService.pagereadySalesList(exportParam);
+                IPage<PreOrderGoods> orderGoodsIPage = preOrderAdministrationService.pagereadySalesList(exportParam);
+                List<PreOrderGoodsReportPageResult> list=new ArrayList<>();
+                if(CollUtil.isNotEmpty(orderGoodsIPage.getRecords())){
+                   for(PreOrderGoods goods:orderGoodsIPage.getRecords()){
+                       PreOrderGoodsReportPageResult preOrderGoodsReportPageResult=new PreOrderGoodsReportPageResult();
+                       BeanUtils.copyProperties(goods, preOrderGoodsReportPageResult);
+                       preOrderGoodsReportPageResult.setDeliveryAddress(goods.getDeliveryProvince()+goods.getDeliveryCity()+goods.getDeliveryDistrict()+goods.getDeliveryAddress());
+                       list.add(preOrderGoodsReportPageResult);
+                   }
+                }
+                page = new Page(exportParam.getPageNum(), exportParam.getPageSize(), orderGoodsIPage.getTotal());
+                page.setRecords(list);
                 break;
             }
             case ORDER_INFO: {
