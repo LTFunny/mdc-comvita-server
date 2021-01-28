@@ -118,6 +118,7 @@
                 a.delivery_district  deliveryDistrict,
                 a.delivery_province deliveryProvince,
                 a.delivery_city deliveryCity,
+                a.delivery_address deliveryAddress,
                 a.order_code orderCode,
                 a.create_time createTime,
                 a.reserve_start_time reserveStartTime,
@@ -167,6 +168,7 @@
         a.buyer_district  deliveryDistrict,
         a.buyer_province deliveryProvince,
         a.buyer_city deliveryCity,
+        a.buyer_address deliveryAddress,
         a.order_code orderCode,
         a.shop_name shopName,
         a.order_state orderState,
@@ -179,7 +181,6 @@
         a.total_price totaGoodsPrice
         from
         pre_order_info a
-
         left join (select count(c.id) num,c.order_id orderId,  b.goods_price goodsPrice,
         b.goods_price unitPrice,b.goods_code goodsCode,c.goods_name
         from pre_order_goods c
