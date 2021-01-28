@@ -27,6 +27,9 @@ public class SalePageResult {
     @ApiModelProperty(value = "城市")
     private String deliveryCity;
 
+    @ApiModelProperty(value = "详细地址")
+    private String deliveryAddress;
+
     @ApiModelProperty(value = "门店名称")
     private String shopName;
 
