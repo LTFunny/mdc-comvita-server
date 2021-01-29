@@ -71,7 +71,7 @@ public class OrderPageResult {
     @ApiModelProperty(value = "零售价")
     private BigDecimal goodsPrice;
 
-    @ApiModelProperty(value = "销售单价")
+    @ApiModelProperty(value = "成交价")
     private BigDecimal unitPrice;
 
 }
