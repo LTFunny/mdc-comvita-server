@@ -118,6 +118,7 @@
                 a.delivery_district  deliveryDistrict,
                 a.delivery_province deliveryProvince,
                 a.delivery_city deliveryCity,
+                a.delivery_address deliveryAddress,
                 a.order_code orderCode,
                 a.create_time createTime,
                 a.reserve_start_time reserveStartTime,
@@ -167,6 +168,7 @@
         a.buyer_district  deliveryDistrict,
         a.buyer_province deliveryProvince,
         a.buyer_city deliveryCity,
+        a.buyer_address deliveryAddress,
         a.order_code orderCode,
         a.shop_name shopName,
         a.order_state orderState,
@@ -179,17 +181,15 @@
         a.total_price totaGoodsPrice
         from
         pre_order_info a
-
         left join (select count(c.id) num,c.order_id orderId,  b.goods_price goodsPrice,
         b.goods_price unitPrice,b.goods_code goodsCode,c.goods_name
         from pre_order_goods c
         left join pre_goods_info b on b.goods_code=c.goods_code
-        where c.goods_type not in (2) ) d on d.orderId=a.id
+        where c.goods_type not in (2) GROUP BY c.order_id) d on d.orderId=a.id
         where a.id is not null
         <if test="param.shopId != null and param.shopId != ''">
             and a.shop_id= #{param.shopId}
         </if>
-
         <if test="param.guideName != null and param.guideName != ''">
             and  a.guide_name= #{param.guideName}
         </if>

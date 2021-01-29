@@ -26,6 +26,9 @@ public class OrderPageResult {
     @ApiModelProperty(value = "城市")
     private String deliveryCity;
 
+    @ApiModelProperty(value = "详细地址")
+    private String deliveryAddress;
+
     @ApiModelProperty(value = "订单编号")
     private String orderCode;
 
@@ -68,7 +71,7 @@ public class OrderPageResult {
     @ApiModelProperty(value = "零售价")
     private BigDecimal goodsPrice;
 
-    @ApiModelProperty(value = "销售单价")
+    @ApiModelProperty(value = "成交价")
     private BigDecimal unitPrice;
 
 }
