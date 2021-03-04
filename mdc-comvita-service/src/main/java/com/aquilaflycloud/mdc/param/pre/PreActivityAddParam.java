@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.param.pre;
 
 import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
+import com.aquilaflycloud.mdc.enums.pre.ActivityGettingWayEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -55,6 +56,7 @@ public class PreActivityAddParam {
 
     /**
      * 关联商品
+     * 20210304 类型修改 可存多个关联商品
      */
     @ApiModelProperty(value = "关联商品")
     private Long refGoods;
@@ -85,4 +87,18 @@ public class PreActivityAddParam {
 
     @ApiModelProperty(value = "标签ids")
     private List<Long> folksonomyIds;
+
+    /**
+     * 领取方式 (线下领取 物流配送)
+     */
+    @ApiModelProperty(value = "领取方式")
+    private ActivityGettingWayEnum activityGettingWay;
+
+    /**
+     * 参加人数上限
+     */
+    @ApiModelProperty(value = "参加人数上限", required = true)
+    @NotNull(message = "参加人数上限不能为空")
+    private Long maxParticipationCount;
+
 }

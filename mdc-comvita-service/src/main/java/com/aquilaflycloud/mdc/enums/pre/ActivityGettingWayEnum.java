@@ -5,24 +5,25 @@ import com.aquilaflycloud.dataAuth.component.EnumDeserializer;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 
 /**
- * ActivityTypeEnum
- * 营销活动类型 1-预售活动 2-快闪活动
+ * ActivityGettingWayEnum
+ * 活动领取方式（1-线下领取 2-物流配送）
  * @author linkq
  *
  */
 @JSONType(serializeEnumAsJavaBean = true, deserializer = EnumDeserializer.class)
-public enum ActivityTypeEnum {
+public enum ActivityGettingWayEnum {
+
     /**
-     * 预售活动
+     * 线下领取
      */
-    PRE_SALES(1, "预售活动"),
+    OFF_LINE(1, "线下领取"),
     /**
-     * 快闪活动
+     * 物流配送
      */
-    FLASH(2,"快闪活动")
+    BY_EXPRESS(2, "物流配送")
     ;
 
-    ActivityTypeEnum(int type, String name) {
+    ActivityGettingWayEnum(int type, String name) {
         this.type = type;
         this.name = name;
     }
