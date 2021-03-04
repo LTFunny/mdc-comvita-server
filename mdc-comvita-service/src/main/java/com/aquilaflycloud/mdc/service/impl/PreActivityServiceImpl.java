@@ -67,13 +67,18 @@ public class PreActivityServiceImpl implements PreActivityService {
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
                 .eq(PreActivityInfo::getActivityType, ActivityTypeEnum.PRE_SALES)
                 .ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
-                .and(state != null && state == ActivityStateEnum.NOT_STARTED,
+                .and(state == ActivityStateEnum.NOT_STARTED,
                         j -> j.and(k -> k.ge(PreActivityInfo::getBeginTime, now)))
-                .and(state != null && state == ActivityStateEnum.IN_PROGRESS,
+                .and(state == ActivityStateEnum.IN_PROGRESS,
                         j -> j.and(k -> k.le(PreActivityInfo::getBeginTime, now).ge(PreActivityInfo::getEndTime, now)))
-                .and(state != null && state == ActivityStateEnum.FINISHED,
+                .and(state == ActivityStateEnum.FINISHED,
                         j -> j.and(k -> k.le(PreActivityInfo::getEndTime, now)))
         ).convert(this::dataConvertResult);
+    }
+
+    @Override
+    public PreActivityInfo getPreActivity(PreActivityGetParam param) {
+        return preActivityInfoMapper.selectById(param.getId());
     }
 
     @Override

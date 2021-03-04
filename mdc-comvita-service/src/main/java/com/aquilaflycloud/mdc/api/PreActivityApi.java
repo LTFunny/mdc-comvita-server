@@ -1,5 +1,7 @@
 package com.aquilaflycloud.mdc.api;
 
+import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
+import com.aquilaflycloud.mdc.param.pre.PreActivityGetParam;
 import com.aquilaflycloud.mdc.param.pre.PreActivityPageParam;
 import com.aquilaflycloud.mdc.result.pre.PreActivityPageResult;
 import com.aquilaflycloud.mdc.service.PreActivityService;
@@ -29,4 +31,9 @@ public class PreActivityApi {
         return preActivityService.pagePreActivity(param);
     }
 
+    @ApiOperation(value = "获取预售活动详情", notes = "获取预售活动详情")
+    @ApiMapping(value = "comvita.pre.activity.info.get", method = RequestMethod.POST)
+    public PreActivityInfo getPreActivity(PreActivityGetParam param) {
+        return preActivityService.getPreActivity(param);
+    }
 }

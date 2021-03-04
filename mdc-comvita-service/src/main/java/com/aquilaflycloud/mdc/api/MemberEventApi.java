@@ -91,6 +91,16 @@ public class MemberEventApi {
         return returnResult(memberEventLogService.increaseBusinessNum(eventParam));
     }
 
+    @ApiOperation(value = "记录活动分享", notes = "记录活动分享,返回分享数")
+    @ApiMapping(value = "comvita.member.activityShare.add", method = RequestMethod.POST)
+    public BaseResult<Long> addActivityShare(MemberEventAddParam param) {
+        MemberEventParam eventParam = new MemberEventParam();
+        eventParam.setBusinessId(param.getBusinessId());
+        eventParam.setBusinessType(BusinessTypeEnum.PREACTIVITY);
+        eventParam.setEventType(EventTypeEnum.SHARE);
+        return returnResult(memberEventLogService.increaseBusinessNum(eventParam));
+    }
+
     @ApiOperation(value = "记录广告点击", notes = "记录广告点击,返回点击数")
     @ApiMapping(value = "comvita.member.adClick.add", method = RequestMethod.POST)
     public BaseResult<Long> addAdClick(MemberEventAddParam param) {
@@ -110,5 +120,4 @@ public class MemberEventApi {
         eventParam.setEventType(EventTypeEnum.CLICK);
         return returnResult(memberEventLogService.increaseBusinessNum(eventParam));
     }
-
 }

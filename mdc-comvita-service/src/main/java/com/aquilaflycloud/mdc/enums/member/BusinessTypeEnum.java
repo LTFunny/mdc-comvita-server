@@ -19,8 +19,8 @@ public enum BusinessTypeEnum {
     APPLY(4, "活动报名"),
     RECOMMEND(5, "最新推荐"),
     EXCHANGEGOODS(8, "兑换商品"),
-    PREGOODS(9, "预售商品"),
-    PREACTIVITY(10, "预售活动"),
+    PREGOODS(9, "营销商品"),
+    PREACTIVITY(10, "营销活动"),
     ;
 
     BusinessTypeEnum(int type, String name) {

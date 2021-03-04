@@ -58,6 +58,10 @@ public class MemberBusinessEventAspect {
                     result = addNum(result, BusinessTypeEnum.APPLY, EventTypeEnum.READ);
                     break;
                 }
+                case "comvita.pre.activity.info.get": {
+                    result = addNum(result, BusinessTypeEnum.PREACTIVITY, EventTypeEnum.CLICK);
+                    break;
+                }
                 case "comvita.apply.info.page":
                 case "backend.comvita.apply.info.page":
                 case "backend.comvita.apply.info.get": {
