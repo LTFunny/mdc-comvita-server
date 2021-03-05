@@ -36,6 +36,12 @@ public class PreActiveQrCodeInfo implements Serializable {
     @ApiModelProperty(value = "关联门店id")
     private Long umsOrganizationId;
 
+    /**
+     * 关联门店名称
+     */
+    @TableField(value = "ums_organization_name")
+    @ApiModelProperty(value = "关联门店名称")
+    private String umsOrganizationName;
 
     /**
      * 二维码地址
