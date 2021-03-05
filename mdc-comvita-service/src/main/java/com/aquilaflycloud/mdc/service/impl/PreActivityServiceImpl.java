@@ -232,7 +232,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         List<PreActivityRefGoodsResult> result = new ArrayList<>();
         JSONArray array_ = JSONUtil.parseArray(refGoods);
         array_.stream().forEach(i ->{
-            PreGoodsInfo goods = preGoodsInfoMapper.selectById((Long)i);
+            PreGoodsInfo goods = preGoodsInfoMapper.selectById((String)i);
             if(null != goods){
                 PreActivityRefGoodsResult refGoodsResult = new PreActivityRefGoodsResult();
                 refGoodsResult.setGoodsId(goods.getId());

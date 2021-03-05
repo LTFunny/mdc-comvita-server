@@ -57,7 +57,7 @@ public class PreActivityUpdateParam {
      * 关联商品
      */
     @ApiModelProperty(value = "关联商品")
-    private List<Long> refGoods;
+    private List<String> refGoods;
 
     /**
      * 关联的销售规则

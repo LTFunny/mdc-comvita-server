@@ -60,7 +60,7 @@ public class PreActivityAddParam {
      */
     @ApiModelProperty(value = "关联商品id数组")
     @NotNull(message = "关联商品不能为空")
-    private List<Long> refGoods;
+    private List<String> refGoods;
 
     /**
      * 关联的销售规则
