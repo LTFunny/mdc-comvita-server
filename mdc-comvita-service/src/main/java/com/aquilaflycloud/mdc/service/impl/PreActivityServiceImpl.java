@@ -5,8 +5,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
@@ -158,20 +158,18 @@ public class PreActivityServiceImpl implements PreActivityService {
 
     private List<PreActivityRefGoodsResult> getGoodsCode(String refGoods) {
         List<PreActivityRefGoodsResult> result = new ArrayList<>();
-        List<Long> ids = JSONArray.parseArray(refGoods,Long.class);
-        if(CollUtil.isNotEmpty(ids)){
-            ids.forEach(i ->{
-                PreGoodsInfo goods = preGoodsInfoMapper.selectById(i);
-                if(null != goods){
-                    PreActivityRefGoodsResult refGoodsResult = new PreActivityRefGoodsResult();
-                    refGoodsResult.setGoodsId(goods.getId());
-                    refGoodsResult.setGoodsCode(goods.getGoodsCode());
-                    refGoodsResult.setGoodsName(goods.getGoodsName());
-                    refGoodsResult.setGoodsPrice(goods.getGoodsPrice());
-                    result.add(refGoodsResult);
-                }
-            });
-        }
+        JSONArray array_ = JSONUtil.parseArray(refGoods);
+        array_.stream().forEach(i ->{
+            PreGoodsInfo goods = preGoodsInfoMapper.selectById((Long)i);
+            if(null != goods){
+                PreActivityRefGoodsResult refGoodsResult = new PreActivityRefGoodsResult();
+                refGoodsResult.setGoodsId(goods.getId());
+                refGoodsResult.setGoodsCode(goods.getGoodsCode());
+                refGoodsResult.setGoodsName(goods.getGoodsName());
+                refGoodsResult.setGoodsPrice(goods.getGoodsPrice());
+                result.add(refGoodsResult);
+            }
+        });
         return result;
     }
 
