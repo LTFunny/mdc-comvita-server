@@ -17,8 +17,8 @@ import java.util.List;
 @Data
 public class PreActivityPageResult extends PreActivityInfo {
 
-    @ApiModelProperty(value = "关联商品编号")
-    private String refGoodsCode;
+    @ApiModelProperty(value = "关联商品")
+    private List<PreActivityRefGoodsResult> refGoodsCode;
 
     @ApiModelProperty(value = "活动标签")
     private List<PreActivityFolksonomyResult> folksonomyIds;

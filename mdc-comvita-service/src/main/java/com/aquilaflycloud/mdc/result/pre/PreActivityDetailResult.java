@@ -23,8 +23,8 @@ public class PreActivityDetailResult extends PreActivityInfo {
     /**
      * 关联商品
      */
-    @ApiModelProperty(value = "商品编号")
-    private String refGoodsCode;
+    @ApiModelProperty(value = "关联商品")
+    private List<PreActivityRefGoodsResult> refGoodsCode;
 
     /**
      * 关联的销售规则

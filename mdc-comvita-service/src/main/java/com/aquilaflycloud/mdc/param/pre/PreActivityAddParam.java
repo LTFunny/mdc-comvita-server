@@ -59,7 +59,7 @@ public class PreActivityAddParam {
      * 20210304 类型修改 可存多个关联商品
      */
     @ApiModelProperty(value = "关联商品")
-    private Long refGoods;
+    private List<Long> refGoods;
 
     /**
      * 关联的销售规则

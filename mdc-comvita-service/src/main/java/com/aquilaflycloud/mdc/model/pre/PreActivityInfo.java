@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.aquilaflycloud.mdc.enums.pre.ActivityGettingWayEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -10,6 +11,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -66,7 +68,7 @@ public class PreActivityInfo implements Serializable {
      */
     @TableField(value = "ref_goods")
     @ApiModelProperty(value = "关联商品")
-    private Long refGoods;
+    private String refGoods;
 
     /**
      * 关联的销售规则
@@ -82,6 +84,21 @@ public class PreActivityInfo implements Serializable {
     @ApiModelProperty(value = "奖励规则", hidden = true)
     @JSONField(serialize = false)
     private String rewardRuleContent;
+
+
+    /**
+     * 领取方式 (线下领取 物流配送)
+     */
+    @TableField(value = "activity_getting_way")
+    @ApiModelProperty(value = "领取方式（pre.ActivityGettingWayEnum）")
+    private ActivityGettingWayEnum activityGettingWay;
+
+    /**
+     * 参加人数上限
+     */
+    @TableField(value = "max_participation_count")
+    @ApiModelProperty(value = "参加人数上限")
+    private Long maxParticipationCount;
 
     /**
      * 活动照片

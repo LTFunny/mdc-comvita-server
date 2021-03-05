@@ -6,6 +6,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
@@ -65,7 +66,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         ActivityStateEnum state = param.getActivityState();
         DateTime now = DateTime.now();
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
-                .eq(PreActivityInfo::getActivityType, ActivityTypeEnum.PRE_SALES)
+                .eq( param.getActivityType() != null,PreActivityInfo::getActivityType,param.getActivityType())
                 .ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
                 .and(state == ActivityStateEnum.NOT_STARTED,
                         j -> j.and(k -> k.ge(PreActivityInfo::getBeginTime, now)))
@@ -155,13 +156,23 @@ public class PreActivityServiceImpl implements PreActivityService {
         return results;
     }
 
-    private String getGoodsCode(Long refGoods) {
-        String code = "";
-        PreGoodsInfo goods = preGoodsInfoMapper.selectById(refGoods);
-        if(null != goods){
-            code = goods.getGoodsCode();
+    private List<PreActivityRefGoodsResult> getGoodsCode(String refGoods) {
+        List<PreActivityRefGoodsResult> result = new ArrayList<>();
+        List<Long> ids = JSONArray.parseArray(refGoods,Long.class);
+        if(CollUtil.isNotEmpty(ids)){
+            ids.forEach(i ->{
+                PreGoodsInfo goods = preGoodsInfoMapper.selectById(i);
+                if(null != goods){
+                    PreActivityRefGoodsResult refGoodsResult = new PreActivityRefGoodsResult();
+                    refGoodsResult.setGoodsId(goods.getId());
+                    refGoodsResult.setGoodsCode(goods.getGoodsCode());
+                    refGoodsResult.setGoodsName(goods.getGoodsName());
+                    refGoodsResult.setGoodsPrice(goods.getGoodsPrice());
+                    result.add(refGoodsResult);
+                }
+            });
         }
-        return code;
+        return result;
     }
 
     /**
@@ -195,9 +206,10 @@ public class PreActivityServiceImpl implements PreActivityService {
         checkTimeParam(param.getBeginTime(),param.getEndTime());
 
         PreActivityInfo activityInfo = new PreActivityInfo();
-        BeanUtil.copyProperties(param, activityInfo);
+        BeanUtil.copyProperties(param, activityInfo,"refGoods");
         activityInfo.setId(MdcUtil.getSnowflakeId());
         activityInfo.setRewardRuleContent(JSONUtil.toJsonStr(param.getRewardRuleList()));
+        activityInfo.setRefGoods(JSONUtil.toJsonStr(param.getRefGoods()));
         //根据时间 判断状态
         DateTime now = DateTime.now();
         if (now.isAfterOrEquals(param.getBeginTime()) && now.isBeforeOrEquals(param.getEndTime())) {
@@ -207,15 +219,17 @@ public class PreActivityServiceImpl implements PreActivityService {
         } else if (now.isAfter(param.getEndTime())) {
             activityInfo.setActivityState(ActivityStateEnum.FINISHED);
         }
-        //设置默认规则
-        if(null == param.getRefRule()){
-            QueryWrapper<PreRuleInfo> qw = new QueryWrapper<>();
-            qw.eq("is_default", RuleDefaultEnum.DEFAULT.getType());
-            PreRuleInfo info = preRuleInfoMapper.selectOne(qw);
-            if(null != info){
-                activityInfo.setRefRule(info.getId());
-            }else{
-                log.info("无法找到默认规则,活动设置规则失败!");
+        //设置默认规则 预售活动才有
+        if(ActivityTypeEnum.PRE_SALES == param.getActivityType()){
+            if(null == param.getRefRule()){
+                QueryWrapper<PreRuleInfo> qw = new QueryWrapper<>();
+                qw.eq("is_default", RuleDefaultEnum.DEFAULT.getType());
+                PreRuleInfo info = preRuleInfoMapper.selectOne(qw);
+                if(null != info){
+                    activityInfo.setRefRule(info.getId());
+                }else{
+                    log.info("无法找到默认规则,活动设置规则失败!");
+                }
             }
         }
         int count = preActivityInfoMapper.insert(activityInfo);
@@ -278,7 +292,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             endTime = activityInfo.getEndTime();
         }
         checkTimeParam(beginTime,endTime);
-        BeanUtil.copyProperties(param, activityInfo,"id","activityState");
+        BeanUtil.copyProperties(param, activityInfo,"id","activityState","refGoods");
         //时间有更新的话 同步更新状态 但是已下架状态的要先上架
         if(null != activityInfo.getActivityState() && activityInfo.getActivityState() != ActivityStateEnum.CANCELED){
             DateTime now = DateTime.now();
@@ -292,6 +306,9 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
         if (CollUtil.isNotEmpty(param.getRewardRuleList())) {
             activityInfo.setRewardRuleContent(JSONUtil.toJsonStr(param.getRewardRuleList()));
+        }
+        if (CollUtil.isNotEmpty(param.getRefGoods())) {
+            activityInfo.setRefGoods(JSONUtil.toJsonStr(param.getRefGoods()));
         }
         preActivityInfoMapper.updateById(activityInfo);
         log.info("编辑活动信息成功");
@@ -346,9 +363,8 @@ public class PreActivityServiceImpl implements PreActivityService {
         PreActivityDetailResult preActivityDetailResult = new PreActivityDetailResult();
         BeanUtil.copyProperties(info, preActivityDetailResult);
         //refGoodsCode
-        PreGoodsInfo goods = preGoodsInfoMapper.selectById(info.getRefGoods());
-        if(null != goods){
-            preActivityDetailResult.setRefGoodsCode(goods.getGoodsCode());
+        if(StrUtil.isNotBlank(info.getRefGoods())){
+            preActivityDetailResult.setRefGoodsCode(getGoodsCode(info.getRefGoods()));
         }
         //refRuleName
         PreRuleInfo rule = preRuleInfoMapper.selectById(info.getRefRule());
