@@ -8,12 +8,11 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
-import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
-import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
-import com.aquilaflycloud.mdc.enums.pre.RuleDefaultEnum;
+import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
+import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
@@ -61,25 +60,83 @@ public class PreActivityServiceImpl implements PreActivityService {
     @Resource
     private FolksonomyService folksonomyService;
 
+    private PreActivityInfo stateHandler(PreActivityInfo info) {
+        if (info == null) {
+            throw new ServiceException("活动不存在");
+        }
+        DateTime now = DateTime.now();
+        if (info.getActivityState() != ActivityStateEnum.CANCELED) {
+            if (now.isAfterOrEquals(info.getBeginTime()) && now.isBeforeOrEquals(info.getEndTime())) {
+                info.setActivityState(ActivityStateEnum.IN_PROGRESS);
+            } else if (now.isBefore(info.getBeginTime())) {
+                info.setActivityState(ActivityStateEnum.NOT_STARTED);
+            } else if (now.isAfter(info.getEndTime())) {
+                info.setActivityState(ActivityStateEnum.FINISHED);
+            }
+        }
+        return info;
+    }
+
     @Override
-    public IPage<PreActivityPageResult> pagePreActivity(PreActivityPageParam param) {
+    public IPage<PreActivityPageApiResult> pagePreActivity(PreActivityPageParam param) {
         ActivityStateEnum state = param.getActivityState();
         DateTime now = DateTime.now();
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
-                .eq( param.getActivityType() != null,PreActivityInfo::getActivityType,param.getActivityType())
-                .ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
+                .eq(param.getActivityType() != null, PreActivityInfo::getActivityType, param.getActivityType())
+                .ne(PreActivityInfo::getActivityState, ActivityStateEnum.CANCELED)
                 .and(state == ActivityStateEnum.NOT_STARTED,
                         j -> j.and(k -> k.ge(PreActivityInfo::getBeginTime, now)))
                 .and(state == ActivityStateEnum.IN_PROGRESS,
                         j -> j.and(k -> k.le(PreActivityInfo::getBeginTime, now).ge(PreActivityInfo::getEndTime, now)))
                 .and(state == ActivityStateEnum.FINISHED,
                         j -> j.and(k -> k.le(PreActivityInfo::getEndTime, now)))
-        ).convert(this::dataConvertResult);
+        ).convert(info -> {
+            info = stateHandler(info);
+            PreActivityPageApiResult result = BeanUtil.copyProperties(info, PreActivityPageApiResult.class);
+            if (StrUtil.isNotBlank(info.getRewardRuleContent())) {
+                result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
+            }
+            return result;
+        });
     }
 
     @Override
-    public PreActivityInfo getPreActivity(PreActivityGetParam param) {
-        return preActivityInfoMapper.selectById(param.getId());
+    public PreActivityInfoApiResult getPreActivity(PreActivityGetParam param) {
+        MemberInfo memberInfo = MdcUtil.getCurrentMember();
+        PreActivityInfo info = preActivityInfoMapper.selectById(param.getId());
+        info = stateHandler(info);
+        PreActivityInfoApiResult result = BeanUtil.copyProperties(info, PreActivityInfoApiResult.class);
+        if (StrUtil.isNotBlank(info.getRewardRuleContent())) {
+            result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
+        }
+        if (result.getActivityState() == ActivityStateEnum.IN_PROGRESS) {
+            result.setButtonState(ButtonStateEnum.JOIN);
+            if (memberInfo != null) {
+                PreOrderInfo orderInfo = preOrderInfoMapper.selectOne(Wrappers.<PreOrderInfo>lambdaQuery()
+                        .eq(PreOrderInfo::getActivityInfoId, result.getId())
+                        .eq(PreOrderInfo::getMemberId, memberInfo.getId())
+                );
+                if (orderInfo == null) {
+                    int orderCount = preOrderInfoMapper.selectCount(Wrappers.<PreOrderInfo>lambdaQuery()
+                            .eq(PreOrderInfo::getActivityInfoId, result.getId())
+                    );
+                    if (orderCount >= result.getMaxParticipationCount()) {
+                        result.setButtonState(ButtonStateEnum.FULL);
+                    }
+                } else {
+                    if (orderInfo.getOrderState() == OrderInfoStateEnum.BEENCOMPLETED) {
+                        result.setButtonState(ButtonStateEnum.COMMENT);
+                    } else {
+                        if (info.getActivityGettingWay() == ActivityGettingWayEnum.OFF_LINE) {
+                            result.setButtonState(ButtonStateEnum.SHOW);
+                        } else {
+                            result.setButtonState(ButtonStateEnum.JOINED);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -115,17 +172,17 @@ public class PreActivityServiceImpl implements PreActivityService {
         ).convert(this::dataConvertResult);
     }
 
-    private PreActivityPageResult dataConvertResult(PreActivityInfo info){
-        if(null != info){
+    private PreActivityPageResult dataConvertResult(PreActivityInfo info) {
+        if (null != info) {
             DateTime now = DateTime.now();
             PreActivityPageResult result = new PreActivityPageResult();
             BeanUtil.copyProperties(info, result);
             result.setRefGoodsCode(getGoodsCode(info.getRefGoods()));
             result.setFolksonomyIds(getFolksonomys(info.getId()));
-            if(StrUtil.isNotBlank(info.getRewardRuleContent())){
+            if (StrUtil.isNotBlank(info.getRewardRuleContent())) {
                 result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
             }
-            if(info.getActivityState() != ActivityStateEnum.CANCELED){
+            if (info.getActivityState() != ActivityStateEnum.CANCELED) {
                 if (now.isAfterOrEquals(info.getBeginTime()) && now.isBeforeOrEquals(info.getEndTime())) {
                     result.setActivityState(ActivityStateEnum.IN_PROGRESS);
                 } else if (now.isBefore(info.getBeginTime())) {
@@ -135,7 +192,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                 }
             }
             return result;
-        }else {
+        } else {
             return null;
         }
     }
