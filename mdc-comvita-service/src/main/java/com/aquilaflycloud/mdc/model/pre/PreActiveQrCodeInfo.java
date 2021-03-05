@@ -25,14 +25,14 @@ public class PreActiveQrCodeInfo implements Serializable {
     /**
      * 活动id
      */
-    @TableId(value = "activity_id")
+    @TableField(value = "activity_id")
     @ApiModelProperty(value = "活动id")
     private Long activityId;
 
     /**
      * 关联门店id
      */
-    @TableId(value = "ums_organization_id")
+    @TableField(value = "ums_organization_id")
     @ApiModelProperty(value = "关联门店id")
     private Long umsOrganizationId;
 
