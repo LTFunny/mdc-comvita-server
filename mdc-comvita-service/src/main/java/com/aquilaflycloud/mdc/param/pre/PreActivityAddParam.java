@@ -58,7 +58,8 @@ public class PreActivityAddParam {
      * 关联商品
      * 20210304 类型修改 可存多个关联商品
      */
-    @ApiModelProperty(value = "关联商品")
+    @ApiModelProperty(value = "关联商品id数组")
+    @NotNull(message = "关联商品不能为空")
     private List<Long> refGoods;
 
     /**
