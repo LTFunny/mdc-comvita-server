@@ -29,7 +29,6 @@ public class PreActivityPageParam extends PageParam<PreActivityInfo> {
     @ApiModelProperty(value = "状态(pre.ActivityStateEnum)")
     private ActivityStateEnum activityState;
 
-
     @ApiModelProperty(value = "活动标签id")
     private List<Long> folksonomyIds;
 

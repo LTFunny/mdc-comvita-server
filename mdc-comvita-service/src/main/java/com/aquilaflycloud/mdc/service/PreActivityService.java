@@ -1,10 +1,7 @@
 package com.aquilaflycloud.mdc.service;
 
-import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
-import com.aquilaflycloud.mdc.result.pre.PreActivityAnalysisResult;
-import com.aquilaflycloud.mdc.result.pre.PreActivityDetailResult;
-import com.aquilaflycloud.mdc.result.pre.PreActivityPageResult;
+import com.aquilaflycloud.mdc.result.pre.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 /**
@@ -12,7 +9,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
  * @author linkq
  */
 public interface PreActivityService {
-    PreActivityInfo getPreActivity(PreActivityGetParam param);
+    IPage<PreActivityPageApiResult> pagePreActivity(PreActivityPageParam param);
+
+    PreActivityInfoApiResult getPreActivity(PreActivityGetParam param);
 
     IPage<PreActivityPageResult> page(PreActivityPageParam param);
 
@@ -25,6 +24,4 @@ public interface PreActivityService {
     void changeState(PreActivityCancelParam param);
 
     PreActivityAnalysisResult analyse(PreActivityAnalysisParam param);
-
-    IPage<PreActivityPageResult> pagePreActivity(PreActivityPageParam param);
 }

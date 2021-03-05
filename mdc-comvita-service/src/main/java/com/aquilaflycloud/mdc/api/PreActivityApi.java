@@ -1,9 +1,9 @@
 package com.aquilaflycloud.mdc.api;
 
-import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.param.pre.PreActivityGetParam;
 import com.aquilaflycloud.mdc.param.pre.PreActivityPageParam;
-import com.aquilaflycloud.mdc.result.pre.PreActivityPageResult;
+import com.aquilaflycloud.mdc.result.pre.PreActivityInfoApiResult;
+import com.aquilaflycloud.mdc.result.pre.PreActivityPageApiResult;
 import com.aquilaflycloud.mdc.service.PreActivityService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -19,21 +19,21 @@ import javax.annotation.Resource;
  * @author linkq
  */
 @RestController
-@Api(tags = "预售活动接口")
+@Api(tags = "活动接口")
 public class PreActivityApi {
 
     @Resource
     private PreActivityService preActivityService;
 
-    @ApiOperation(value = "获取预售活动列表", notes = "获取预售活动列表")
+    @ApiOperation(value = "获取活动列表", notes = "获取活动列表")
     @ApiMapping(value = "comvita.pre.activity.info.page", method = RequestMethod.POST)
-    public IPage<PreActivityPageResult> pagePreActivity(PreActivityPageParam param) {
+    public IPage<PreActivityPageApiResult> pagePreActivity(PreActivityPageParam param) {
         return preActivityService.pagePreActivity(param);
     }
 
-    @ApiOperation(value = "获取预售活动详情", notes = "获取预售活动详情")
+    @ApiOperation(value = "获取活动详情", notes = "获取活动详情")
     @ApiMapping(value = "comvita.pre.activity.info.get", method = RequestMethod.POST)
-    public PreActivityInfo getPreActivity(PreActivityGetParam param) {
+    public PreActivityInfoApiResult getPreActivity(PreActivityGetParam param) {
         return preActivityService.getPreActivity(param);
     }
 }
