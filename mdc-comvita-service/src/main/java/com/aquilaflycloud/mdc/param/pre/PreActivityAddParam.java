@@ -96,9 +96,10 @@ public class PreActivityAddParam {
 
     /**
      * 参加人数上限
+     * 不做非空校验 前端控制
      */
     @ApiModelProperty(value = "参加人数上限", required = true)
-    @NotNull(message = "参加人数上限不能为空")
+//    @NotNull(message = "参加人数上限不能为空")
     private Long maxParticipationCount;
 
 }
