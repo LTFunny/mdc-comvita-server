@@ -27,5 +27,14 @@ public class PreActivityInfoApiResult extends PreActivityInfo {
     private ButtonStateEnum buttonState;
 
     @ApiModelProperty(value = "可选门店列表")
-    private List<String> shopList;
+    private List<ShopInfo> shopList;
+
+    @Data
+    public static class ShopInfo {
+        @ApiModelProperty(value = "可选门店id")
+        private Long shopId;
+
+        @ApiModelProperty(value = "可选门店名称")
+        private String shopName;
+    }
 }

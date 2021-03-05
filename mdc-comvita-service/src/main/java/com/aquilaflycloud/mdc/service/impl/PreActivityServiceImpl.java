@@ -13,10 +13,7 @@ import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
-import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
-import com.aquilaflycloud.mdc.model.pre.PreGoodsInfo;
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
-import com.aquilaflycloud.mdc.model.pre.PreRuleInfo;
+import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
@@ -33,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * PreActivityServiceImpl
@@ -53,6 +51,12 @@ public class PreActivityServiceImpl implements PreActivityService {
 
     @Resource
     private PreOrderInfoMapper preOrderInfoMapper;
+
+    @Resource
+    private PreActivityQrCodeInfoMapper preActivityQrCodeInfoMapper;
+
+    @Resource
+    private PreFlashOrderInfoMapper preFlashOrderInfoMapper;
 
     @Resource
     private FolksonomyBusinessRelMapper folksonomyBusinessRelMapper;
@@ -109,32 +113,43 @@ public class PreActivityServiceImpl implements PreActivityService {
         if (StrUtil.isNotBlank(info.getRewardRuleContent())) {
             result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
         }
-        if (result.getActivityState() == ActivityStateEnum.IN_PROGRESS) {
-            result.setButtonState(ButtonStateEnum.JOIN);
-            if (memberInfo != null) {
-                PreOrderInfo orderInfo = preOrderInfoMapper.selectOne(Wrappers.<PreOrderInfo>lambdaQuery()
-                        .eq(PreOrderInfo::getActivityInfoId, result.getId())
-                        .eq(PreOrderInfo::getMemberId, memberInfo.getId())
-                );
-                if (orderInfo == null) {
-                    int orderCount = preOrderInfoMapper.selectCount(Wrappers.<PreOrderInfo>lambdaQuery()
-                            .eq(PreOrderInfo::getActivityInfoId, result.getId())
+        if (info.getActivityType() == ActivityTypeEnum.FLASH) {
+            if (result.getActivityState() == ActivityStateEnum.IN_PROGRESS) {
+                result.setButtonState(ButtonStateEnum.JOIN);
+                if (memberInfo != null) {
+                    PreFlashOrderInfo orderInfo = preFlashOrderInfoMapper.selectOne(Wrappers.<PreFlashOrderInfo>lambdaQuery()
+                            .eq(PreFlashOrderInfo::getActivityInfoId, result.getId())
+                            .eq(PreFlashOrderInfo::getMemberId, memberInfo.getId())
                     );
-                    if (orderCount >= result.getMaxParticipationCount()) {
-                        result.setButtonState(ButtonStateEnum.FULL);
-                    }
-                } else {
-                    if (orderInfo.getOrderState() == OrderInfoStateEnum.BEENCOMPLETED) {
-                        result.setButtonState(ButtonStateEnum.COMMENT);
+                    if (orderInfo == null) {
+                        int orderCount = preOrderInfoMapper.selectCount(Wrappers.<PreOrderInfo>lambdaQuery()
+                                .eq(PreOrderInfo::getActivityInfoId, result.getId())
+                        );
+                        if (orderCount >= result.getMaxParticipationCount()) {
+                            result.setButtonState(ButtonStateEnum.FULL);
+                        }
                     } else {
-                        if (info.getActivityGettingWay() == ActivityGettingWayEnum.OFF_LINE) {
-                            result.setButtonState(ButtonStateEnum.SHOW);
+                        if (orderInfo.getFlashOrderState() == FlashOrderInfoStateEnum.WRITTENOFF) {
+                            result.setButtonState(ButtonStateEnum.COMMENT);
                         } else {
-                            result.setButtonState(ButtonStateEnum.JOINED);
+                            if (info.getActivityGettingWay() == ActivityGettingWayEnum.OFF_LINE) {
+                                result.setButtonState(ButtonStateEnum.SHOW);
+                            } else {
+                                result.setButtonState(ButtonStateEnum.JOINED);
+                            }
                         }
                     }
                 }
             }
+            List<PreActivityInfoApiResult.ShopInfo> shopInfoList = preActivityQrCodeInfoMapper.selectList(Wrappers.<PreActiveQrCodeInfo>lambdaQuery()
+                    .eq(PreActiveQrCodeInfo::getActivityId, result.getId())
+            ).stream().map(qrCodeInfo -> {
+                PreActivityInfoApiResult.ShopInfo shopInfo = new PreActivityInfoApiResult.ShopInfo();
+                shopInfo.setShopId(qrCodeInfo.getUmsOrganizationId());
+                shopInfo.setShopName(qrCodeInfo.getUmsOrganizationName());
+                return shopInfo;
+            }).collect(Collectors.toList());
+            result.setShopList(shopInfoList);
         }
         return result;
     }
