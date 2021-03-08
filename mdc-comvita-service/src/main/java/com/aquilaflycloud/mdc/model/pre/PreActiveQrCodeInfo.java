@@ -74,7 +74,7 @@ public class PreActiveQrCodeInfo implements Serializable {
     /**
      * 小程序码oss标识
      */
-    @TableField(value = "mini_code_file_key")
+    @TableField(value = "qr_code_file_key")
     @ApiModelProperty(value = "二维码oss标识", hidden = true)
     @JSONField(serialize = false)
     private String qrCodeFileKey;

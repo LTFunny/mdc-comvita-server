@@ -213,6 +213,11 @@ public class PreActivityServiceImpl implements PreActivityService {
         ).convert(this::dataConvertResult);
     }
 
+    /**
+     * 门店名称模糊查询关联的活动id
+     * @param shopName
+     * @return
+     */
     private List<Long> getActivityIdByShopName(String shopName) {
         if(StrUtil.isBlank(shopName)){
             return null;
@@ -241,9 +246,12 @@ public class PreActivityServiceImpl implements PreActivityService {
             if (StrUtil.isNotBlank(info.getRewardRuleContent())) {
                 result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
             }
+            //参加人数上线 领取方式 参加人数 关联门店
             if(ActivityTypeEnum.FLASH == info.getActivityType()){
                 result.setRefShops(getRefShops(info.getId()));
-
+//                result.setMaxParticipationCount(info.getMaxParticipationCount());
+//                result.setActivityGettingWay(info.getActivityGettingWay());
+                result.setParticipationCount(getParticipationCount(info.getId()));
             }
 
             if (info.getActivityState() != ActivityStateEnum.CANCELED) {
@@ -262,18 +270,35 @@ public class PreActivityServiceImpl implements PreActivityService {
     }
 
     /**
+     * 获取活动的参加人数
+     * @param id
+     * @return
+     */
+    private Long getParticipationCount(Long id) {
+        QueryWrapper<PreFlashOrderInfo> qw = new QueryWrapper<>();
+        qw.select("count(1) as total").eq("activity_info_id",id);
+        List<Map<String, Object>> maps = preFlashOrderInfoMapper.selectMaps(qw);
+        if(CollUtil.isNotEmpty(maps)){
+            for(Map<String, Object> map : maps){
+                return (Long) map.get("total");
+            }
+        }
+        return 0L;
+    }
+
+    /**
      * 快闪活动详情 关联门店
      * @param activityId
      * @return
      */
-    private List<PreActivityPageResult.RefShopInfo> getRefShops(Long activityId) {
-        List<PreActivityPageResult.RefShopInfo> result = new ArrayList<>();
+    private List<RefShopInfoResult> getRefShops(Long activityId) {
+        List<RefShopInfoResult> result = new ArrayList<>();
         QueryWrapper<PreActiveQrCodeInfo> qw = new QueryWrapper<>();
         qw.eq("activity_id", activityId);
         List<PreActiveQrCodeInfo> preActiveQrCodeInfos = preActivityQrCodeInfoMapper.selectList(qw);
         if(CollUtil.isNotEmpty(preActiveQrCodeInfos)){
             preActiveQrCodeInfos.forEach(f -> {
-                PreActivityPageResult.RefShopInfo refShopInfo = new PreActivityPageResult.RefShopInfo();
+                RefShopInfoResult refShopInfo = new RefShopInfoResult();
                 refShopInfo.setShopId(f.getOrgId());
                 refShopInfo.setShopName(f.getOrgName());
                 refShopInfo.setShopAddress(f.getOrgAddress());
@@ -547,6 +572,12 @@ public class PreActivityServiceImpl implements PreActivityService {
                 names.add(s.getName());
             });
             preActivityDetailResult.setFolksonomyNames(names);
+        }
+        if(ActivityTypeEnum.FLASH == info.getActivityType()){
+            preActivityDetailResult.setRefShops(getRefShops(info.getId()));
+//            preActivityDetailResult.setMaxParticipationCount(info.getMaxParticipationCount());
+//            preActivityDetailResult.setActivityGettingWay(info.getActivityGettingWay());
+            preActivityDetailResult.setParticipationCount(getParticipationCount(info.getId()));
         }
         return preActivityDetailResult;
     }

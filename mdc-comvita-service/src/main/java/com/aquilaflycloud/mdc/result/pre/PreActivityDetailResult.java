@@ -31,4 +31,11 @@ public class PreActivityDetailResult extends PreActivityInfo {
      */
     @ApiModelProperty(value = "销售规则名")
     private String refRuleName;
+
+    @ApiModelProperty(value = "关联门店列表")
+    private List<RefShopInfoResult> refShops;
+
+    @ApiModelProperty(value = "参加人数")
+    private Long participationCount;
+
 }
