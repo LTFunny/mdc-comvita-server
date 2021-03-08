@@ -169,6 +169,19 @@ public class PreActivityServiceImpl implements PreActivityService {
         if(!CollUtil.isEmpty(param.getFolksonomyIds()) && CollUtil.isEmpty(businessIds)){
             return null;
         }
+        List<Long> activityIds = getActivityIdByShopName(param.getShopName());
+        //输入关联门店名称 但是没有找到关联的活动时 返回空
+        if(StrUtil.isNotBlank(param.getShopName()) && CollUtil.isEmpty(activityIds) ){
+            return null;
+        }
+        Set<Long> Ids_ = new HashSet<>();
+        businessIds.forEach( b -> {
+            Ids_.add(b);
+        });
+        activityIds.forEach( b -> {
+            Ids_.add(b);
+        });
+        List<Long> ids = new ArrayList<>(Ids_);
         ActivityStateEnum state = param.getActivityState();
         DateTime now = DateTime.now();
         Date start_ = param.getCreateTimeStart();
@@ -176,7 +189,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         return preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
                 .like( param.getActivityName()!= null,PreActivityInfo::getActivityName,param.getActivityName())
                 .like( param.getCreatorName() != null,PreActivityInfo::getCreatorName,param.getCreatorName())
-                .in(CollUtil.isNotEmpty(businessIds),PreActivityInfo::getId,businessIds)
+                .in(CollUtil.isNotEmpty(ids),PreActivityInfo::getId,ids)
                 .eq( param.getActivityType() != null,PreActivityInfo::getActivityType,param.getActivityType())
                 .and(start_ != null,k -> k.ge(PreActivityInfo::getCreateTime, start_))
                 .and(end_ != null,k -> k.le(PreActivityInfo::getCreateTime, end_))
@@ -193,6 +206,24 @@ public class PreActivityServiceImpl implements PreActivityService {
                         k -> k.ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
                                 .le(PreActivityInfo::getEndTime, now))
         ).convert(this::dataConvertResult);
+    }
+
+    private List<Long> getActivityIdByShopName(String shopName) {
+        if(StrUtil.isBlank(shopName)){
+            return null;
+        }
+        Set<Long> activityIds = new HashSet<>();
+        if(StrUtil.isNotBlank(shopName)){
+            QueryWrapper<PreActiveQrCodeInfo> qw = new QueryWrapper<>();
+            qw.like("org_name", shopName);
+            List<PreActiveQrCodeInfo> preActiveQrCodeInfos = preActivityQrCodeInfoMapper.selectList(qw);
+            if(CollUtil.isNotEmpty(preActiveQrCodeInfos)){
+                preActiveQrCodeInfos.forEach(f -> {
+                    activityIds.add(f.getActivityId());
+                });
+            }
+        }
+        return new ArrayList<>(activityIds);
     }
 
     private PreActivityPageResult dataConvertResult(PreActivityInfo info) {
@@ -248,6 +279,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                 refGoodsResult.setGoodsCode(goods.getGoodsCode());
                 refGoodsResult.setGoodsName(goods.getGoodsName());
                 refGoodsResult.setGoodsPrice(goods.getGoodsPrice());
+                refGoodsResult.setGoodsPicture(goods.getGoodsPicture());
                 result.add(refGoodsResult);
             }
         });
@@ -255,14 +287,23 @@ public class PreActivityServiceImpl implements PreActivityService {
     }
 
     public static void main(String[] args) {
-        String str = "[\"2314235432132367845\"]";
-        JSONArray array_ = JSONUtil.parseArray(str);
+        List<String> aa = new ArrayList<>();
+        aa.add("345356789543212345");
+//        aa.add("145356789543212345");
+//        aa.add("245356789543212345");
+
+        String aa1 = JSONUtil.toJsonStr(aa);
+        System.out.println("aa1:" + aa1);
+//        String str = "[\"2314235432132367845\"]";
+        JSONArray array_ = JSONUtil.parseArray(aa1);
         array_.stream().forEach(i ->{
             String str1 = i.toString();
 //            str1 = str1.replaceAll("\"","");
             Long idLong = Long.parseLong(str1);
-            System.out.println("1" + i);
+            System.out.println("i:" + i);
         });
+
+
     }
 
 
