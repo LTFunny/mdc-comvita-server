@@ -10,6 +10,7 @@ import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.FlashConfirmOrderParam;
 import com.aquilaflycloud.mdc.param.pre.FlashWriteOffOrderParam;
 import com.aquilaflycloud.mdc.param.pre.MemberFlashPageParam;
+import com.aquilaflycloud.mdc.param.pre.QueryFlashCodeParam;
 import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
 import com.aquilaflycloud.mdc.service.FlashOrderService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
@@ -50,8 +51,14 @@ public class FlashOrderServiceImpl implements FlashOrderService {
     private PreOrderGoodsMapper preOrderGoodsMapper;
     @Override
     @Transactional
-    public String getFlashOrderInfo(FlashConfirmOrderParam param) {
+    public void getFlashOrderInfo(FlashConfirmOrderParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
+        PreFlashOrderInfo preFlashOrderInfo = flashOrderInfoMapper.selectOne(Wrappers.<PreFlashOrderInfo>lambdaQuery()
+                .eq(PreFlashOrderInfo::getActivityInfoId,param.getActivityInfoId())
+                .eq(PreFlashOrderInfo::getMemberId,infoResult.getId()));
+        if(preFlashOrderInfo!=null){
+            throw new ServiceException("已参加该活动");
+        }
         PreActivityInfo preActivityInfo = activityInfoMapper.selectById(param.getActivityInfoId());
         if(preActivityInfo == null){
             throw new ServiceException("活动不存在");
@@ -60,7 +67,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         if(null == pUmsUserDetail){
             throw new ServiceException("获取导购员失败。");
         }
-        PreFlashOrderInfo preFlashOrderInfo=new PreFlashOrderInfo();
+        preFlashOrderInfo=new PreFlashOrderInfo();
         preFlashOrderInfo.setActivityInfoId(param.getActivityInfoId());
         preFlashOrderInfo.setMemberId(infoResult.getId());
         preFlashOrderInfo.setShopId(pUmsUserDetail.getOrgId());
@@ -75,11 +82,10 @@ public class FlashOrderServiceImpl implements FlashOrderService {
             throw new ServiceException("生成订单失败。");
         }
         if(ActivityGettingWayEnum.BY_EXPRESS.equals(preActivityInfo.getActivityGettingWay())){
-            saveOrder(infoResult,preActivityInfo,preFlashOrderInfo);
+            saveOrder(infoResult,preActivityInfo,preFlashOrderInfo,param);
         }
-        return preFlashOrderInfo.getFlashCode();
       }
-    private void saveOrder( MemberInfoResult infoResult,  PreActivityInfo preActivityInfo,PreFlashOrderInfo preFlashOrderInfo ){
+    private void saveOrder( MemberInfoResult infoResult,  PreActivityInfo preActivityInfo,PreFlashOrderInfo preFlashOrderInfo,FlashConfirmOrderParam param ){
         PreOrderInfo preOrderInfo = new PreOrderInfo();
         PreGoodsInfo goodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
         if(goodsInfo == null){
@@ -105,13 +111,13 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         if(orderInfo < 0){
             throw new ServiceException("生成订单失败。");
         }
-        savePreOrderGoods(preOrderInfo,goodsInfo);
+        savePreOrderGoods(preOrderInfo,goodsInfo,param);
         String content =  preFlashOrderInfo.getBuyerName() + "于"+ DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"通过扫码填写信息生成快闪订单";
         orderOperateRecordService.addOrderOperateRecordLog(preFlashOrderInfo.getBuyerName(),preOrderInfo.getId(),content);
 
     }
-    private void savePreOrderGoods( PreOrderInfo preOrderInfo,  PreGoodsInfo  preGoodsInfo){
+    private void savePreOrderGoods( PreOrderInfo preOrderInfo,  PreGoodsInfo  preGoodsInfo,FlashConfirmOrderParam param){
         //订单明细
         PreOrderGoods preOrderGoods = new PreOrderGoods();
         preOrderGoods.setOrderId(preOrderInfo.getId());
@@ -128,8 +134,15 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
         preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
         preOrderGoods.setTenantId(preOrderInfo.getTenantId());
-        preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PREPARE);
+        preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
         preOrderGoods.setGiftsSymbol(GiftsSymbolEnum.AFTER);
+        preOrderGoods.setDeliveryAddress(param.getBuyerAddress());
+        preOrderGoods.setDeliveryProvince(param.getBuyerProvince());
+        preOrderGoods.setDeliveryCity(param.getBuyerCity());
+        preOrderGoods.setDeliveryDistrict(param.getBuyerDistrict());
+        preOrderGoods.setReserveId(preOrderInfo.getMemberId());
+        preOrderGoods.setReserveName(param.getBuyerName());
+        preOrderGoods.setReservePhone(param.getBuyerPhone());
         int orderGoodsInfo = preOrderGoodsMapper.insert(preOrderGoods);
         if(orderGoodsInfo < 0){
             throw new ServiceException("生成订单失败。");
@@ -166,5 +179,18 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         if(orderInfo < 0){
             throw new ServiceException("核销失败。");
         }
+    }
+
+    @Override
+    public String getFlashOrderCode(QueryFlashCodeParam param) {
+        Long memberId = MdcUtil.getCurrentMemberId();
+        PreFlashOrderInfo preFlashOrderInfo = flashOrderInfoMapper.selectOne(Wrappers.<PreFlashOrderInfo>lambdaQuery()
+                .eq(PreFlashOrderInfo::getActivityInfoId, param.getActivityInfoId())
+                .eq(PreFlashOrderInfo::getMemberId, memberId)
+        );
+        if(preFlashOrderInfo!=null){
+            return preFlashOrderInfo.getFlashCode();
+        }
+    return null;
     }
 }

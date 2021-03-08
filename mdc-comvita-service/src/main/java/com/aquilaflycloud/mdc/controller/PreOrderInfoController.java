@@ -6,6 +6,7 @@ import com.aquilaflycloud.mdc.model.pre.PreRefundOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.param.system.FileUploadParam;
 import com.aquilaflycloud.mdc.result.pre.*;
+import com.aquilaflycloud.mdc.service.FlashOrderService;
 import com.aquilaflycloud.mdc.service.PreOrderAdministrationService;
 import com.aquilaflycloud.mdc.service.PreOrderInfoService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -31,7 +32,13 @@ public class PreOrderInfoController {
     private PreOrderInfoService orderInfoService;
     @Resource
     private PreOrderAdministrationService preOrderAdministrationService;
-
+    @Resource
+    private FlashOrderService flashOrderService;
+    @ApiOperation(value = "快闪活动核销订单", notes = "快闪活动核销订单")
+    @ApiMapping(value = "backend.comvita.flash.order.verification", method = RequestMethod.POST, permission = true)
+    public void verificationFlashOrder(FlashWriteOffOrderParam param) {
+        flashOrderService.verificationFlashOrder(param);
+    }
     @ApiOperation(value = "对订单进行确认", notes = "对订单进行确认")
     //@PreAuthorize("hasAuthority('mdc:confirm:validation')")
     @ApiMapping(value = "backend.comvita.order.info.confirm.validation", method = RequestMethod.POST, permission = true)

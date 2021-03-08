@@ -7,9 +7,9 @@ import lombok.Data;
  * @Author zly
  */
 @Data
-public class FlashWriteOffOrderParam {
+public class QueryFlashCodeParam {
 
-    @ApiModelProperty(value = "核销码")
-    private String flashCode;
+    @ApiModelProperty(value = "活动id")
+    private Long activityInfoId;
 
 }

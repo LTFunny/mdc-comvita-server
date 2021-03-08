@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.api;
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.param.pre.FlashConfirmOrderParam;
 import com.aquilaflycloud.mdc.param.pre.MemberFlashPageParam;
+import com.aquilaflycloud.mdc.param.pre.QueryFlashCodeParam;
 import com.aquilaflycloud.mdc.service.FlashOrderService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -25,8 +26,13 @@ public class FlashOrderInfoApi {
 
     @ApiOperation(value = "下订单", notes = "下订单")
     @ApiMapping(value = "backend.comvita.order.info.flash.order", method = RequestMethod.POST, permission = true)
-    public String registgetFlashOrderInfoer(FlashConfirmOrderParam param) {
-        return flashOrderService.getFlashOrderInfo(param);
+    public void registgetFlashOrderInfoer(FlashConfirmOrderParam param) {
+         flashOrderService.getFlashOrderInfo(param);
+    }
+    @ApiOperation(value = "查询核销码", notes = "查询核销码")
+    @ApiMapping(value = "backend.comvita.order.info.flash.code", method = RequestMethod.POST, permission = true)
+    public String registgetFlashCode(QueryFlashCodeParam param) {
+        return flashOrderService.getFlashOrderCode(param);
     }
 
     @ApiOperation(value = "获取我参与的活动列表(分页)", notes = "获取我参与的活动列表(分页)")
