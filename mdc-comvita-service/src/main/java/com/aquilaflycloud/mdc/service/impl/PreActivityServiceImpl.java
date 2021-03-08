@@ -175,12 +175,17 @@ public class PreActivityServiceImpl implements PreActivityService {
             return null;
         }
         Set<Long> Ids_ = new HashSet<>();
-        businessIds.forEach( b -> {
-            Ids_.add(b);
-        });
-        activityIds.forEach( b -> {
-            Ids_.add(b);
-        });
+        if(!CollUtil.isEmpty(businessIds)){
+            businessIds.forEach( b -> {
+                Ids_.add(b);
+            });
+        }
+        if(!CollUtil.isEmpty(activityIds)){
+            activityIds.forEach( b -> {
+                Ids_.add(b);
+            });
+        }
+
         List<Long> ids = new ArrayList<>(Ids_);
         ActivityStateEnum state = param.getActivityState();
         DateTime now = DateTime.now();
@@ -238,6 +243,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             }
             if(ActivityTypeEnum.FLASH == info.getActivityType()){
                 result.setRefShops(getRefShops(info.getId()));
+
             }
 
             if (info.getActivityState() != ActivityStateEnum.CANCELED) {
