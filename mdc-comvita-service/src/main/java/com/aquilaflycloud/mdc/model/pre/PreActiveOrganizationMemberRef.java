@@ -28,21 +28,21 @@ public class PreActiveOrganizationMemberRef implements Serializable {
     /**
      * 活动id
      */
-    @TableId(value = "activity_id")
+    @TableField(value = "activity_id")
     @ApiModelProperty(value = "活动id")
     private Long activityId;
 
     /**
      * 会员id
      */
-    @TableId(value = "member_id")
+    @TableField(value = "member_id")
     @ApiModelProperty(value = "会员id")
     private Long memberId;
 
     /**
      * 门店id
      */
-    @TableId(value = "ums_organization_id")
+    @TableField(value = "ums_organization_id")
     @ApiModelProperty(value = "关联门店id")
     private Long umsOrganizationId;
 
