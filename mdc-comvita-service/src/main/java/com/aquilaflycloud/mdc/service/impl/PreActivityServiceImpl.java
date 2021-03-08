@@ -233,7 +233,8 @@ public class PreActivityServiceImpl implements PreActivityService {
         List<PreActivityRefGoodsResult> result = new ArrayList<>();
         JSONArray array_ = JSONUtil.parseArray(refGoods);
         array_.stream().forEach(i ->{
-            PreGoodsInfo goods = preGoodsInfoMapper.selectById((Long)i);
+            Long idLong = Long.parseLong(i.toString());
+            PreGoodsInfo goods = preGoodsInfoMapper.selectById(idLong);
             if(null != goods){
                 PreActivityRefGoodsResult refGoodsResult = new PreActivityRefGoodsResult();
                 refGoodsResult.setGoodsId(goods.getId());
@@ -245,6 +246,18 @@ public class PreActivityServiceImpl implements PreActivityService {
         });
         return result;
     }
+
+    public static void main(String[] args) {
+        String str = "[\"2314235432132367845\"]";
+        JSONArray array_ = JSONUtil.parseArray(str);
+        array_.stream().forEach(i ->{
+            String str1 = i.toString();
+//            str1 = str1.replaceAll("\"","");
+            Long idLong = Long.parseLong(str1);
+            System.out.println("1" + i);
+        });
+    }
+
 
     /**
      * 获取关联的标签
