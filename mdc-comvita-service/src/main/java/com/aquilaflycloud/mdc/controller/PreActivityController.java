@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.controller;
 
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.result.pre.FlashStatisticsGetResult;
 import com.aquilaflycloud.mdc.result.pre.PreActivityAnalysisResult;
 import com.aquilaflycloud.mdc.result.pre.PreActivityDetailResult;
 import com.aquilaflycloud.mdc.result.pre.PreActivityPageResult;
@@ -65,11 +66,18 @@ public class PreActivityController {
      * @param param
      * @return
      */
-    @ApiOperation(value = "活动概况", notes = "活动概况")
+    @ApiOperation(value = "预售活动概况", notes = "预售活动概况")
 //    @PreAuthorize("hasAuthority('mdc:pre:activity:analyse')")
     @ApiMapping(value = "backend.comvita.pre.activity.analyse", method = RequestMethod.POST, permission = true)
     public PreActivityAnalysisResult analyse(PreActivityAnalysisParam param) {
         return preActivityService.analyse(param);
+    }
+
+    @ApiOperation(value = "快闪活动概况", notes = "快闪活动概况")
+//    @PreAuthorize("hasAuthority('mdc:pre:activity:analyse')")
+    @ApiMapping(value = "backend.comvita.flash.statistics.get", method = RequestMethod.POST, permission = true)
+    public FlashStatisticsGetResult getFlashStatistics(FlashStatisticsGetParam param) {
+        return preActivityService.getFlashStatistics(param);
     }
 
     @ApiOperation(value = "生成快闪活动二维码", notes = "生成快闪活动二维码")

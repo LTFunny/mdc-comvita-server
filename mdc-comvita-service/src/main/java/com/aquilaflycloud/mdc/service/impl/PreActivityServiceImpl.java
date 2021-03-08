@@ -4,10 +4,12 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
+import com.aquilaflycloud.mdc.enums.member.EventTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.*;
@@ -15,9 +17,12 @@ import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
+import com.aquilaflycloud.mdc.param.member.MemberEventStatisticsParam;
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.result.member.MemberEventStatisticsResult;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
+import com.aquilaflycloud.mdc.service.MemberEventLogService;
 import com.aquilaflycloud.mdc.service.PreActivityService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.result.OssResult;
@@ -64,6 +69,8 @@ public class PreActivityServiceImpl implements PreActivityService {
     private FolksonomyService folksonomyService;
     @Resource
     private WechatMiniService wechatMiniService;
+    @Resource
+    private MemberEventLogService memberEventLogService;
 
     private PreActivityInfo stateHandler(PreActivityInfo info) {
         if (info == null) {
@@ -525,6 +532,34 @@ public class PreActivityServiceImpl implements PreActivityService {
             result.setPricePerCustomer(new BigDecimal(0.00));
         }
         return result;
+    }
+
+    @Override
+    public FlashStatisticsGetResult getFlashStatistics(FlashStatisticsGetParam param) {
+        FlashStatisticsGetResult statisticsResult = new FlashStatisticsGetResult();
+        Set<EventTypeEnum> eventTypeSet = new HashSet<>();
+        eventTypeSet.add(EventTypeEnum.SHARE);
+        eventTypeSet.add(EventTypeEnum.CLICK);
+        List<MemberEventStatisticsResult> list = memberEventLogService.selectLogStatistics(new MemberEventStatisticsParam()
+                .setBusinessId(param.getId()).setBusinessType(BusinessTypeEnum.PREACTIVITY).setEventTypes(eventTypeSet));
+        for (MemberEventStatisticsResult result : list) {
+            if (result.getEventType() == EventTypeEnum.SHOW) {
+                statisticsResult.setSharePv(result.getPv());
+                statisticsResult.setShareUv(result.getUv());
+            } else if (result.getEventType() == EventTypeEnum.CLICK) {
+                statisticsResult.setClickPv(result.getPv());
+                statisticsResult.setClickUv(result.getUv());
+            }
+        }
+        int participantsCount = preFlashOrderInfoMapper.selectCount(Wrappers.<PreFlashOrderInfo>lambdaQuery()
+                .eq(PreFlashOrderInfo::getActivityInfoId, param.getId())
+        );
+        statisticsResult.setParticipantsCount(Convert.toLong(participantsCount));
+        if (participantsCount != 0) {
+            statisticsResult.setConversionRate(NumberUtil.formatPercent(
+                    NumberUtil.div(statisticsResult.getClickUv(), statisticsResult.getParticipantsCount()).doubleValue(), 2));
+        }
+        return statisticsResult;
     }
 
     @Override

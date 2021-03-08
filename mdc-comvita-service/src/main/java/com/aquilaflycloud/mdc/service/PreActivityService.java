@@ -25,5 +25,7 @@ public interface PreActivityService {
 
     PreActivityAnalysisResult analyse(PreActivityAnalysisParam param);
 
+    FlashStatisticsGetResult getFlashStatistics(FlashStatisticsGetParam param);
+
     void addQrcode(PreQrcodeAddParam param);
 }
