@@ -86,4 +86,18 @@ public class PreActivityController {
         preActivityService.addQrcode(param);
     }
 
+    @ApiOperation(value = "删除快闪活动二维码", notes = "删除快闪活动二维码")
+    @ApiMapping(value = "backend.comvita.pre.qrcode.delete", method = RequestMethod.POST, permission = true)
+    public void deleteQrcode(PreQrcodeDeleteParam param) {
+        preActivityService.deleteQrcode(param);
+    }
+
+    @ApiOperation(value = "(批量)下载快闪活动二维码", notes = "(批量)下载快闪活动二维码")
+    @ApiMapping(value = "backend.comvita.pre.qrcode.download", method = RequestMethod.POST, permission = true)
+    public void downloadQrcode(PreQrcodeDownloadParam param) {
+        preActivityService.downloadQrcode(param);
+    }
+
+
+
 }

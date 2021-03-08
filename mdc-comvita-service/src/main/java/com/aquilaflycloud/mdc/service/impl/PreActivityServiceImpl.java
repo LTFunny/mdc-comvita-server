@@ -663,6 +663,16 @@ public class PreActivityServiceImpl implements PreActivityService {
         createMiniQrcode(infoList.toArray(new PreActiveQrCodeInfo[]{}));
     }
 
+    @Override
+    public void deleteQrcode(PreQrcodeDeleteParam param) {
+
+    }
+
+    @Override
+    public void downloadQrcode(PreQrcodeDownloadParam param) {
+
+    }
+
     private void createMiniQrcode(PreActiveQrCodeInfo... qrCodeInfoList) {
         MdcUtil.getTtlExecutorService().submit(() -> {
             for (PreActiveQrCodeInfo qrCode : qrCodeInfoList) {

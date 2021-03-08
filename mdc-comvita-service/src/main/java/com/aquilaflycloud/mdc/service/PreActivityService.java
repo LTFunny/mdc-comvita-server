@@ -28,4 +28,8 @@ public interface PreActivityService {
     FlashStatisticsGetResult getFlashStatistics(FlashStatisticsGetParam param);
 
     void addQrcode(PreQrcodeAddParam param);
+
+    void deleteQrcode(PreQrcodeDeleteParam param);
+
+    void downloadQrcode(PreQrcodeDownloadParam param);
 }
