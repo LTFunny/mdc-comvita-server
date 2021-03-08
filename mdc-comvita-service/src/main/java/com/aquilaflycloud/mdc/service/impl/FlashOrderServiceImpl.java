@@ -1,6 +1,6 @@
 package com.aquilaflycloud.mdc.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.aquilaflycloud.mdc.enums.pre.*;
@@ -9,10 +9,13 @@ import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.FlashConfirmOrderParam;
 import com.aquilaflycloud.mdc.param.pre.FlashWriteOffOrderParam;
+import com.aquilaflycloud.mdc.param.pre.MemberFlashPageParam;
 import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
-import com.aquilaflycloud.mdc.service.*;
+import com.aquilaflycloud.mdc.service.FlashOrderService;
+import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.org.service.provider.entity.PUmsUserDetail;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author zly
@@ -129,6 +134,22 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         if(orderGoodsInfo < 0){
             throw new ServiceException("生成订单失败。");
         }
+    }
+
+    @Override
+    public IPage<PreActivityInfo> pageMemberFlash(MemberFlashPageParam param) {
+        Long memberId = MdcUtil.getCurrentMemberId();
+        List<Long> activityIds = flashOrderInfoMapper.selectList(Wrappers.<PreFlashOrderInfo>lambdaQuery()
+                .select(PreFlashOrderInfo::getActivityInfoId)
+                .eq(PreFlashOrderInfo::getMemberId, memberId)
+                .eq(PreFlashOrderInfo::getFlashOrderState, param.getFlashOrderState())
+        ).stream().map(PreFlashOrderInfo::getActivityInfoId).collect(Collectors.toList());
+        if (CollUtil.isNotEmpty(activityIds)) {
+            return activityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
+                    .in(PreActivityInfo::getId, activityIds)
+            );
+        }
+        return param.page();
     }
 
     @Override
