@@ -41,6 +41,9 @@ public class PreActivityPageParam extends PageParam<PreActivityInfo> {
     @ApiModelProperty(value = "创建结束时间")
     private Date createTimeEnd;
 
+    @ApiModelProperty(value = "关联门店名称")
+    private String shopName;
+
 }
 
 

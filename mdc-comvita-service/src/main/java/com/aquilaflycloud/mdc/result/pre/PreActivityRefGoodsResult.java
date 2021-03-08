@@ -34,4 +34,10 @@ public class PreActivityRefGoodsResult {
      */
     @ApiModelProperty(value = "商品零售价")
     private BigDecimal goodsPrice;
+
+    /**
+     * 用于快闪活动显示
+     */
+    @ApiModelProperty(value = "商品图片")
+    private String goodsPicture;
 }
