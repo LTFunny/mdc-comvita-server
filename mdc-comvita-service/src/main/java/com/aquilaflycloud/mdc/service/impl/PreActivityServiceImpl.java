@@ -246,11 +246,9 @@ public class PreActivityServiceImpl implements PreActivityService {
             if (StrUtil.isNotBlank(info.getRewardRuleContent())) {
                 result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
             }
-            //参加人数上线 领取方式 参加人数 关联门店
+            //参加人数 关联门店
             if(ActivityTypeEnum.FLASH == info.getActivityType()){
                 result.setRefShops(getRefShops(info.getId()));
-//                result.setMaxParticipationCount(info.getMaxParticipationCount());
-//                result.setActivityGettingWay(info.getActivityGettingWay());
                 result.setParticipationCount(getParticipationCount(info.getId()));
             }
 
@@ -341,26 +339,6 @@ public class PreActivityServiceImpl implements PreActivityService {
             }
         });
         return result;
-    }
-
-    public static void main(String[] args) {
-        List<String> aa = new ArrayList<>();
-        aa.add("345356789543212345");
-//        aa.add("145356789543212345");
-//        aa.add("245356789543212345");
-
-        String aa1 = JSONUtil.toJsonStr(aa);
-        System.out.println("aa1:" + aa1);
-//        String str = "[\"2314235432132367845\"]";
-        JSONArray array_ = JSONUtil.parseArray(aa1);
-        array_.stream().forEach(i ->{
-            String str1 = i.toString();
-//            str1 = str1.replaceAll("\"","");
-            Long idLong = Long.parseLong(str1);
-            System.out.println("i:" + i);
-        });
-
-
     }
 
 
@@ -575,8 +553,6 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
         if(ActivityTypeEnum.FLASH == info.getActivityType()){
             preActivityDetailResult.setRefShops(getRefShops(info.getId()));
-//            preActivityDetailResult.setMaxParticipationCount(info.getMaxParticipationCount());
-//            preActivityDetailResult.setActivityGettingWay(info.getActivityGettingWay());
             preActivityDetailResult.setParticipationCount(getParticipationCount(info.getId()));
         }
         return preActivityDetailResult;
