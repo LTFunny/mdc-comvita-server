@@ -24,4 +24,6 @@ public interface PreActivityService {
     void changeState(PreActivityCancelParam param);
 
     PreActivityAnalysisResult analyse(PreActivityAnalysisParam param);
+
+    void addQrcode(PreQrcodeAddParam param);
 }

@@ -9,6 +9,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
+import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
@@ -19,15 +20,21 @@ import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.service.PreActivityService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
+import com.aquilaflycloud.result.OssResult;
+import com.aquilaflycloud.util.AliOssUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,30 +46,24 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class PreActivityServiceImpl implements PreActivityService {
-
     @Resource
     private PreActivityInfoMapper preActivityInfoMapper;
-
     @Resource
     private PreRuleInfoMapper preRuleInfoMapper;
-
     @Resource
     private PreGoodsInfoMapper preGoodsInfoMapper;
-
     @Resource
     private PreOrderInfoMapper preOrderInfoMapper;
-
     @Resource
     private PreActivityQrCodeInfoMapper preActivityQrCodeInfoMapper;
-
     @Resource
     private PreFlashOrderInfoMapper preFlashOrderInfoMapper;
-
     @Resource
     private FolksonomyBusinessRelMapper folksonomyBusinessRelMapper;
-
     @Resource
     private FolksonomyService folksonomyService;
+    @Resource
+    private WechatMiniService wechatMiniService;
 
     private PreActivityInfo stateHandler(PreActivityInfo info) {
         if (info == null) {
@@ -145,8 +146,8 @@ public class PreActivityServiceImpl implements PreActivityService {
                     .eq(PreActiveQrCodeInfo::getActivityId, result.getId())
             ).stream().map(qrCodeInfo -> {
                 PreActivityInfoApiResult.ShopInfo shopInfo = new PreActivityInfoApiResult.ShopInfo();
-                shopInfo.setShopId(qrCodeInfo.getUmsOrganizationId());
-                shopInfo.setShopName(qrCodeInfo.getUmsOrganizationName());
+                shopInfo.setShopId(qrCodeInfo.getOrgId());
+                shopInfo.setShopName(qrCodeInfo.getOrgName());
                 return shopInfo;
             }).collect(Collectors.toList());
             result.setShopList(shopInfoList);
@@ -511,5 +512,46 @@ public class PreActivityServiceImpl implements PreActivityService {
             result.setPricePerCustomer(new BigDecimal(0.00));
         }
         return result;
+    }
+
+    @Override
+    public void addQrcode(PreQrcodeAddParam param) {
+        PreActivityInfo activityInfo = preActivityInfoMapper.selectById(param.getId());
+        if (activityInfo == null) {
+            throw new ServiceException("活动不存在");
+        }
+        PreActiveQrCodeInfo info = new PreActiveQrCodeInfo();
+        info.setActivityId(param.getId());
+        info.setOrgId(param.getOrgId());
+        info.setOrgName(param.getOrgName());
+        preActivityQrCodeInfoMapper.insert(info);
+        createMiniCode(info);
+    }
+
+    private void createMiniCode(PreActiveQrCodeInfo... qrCodeInfoList) {
+        MdcUtil.getTtlExecutorService().submit(() -> {
+            for (PreActiveQrCodeInfo qrCode : qrCodeInfoList) {
+                if (StrUtil.isBlank(qrCode.getQrCodeUrl())) {
+                    try {
+                        String appId = "wxadb960df280e9e79";
+                        String pagePath = "pages/activity/quick/detail";
+                        File file = wechatMiniService.getWxMaServiceByAppId(qrCode.getAppId())
+                                .getQrcodeService().createQrcode(pagePath + "?id=" + qrCode.getActivityId() + "&orgId=" + qrCode.getOrgId());
+                        String path = qrCode.getAppId() + "/" + qrCode.getPagePath().replace("/", ".");
+                        OssResult ossResult = AliOssUtil.uploadFileReturn(path, StrUtil.appendIfMissing(qrCode.getActivityId() + "_" + DateTime.now().getTime(),
+                                ".png"), new FileInputStream(file), AliOssUtil.MEMBER_STYLE);
+                        PreActiveQrCodeInfo update = new PreActiveQrCodeInfo();
+                        update.setAppId(appId);
+                        update.setPagePath(pagePath);
+                        update.setQrCodeFileKey(ossResult.getObjectKey());
+                        update.setQrCodeUrl(ossResult.getUrl());
+                        update.setId(qrCode.getId());
+                        preActivityQrCodeInfoMapper.updateById(update);
+                    } catch (WxErrorException | FileNotFoundException e) {
+                        log.error("创建小程序码失败", e);
+                    }
+                }
+            }
+        });
     }
 }

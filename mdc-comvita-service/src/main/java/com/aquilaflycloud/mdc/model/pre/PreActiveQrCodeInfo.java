@@ -32,16 +32,30 @@ public class PreActiveQrCodeInfo implements Serializable {
     /**
      * 关联门店id
      */
-    @TableField(value = "ums_organization_id")
+    @TableField(value = "org_id")
     @ApiModelProperty(value = "关联门店id")
-    private Long umsOrganizationId;
+    private Long orgId;
 
     /**
      * 关联门店名称
      */
-    @TableField(value = "ums_organization_name")
+    @TableField(value = "org_name")
     @ApiModelProperty(value = "关联门店名称")
-    private String umsOrganizationName;
+    private String orgName;
+
+    /**
+     * 微信appId
+     */
+    @TableField(value = "app_id")
+    @ApiModelProperty(value = "微信appId")
+    private String appId;
+
+    /**
+     * 小程序路径
+     */
+    @TableField(value = "page_path")
+    @ApiModelProperty(value = "小程序路径")
+    private String pagePath;
 
     /**
      * 二维码地址
@@ -54,9 +68,9 @@ public class PreActiveQrCodeInfo implements Serializable {
      * 小程序码oss标识
      */
     @TableField(value = "mini_code_file_key")
-    @ApiModelProperty(value = "小程序码oss标识", hidden = true)
+    @ApiModelProperty(value = "二维码oss标识", hidden = true)
     @JSONField(serialize = false)
-    private String miniCodeFileKey;
+    private String qrCodeFileKey;
 
     /**
      * 状态
@@ -132,20 +146,6 @@ public class PreActiveQrCodeInfo implements Serializable {
     @ApiModelProperty(value = "最后操作人id", hidden = true)
     @JSONField(serialize = false)
     private Long lastOperatorId;
-
-    /**
-     * 指定用户部门ids
-     */
-    @TableField(value = "designate_org_ids")
-    @ApiModelProperty(value = "指定用户部门ids")
-    private String designateOrgIds;
-
-    /**
-     * 指定用户部门名称
-     */
-    @TableField(value = "designate_org_names")
-    @ApiModelProperty(value = "指定用户部门名称")
-    private String designateOrgNames;
 
     /**
      * isv的appId

@@ -72,4 +72,10 @@ public class PreActivityController {
         return preActivityService.analyse(param);
     }
 
+    @ApiOperation(value = "生成快闪活动二维码", notes = "生成快闪活动二维码")
+    @ApiMapping(value = "backend.comvita.pre.qrcode.add", method = RequestMethod.POST, permission = true)
+    public void addQrcode(PreQrcodeAddParam param) {
+        preActivityService.addQrcode(param);
+    }
+
 }
