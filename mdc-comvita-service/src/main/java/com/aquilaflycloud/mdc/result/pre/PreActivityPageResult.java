@@ -26,4 +26,20 @@ public class PreActivityPageResult extends PreActivityInfo {
     @ApiModelProperty(value = "奖励规则")
     private List<PreActivityRewardParam> rewardRuleList;
 
+    @ApiModelProperty(value = "关联门店列表")
+    private List<RefShopInfo> refShops;
+
+    @Data
+    public static class RefShopInfo {
+        @ApiModelProperty(value = "关联门店id")
+        private Long shopId;
+
+        @ApiModelProperty(value = "关联门店名称")
+        private String shopName;
+
+        @ApiModelProperty(value = "关联门店地址")
+        private String shopAddress;
+    }
+
+
 }

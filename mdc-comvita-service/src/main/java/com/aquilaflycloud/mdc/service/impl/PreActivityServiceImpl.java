@@ -236,6 +236,10 @@ public class PreActivityServiceImpl implements PreActivityService {
             if (StrUtil.isNotBlank(info.getRewardRuleContent())) {
                 result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
             }
+            if(ActivityTypeEnum.FLASH == info.getActivityType()){
+                result.setRefShops(getRefShops(info.getId()));
+            }
+
             if (info.getActivityState() != ActivityStateEnum.CANCELED) {
                 if (now.isAfterOrEquals(info.getBeginTime()) && now.isBeforeOrEquals(info.getEndTime())) {
                     result.setActivityState(ActivityStateEnum.IN_PROGRESS);
@@ -249,6 +253,28 @@ public class PreActivityServiceImpl implements PreActivityService {
         } else {
             return null;
         }
+    }
+
+    /**
+     * 快闪活动详情 关联门店
+     * @param activityId
+     * @return
+     */
+    private List<PreActivityPageResult.RefShopInfo> getRefShops(Long activityId) {
+        List<PreActivityPageResult.RefShopInfo> result = new ArrayList<>();
+        QueryWrapper<PreActiveQrCodeInfo> qw = new QueryWrapper<>();
+        qw.eq("activity_id", activityId);
+        List<PreActiveQrCodeInfo> preActiveQrCodeInfos = preActivityQrCodeInfoMapper.selectList(qw);
+        if(CollUtil.isNotEmpty(preActiveQrCodeInfos)){
+            preActiveQrCodeInfos.forEach(f -> {
+                PreActivityPageResult.RefShopInfo refShopInfo = new PreActivityPageResult.RefShopInfo();
+                refShopInfo.setShopId(f.getOrgId());
+                refShopInfo.setShopName(f.getOrgName());
+                refShopInfo.setShopAddress(f.getOrgAddress());
+                result.add(refShopInfo);
+            });
+        }
+        return result;
     }
 
     private List<PreActivityFolksonomyResult> getFolksonomys(Long business_id) {

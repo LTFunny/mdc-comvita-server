@@ -44,6 +44,13 @@ public class PreActiveQrCodeInfo implements Serializable {
     private String orgName;
 
     /**
+     * 关联门店地址
+     */
+    @TableField(value = "org_address")
+    @ApiModelProperty(value = "关联门店地址")
+    private String orgAddress;
+
+    /**
      * 微信appId
      */
     @TableField(value = "app_id")
