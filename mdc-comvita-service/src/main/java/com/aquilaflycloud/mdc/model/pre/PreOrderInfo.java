@@ -28,7 +28,12 @@ public class PreOrderInfo implements Serializable {
     @TableId(value = "id")
     @ApiModelProperty(value = "id")
     private Long id;
-
+    /**
+     * 快闪活动id
+     */
+    @TableField(value = "flash_id")
+    @ApiModelProperty(value = "快闪活动id")
+    private Long flashId;
     /**
      * 订单编码
      */
@@ -274,7 +279,6 @@ public class PreOrderInfo implements Serializable {
     @TableField(value = "reason")
     @ApiModelProperty(value = "不通过原因")
     private String reason;
-
     /**
      * 创建时间
      */

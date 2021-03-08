@@ -75,7 +75,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Resource
     private MemberRewardService memberRewardService;
     @Resource
-    private PreExpressInfoMapper preExpressInfoMapper;
+    private PreFlashOrderInfoMapper flashOrderInfoMapper;
 
     @Resource
     private PreOrderOperateRecordService orderOperateRecordService;
@@ -534,7 +534,6 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     updateItem.setExpressName(expressName);
 
                     int count = preOrderGoodsMapper.updateById(updateItem);
-
                     if (count > 0) {
                         log.info("待签收订单物流单号更新信息：{id=" + id + ", expressCode=" + expressCode + ", expressOrderCode" + expressOrderCode + ", expressName" + expressName + "}");
                     } else {
@@ -546,5 +545,16 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         } else {
             throw new ServiceException("请检查导入的数据是否有效");
         }
+    }
+    private void changeFlashState(String id){
+        PreFlashOrderInfo preFlashOrderInfo = flashOrderInfoMapper.selectById(id);
+        if(preFlashOrderInfo!=null){
+            preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.WRITTENOFF);
+            int orderInfo=flashOrderInfoMapper.updateById(preFlashOrderInfo);
+            if(orderInfo < 0){
+                throw new ServiceException("核销失败。");
+            }
+        }
+
     }
 }
