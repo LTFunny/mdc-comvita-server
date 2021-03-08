@@ -641,15 +641,22 @@ public class PreActivityServiceImpl implements PreActivityService {
         if (activityInfo == null) {
             throw new ServiceException("活动不存在");
         }
-        PreActiveQrCodeInfo info = new PreActiveQrCodeInfo();
-        info.setActivityId(param.getId());
-        info.setOrgId(param.getOrgId());
-        info.setOrgName(param.getOrgName());
-        preActivityQrCodeInfoMapper.insert(info);
-        createMiniCode(info);
+        List<PreActiveQrCodeInfo> infoList = new ArrayList<>();
+        for (PreQrcodeAddParam.OrgInfo orgInfo : param.getOrgInfoList()) {
+            PreActiveQrCodeInfo info = new PreActiveQrCodeInfo();
+            info.setActivityId(param.getId());
+            info.setOrgId(orgInfo.getOrgId());
+            info.setOrgName(orgInfo.getOrgName());
+            infoList.add(info);
+        }
+        int count = preActivityQrCodeInfoMapper.insertAllBatch(infoList);
+        if (count <= 0) {
+            throw new ServiceException("保存小程序二维码失败");
+        }
+        createMiniQrcode(infoList.toArray(new PreActiveQrCodeInfo[]{}));
     }
 
-    private void createMiniCode(PreActiveQrCodeInfo... qrCodeInfoList) {
+    private void createMiniQrcode(PreActiveQrCodeInfo... qrCodeInfoList) {
         MdcUtil.getTtlExecutorService().submit(() -> {
             for (PreActiveQrCodeInfo qrCode : qrCodeInfoList) {
                 if (StrUtil.isBlank(qrCode.getQrCodeUrl())) {

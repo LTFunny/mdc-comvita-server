@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * PreQrcodeAddParam
@@ -18,12 +19,19 @@ public class PreQrcodeAddParam {
     @NotNull(message = "活动id不能为空")
     private Long id;
 
-    @ApiModelProperty(value = "门店id", required = true)
-    @NotNull(message = "门店id不能为空")
-    private Long orgId;
+    @ApiModelProperty(value = "门店信息列表", required = true)
+    @NotEmpty(message = "门店信息列表不能为空")
+    private List<OrgInfo> orgInfoList;
 
-    @ApiModelProperty(value = "门店名称", required = true)
-    @NotEmpty(message = "门店名称不能为空")
-    private String orgName;
+    @Data
+    public static class OrgInfo {
+        @ApiModelProperty(value = "门店id", required = true)
+        @NotNull(message = "门店id不能为空")
+        private Long orgId;
+
+        @ApiModelProperty(value = "门店名称", required = true)
+        @NotEmpty(message = "门店名称不能为空")
+        private String orgName;
+    }
 
 }
