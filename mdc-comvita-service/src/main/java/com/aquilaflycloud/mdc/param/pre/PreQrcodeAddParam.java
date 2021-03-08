@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.param.pre;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -21,6 +22,7 @@ public class PreQrcodeAddParam {
 
     @ApiModelProperty(value = "门店信息列表", required = true)
     @NotEmpty(message = "门店信息列表不能为空")
+    @Valid
     private List<OrgInfo> orgInfoList;
 
     @Data
