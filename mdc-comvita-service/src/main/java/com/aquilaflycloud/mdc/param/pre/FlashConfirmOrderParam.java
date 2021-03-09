@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.param.pre;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -11,12 +12,17 @@ import java.util.List;
 @Data
 public class FlashConfirmOrderParam {
 
-    @ApiModelProperty(value = "活动id")
+    @ApiModelProperty(value = "活动id", required = true)
+    @NotNull(message = "活动id不能为空")
     private Long activityInfoId;
 
-    @ApiModelProperty(value = "导购员id")
-    private Long guideId;
+    @ApiModelProperty(value = "门店id", required = true)
+    @NotNull(message = "门店id不能为空")
+    private Long shopId;
 
+    @ApiModelProperty(value = "门店名称", required = true)
+    @NotNull(message = "门店名称不能为空")
+    private String shopName;
     /**
      * 买家手机
      */

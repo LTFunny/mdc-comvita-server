@@ -1,8 +1,7 @@
 package com.aquilaflycloud.mdc.controller;
 
-import com.aquilaflycloud.mdc.model.IsvAppInfo;
 import com.aquilaflycloud.mdc.model.pre.PreFlashOrderInfo;
-import com.aquilaflycloud.mdc.param.pre.FlashConfirmOrderParam;
+import com.aquilaflycloud.mdc.param.pre.FlashPageParam;
 import com.aquilaflycloud.mdc.service.FlashOrderService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -23,14 +22,14 @@ public class FlashOrderInfoController {
     @Resource
     private FlashOrderService flashOrderService;
 
-   /*@ApiOperation(value = "活动概况", notes = "活动概况")
+  /* @ApiOperation(value = "活动概况", notes = "活动概况")
     @ApiMapping(value = "backend.comvita.order.info.flash.survey", method = RequestMethod.POST, permission = true)
     public void getFlashOrderInfoSurvey(FlashConfirmOrderParam param) {
         flashOrderService.getFlashOrderInfo(param);
-    }
+    }*/
     @ApiOperation(value = "领取明细", notes = "领取明细")
     @ApiMapping(value = "backend.comvita.order.info.flash.detailed", method = RequestMethod.POST, permission = true)
-    public IPage<PreFlashOrderInfo> getFlashOrderInfoDetailed(FlashConfirmOrderParam param) {
-       return flashOrderService.getFlashOrderInfo(param);
-    }*/
+    public IPage<PreFlashOrderInfo> getFlashOrderInfoDetailed(FlashPageParam param) {
+       return flashOrderService.pageFlashOrderInfo(param);
+    }
 }

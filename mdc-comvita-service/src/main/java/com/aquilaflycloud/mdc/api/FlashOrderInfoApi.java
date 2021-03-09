@@ -29,6 +29,7 @@ public class FlashOrderInfoApi {
     public void registgetFlashOrderInfoer(FlashConfirmOrderParam param) {
          flashOrderService.getFlashOrderInfo(param);
     }
+
     @ApiOperation(value = "查询核销码", notes = "查询核销码")
     @ApiMapping(value = "comvita.order.info.flash.code", method = RequestMethod.POST, permission = true)
     public String registgetFlashCode(QueryFlashCodeParam param) {

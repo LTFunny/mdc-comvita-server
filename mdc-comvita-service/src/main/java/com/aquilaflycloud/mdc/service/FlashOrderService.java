@@ -1,11 +1,9 @@
 package com.aquilaflycloud.mdc.service;
 
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
-import com.aquilaflycloud.mdc.param.pre.FlashConfirmOrderParam;
-import com.aquilaflycloud.mdc.param.pre.FlashWriteOffOrderParam;
-import com.aquilaflycloud.mdc.param.pre.MemberFlashPageParam;
+import com.aquilaflycloud.mdc.model.pre.PreFlashOrderInfo;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.aquilaflycloud.mdc.param.pre.QueryFlashCodeParam;
 
 /**
  * @Author zly
@@ -19,4 +17,6 @@ public interface FlashOrderService {
     void verificationFlashOrder(FlashWriteOffOrderParam param);
 
     String getFlashOrderCode(QueryFlashCodeParam param);
+
+    IPage<PreFlashOrderInfo> pageFlashOrderInfo(FlashPageParam param);
 }

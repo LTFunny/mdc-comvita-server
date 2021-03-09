@@ -3,20 +3,19 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.feign.consumer.org.IUserConsumer;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.pre.*;
-import com.aquilaflycloud.mdc.param.pre.FlashConfirmOrderParam;
-import com.aquilaflycloud.mdc.param.pre.FlashWriteOffOrderParam;
-import com.aquilaflycloud.mdc.param.pre.MemberFlashPageParam;
-import com.aquilaflycloud.mdc.param.pre.QueryFlashCodeParam;
+import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
 import com.aquilaflycloud.mdc.service.FlashOrderService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.org.service.provider.entity.PUmsUserDetail;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
@@ -63,19 +62,14 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         if(preActivityInfo == null){
             throw new ServiceException("活动不存在");
         }
-        PUmsUserDetail pUmsUserDetail = userConsumer.getUserOrganization(param.getGuideId());
-        if(null == pUmsUserDetail){
-            throw new ServiceException("获取导购员失败。");
-        }
+
         preFlashOrderInfo=new PreFlashOrderInfo();
         preFlashOrderInfo.setActivityInfoId(param.getActivityInfoId());
         preFlashOrderInfo.setMemberId(infoResult.getId());
-        preFlashOrderInfo.setShopId(pUmsUserDetail.getOrgId());
+        preFlashOrderInfo.setShopId(param.getShopId());
+        preFlashOrderInfo.setShopName(param.getShopName());
         preFlashOrderInfo.setFlashCode(MdcUtil.getTenantIncIdStr("flashCode", "O" + DateTime.now().toString("yyMMdd"), 5));
         preFlashOrderInfo.setBuyerName(infoResult.getRealName());
-        preFlashOrderInfo.setShopName(pUmsUserDetail.getOrgName());
-        preFlashOrderInfo.setGuideId(pUmsUserDetail.getUserId());
-        preFlashOrderInfo.setGuideName(pUmsUserDetail.getRealName());
         preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.TOBEWRITTENOFF);
         int orderInfo = flashOrderInfoMapper.insert(preFlashOrderInfo);
         if(orderInfo < 0){
@@ -98,14 +92,8 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
         preOrderInfo.setScore(new BigDecimal("0"));
         preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderCode", "O" + DateTime.now().toString("yyMMdd"), 5));
-        PUmsUserDetail pUmsUserDetail = userConsumer.getUserOrganization(preFlashOrderInfo.getGuideId());
-        if(null == pUmsUserDetail){
-            throw new ServiceException("获取导购员失败。");
-        }
-        preOrderInfo.setGuideId(pUmsUserDetail.getUserId());
-        preOrderInfo.setGuideName(pUmsUserDetail.getRealName());
-        preOrderInfo.setShopId(pUmsUserDetail.getOrgId());
-        preOrderInfo.setShopName(pUmsUserDetail.getOrgName());
+        preOrderInfo.setShopId(param.getShopId());
+        preOrderInfo.setShopName(param.getShopName());
         preOrderInfo.setFlashId(preFlashOrderInfo.getId());
         int orderInfo = preOrderInfoMapper.insert(preOrderInfo);
         if(orderInfo < 0){
@@ -121,8 +109,6 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         //订单明细
         PreOrderGoods preOrderGoods = new PreOrderGoods();
         preOrderGoods.setOrderId(preOrderInfo.getId());
-        preOrderGoods.setGuideId(preOrderInfo.getGuideId());
-        preOrderGoods.setGuideName(preOrderInfo.getGuideName());
         preOrderGoods.setGoodsId(preGoodsInfo.getId());
         preOrderGoods.setGoodsDescription(preGoodsInfo.getGoodsDescription());
         preOrderGoods.setGoodsPicture(preGoodsInfo.getGoodsPicture());
@@ -192,5 +178,17 @@ public class FlashOrderServiceImpl implements FlashOrderService {
             return preFlashOrderInfo.getFlashCode();
         }
     return null;
+    }
+
+    @Override
+    public IPage<PreFlashOrderInfo> pageFlashOrderInfo(FlashPageParam param) {
+        return flashOrderInfoMapper.selectPage(param.page(), Wrappers.<PreFlashOrderInfo>lambdaQuery()
+                .in(PreFlashOrderInfo::getActivityInfoId, param.getId())
+                .eq(ObjectUtil.isNotNull(param.getFlashOrderState()), PreFlashOrderInfo::getFlashOrderState, param.getFlashOrderState())
+                .ge(param.getCreateStartTime() != null, PreFlashOrderInfo::getCreateTime, param.getCreateStartTime())
+                .le(param.getCreateEndTime() != null, PreFlashOrderInfo::getCreateTime, param.getCreateEndTime())
+                .eq(StringUtils.isNotBlank(param.getShopId()), PreFlashOrderInfo::getShopId, param.getShopId())
+                .orderByDesc(PreFlashOrderInfo::getCreateTime)
+        );
     }
 }
