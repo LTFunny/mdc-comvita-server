@@ -123,8 +123,12 @@ public class FlashOrderServiceImpl implements FlashOrderService {
                 preOrderGoods.setGoodsPicture(preGoodsInfo.getGoodsPicture());
                 preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
                 preOrderGoods.setOrderCode(preOrderInfo.getOrderCode());
-                preOrderGoods.setReserveShopId(preOrderInfo.getShopId()+"");
-                preOrderGoods.setReserveShop(preOrderInfo.getShopName());
+                if(StringUtils.isNotBlank(param.getShopName())){
+                    preOrderGoods.setReserveShop(param.getShopName());
+                }
+                if(param.getShopId()!=null){
+                    preOrderGoods.setReserveShopId(param.getShopId()+"");
+                }
                 preOrderGoods.setGoodsName(preGoodsInfo.getGoodsName());
                 preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
                 preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
