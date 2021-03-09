@@ -25,19 +25,19 @@ public class FlashOrderInfoApi {
     private FlashOrderService flashOrderService;
 
     @ApiOperation(value = "下订单", notes = "下订单")
-    @ApiMapping(value = "comvita.order.info.flash.order", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "comvita.order.info.flash.order", method = RequestMethod.POST)
     public void registgetFlashOrderInfoer(FlashConfirmOrderParam param) {
          flashOrderService.getFlashOrderInfo(param);
     }
 
     @ApiOperation(value = "查询核销码", notes = "查询核销码")
-    @ApiMapping(value = "comvita.order.info.flash.code", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "comvita.order.info.flash.code", method = RequestMethod.POST)
     public String registgetFlashCode(QueryFlashCodeParam param) {
         return flashOrderService.getFlashOrderCode(param);
     }
 
     @ApiOperation(value = "获取我参与的活动列表(分页)", notes = "获取我参与的活动列表(分页)")
-    @ApiMapping(value = "comvita.order.memberFlash.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "comvita.order.memberFlash.page", method = RequestMethod.POST)
     public IPage<PreActivityInfo> pageMemberFlash(MemberFlashPageParam param) {
         return flashOrderService.pageMemberFlash(param);
     }
