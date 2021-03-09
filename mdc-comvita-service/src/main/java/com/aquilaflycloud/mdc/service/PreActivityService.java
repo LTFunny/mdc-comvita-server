@@ -37,6 +37,4 @@ public interface PreActivityService {
     BaseResult<String> downloadQrcode(PreQrcodeDownloadParam param);
 
     List<PreActivityQrCodeResult> getQrcode(PreQrcodeGetterParam param);
-
-    void export(PreActivityExportParam param);
 }

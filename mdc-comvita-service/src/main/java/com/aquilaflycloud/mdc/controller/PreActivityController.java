@@ -109,11 +109,4 @@ public class PreActivityController {
     public List<PreActivityQrCodeResult> getQrcode(PreQrcodeGetterParam param) {
         return preActivityService.getQrcode(param);
     }
-
-    @ApiOperation(value = "活动导出", notes = "活动导出")
-    @ApiMapping(value = "backend.comvita.pre.activity.export", method = RequestMethod.POST, permission = true)
-    public void export(PreActivityExportParam param) {
-        preActivityService.export(param);
-    }
-
 }
