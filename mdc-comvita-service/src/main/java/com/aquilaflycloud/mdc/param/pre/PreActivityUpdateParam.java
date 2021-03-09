@@ -1,5 +1,6 @@
 package com.aquilaflycloud.mdc.param.pre;
 
+import com.aquilaflycloud.mdc.enums.pre.ActivityGettingWayEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
@@ -83,4 +84,16 @@ public class PreActivityUpdateParam {
 
     @ApiModelProperty(value = "标签ids")
     private List<Long> folksonomyIds;
+
+    /**
+     * 领取方式 (线下领取 物流配送)
+     */
+    @ApiModelProperty(value = "领取方式")
+    private ActivityGettingWayEnum activityGettingWay;
+
+    /**
+     * 参加人数上限
+     */
+    @ApiModelProperty(value = "参加人数上限")
+    private Long maxParticipationCount;
 }

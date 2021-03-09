@@ -671,6 +671,9 @@ public class PreActivityServiceImpl implements PreActivityService {
 
     @Override
     public void downloadQrcode(PreQrcodeDownloadParam param) {
+        if (CollUtil.isEmpty(param.getOrgIdList())) {
+            throw new ServiceException("门店id列表为空");
+        }
 
     }
 
