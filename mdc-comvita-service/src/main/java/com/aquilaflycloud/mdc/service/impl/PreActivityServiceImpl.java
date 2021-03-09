@@ -272,16 +272,9 @@ public class PreActivityServiceImpl implements PreActivityService {
      * @param id
      * @return
      */
-    private Long getParticipationCount(Long id) {
-        QueryWrapper<PreFlashOrderInfo> qw = new QueryWrapper<>();
-        qw.select("count(1) as total").eq("activity_info_id",id);
-        List<Map<String, Object>> maps = preFlashOrderInfoMapper.selectMaps(qw);
-        if(CollUtil.isNotEmpty(maps)){
-            for(Map<String, Object> map : maps){
-                return (Long) map.get("total");
-            }
-        }
-        return 0L;
+    private int getParticipationCount(Long id) {
+        return preFlashOrderInfoMapper.selectCount(Wrappers.<PreFlashOrderInfo>lambdaQuery()
+                .eq(PreFlashOrderInfo::getActivityInfoId, id));
     }
 
     /**
@@ -665,7 +658,15 @@ public class PreActivityServiceImpl implements PreActivityService {
 
     @Override
     public void deleteQrcode(PreQrcodeDeleteParam param) {
-
+        if(param.getId()==null) {
+            throw new ServiceException("活动主键id为空!" );
+        }
+        if(param.getOrgId()==null) {
+            throw new ServiceException("门店id为空!" );
+        }
+        preActivityQrCodeInfoMapper.delete(new QueryWrapper<PreActiveQrCodeInfo>()
+                .eq("activity_id", param.getId())
+                .eq("org_id", param.getOrgId()));
     }
 
     @Override
@@ -675,8 +676,23 @@ public class PreActivityServiceImpl implements PreActivityService {
 
     @Override
     public List<PreActivityQrCodeResult> getQrcode(PreQrcodeGetterParam param) {
-
-        return null;
+        if(param.getActivityId()==null) {
+            throw new ServiceException("活动主键id为空,无法获取二维码列表!" );
+        }
+        List<PreActivityQrCodeResult> result = new ArrayList<>();
+        QueryWrapper<PreActiveQrCodeInfo> qw = new QueryWrapper<>();
+        qw.eq("activity_id", param.getActivityId());
+        List<PreActiveQrCodeInfo> preActiveQrCodeInfos = preActivityQrCodeInfoMapper.selectList(qw);
+        if(CollUtil.isNotEmpty(preActiveQrCodeInfos)){
+            preActiveQrCodeInfos.forEach(f -> {
+                PreActivityQrCodeResult qrCodeResult = new PreActivityQrCodeResult();
+                qrCodeResult.setActivityId(f.getActivityId());
+                qrCodeResult.setOrgId(f.getOrgId());
+                qrCodeResult.setOrgName(f.getOrgName());
+                result.add(qrCodeResult);
+            });
+        }
+        return result;
     }
 
     @Override

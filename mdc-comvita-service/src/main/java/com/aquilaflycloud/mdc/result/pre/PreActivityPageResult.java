@@ -30,5 +30,5 @@ public class PreActivityPageResult extends PreActivityInfo {
     private List<RefShopInfoResult> refShops;
 
     @ApiModelProperty(value = "参加人数")
-    private Long participationCount;
+    private int participationCount;
 }
