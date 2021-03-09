@@ -652,7 +652,7 @@ public class PreActivityServiceImpl implements PreActivityService {
 
         List<PreActiveQrCodeInfo> qrCodeList = preActivityQrCodeInfoMapper.selectList(Wrappers.<PreActiveQrCodeInfo>lambdaQuery()
                 .eq(PreActiveQrCodeInfo::getActivityId, param.getActivityId())
-                .in(PreActiveQrCodeInfo::getId, param.getOrgIdList())
+                .in(PreActiveQrCodeInfo::getOrgId, param.getOrgIdList())
         );
         List<InputStream> isList = new ArrayList<>();
         List<String> pathList = new ArrayList<>();
