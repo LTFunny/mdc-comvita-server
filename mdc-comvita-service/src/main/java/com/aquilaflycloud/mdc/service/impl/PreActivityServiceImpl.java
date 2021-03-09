@@ -472,40 +472,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
         preActivityInfoMapper.updateById(activityInfo);
         log.info("编辑活动信息成功");
-        Set<Long> oldIds = new HashSet<>();
-        QueryWrapper<FolksonomyBusinessRel> qw = new QueryWrapper<>();
-        qw.in("business_id", param.getId());
-        List<FolksonomyBusinessRel> folksonomyBusinessRels = folksonomyBusinessRelMapper.selectList(qw);
-        if(CollUtil.isNotEmpty(folksonomyBusinessRels)){
-            folksonomyBusinessRels.forEach(f -> oldIds.add(f.getFolksonomyId()));
-        }
-        Set<Long> newIds = new HashSet<>();
-        if(CollUtil.isNotEmpty(param.getFolksonomyIds())){
-            for(Long id : param.getFolksonomyIds()){
-                newIds.add(id);
-            }
-        }
-        List<Long> addIds = new ArrayList<>();
-        List<Long> deleteIds = new ArrayList<>();
-        for(Long n : newIds){
-            if(!oldIds.contains(n)){
-                addIds.add(n);
-            }
-        }
-        for(Long o : oldIds){
-            if(!newIds.contains(o)){
-                deleteIds.add(o);
-            }
-        }
-        if(CollUtil.isNotEmpty(addIds)){
-            folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREACTIVITY, activityInfo.getId(), addIds);
-        }
-
-        if(CollUtil.isNotEmpty(deleteIds)){
-            deleteIds.forEach(i -> folksonomyBusinessRelMapper.delete(new QueryWrapper<FolksonomyBusinessRel>()
-                    .eq("folksonomy_id", i)
-                    .eq("business_id",param.getId())));
-        }
+        folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREACTIVITY, activityInfo.getId(), param.getFolksonomyIds());
         log.info("处理标签成功");
     }
 
