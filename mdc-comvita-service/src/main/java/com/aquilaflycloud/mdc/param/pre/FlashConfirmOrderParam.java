@@ -16,12 +16,10 @@ public class FlashConfirmOrderParam {
     @NotNull(message = "活动id不能为空")
     private Long activityInfoId;
 
-    @ApiModelProperty(value = "门店id", required = true)
-    @NotNull(message = "门店id不能为空")
+    @ApiModelProperty(value = "门店id")
     private Long shopId;
 
-    @ApiModelProperty(value = "门店名称", required = true)
-    @NotNull(message = "门店名称不能为空")
+    @ApiModelProperty(value = "门店名称")
     private String shopName;
     /**
      * 买家手机

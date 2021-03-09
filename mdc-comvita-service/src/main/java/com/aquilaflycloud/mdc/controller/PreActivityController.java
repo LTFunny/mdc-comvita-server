@@ -1,7 +1,9 @@
 package com.aquilaflycloud.mdc.controller;
 
+import com.aquilaflycloud.mdc.model.pre.PreFlashOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
+import com.aquilaflycloud.mdc.service.FlashOrderService;
 import com.aquilaflycloud.mdc.service.PreActivityService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -23,7 +25,8 @@ public class PreActivityController {
 
     @Resource
     private PreActivityService preActivityService;
-
+    @Resource
+    private FlashOrderService flashOrderService;
     @ApiOperation(value = "销售活动分页信息", notes = "销售活动分页信息")
 //    @PreAuthorize("hasAuthority('mdc:pre:activity:page')")
     @ApiMapping(value = "backend.comvita.pre.activity.page", method = RequestMethod.POST, permission = true)
@@ -78,6 +81,11 @@ public class PreActivityController {
         return preActivityService.getFlashStatistics(param);
     }
 
+    @ApiOperation(value = "概况领取明细", notes = "概况领取明细")
+    @ApiMapping(value = "backend.comvita.order.info.flash.detailed", method = RequestMethod.POST, permission = true)
+    public IPage<PreFlashOrderInfo> getFlashOrderInfoDetailed(FlashPageParam param) {
+        return flashOrderService.pageFlashOrderInfo(param);
+    }
     @ApiOperation(value = "生成快闪活动二维码", notes = "生成快闪活动二维码")
     @ApiMapping(value = "backend.comvita.pre.qrcode.add", method = RequestMethod.POST, permission = true)
     public void addQrcode(PreQrcodeAddParam param) {
