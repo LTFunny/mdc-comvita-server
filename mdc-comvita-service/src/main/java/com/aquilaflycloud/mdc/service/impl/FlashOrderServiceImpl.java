@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.schedulerx.shade.net.sf.json.JSONArray;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.feign.consumer.org.IUserConsumer;
@@ -103,7 +104,8 @@ public class FlashOrderServiceImpl implements FlashOrderService {
 
     }
     private void savePreOrderGoods( PreActivityInfo preActivityInfo,PreOrderInfo preOrderInfo,  FlashConfirmOrderParam param){
-        List<String> list = Arrays.asList( preActivityInfo.getRefGoods().split(","));
+        JSONArray dataJson= JSONArray .fromObject(preActivityInfo.getRefGoods());
+        List<String> list = (List<String>) JSONArray.toCollection(dataJson);
         if(CollUtil.isEmpty(list)){
             throw new ServiceException("活动里不存在商品,无法生成订单。");
         }
