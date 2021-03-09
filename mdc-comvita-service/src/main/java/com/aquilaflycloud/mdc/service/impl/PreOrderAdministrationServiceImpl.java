@@ -535,6 +535,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
                     int count = preOrderGoodsMapper.updateById(updateItem);
                     if (count > 0) {
+                        //快闪订单核销
+                        changeFlashState(updateItem.getOrderId());
                         log.info("待签收订单物流单号更新信息：{id=" + id + ", expressCode=" + expressCode + ", expressOrderCode" + expressOrderCode + ", expressName" + expressName + "}");
                     } else {
                         throw new ServiceException("导入失败，请重试");
@@ -546,15 +548,23 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             throw new ServiceException("请检查导入的数据是否有效");
         }
     }
-    private void changeFlashState(String id){
-        PreFlashOrderInfo preFlashOrderInfo = flashOrderInfoMapper.selectById(id);
-        if(preFlashOrderInfo!=null){
-            preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.WRITTENOFF);
-            int orderInfo=flashOrderInfoMapper.updateById(preFlashOrderInfo);
-            if(orderInfo < 0){
-                throw new ServiceException("核销失败。");
+    //根据订单id查询订单表
+    private void changeFlashState(Long id){
+        PreOrderInfo preOrderInfo=preOrderInfoMapper.selectById(id);
+        if(preOrderInfo!=null ){
+            if(preOrderInfo.getFlashId()!=null){
+                PreFlashOrderInfo preFlashOrderInfo = flashOrderInfoMapper.selectById(preOrderInfo.getFlashId());
+                if(preFlashOrderInfo!=null){
+                    preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.WRITTENOFF);
+                    int orderInfo=flashOrderInfoMapper.updateById(preFlashOrderInfo);
+                    if(orderInfo < 0){
+                        throw new ServiceException("核销失败。");
+                    }
+                }
             }
+
         }
+
 
     }
 }
