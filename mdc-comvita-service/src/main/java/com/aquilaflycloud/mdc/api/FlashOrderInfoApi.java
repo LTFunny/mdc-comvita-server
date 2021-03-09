@@ -1,6 +1,8 @@
 package com.aquilaflycloud.mdc.api;
 
+import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
+import com.aquilaflycloud.mdc.param.member.MemberRegisterParam;
 import com.aquilaflycloud.mdc.param.pre.FlashConfirmOrderParam;
 import com.aquilaflycloud.mdc.param.pre.MemberFlashPageParam;
 import com.aquilaflycloud.mdc.param.pre.QueryFlashCodeParam;
@@ -32,7 +34,7 @@ public class FlashOrderInfoApi {
 
     @ApiOperation(value = "查询核销码", notes = "查询核销码")
     @ApiMapping(value = "comvita.order.info.flash.code", method = RequestMethod.POST)
-    public String registgetFlashCode(QueryFlashCodeParam param) {
+    public  BaseResult<String> registgetFlashCode(QueryFlashCodeParam param) {
         return flashOrderService.getFlashOrderCode(param);
     }
 
