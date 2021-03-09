@@ -249,6 +249,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
         info.setDeliveryTime(new DateTime());
         preOrderGoodsMapper.updateById(info);
+
         PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
                 .eq(PrePickingCard::getPickingCode, info.getCardCode())
         );
@@ -256,6 +257,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
             prePickingCardMapper.updateById(prePickingCard);
         }
+        //快闪订单核销
+        changeFlashState(info.getOrderId(),info.getExpressOrderCode());
         //添加操作记录
         orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getGuideName(), preOrderInfo.getId(), "进行了发货。");
 
@@ -536,7 +539,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     int count = preOrderGoodsMapper.updateById(updateItem);
                     if (count > 0) {
                         //快闪订单核销
-                        changeFlashState(updateItem.getOrderId());
+                        changeFlashState(updateItem.getOrderId(),updateItem.getExpressOrderCode());
                         log.info("待签收订单物流单号更新信息：{id=" + id + ", expressCode=" + expressCode + ", expressOrderCode" + expressOrderCode + ", expressName" + expressName + "}");
                     } else {
                         throw new ServiceException("导入失败，请重试");
@@ -549,13 +552,14 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         }
     }
     //根据订单id查询订单表
-    private void changeFlashState(Long id){
+    private void changeFlashState(Long id,String code){
         PreOrderInfo preOrderInfo=preOrderInfoMapper.selectById(id);
         if(preOrderInfo!=null ){
             if(preOrderInfo.getFlashId()!=null){
                 PreFlashOrderInfo preFlashOrderInfo = flashOrderInfoMapper.selectById(preOrderInfo.getFlashId());
                 if(preFlashOrderInfo!=null){
                     preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.WRITTENOFF);
+                    preFlashOrderInfo.setExpressOrder(code);
                     int orderInfo=flashOrderInfoMapper.updateById(preFlashOrderInfo);
                     if(orderInfo < 0){
                         throw new ServiceException("核销失败。");
