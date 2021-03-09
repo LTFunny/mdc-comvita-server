@@ -6,8 +6,11 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
+import com.aliyun.oss.model.OSSObject;
+import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.member.EventTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
@@ -37,10 +40,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -637,12 +639,38 @@ public class PreActivityServiceImpl implements PreActivityService {
                 .eq("org_id", param.getOrgId()));
     }
 
+    private int incrementalCount = 0;
+
     @Override
-    public void downloadQrcode(PreQrcodeDownloadParam param) {
+    public BaseResult<String> downloadQrcode(PreQrcodeDownloadParam param) {
         if (CollUtil.isEmpty(param.getOrgIdList())) {
             throw new ServiceException("门店id列表为空");
         }
+        if(param.getActivityName()==null) {
+            throw new ServiceException("活动名称为空!" );
+        }
 
+        List<PreActiveQrCodeInfo> qrCodeList = preActivityQrCodeInfoMapper.selectList(Wrappers.<PreActiveQrCodeInfo>lambdaQuery()
+                .eq(PreActiveQrCodeInfo::getActivityId, param.getActivityId())
+                .in(PreActiveQrCodeInfo::getId, param.getOrgIdList())
+        );
+        List<InputStream> isList = new ArrayList<>();
+        List<String> pathList = new ArrayList<>();
+        for (PreActiveQrCodeInfo qrCode : qrCodeList) {
+            OSSObject ossObject = AliOssUtil.getObject(qrCode.getQrCodeFileKey());
+            isList.add(ossObject.getObjectContent());
+            pathList.add(StrUtil.join("-", param.getActivityName(), qrCode.getOrgName(), (incrementalCount++)) + ".png");
+        }
+        try {
+            File tmpDirFile = Files.createTempDirectory("flash-codes-temp").toFile();
+            File resultFile = File.createTempFile("codes", ".zip", tmpDirFile);
+            File zipFile = ZipUtil.zip(resultFile, pathList.toArray(new String[0]), isList.toArray(new InputStream[0]));
+            String url = AliOssUtil.uploadFile(param.getActivityName() + "二维码.zip", new FileInputStream(zipFile));
+            return new BaseResult<String>().setResult(url);
+        } catch (IOException e) {
+            log.error("压缩上传oss失败", e);
+            throw new ServiceException("下载小程序二维码失败");
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.aquilaflycloud.mdc.service;
 
+import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -33,7 +34,7 @@ public interface PreActivityService {
 
     void deleteQrcode(PreQrcodeDeleteParam param);
 
-    void downloadQrcode(PreQrcodeDownloadParam param);
+    BaseResult<String> downloadQrcode(PreQrcodeDownloadParam param);
 
     List<PreActivityQrCodeResult> getQrcode(PreQrcodeGetterParam param);
 
