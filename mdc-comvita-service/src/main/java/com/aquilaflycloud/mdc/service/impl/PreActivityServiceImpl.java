@@ -673,6 +673,17 @@ public class PreActivityServiceImpl implements PreActivityService {
 
     }
 
+    @Override
+    public List<PreActivityQrCodeResult> getQrcode(PreQrcodeGetterParam param) {
+
+        return null;
+    }
+
+    @Override
+    public void export(PreActivityExportParam param) {
+
+    }
+
     private void createMiniQrcode(PreActiveQrCodeInfo... qrCodeInfoList) {
         MdcUtil.getTtlExecutorService().submit(() -> {
             for (PreActiveQrCodeInfo qrCode : qrCodeInfoList) {

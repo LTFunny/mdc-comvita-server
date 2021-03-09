@@ -4,6 +4,8 @@ import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
+import java.util.List;
+
 /**
  * PreActivityService
  * @author linkq
@@ -32,4 +34,8 @@ public interface PreActivityService {
     void deleteQrcode(PreQrcodeDeleteParam param);
 
     void downloadQrcode(PreQrcodeDownloadParam param);
+
+    List<PreActivityQrCodeResult> getQrcode(PreQrcodeGetterParam param);
+
+    void export(PreActivityExportParam param);
 }

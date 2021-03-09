@@ -1,10 +1,7 @@
 package com.aquilaflycloud.mdc.controller;
 
 import com.aquilaflycloud.mdc.param.pre.*;
-import com.aquilaflycloud.mdc.result.pre.FlashStatisticsGetResult;
-import com.aquilaflycloud.mdc.result.pre.PreActivityAnalysisResult;
-import com.aquilaflycloud.mdc.result.pre.PreActivityDetailResult;
-import com.aquilaflycloud.mdc.result.pre.PreActivityPageResult;
+import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.service.PreActivityService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -14,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * PreActivityController
@@ -98,6 +96,16 @@ public class PreActivityController {
         preActivityService.downloadQrcode(param);
     }
 
+    @ApiOperation(value = "获取下载快闪活动二维码列表", notes = "获取下载快闪活动二维码列表")
+    @ApiMapping(value = "backend.comvita.pre.qrcode.get", method = RequestMethod.POST, permission = true)
+    public List<PreActivityQrCodeResult> getQrcode(PreQrcodeGetterParam param) {
+        return preActivityService.getQrcode(param);
+    }
 
+    @ApiOperation(value = "活动导出", notes = "活动导出")
+    @ApiMapping(value = "backend.comvita.pre.activity.export", method = RequestMethod.POST, permission = true)
+    public void export(PreActivityExportParam param) {
+        preActivityService.export(param);
+    }
 
 }
