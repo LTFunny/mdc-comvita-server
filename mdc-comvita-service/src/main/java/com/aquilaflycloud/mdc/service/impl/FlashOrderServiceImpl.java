@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.feign.consumer.org.IUserConsumer;
 import com.aquilaflycloud.mdc.mapper.*;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,11 +83,6 @@ public class FlashOrderServiceImpl implements FlashOrderService {
       }
     private void saveOrder( MemberInfoResult infoResult,  PreActivityInfo preActivityInfo,PreFlashOrderInfo preFlashOrderInfo,FlashConfirmOrderParam param ){
         PreOrderInfo preOrderInfo = new PreOrderInfo();
-        PreGoodsInfo goodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
-        if(goodsInfo == null){
-            throw new ServiceException("活动里不存在商品,无法生成订单。");
-        }
-
         MdcUtil.setMemberInfo(preOrderInfo,infoResult);
         preOrderInfo.setMemberId(infoResult.getId());
         preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
@@ -99,40 +96,54 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         if(orderInfo < 0){
             throw new ServiceException("生成订单失败。");
         }
-        savePreOrderGoods(preOrderInfo,goodsInfo,param);
+        savePreOrderGoods(preActivityInfo,preOrderInfo,param);
         String content =  preFlashOrderInfo.getBuyerName() + "于"+ DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 +"通过扫码填写信息生成快闪订单";
         orderOperateRecordService.addOrderOperateRecordLog(preFlashOrderInfo.getBuyerName(),preOrderInfo.getId(),content);
 
     }
-    private void savePreOrderGoods( PreOrderInfo preOrderInfo,  PreGoodsInfo  preGoodsInfo,FlashConfirmOrderParam param){
-        //订单明细
-        PreOrderGoods preOrderGoods = new PreOrderGoods();
-        preOrderGoods.setOrderId(preOrderInfo.getId());
-        preOrderGoods.setGoodsId(preGoodsInfo.getId());
-        preOrderGoods.setGoodsDescription(preGoodsInfo.getGoodsDescription());
-        preOrderGoods.setGoodsPicture(preGoodsInfo.getGoodsPicture());
-        preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
-        preOrderGoods.setOrderCode(preOrderInfo.getOrderCode());
-        preOrderGoods.setReserveShopId(preOrderInfo.getShopId()+"");
-        preOrderGoods.setReserveShop(preOrderInfo.getShopName());
-        preOrderGoods.setGoodsName(preGoodsInfo.getGoodsName());
-        preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
-        preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
-        preOrderGoods.setTenantId(preOrderInfo.getTenantId());
-        preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
-        preOrderGoods.setGiftsSymbol(GiftsSymbolEnum.AFTER);
-        preOrderGoods.setDeliveryAddress(param.getBuyerAddress());
-        preOrderGoods.setDeliveryProvince(param.getBuyerProvince());
-        preOrderGoods.setDeliveryCity(param.getBuyerCity());
-        preOrderGoods.setDeliveryDistrict(param.getBuyerDistrict());
-        preOrderGoods.setReserveId(preOrderInfo.getMemberId());
-        preOrderGoods.setReserveName(param.getBuyerName());
-        preOrderGoods.setReservePhone(param.getBuyerPhone());
-        int orderGoodsInfo = preOrderGoodsMapper.insert(preOrderGoods);
-        if(orderGoodsInfo < 0){
-            throw new ServiceException("生成订单失败。");
+    private void savePreOrderGoods( PreActivityInfo preActivityInfo,PreOrderInfo preOrderInfo,  FlashConfirmOrderParam param){
+        List<String> list = Arrays.asList( preActivityInfo.getRefGoods().split(","));
+        if(CollUtil.isEmpty(list)){
+            throw new ServiceException("活动里不存在商品,无法生成订单。");
         }
+        for(String id:list){
+            if(StringUtils.isNotBlank(id)){
+                PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(id);
+                if(preGoodsInfo==null){
+                    throw new ServiceException("活动里不存在商品,无法生成订单。");
+                }
+                //订单明细
+                PreOrderGoods preOrderGoods = new PreOrderGoods();
+                preOrderGoods.setOrderId(preOrderInfo.getId());
+                preOrderGoods.setGoodsId(preGoodsInfo.getId());
+                preOrderGoods.setGoodsDescription(preGoodsInfo.getGoodsDescription());
+                preOrderGoods.setGoodsPicture(preGoodsInfo.getGoodsPicture());
+                preOrderGoods.setGoodsCode(preGoodsInfo.getGoodsCode());
+                preOrderGoods.setOrderCode(preOrderInfo.getOrderCode());
+                preOrderGoods.setReserveShopId(preOrderInfo.getShopId()+"");
+                preOrderGoods.setReserveShop(preOrderInfo.getShopName());
+                preOrderGoods.setGoodsName(preGoodsInfo.getGoodsName());
+                preOrderGoods.setGoodsType(preGoodsInfo.getGoodsType());
+                preOrderGoods.setGoodsPrice(preGoodsInfo.getGoodsPrice());
+                preOrderGoods.setTenantId(preOrderInfo.getTenantId());
+                preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
+                preOrderGoods.setGiftsSymbol(GiftsSymbolEnum.AFTER);
+                preOrderGoods.setDeliveryAddress(param.getBuyerAddress());
+                preOrderGoods.setDeliveryProvince(param.getBuyerProvince());
+                preOrderGoods.setDeliveryCity(param.getBuyerCity());
+                preOrderGoods.setDeliveryDistrict(param.getBuyerDistrict());
+                preOrderGoods.setReserveId(preOrderInfo.getMemberId());
+                preOrderGoods.setReserveName(param.getBuyerName());
+                preOrderGoods.setReservePhone(param.getBuyerPhone());
+                int orderGoodsInfo = preOrderGoodsMapper.insert(preOrderGoods);
+                if(orderGoodsInfo < 0){
+                    throw new ServiceException("生成订单失败。");
+                }
+            }
+
+        }
+
     }
 
     @Override
@@ -168,16 +179,17 @@ public class FlashOrderServiceImpl implements FlashOrderService {
     }
 
     @Override
-    public String getFlashOrderCode(QueryFlashCodeParam param) {
-        Long memberId = MdcUtil.getCurrentMemberId();
+    public BaseResult<String> getFlashOrderCode(QueryFlashCodeParam param) {
+        Long id= MdcUtil.getCurrentMemberId();
         PreFlashOrderInfo preFlashOrderInfo = flashOrderInfoMapper.selectOne(Wrappers.<PreFlashOrderInfo>lambdaQuery()
                 .eq(PreFlashOrderInfo::getActivityInfoId, param.getActivityInfoId())
-                .eq(PreFlashOrderInfo::getMemberId, memberId)
+                .eq(PreFlashOrderInfo::getMemberId, id)
         );
         if(preFlashOrderInfo!=null){
-            return preFlashOrderInfo.getFlashCode();
+            return new BaseResult<String>().setResult(preFlashOrderInfo.getFlashCode());
         }
-    return null;
+        throw new ServiceException("查询失败。");
+
     }
 
     @Override

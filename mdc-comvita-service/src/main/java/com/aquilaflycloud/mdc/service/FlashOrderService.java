@@ -1,5 +1,6 @@
 package com.aquilaflycloud.mdc.service;
 
+import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.model.pre.PreFlashOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
@@ -16,7 +17,7 @@ public interface FlashOrderService {
 
     void verificationFlashOrder(FlashWriteOffOrderParam param);
 
-    String getFlashOrderCode(QueryFlashCodeParam param);
+    BaseResult<String> getFlashOrderCode(QueryFlashCodeParam param);
 
     IPage<PreFlashOrderInfo> pageFlashOrderInfo(FlashPageParam param);
 }
