@@ -647,6 +647,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             info.setActivityId(param.getId());
             info.setOrgId(orgInfo.getOrgId());
             info.setOrgName(orgInfo.getOrgName());
+            info.setOrgAddress(orgInfo.getOrgAddress());
             infoList.add(info);
         }
         int count = preActivityQrCodeInfoMapper.insertAllBatch(infoList);

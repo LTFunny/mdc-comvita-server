@@ -34,6 +34,10 @@ public class PreQrcodeAddParam {
         @ApiModelProperty(value = "门店名称", required = true)
         @NotEmpty(message = "门店名称不能为空")
         private String orgName;
+
+        @ApiModelProperty(value = "门店地址", required = true)
+        @NotEmpty(message = "门店地址不能为空")
+        private String orgAddress;
     }
 
 }
