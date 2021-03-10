@@ -17,6 +17,7 @@ import java.util.Date;
 
 /**
  * 活动信息
+ * @author linkq
  */
 @Data
 @TableName(value = "pre_activity_info")

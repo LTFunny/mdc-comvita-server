@@ -97,6 +97,10 @@ public class SystemFileServiceImpl implements SystemFileService {
     private PrePickingCardService prePickingCardService;
     @Resource
     private PreOrderAdministrationService preOrderAdministrationService;
+    @Resource
+    private PreActivityService preActivityService;
+
+
     private IPage pageData(ExcelDownloadParam param) {
         IPage page;
         switch (param.getExportType()) {
@@ -169,6 +173,17 @@ public class SystemFileServiceImpl implements SystemFileService {
             case SALES_VOUME: {
                 AdministrationListParam exportParam = buildParam(param.getExportParam(), AdministrationListParam.class);
                 page = preOrderAdministrationService.pageSalePageResultList(exportParam);
+                break;
+            }
+            case PRE_ACTIVITY_INFO: {
+//                AdministrationListParam exportParam = buildParam(param.getExportParam(), AdministrationListParam.class);
+//                page = preOrderAdministrationService.pageSalePageResultList(exportParam);
+                page = null;
+                break;
+            }
+            case FLASH_ACTIVITY_INFO: {
+                FlashExportParam flashExportParam = buildParam(param.getExportParam(), FlashExportParam.class);
+                page = preActivityService.pageExportPageResultList(flashExportParam);
                 break;
             }
             default:

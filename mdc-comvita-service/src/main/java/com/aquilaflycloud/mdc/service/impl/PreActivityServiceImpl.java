@@ -234,6 +234,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                 .and(state != null && state == ActivityStateEnum.FINISHED,
                         k -> k.ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
                                 .le(PreActivityInfo::getEndTime, now))
+                .orderByDesc(PreActivityInfo::getCreateTime)
         ).convert(this::dataConvertResult);
     }
 
@@ -730,6 +731,11 @@ public class PreActivityServiceImpl implements PreActivityService {
             });
         }
         return result;
+    }
+
+    @Override
+    public IPage<PreFlashReportPageResult> pageExportPageResultList(FlashExportParam flashExportParam) {
+        return null;
     }
 
     private void createMiniQrcode(PreActiveQrCodeInfo... qrCodeInfoList) {
