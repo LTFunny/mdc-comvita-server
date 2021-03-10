@@ -176,7 +176,9 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         if(preFlashOrderInfo==null){
             throw new ServiceException("核销码有误。");
         }
-
+        if(FlashOrderInfoStateEnum.WRITTENOFF.equals(preFlashOrderInfo.getFlashOrderState())){
+            throw new ServiceException("该码已核销。");
+        }
         preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.WRITTENOFF);
         int orderInfo=flashOrderInfoMapper.updateById(preFlashOrderInfo);
         if(orderInfo < 0){
