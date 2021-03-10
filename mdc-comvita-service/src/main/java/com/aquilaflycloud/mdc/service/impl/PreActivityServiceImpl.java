@@ -4,10 +4,8 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.ZipUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.aliyun.oss.model.OSSObject;
@@ -698,7 +696,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         for (PreActiveQrCodeInfo qrCode : qrCodeList) {
             OSSObject ossObject = AliOssUtil.getObject(qrCode.getQrCodeFileKey());
             isList.add(ossObject.getObjectContent());
-            pathList.add(StrUtil.join("-", param.getActivityName(), qrCode.getOrgName(), (incrementalCount++)) + ".png");
+            pathList.add(param.getActivityName() + qrCode.getOrgName() + (incrementalCount++) + ".png");
         }
         try {
             File tmpDirFile = Files.createTempDirectory("flash-codes-temp").toFile();
@@ -734,8 +732,169 @@ public class PreActivityServiceImpl implements PreActivityService {
     }
 
     @Override
-    public IPage<PreFlashReportPageResult> pageExportPageResultList(FlashExportParam flashExportParam) {
-        return null;
+    public IPage<PreFlashReportPageResult> pageExportPageResultList(FlashExportParam param) {
+        List<Long> businessIds = getFolksonomyBusinessRels(param.getFolksonomyIds());
+        if(!CollUtil.isEmpty(param.getFolksonomyIds()) && CollUtil.isEmpty(businessIds)){
+            return null;
+        }
+        List<Long> activityIds = getActivityIdByShopName(param.getShopName());
+        if(StrUtil.isNotBlank(param.getShopName()) && CollUtil.isEmpty(activityIds) ){
+            return null;
+        }
+        List<Long> ids = (List<Long>)CollUtil.union(businessIds,activityIds);
+        ActivityStateEnum state = param.getActivityState();
+        DateTime now = DateTime.now();
+        Date start_ = param.getCreateTimeStart();
+        Date end_ = param.getCreateTimeEnd();
+        IPage<PreFlashReportPageResult> resultIPage =  preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
+                .like( param.getActivityName()!= null,PreActivityInfo::getActivityName,param.getActivityName())
+                .like( param.getCreatorName() != null,PreActivityInfo::getCreatorName,param.getCreatorName())
+                .in(CollUtil.isNotEmpty(ids),PreActivityInfo::getId,ids)
+                .eq(PreActivityInfo::getActivityType,ActivityTypeEnum.FLASH)
+                .and(start_ != null,k -> k.ge(PreActivityInfo::getCreateTime, start_))
+                .and(end_ != null,k -> k.le(PreActivityInfo::getCreateTime, end_))
+                .eq(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.CANCELED,
+                        PreActivityInfo::getActivityState,param.getActivityState())
+                .and(state != null && state == ActivityStateEnum.NOT_STARTED,
+                        k -> k.ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
+                                .ge(PreActivityInfo::getBeginTime, now))
+                .and(state != null && state == ActivityStateEnum.IN_PROGRESS,
+                        k -> k.ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
+                                .le(PreActivityInfo::getBeginTime, now)
+                                .ge(PreActivityInfo::getEndTime, now))
+                .and(state != null && state == ActivityStateEnum.FINISHED,
+                        k -> k.ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
+                                .le(PreActivityInfo::getEndTime, now))
+                .orderByDesc(PreActivityInfo::getCreateTime)
+        ).convert(info -> {
+            PreFlashReportPageResult preFlashReportPageResult = new PreFlashReportPageResult();
+            preFlashReportPageResult.setActivityId(info.getId());
+            preFlashReportPageResult.setActivityName(info.getActivityName());
+            preFlashReportPageResult.setActivityTime(DateUtil.formatDateTime(info.getBeginTime()) + " ~ " + DateUtil.formatDateTime(info.getEndTime()));
+            List<PreActivityFolksonomyResult> folksonomys = getFolksonomys(info.getId());
+            StringBuffer sb = new StringBuffer();
+            if(CollUtil.isNotEmpty(folksonomys)){
+                for(int i = 0 ; i < folksonomys.size() ; i++){
+                    sb.append(folksonomys.get(i).getFolksonomyName());
+                    if(i != folksonomys.size() - 1 ){
+                        sb.append(",");
+                    }
+                }
+            }
+            preFlashReportPageResult.setActivityFolksonomy(sb.toString());
+            FlashStatisticsGetParam param_ = new FlashStatisticsGetParam();
+            param_.setId(info.getId());
+            FlashStatisticsGetResult statistics = getFlashStatistics(param_);
+            if(null != statistics){
+                preFlashReportPageResult.setSharePv(statistics.getSharePv());
+                preFlashReportPageResult.setClickUv(statistics.getClickUv());
+                preFlashReportPageResult.setClickPv(statistics.getClickPv());
+                preFlashReportPageResult.setConversionRate(statistics.getConversionRate());
+                preFlashReportPageResult.setParticipantsCount(statistics.getParticipantsCount());
+            }
+            return preFlashReportPageResult;
+        });
+        List<PreFlashReportPageResult> resultList = resultIPage.getRecords();
+        if(CollUtil.isNotEmpty(resultList)){
+            Map<String,PreFlashReportPageResult> activityId2Result = new HashMap<>();
+            for (PreFlashReportPageResult result : resultList) {
+                activityId2Result.put(Convert.toStr(result.getActivityId()), result);
+            }
+            //2，补充是否曾经购买属性
+            Map<String,String> map = getEverBought();
+            //3，补充会员以及门店等信息
+            List<PreFlashReportPageResult> result2 = getShopAndMember(activityId2Result,map);
+            if(CollUtil.isNotEmpty(result2)){
+                resultIPage.setRecords(result2);
+            }
+        }
+        return resultIPage;
+    }
+
+
+    /**
+     * 补充会员以及门店信息
+     * @param activityId2result
+     * @param memberId2isEvenBought
+     * @return
+     */
+    private List<PreFlashReportPageResult> getShopAndMember(Map<String, PreFlashReportPageResult> activityId2result,
+                                                            Map<String, String> memberId2isEvenBought) {
+        List<PreFlashReportPageResult> resultList = new ArrayList<>();
+        List<Map<String, Object>> list = preActivityInfoMapper.getShopAndMember();
+        if(CollUtil.isNotEmpty(list)){
+            list.forEach(l -> {
+                Long activity_info_id = (Long) l.get("activity_info_id");
+                PreFlashReportPageResult result = activityId2result.get(Convert.toStr(activity_info_id));
+                if(null != result){
+                    PreFlashReportPageResult newResult = ObjectUtil.cloneIfPossible(result);
+                    resultList.add(newResult);
+                    //是否曾经购买
+                    Long member_id = (Long) l.get("member_id");
+                    String isEvenBought = memberId2isEvenBought.get(Convert.toStr(member_id));
+                    if(StrUtil.isNotBlank(isEvenBought)){
+                        newResult.setIsEverBought(isEvenBought);
+                    }
+                    //门店信息
+                    String org_name = (String) l.get("org_name");
+                    newResult.setOrgName(org_name);
+                    String org_address = (String) l.get("org_address");
+                    newResult.setOrgAddress(org_address);
+                    //会员信息
+                    String real_name = (String) l.get("real_name");
+                    newResult.setParticipantName(real_name);
+                    int sex = (Integer) l.get("sex");
+                    if(0 == sex){
+                        newResult.setParticipantSex("未知");
+                    }else if(1 == sex){
+                        newResult.setParticipantSex("男");
+                    }else if(2 == sex){
+                        newResult.setParticipantSex("女");
+                    }
+                    Date birthday = (Date) l.get("birthday");
+                    newResult.setParticipantBirthdate(DateUtil.format(birthday,"yyyy-MM-dd"));
+                    String province = (String) l.get("province");
+                    String city = (String) l.get("city");
+                    String county = (String) l.get("county");
+                    String address = (String) l.get("address");
+                    newResult.setParticipantAddress(province + city + county + address);
+                    Date create_time = (Date) l.get("create_time");
+                    //同一天注册即为新会员
+                    boolean isSameDay = DateUtil.isSameDay(create_time, DateTime.now());
+                    if(isSameDay){
+                        newResult.setIsNewMember("是");
+                    }else{
+                        newResult.setIsNewMember("否");
+                    }
+                }
+            });
+        }
+        return resultList;
+    }
+
+    /**
+     *  获取是否曾经购买属性
+     * @return map: key->member_id value->是否曾经购买
+     */
+    private Map<String,String> getEverBought() {
+        QueryWrapper<PreFlashOrderInfo> qw = new QueryWrapper<>();
+        qw.select("member_id","count(member_id) as count")
+                .groupBy("member_id");
+        List<Map<String, Object>> maps = preFlashOrderInfoMapper.selectMaps(qw);
+        //key : member id value:是否曾经购买
+        Map<String,String> memberId2Count = new HashMap<>();
+        if(CollUtil.isNotEmpty(maps)){
+            for(Map<String, Object> map_ : maps){
+                Long member_id = (Long) map_.get("member_id");
+                Long count = (Long) map_.get("count");
+                if(count > 1){
+                    memberId2Count.put(Convert.toStr(member_id),"是");
+                }else{
+                    memberId2Count.put(Convert.toStr(member_id),"否");
+                }
+            }
+        }
+        return memberId2Count;
     }
 
     private void createMiniQrcode(PreActiveQrCodeInfo... qrCodeInfoList) {
