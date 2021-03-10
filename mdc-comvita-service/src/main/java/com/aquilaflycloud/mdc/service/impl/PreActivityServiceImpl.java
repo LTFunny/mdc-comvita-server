@@ -641,6 +641,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         for (PreQrcodeAddParam.OrgInfo orgInfo : param.getOrgInfoList()) {
             if (orgIdList.contains(orgInfo.getOrgId())) {
                 duplicateOrg.add(orgInfo.getOrgName());
+                continue;
             }
             PreActiveQrCodeInfo info = new PreActiveQrCodeInfo();
             info.setActivityId(param.getId());
@@ -657,7 +658,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
         createMiniQrcode(infoList.toArray(new PreActiveQrCodeInfo[]{}));
         if (!duplicateOrg.isEmpty()) {
-            return BaseResult.buildResult(ArrayUtil.join(duplicateOrg, ", "));
+            return BaseResult.buildResult(ArrayUtil.join(duplicateOrg.toArray(), ", "));
         } else {
             return new BaseResult<>();
         }
