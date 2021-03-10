@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
@@ -626,13 +627,21 @@ public class PreActivityServiceImpl implements PreActivityService {
     }
 
     @Override
-    public void addQrcode(PreQrcodeAddParam param) {
+    public BaseResult<String> addQrcode(PreQrcodeAddParam param) {
         PreActivityInfo activityInfo = preActivityInfoMapper.selectById(param.getId());
         if (activityInfo == null) {
             throw new ServiceException("活动不存在");
         }
+        List<Long> orgIdList = preActivityQrCodeInfoMapper.selectList(Wrappers.<PreActiveQrCodeInfo>lambdaQuery()
+                .select(PreActiveQrCodeInfo::getOrgId)
+                .eq(PreActiveQrCodeInfo::getActivityId, param.getId())
+        ).stream().map(PreActiveQrCodeInfo::getOrgId).collect(Collectors.toList());
+        List<String> duplicateOrg = new ArrayList<>();
         List<PreActiveQrCodeInfo> infoList = new ArrayList<>();
         for (PreQrcodeAddParam.OrgInfo orgInfo : param.getOrgInfoList()) {
+            if (orgIdList.contains(orgInfo.getOrgId())) {
+                duplicateOrg.add(orgInfo.getOrgName());
+            }
             PreActiveQrCodeInfo info = new PreActiveQrCodeInfo();
             info.setActivityId(param.getId());
             info.setOrgId(orgInfo.getOrgId());
@@ -640,11 +649,18 @@ public class PreActivityServiceImpl implements PreActivityService {
             info.setOrgAddress(orgInfo.getOrgAddress());
             infoList.add(info);
         }
-        int count = preActivityQrCodeInfoMapper.insertAllBatch(infoList);
-        if (count <= 0) {
-            throw new ServiceException("保存小程序二维码失败");
+        if (infoList.size() > 0) {
+            int count = preActivityQrCodeInfoMapper.insertAllBatch(infoList);
+            if (count <= 0) {
+                throw new ServiceException("保存小程序二维码失败");
+            }
         }
         createMiniQrcode(infoList.toArray(new PreActiveQrCodeInfo[]{}));
+        if (!duplicateOrg.isEmpty()) {
+            return BaseResult.buildResult(ArrayUtil.join(duplicateOrg, ", "));
+        } else {
+            return new BaseResult<>();
+        }
     }
 
     @Override
