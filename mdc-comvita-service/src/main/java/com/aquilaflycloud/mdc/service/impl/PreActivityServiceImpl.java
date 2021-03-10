@@ -607,7 +607,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         List<MemberEventStatisticsResult> list = memberEventLogService.selectLogStatistics(new MemberEventStatisticsParam()
                 .setBusinessId(param.getId()).setBusinessType(BusinessTypeEnum.PREACTIVITY).setEventTypes(eventTypeSet));
         for (MemberEventStatisticsResult result : list) {
-            if (result.getEventType() == EventTypeEnum.SHOW) {
+            if (result.getEventType() == EventTypeEnum.SHARE) {
                 statisticsResult.setSharePv(result.getPv());
                 statisticsResult.setShareUv(result.getUv());
             } else if (result.getEventType() == EventTypeEnum.CLICK) {
