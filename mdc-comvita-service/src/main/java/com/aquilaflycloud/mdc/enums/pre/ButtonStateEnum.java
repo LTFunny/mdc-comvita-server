@@ -33,6 +33,10 @@ public enum ButtonStateEnum {
      * 参加人数已达到上限
      */
     FULL(5, "参加人数已达到上限"),
+    /**
+     * 活动已结束
+     */
+    FINISHED(6, "活动已结束"),
     ;
 
     ButtonStateEnum(int type, String name) {

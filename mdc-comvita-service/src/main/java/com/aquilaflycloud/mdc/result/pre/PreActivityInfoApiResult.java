@@ -23,8 +23,11 @@ public class PreActivityInfoApiResult extends PreActivityInfo {
     @ApiModelProperty(value = "奖励规则")
     private List<PreActivityRewardParam> rewardRuleList;
 
-    @ApiModelProperty(value = "按钮状态（pre.ButtonStateEnum）")
+    @ApiModelProperty(value = "按钮状态(pre.ButtonStateEnum)")
     private ButtonStateEnum buttonState;
+
+    @ApiModelProperty(value = "参与活动的门店id")
+    private Long shopId;
 
     @ApiModelProperty(value = "可选门店列表")
     private List<ShopInfo> shopList;

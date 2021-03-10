@@ -123,14 +123,20 @@ public class PreActivityServiceImpl implements PreActivityService {
         if (StrUtil.isNotBlank(info.getRewardRuleContent())) {
             result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
         }
+        PreFlashOrderInfo orderInfo = null;
+        if (memberInfo != null) {
+            orderInfo = preFlashOrderInfoMapper.selectOne(Wrappers.<PreFlashOrderInfo>lambdaQuery()
+                    .eq(PreFlashOrderInfo::getActivityInfoId, result.getId())
+                    .eq(PreFlashOrderInfo::getMemberId, memberInfo.getId())
+            );
+            if (orderInfo != null) {
+                result.setShopId(orderInfo.getShopId());
+            }
+        }
         if (info.getActivityType() == ActivityTypeEnum.FLASH) {
             if (result.getActivityState() == ActivityStateEnum.IN_PROGRESS) {
                 result.setButtonState(ButtonStateEnum.JOIN);
                 if (memberInfo != null) {
-                    PreFlashOrderInfo orderInfo = preFlashOrderInfoMapper.selectOne(Wrappers.<PreFlashOrderInfo>lambdaQuery()
-                            .eq(PreFlashOrderInfo::getActivityInfoId, result.getId())
-                            .eq(PreFlashOrderInfo::getMemberId, memberInfo.getId())
-                    );
                     if (orderInfo == null) {
                         int orderCount = preOrderInfoMapper.selectCount(Wrappers.<PreOrderInfo>lambdaQuery()
                                 .eq(PreOrderInfo::getActivityInfoId, result.getId())
@@ -139,6 +145,21 @@ public class PreActivityServiceImpl implements PreActivityService {
                             result.setButtonState(ButtonStateEnum.FULL);
                         }
                     } else {
+                        if (orderInfo.getFlashOrderState() == FlashOrderInfoStateEnum.WRITTENOFF) {
+                            result.setButtonState(ButtonStateEnum.COMMENT);
+                        } else {
+                            if (info.getActivityGettingWay() == ActivityGettingWayEnum.OFF_LINE) {
+                                result.setButtonState(ButtonStateEnum.SHOW);
+                            } else {
+                                result.setButtonState(ButtonStateEnum.JOINED);
+                            }
+                        }
+                    }
+                }
+            } else if (result.getActivityState() == ActivityStateEnum.FINISHED || result.getActivityState() == ActivityStateEnum.CANCELED) {
+                result.setButtonState(ButtonStateEnum.FINISHED);
+                if (memberInfo != null) {
+                    if (orderInfo != null) {
                         if (orderInfo.getFlashOrderState() == FlashOrderInfoStateEnum.WRITTENOFF) {
                             result.setButtonState(ButtonStateEnum.COMMENT);
                         } else {
