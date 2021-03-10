@@ -101,8 +101,8 @@ public class PreActivityController {
 
     @ApiOperation(value = "(批量)下载快闪活动二维码", notes = "(批量)下载快闪活动二维码")
     @ApiMapping(value = "backend.comvita.pre.qrcode.download", method = RequestMethod.POST, permission = true)
-    public void downloadQrcode(PreQrcodeDownloadParam param) {
-        preActivityService.downloadQrcode(param);
+    public BaseResult<String> downloadQrcode(PreQrcodeDownloadParam param) {
+        return preActivityService.downloadQrcode(param);
     }
 
     @ApiOperation(value = "获取下载快闪活动二维码列表", notes = "获取下载快闪活动二维码列表")
