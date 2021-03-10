@@ -10,6 +10,8 @@ import lombok.Data;
  */
 @Data
 public class PreActivityReportPageResult {
+    @ApiModelProperty(value = "活动Id")
+    private Long activityId;
 
     @ApiModelProperty(value = "活动名称")
     private String activityName;
@@ -39,5 +41,6 @@ public class PreActivityReportPageResult {
     private String participantBirthdate;
 
     @ApiModelProperty(value = "地址信息")
-    private String deliveryAddress;
+    private String participantAddress;
+
 }

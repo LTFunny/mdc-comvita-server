@@ -38,5 +38,7 @@ public interface PreActivityService {
 
     List<PreActivityQrCodeResult> getQrcode(PreQrcodeGetterParam param);
 
-    IPage<PreFlashReportPageResult> pageExportPageResultList(FlashExportParam flashExportParam);
+    IPage<PreFlashReportPageResult> pageExportFlashActivityPageResultList(FlashExportParam flashExportParam);
+
+    IPage<PreActivityReportPageResult> pageExportPreActivityPageResultList(PreActivityExportParam preActivityExportParam);
 }

@@ -732,7 +732,7 @@ public class PreActivityServiceImpl implements PreActivityService {
     }
 
     @Override
-    public IPage<PreFlashReportPageResult> pageExportPageResultList(FlashExportParam param) {
+    public IPage<PreFlashReportPageResult> pageExportFlashActivityPageResultList(FlashExportParam param) {
         List<Long> businessIds = getFolksonomyBusinessRels(param.getFolksonomyIds());
         if(!CollUtil.isEmpty(param.getFolksonomyIds()) && CollUtil.isEmpty(businessIds)){
             return null;
@@ -811,9 +811,148 @@ public class PreActivityServiceImpl implements PreActivityService {
         return resultIPage;
     }
 
+    @Override
+    public IPage<PreActivityReportPageResult> pageExportPreActivityPageResultList(PreActivityExportParam param) {
+        //1,获取活动
+        List<Long> businessIds = getFolksonomyBusinessRels(param.getFolksonomyIds());
+        if(!CollUtil.isEmpty(param.getFolksonomyIds()) && CollUtil.isEmpty(businessIds)){
+            return null;
+        }
+        ActivityStateEnum state = param.getActivityState();
+        DateTime now = DateTime.now();
+        Date start_ = param.getCreateTimeStart();
+        Date end_ = param.getCreateTimeEnd();
+        IPage<PreActivityReportPageResult> resultIPage =  preActivityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
+                .like( param.getActivityName()!= null,PreActivityInfo::getActivityName,param.getActivityName())
+                .like( param.getCreatorName() != null,PreActivityInfo::getCreatorName,param.getCreatorName())
+                .in(CollUtil.isNotEmpty(businessIds),PreActivityInfo::getId,businessIds)
+                .eq(PreActivityInfo::getActivityType,ActivityTypeEnum.PRE_SALES)
+                .and(start_ != null,k -> k.ge(PreActivityInfo::getCreateTime, start_))
+                .and(end_ != null,k -> k.le(PreActivityInfo::getCreateTime, end_))
+                .eq(param.getActivityState()!=null && param.getActivityState() == ActivityStateEnum.CANCELED,
+                        PreActivityInfo::getActivityState,param.getActivityState())
+                .and(state != null && state == ActivityStateEnum.NOT_STARTED,
+                        k -> k.ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
+                                .ge(PreActivityInfo::getBeginTime, now))
+                .and(state != null && state == ActivityStateEnum.IN_PROGRESS,
+                        k -> k.ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
+                                .le(PreActivityInfo::getBeginTime, now)
+                                .ge(PreActivityInfo::getEndTime, now))
+                .and(state != null && state == ActivityStateEnum.FINISHED,
+                        k -> k.ne(PreActivityInfo::getActivityState,ActivityStateEnum.CANCELED)
+                                .le(PreActivityInfo::getEndTime, now))
+                .orderByDesc(PreActivityInfo::getCreateTime)
+        ).convert(info -> {
+            PreActivityReportPageResult pageResult = new PreActivityReportPageResult();
+            pageResult.setActivityId(info.getId());
+            pageResult.setActivityName(info.getActivityName());
+            pageResult.setActivityTime(DateUtil.formatDateTime(info.getBeginTime()) + " ~ " + DateUtil.formatDateTime(info.getEndTime()));
+            List<PreActivityFolksonomyResult> folksonomys = getFolksonomys(info.getId());
+            StringBuffer sb = new StringBuffer();
+            if(CollUtil.isNotEmpty(folksonomys)){
+                for(int i = 0 ; i < folksonomys.size() ; i++){
+                    sb.append(folksonomys.get(i).getFolksonomyName());
+                    if(i != folksonomys.size() - 1 ){
+                        sb.append(",");
+                    }
+                }
+            }
+            pageResult.setActivityFolksonomy(sb.toString());
+            return pageResult;
+        });
+        List<PreActivityReportPageResult> resultList = resultIPage.getRecords();
+        if(CollUtil.isNotEmpty(resultList)){
+            Map<String,PreActivityReportPageResult> activityId2Result = new HashMap<>();
+            for (PreActivityReportPageResult result : resultList) {
+                activityId2Result.put(Convert.toStr(result.getActivityId()), result);
+            }
+            //2，获取活动以及参加人数Map
+            Map<String,String> map = getParticipantsCountMap();
+            //3，补充会员以及门店等信息
+            List<PreActivityReportPageResult> result1 = getPreActivityRefShopAndMember(activityId2Result,map);
+            if(CollUtil.isNotEmpty(result1)){
+                resultIPage.setRecords(result1);
+            }
+        }
+        return resultIPage;
+    }
 
     /**
-     * 补充会员以及门店信息
+     * 补充预售活动的关联会员以及门店信息
+     * @param activityId2Result
+     * @param activityId2Count
+     * @return
+     */
+    private List<PreActivityReportPageResult> getPreActivityRefShopAndMember(
+            Map<String, PreActivityReportPageResult> activityId2Result,
+            Map<String, String> activityId2Count) {
+        List<PreActivityReportPageResult> resultList = new ArrayList<>();
+        List<Map<String, Object>> list = preActivityInfoMapper.getPreActivityRefShopAndMember();
+        if(CollUtil.isNotEmpty(list)){
+            list.forEach(l -> {
+                Long activity_info_id = (Long) l.get("activity_info_id");
+                PreActivityReportPageResult result = activityId2Result.get(Convert.toStr(activity_info_id));
+                if(null != result){
+                    PreActivityReportPageResult newResult = ObjectUtil.cloneIfPossible(result);
+                    resultList.add(newResult);
+                    //参加人数
+                    String count = activityId2Count.get(Convert.toStr(activity_info_id));
+                    if(StrUtil.isNotBlank(count)){
+                        newResult.setParticipantsCount(Convert.toLong(count));
+                    }
+                    //门店信息
+                    String shop_name = (String) l.get("shop_name");
+                    newResult.setOrgName(shop_name);
+                    String shop_address = (String) l.get("shop_address");
+                    newResult.setOrgAddress(shop_address);
+                    //会员信息
+                    String real_name = (String) l.get("real_name");
+                    newResult.setParticipantName(real_name);
+                    int sex = (Integer) l.get("sex");
+                    if(0 == sex){
+                        newResult.setParticipantSex("未知");
+                    }else if(1 == sex){
+                        newResult.setParticipantSex("男");
+                    }else if(2 == sex){
+                        newResult.setParticipantSex("女");
+                    }
+                    Date birthday = (Date) l.get("birthday");
+                    newResult.setParticipantBirthdate(DateUtil.format(birthday,"yyyy-MM-dd"));
+                    String province = (String) l.get("province");
+                    String city = (String) l.get("city");
+                    String county = (String) l.get("county");
+                    String address = (String) l.get("address");
+                    newResult.setParticipantAddress(province + city + county + address);
+                }
+            });
+        }
+        return resultList;
+    }
+
+    /**
+     * 获取活动以及参加人数Map
+     * @return
+     */
+    private Map<String, String> getParticipantsCountMap() {
+        QueryWrapper<PreOrderInfo> qw = new QueryWrapper<>();
+        qw.select("activity_info_id","count(member_id) as count")
+                .groupBy("activity_info_id");
+        List<Map<String, Object>> maps = preOrderInfoMapper.selectMaps(qw);
+        //key : activity id value:member count
+        Map<String,String> activityId2Count = new HashMap<>();
+        if(CollUtil.isNotEmpty(maps)){
+            for(Map<String, Object> map_ : maps){
+                Long activity_info_id = Convert.toLong(map_.get("activity_info_id"));
+                Long count = Convert.toLong(map_.get("count"));
+                activityId2Count.put(Convert.toStr(activity_info_id),Convert.toStr(count));
+            }
+        }
+        return activityId2Count;
+    }
+
+
+    /**
+     * 快闪活动补充会员以及门店信息
      * @param activityId2result
      * @param memberId2isEvenBought
      * @return

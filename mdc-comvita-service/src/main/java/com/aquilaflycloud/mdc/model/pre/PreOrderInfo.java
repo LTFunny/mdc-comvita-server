@@ -105,6 +105,13 @@ public class PreOrderInfo implements Serializable {
     private String shopName;
 
     /**
+     * 门店名称
+     */
+    @TableField(value = "shop_address")
+    @ApiModelProperty(value = "门店地址")
+    private String shopAddress;
+
+    /**
      * 导购员id
      */
     @TableField(value = "guide_id")

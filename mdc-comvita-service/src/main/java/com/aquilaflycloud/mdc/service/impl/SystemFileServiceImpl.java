@@ -176,14 +176,13 @@ public class SystemFileServiceImpl implements SystemFileService {
                 break;
             }
             case PRE_ACTIVITY_INFO: {
-//                AdministrationListParam exportParam = buildParam(param.getExportParam(), AdministrationListParam.class);
-//                page = preOrderAdministrationService.pageSalePageResultList(exportParam);
-                page = null;
+                PreActivityExportParam exportParam = buildParam(param.getExportParam(), PreActivityExportParam.class);
+                page = preActivityService.pageExportPreActivityPageResultList(exportParam);
                 break;
             }
             case FLASH_ACTIVITY_INFO: {
                 FlashExportParam flashExportParam = buildParam(param.getExportParam(), FlashExportParam.class);
-                page = preActivityService.pageExportPageResultList(flashExportParam);
+                page = preActivityService.pageExportFlashActivityPageResultList(flashExportParam);
                 break;
             }
             default:
