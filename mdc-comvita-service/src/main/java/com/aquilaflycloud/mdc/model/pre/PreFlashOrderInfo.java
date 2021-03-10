@@ -90,6 +90,20 @@ public class PreFlashOrderInfo implements Serializable {
     private FlashOrderInfoStateEnum flashOrderState;
 
     /**
+     * 活动开始时间
+     */
+    @TableField(value = "begin_time")
+    @ApiModelProperty(value = "活动开始时间")
+    private Date beginTime;
+
+    /**
+     * 活动结束时间
+     */
+    @TableField(value = "end_time")
+    @ApiModelProperty(value = "活动结束时间")
+    private Date endTime;
+
+    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)

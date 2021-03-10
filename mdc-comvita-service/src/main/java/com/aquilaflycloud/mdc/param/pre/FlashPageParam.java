@@ -2,8 +2,10 @@ package com.aquilaflycloud.mdc.param.pre;
 
 import com.aquilaflycloud.dataAuth.common.PageParam;
 import com.aquilaflycloud.mdc.enums.pre.FlashOrderInfoStateEnum;
+import com.aquilaflycloud.mdc.model.pre.PreFlashOrderInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -13,8 +15,9 @@ import java.util.Date;
  *
  * @author zly
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class FlashPageParam  extends PageParam {
+public class FlashPageParam  extends PageParam<PreFlashOrderInfo> {
     @ApiModelProperty(value = "活动id", required = true)
     @NotNull(message = "活动id不能为空")
     private Long id;

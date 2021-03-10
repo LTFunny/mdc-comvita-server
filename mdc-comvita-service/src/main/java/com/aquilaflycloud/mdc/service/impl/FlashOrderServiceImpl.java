@@ -3,7 +3,6 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.schedulerx.shade.net.sf.json.JSONArray;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.pre.*;
@@ -15,7 +14,6 @@ import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
 import com.aquilaflycloud.mdc.service.FlashOrderService;
 import com.aquilaflycloud.mdc.service.PreOrderOperateRecordService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
-import com.aquilaflycloud.org.service.provider.entity.PUmsUserDetail;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -26,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,6 +71,8 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preFlashOrderInfo.setFlashCode(MdcUtil.getTenantIncIdStr("flashCode", "O" + DateTime.now().toString("yyMMdd"), 5));
         preFlashOrderInfo.setBuyerName(infoResult.getRealName());
         preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.TOBEWRITTENOFF);
+        preFlashOrderInfo.setBeginTime(preActivityInfo.getBeginTime());
+        preFlashOrderInfo.setEndTime(preActivityInfo.getEndTime());
         int orderInfo = flashOrderInfoMapper.insert(preFlashOrderInfo);
         if(orderInfo < 0){
             throw new ServiceException("生成订单失败。");
@@ -155,10 +154,20 @@ public class FlashOrderServiceImpl implements FlashOrderService {
     @Override
     public IPage<PreActivityInfo> pageMemberFlash(MemberFlashPageParam param) {
         Long memberId = MdcUtil.getCurrentMemberId();
+        DateTime now = DateTime.now();
+        FlashOrderInfoStateEnum state = param.getFlashOrderState();
         List<Long> activityIds = flashOrderInfoMapper.selectList(Wrappers.<PreFlashOrderInfo>lambdaQuery()
                 .select(PreFlashOrderInfo::getActivityInfoId)
                 .eq(PreFlashOrderInfo::getMemberId, memberId)
-                .eq(PreFlashOrderInfo::getFlashOrderState, param.getFlashOrderState())
+                .nested(state == FlashOrderInfoStateEnum.TOBEWRITTENOFF,
+                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, state)
+                                .ge(PreFlashOrderInfo::getEndTime, now)
+                )
+                .nested(state == FlashOrderInfoStateEnum.EXPIRED,
+                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, state)
+                                .lt(PreFlashOrderInfo::getEndTime, now)
+                )
+                .eq(state == FlashOrderInfoStateEnum.WRITTENOFF, PreFlashOrderInfo::getFlashOrderState, state)
         ).stream().map(PreFlashOrderInfo::getActivityInfoId).collect(Collectors.toList());
         if (CollUtil.isNotEmpty(activityIds)) {
             return activityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
@@ -202,9 +211,19 @@ public class FlashOrderServiceImpl implements FlashOrderService {
 
     @Override
     public IPage<PreFlashOrderInfo> pageFlashOrderInfo(FlashPageParam param) {
+        DateTime now = DateTime.now();
+        FlashOrderInfoStateEnum state = param.getFlashOrderState();
         return flashOrderInfoMapper.selectPage(param.page(), Wrappers.<PreFlashOrderInfo>lambdaQuery()
-                .in(PreFlashOrderInfo::getActivityInfoId, param.getId())
-                .eq(ObjectUtil.isNotNull(param.getFlashOrderState()), PreFlashOrderInfo::getFlashOrderState, param.getFlashOrderState())
+                .eq(PreFlashOrderInfo::getActivityInfoId, param.getId())
+                .nested(state == FlashOrderInfoStateEnum.TOBEWRITTENOFF,
+                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, state)
+                                .ge(PreFlashOrderInfo::getEndTime, now)
+                )
+                .nested(state == FlashOrderInfoStateEnum.EXPIRED,
+                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, state)
+                                .lt(PreFlashOrderInfo::getEndTime, now)
+                )
+                .eq(state == FlashOrderInfoStateEnum.WRITTENOFF, PreFlashOrderInfo::getFlashOrderState, state)
                 .ge(param.getCreateStartTime() != null, PreFlashOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreFlashOrderInfo::getCreateTime, param.getCreateEndTime())
                 .eq(StringUtils.isNotBlank(param.getShopId()), PreFlashOrderInfo::getShopId, param.getShopId())
