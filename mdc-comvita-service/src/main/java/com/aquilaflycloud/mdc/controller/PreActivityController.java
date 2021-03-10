@@ -1,5 +1,6 @@
 package com.aquilaflycloud.mdc.controller;
 
+import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.model.pre.PreFlashOrderInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
@@ -88,8 +89,8 @@ public class PreActivityController {
     }
     @ApiOperation(value = "生成快闪活动二维码", notes = "生成快闪活动二维码")
     @ApiMapping(value = "backend.comvita.pre.qrcode.add", method = RequestMethod.POST, permission = true)
-    public void addQrcode(PreQrcodeAddParam param) {
-        preActivityService.addQrcode(param);
+    public BaseResult<String> addQrcode(PreQrcodeAddParam param) {
+        return preActivityService.addQrcode(param);
     }
 
     @ApiOperation(value = "删除快闪活动二维码", notes = "删除快闪活动二维码")
