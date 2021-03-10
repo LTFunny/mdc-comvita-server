@@ -701,6 +701,8 @@ public class PreActivityServiceImpl implements PreActivityService {
                     try {
                         String appId = "wxadb960df280e9e79";
                         String pagePath = "pages/activity/quick/detail";
+                        qrCode.setAppId(appId);
+                        qrCode.setPagePath(pagePath);
                         File file = wechatMiniService.getWxMaServiceByAppId(qrCode.getAppId())
                                 .getQrcodeService().createQrcode(pagePath + "?id=" + qrCode.getActivityId() + "&orgId=" + qrCode.getOrgId());
                         String path = qrCode.getAppId() + "/" + qrCode.getPagePath().replace("/", ".");
