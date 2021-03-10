@@ -29,10 +29,16 @@ public class MiniMemberApi {
         return memberService.loginMiniMember(param);
     }
 
-    @ApiOperation(value = "小程序会员授权", notes = "小程序会员授权后更新信息")
+    @ApiOperation(value = "小程序会员授权(废弃)", notes = "小程序会员授权后更新信息")
     @ApiMapping(value = "comvita.mini.member.authorize", method = RequestMethod.POST)
     public void authorizeMiniMember(MiniMemberAuthorizeParam param) {
         memberService.authorizeMiniMember(param);
+    }
+
+    @ApiOperation(value = "小程序会员授权信息编辑(非加密)", notes = "小程序会员授权后更新信息")
+    @ApiMapping(value = "comvita.mini.member.edit", method = RequestMethod.POST)
+    public void editMiniMember(MiniMemberEditParam param) {
+        memberService.editMiniMember(param);
     }
 
     @ApiOperation(value = "小程序手机号获取", notes = "小程序会员授权后获取手机号")

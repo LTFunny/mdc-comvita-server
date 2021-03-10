@@ -48,6 +48,8 @@ public interface MemberService {
 
     void authorizeMiniMember(MiniMemberAuthorizeParam param);
 
+    void editMiniMember(MiniMemberEditParam param);
+
     BaseResult<String> getMiniPhone(MiniPhoneGetParam param);
 
     BaseResult<String> editMiniPhone(MiniPhoneGetParam param);

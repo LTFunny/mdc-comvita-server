@@ -792,6 +792,47 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public void editMiniMember(MiniMemberEditParam param) {
+        MemberInfoResult sessionKey = MdcUtil.getMiniSessionKey();
+        WxMaUserInfo userInfo = BeanUtil.copyProperties(param.getUserInfo(), WxMaUserInfo.class);
+        MemberInfo memberInfo = new MemberInfo();
+        memberInfo.setIsAuth(WhetherEnum.YES);
+        DateTime now = DateTime.now();
+        if (sessionKey.getAuthTime() == null) {
+            memberInfo.setAuthTime(now);
+        }
+        memberInfo.setLastAuthTime(now);
+        memberInfo.setNickName(userInfo.getNickName());
+        memberInfo.setAvatarUrl(userInfo.getAvatarUrl());
+        memberInfo.setSex(EnumUtil.likeValueOf(SexEnum.class, Convert.toInt(userInfo.getGender())));
+        memberInfo.setCountry(userInfo.getCountry());
+        memberInfo.setProvince(userInfo.getProvince());
+        memberInfo.setCity(userInfo.getCity());
+        memberInfo.setUnionId(userInfo.getUnionId());
+        memberInfo.setWxContent(JSONUtil.toJsonStr(userInfo));
+        if (sessionKey.getGuideId() == null) {
+            memberInfo.setGuideId(param.getGuideId());
+        }
+        int count = memberInfoMapper.update(memberInfo, Wrappers.<MemberInfo>lambdaUpdate()
+                .eq(MemberInfo::getWxAppId, sessionKey.getWxAppId())
+                .eq(MemberInfo::getOpenId, sessionKey.getOpenId())
+        );
+        if (count > 0) {
+            memberInfo = memberInfoMapper.selectOne(Wrappers.<MemberInfo>lambdaQuery()
+                    .eq(MemberInfo::getWxAppId, sessionKey.getWxAppId())
+                    .eq(MemberInfo::getOpenId, sessionKey.getOpenId())
+            );
+            String hashKey = memberInfo.getWxAppId() + "_" + memberInfo.getOpenId();
+            RedisUtil.redisson().getMapCache("miniMemberRMap").fastRemove(hashKey);
+            memberInfo.setId(sessionKey.getId());
+            memberInfo.setMemberCode(sessionKey.getMemberCode());
+            login2Session(memberInfo);
+        } else {
+            throw new ServiceException("授权失败");
+        }
+    }
+
+    @Override
     public BaseResult<String> getMiniPhone(MiniPhoneGetParam param) {
         MemberInfoResult sessionKey = MdcUtil.getMiniSessionKey();
         String appId = sessionKey.getWxAppId();
