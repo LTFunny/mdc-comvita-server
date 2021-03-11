@@ -139,7 +139,8 @@ public class PreGoodsInfoServiceImpl implements PreGoodsInfoService {
             //下架时判断是否有活动关联
             DateTime now = DateTime.now();
             int count = preActivityInfoMapper.selectCount(Wrappers.<PreActivityInfo>lambdaQuery()
-                    .eq(PreActivityInfo::getRefGoods, goods.getId())
+//                    .eq(PreActivityInfo::getRefGoods, goods.getId())
+                    .like(PreActivityInfo::getRefGoods, goods.getId())
                     .ge(PreActivityInfo::getEndTime, now)
                     .ne(PreActivityInfo::getActivityState, ActivityStateEnum.CANCELED)
             );
