@@ -6,6 +6,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
@@ -97,8 +98,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if(preActivityInfo == null){
             throw new ServiceException("活动不存在");
         }
-        PreGoodsInfo goodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
-        if(goodsInfo == null){
+//        PreGoodsInfo goodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
+        List<PreGoodsInfo> goods = getGoods(preActivityInfo.getRefGoods());
+        if(CollUtil.isEmpty(goods)){
             throw new ServiceException("活动里不存在商品,无法生成订单。");
         }
         BeanUtil.copyProperties(param,preOrderInfo);
@@ -190,7 +192,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             if (null == preActivityInfo) {
                 throw new ServiceException("活动不存在");
             }
-            PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
+//            PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(preActivityInfo.getRefGoods());
+            List<PreGoodsInfo> goods = getGoods(preActivityInfo.getRefGoods());
+            PreGoodsInfo preGoodsInfo = goods.get(0);
             param.getPrePickingCardList().stream().forEach(card -> {
                 PrePickingCardValidationParam param1 = new PrePickingCardValidationParam();
                 param1.setPickingCode(card);
@@ -384,7 +388,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 .notIn(PreOrderGoods::getId,preOrderGoods == null ? 0L : preOrderGoods.getId()));
         result.setIngdeliveryNum(takenCount);
         PreActivityInfo activityInfo = activityInfoMapper.selectById(order.getActivityInfoId());
-        PreGoodsInfo goodsInfo = goodsInfoMapper.selectById(activityInfo.getRefGoods());
+//        PreGoodsInfo goodsInfo = goodsInfoMapper.selectById(activityInfo.getRefGoods());
+        List<PreGoodsInfo> goods = getGoods(activityInfo.getRefGoods());
+        PreGoodsInfo goodsInfo = goods.get(0);
         result.setPreGoodsInfo(goodsInfo);
         int goodsCount = preOrderGoodsMapper.selectCount(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,order.getId())
@@ -626,5 +632,22 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 "退款将于7个工作日内退回到您的付款账户。");
     }
 
+    /**
+     * 获取关联的商品
+     * @param refGoods
+     * @return
+     */
+    private List<PreGoodsInfo> getGoods(String refGoods) {
+        List<PreGoodsInfo> result = new ArrayList<>();
+        JSONArray array_ = JSONUtil.parseArray(refGoods);
+        array_.stream().forEach(i ->{
+            Long idLong = Long.parseLong(i.toString());
+            PreGoodsInfo goods = goodsInfoMapper.selectById(idLong);
+            if(null != goods){
+                result.add(goods);
+            }
+        });
+        return result;
+    }
 
 }
