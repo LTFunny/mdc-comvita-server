@@ -928,16 +928,20 @@ public class PreActivityServiceImpl implements PreActivityService {
                     //会员信息
                     String real_name = (String) l.get("real_name");
                     newResult.setParticipantName(real_name);
-                    int sex = Convert.toInt(l.get("sex"));
-                    if(0 == sex){
-                        newResult.setParticipantSex("未知");
-                    }else if(1 == sex){
-                        newResult.setParticipantSex("男");
-                    }else if(2 == sex){
-                        newResult.setParticipantSex("女");
+                    if(null != l.get("sex")){
+                        int sex = Convert.toInt(l.get("sex"));
+                        if(0 == sex){
+                            newResult.setParticipantSex("未知");
+                        }else if(1 == sex){
+                            newResult.setParticipantSex("男");
+                        }else if(2 == sex){
+                            newResult.setParticipantSex("女");
+                        }
                     }
-                    Date birthday = (Date) l.get("birthday");
-                    newResult.setParticipantBirthdate(DateUtil.format(birthday,"yyyy-MM-dd"));
+                    if(null != l.get("birthday")){
+                        Date birthday = (Date) l.get("birthday");
+                        newResult.setParticipantBirthdate(DateUtil.format(birthday,"yyyy-MM-dd"));
+                    }
                     String province = (String) l.get("province");
                     String city = (String) l.get("city");
                     String county = (String) l.get("county");
@@ -1002,16 +1006,20 @@ public class PreActivityServiceImpl implements PreActivityService {
                     //会员信息
                     String real_name = (String) l.get("real_name");
                     newResult.setParticipantName(real_name);
-                    int sex = (Integer) l.get("sex");
-                    if(0 == sex){
-                        newResult.setParticipantSex("未知");
-                    }else if(1 == sex){
-                        newResult.setParticipantSex("男");
-                    }else if(2 == sex){
-                        newResult.setParticipantSex("女");
+                    if(null != l.get("sex")){
+                        int sex = (Integer) l.get("sex");
+                        if(0 == sex){
+                            newResult.setParticipantSex("未知");
+                        }else if(1 == sex){
+                            newResult.setParticipantSex("男");
+                        }else if(2 == sex){
+                            newResult.setParticipantSex("女");
+                        }
                     }
-                    Date birthday = (Date) l.get("birthday");
-                    newResult.setParticipantBirthdate(DateUtil.format(birthday,"yyyy-MM-dd"));
+                    if(null != l.get("birthday")){
+                        Date birthday = (Date) l.get("birthday");
+                        newResult.setParticipantBirthdate(DateUtil.format(birthday,"yyyy-MM-dd"));
+                    }
                     String province = (String) l.get("province");
                     String city = (String) l.get("city");
                     String county = (String) l.get("county");
