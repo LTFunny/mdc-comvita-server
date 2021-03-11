@@ -636,9 +636,9 @@ public class PreActivityServiceImpl implements PreActivityService {
                 .eq(PreFlashOrderInfo::getActivityInfoId, param.getId())
         );
         statisticsResult.setParticipantsCount(Convert.toLong(participantsCount));
-        if (participantsCount != 0) {
+        if (statisticsResult.getClickUv() != 0) {
             statisticsResult.setConversionRate(NumberUtil.formatPercent(
-                    NumberUtil.div(statisticsResult.getClickUv(), statisticsResult.getParticipantsCount()).doubleValue(), 2));
+                    NumberUtil.div(statisticsResult.getParticipantsCount(), statisticsResult.getClickUv()).doubleValue(), 2));
         }
         return statisticsResult;
     }
