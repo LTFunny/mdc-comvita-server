@@ -14,6 +14,12 @@ import java.math.BigDecimal;
 public class PreActivityQrCodeResult {
 
     /**
+     * 二维码id
+     */
+    @ApiModelProperty(value = "二维码Id")
+    private Long qrId;
+
+    /**
      * 活动
      */
     @ApiModelProperty(value = "活动id")
