@@ -388,7 +388,7 @@ public class PreActivityServiceImpl implements PreActivityService {
     @Transactional
     @Override
     public void add(PreActivityAddParam param) {
-        checkNameParam(param.getActivityName(), param.getActivityType());
+        checkNameParam(null,param.getActivityName(), param.getActivityType());
         checkTimeParam(param.getBeginTime(), param.getEndTime());
 
         PreActivityInfo activityInfo = new PreActivityInfo();
@@ -463,11 +463,13 @@ public class PreActivityServiceImpl implements PreActivityService {
      * 重名校验
      * 活动名称不允许重复
      *  不同类型之间可以重复
+     * @param id
      * @param activityName
      * @param activityType 活动类型
      */
-    private void checkNameParam(String activityName, ActivityTypeEnum activityType) {
+    private void checkNameParam(Long id, String activityName, ActivityTypeEnum activityType) {
         PreActivityInfo info =  preActivityInfoMapper.selectOne(Wrappers.<PreActivityInfo>lambdaQuery()
+                .ne(null != id,PreActivityInfo::getId,id)
                 .eq(PreActivityInfo::getActivityName,activityName)
                 .eq(PreActivityInfo::getActivityType,activityType));
         if(null != info){
@@ -491,7 +493,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             endTime = activityInfo.getEndTime();
         }
         checkTimeParam(beginTime,endTime);
-        checkNameParam(param.getActivityName(), param.getActivityType());
+        checkNameParam(param.getId(),param.getActivityName(), param.getActivityType());
         BeanUtil.copyProperties(param, activityInfo,"id","activityState","refGoods");
         //时间有更新的话 同步更新状态 但是已下架状态的要先上架
         if(null != activityInfo.getActivityState() && activityInfo.getActivityState() != ActivityStateEnum.CANCELED){
@@ -925,7 +927,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                     //会员信息
                     String real_name = (String) l.get("real_name");
                     newResult.setParticipantName(real_name);
-                    int sex = (Integer) l.get("sex");
+                    int sex = Convert.toInt(l.get("sex"));
                     if(0 == sex){
                         newResult.setParticipantSex("未知");
                     }else if(1 == sex){
