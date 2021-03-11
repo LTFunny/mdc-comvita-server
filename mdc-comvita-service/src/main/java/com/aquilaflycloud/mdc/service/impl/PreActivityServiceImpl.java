@@ -130,6 +130,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             );
             if (orderInfo != null) {
                 result.setShopId(orderInfo.getShopId());
+                result.setShopName(orderInfo.getShopName());
             }
         }
         if (info.getActivityType() == ActivityTypeEnum.FLASH) {
@@ -177,6 +178,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                 PreActivityInfoApiResult.ShopInfo shopInfo = new PreActivityInfoApiResult.ShopInfo();
                 shopInfo.setShopId(qrCodeInfo.getOrgId());
                 shopInfo.setShopName(qrCodeInfo.getOrgName());
+                shopInfo.setShopAddress(qrCodeInfo.getOrgAddress());
                 return shopInfo;
             }).collect(Collectors.toList());
             result.setShopList(shopInfoList);

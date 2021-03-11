@@ -1,14 +1,18 @@
 package com.aquilaflycloud.mdc.param.pre;
 
+import com.aquilaflycloud.common.AnotherFieldHasValue;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * @Author zly
  */
+@AnotherFieldHasValue.List({
+        @AnotherFieldHasValue(fieldName = "shopId", notNullFieldName = "shopName", message = "门店名称不能为空"),
+        @AnotherFieldHasValue(fieldName = "shopId", notNullFieldName = "shopAddress", message = "门店地址不能为空"),
+})
 @Data
 public class FlashConfirmOrderParam {
 
@@ -21,6 +25,9 @@ public class FlashConfirmOrderParam {
 
     @ApiModelProperty(value = "门店名称")
     private String shopName;
+
+    @ApiModelProperty(value = "门店地址")
+    private String shopAddress;
     /**
      * 买家手机
      */

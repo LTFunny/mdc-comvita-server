@@ -37,12 +37,6 @@ public class PreFlashOrderInfo implements Serializable {
     @ApiModelProperty(value = "会员id")
     private Long memberId;
     /**
-     * 门店id
-     */
-    @TableField(value = "shop_id")
-    @ApiModelProperty(value = "门店id")
-    private Long shopId;
-    /**
      * 订单编码
      */
     @TableField(value = "flash_code")
@@ -55,11 +49,23 @@ public class PreFlashOrderInfo implements Serializable {
     @ApiModelProperty(value = "领取人")
     private String buyerName;
     /**
+     * 门店id
+     */
+    @TableField(value = "shop_id")
+    @ApiModelProperty(value = "门店id")
+    private Long shopId;
+    /**
      * 门店名称
      */
     @TableField(value = "shop_name")
-    @ApiModelProperty(value = "参加渠道")
+    @ApiModelProperty(value = "门店名称")
     private String shopName;
+    /**
+     * 门店地址
+     */
+    @TableField(value = "shop_address")
+    @ApiModelProperty(value = "门店地址")
+    private String shopAddress;
 
     /**
      * 导购员id

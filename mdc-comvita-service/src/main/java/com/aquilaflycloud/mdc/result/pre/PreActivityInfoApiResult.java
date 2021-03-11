@@ -29,6 +29,9 @@ public class PreActivityInfoApiResult extends PreActivityInfo {
     @ApiModelProperty(value = "参与活动的门店id")
     private Long shopId;
 
+    @ApiModelProperty(value = "参与活动的门店名称")
+    private String shopName;
+
     @ApiModelProperty(value = "可选门店列表")
     private List<ShopInfo> shopList;
 
@@ -39,5 +42,8 @@ public class PreActivityInfoApiResult extends PreActivityInfo {
 
         @ApiModelProperty(value = "可选门店名称")
         private String shopName;
+
+        @ApiModelProperty(value = "可选门店地址")
+        private String shopAddress;
     }
 }

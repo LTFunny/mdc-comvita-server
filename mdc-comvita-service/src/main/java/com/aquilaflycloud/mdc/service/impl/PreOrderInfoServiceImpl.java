@@ -30,7 +30,6 @@ import com.aquilaflycloud.util.RedisUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sop.servercommon.exception.ServiceException;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -117,6 +116,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preOrderInfo.setGuideName(pUmsUserDetail.getRealName());
         preOrderInfo.setShopId(pUmsUserDetail.getOrgId());
         preOrderInfo.setShopName(pUmsUserDetail.getOrgName());
+        preOrderInfo.setShopAddress(pUmsUserDetail.getOrgAddress());
         int orderInfo = preOrderInfoMapper.insert(preOrderInfo);
         if(orderInfo < 0){
             throw new ServiceException("生成待确认订单失败。");

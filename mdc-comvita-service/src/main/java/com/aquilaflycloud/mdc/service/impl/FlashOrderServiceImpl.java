@@ -68,6 +68,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preFlashOrderInfo.setMemberId(infoResult.getId());
         preFlashOrderInfo.setShopId(param.getShopId());
         preFlashOrderInfo.setShopName(param.getShopName());
+        preFlashOrderInfo.setShopAddress(param.getShopAddress());
         preFlashOrderInfo.setFlashCode(MdcUtil.getTenantIncIdStr("flashCode", "O" + DateTime.now().toString("yyMMdd"), 5));
         preFlashOrderInfo.setBuyerName(infoResult.getRealName());
         preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.TOBEWRITTENOFF);
@@ -91,6 +92,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preOrderInfo.setOrderCode(MdcUtil.getTenantIncIdStr("preOrderCode", "O" + DateTime.now().toString("yyMMdd"), 5));
         preOrderInfo.setShopId(param.getShopId());
         preOrderInfo.setShopName(param.getShopName());
+        preOrderInfo.setShopAddress(param.getShopAddress());
         preOrderInfo.setFlashId(preFlashOrderInfo.getId());
         int orderInfo = preOrderInfoMapper.insert(preOrderInfo);
         if(orderInfo < 0){
