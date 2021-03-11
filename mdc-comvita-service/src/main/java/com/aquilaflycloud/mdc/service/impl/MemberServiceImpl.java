@@ -808,7 +808,6 @@ public class MemberServiceImpl implements MemberService {
         memberInfo.setCountry(userInfo.getCountry());
         memberInfo.setProvince(userInfo.getProvince());
         memberInfo.setCity(userInfo.getCity());
-        memberInfo.setUnionId(userInfo.getUnionId());
         memberInfo.setWxContent(JSONUtil.toJsonStr(userInfo));
         if (sessionKey.getGuideId() == null) {
             memberInfo.setGuideId(param.getGuideId());
