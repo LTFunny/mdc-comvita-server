@@ -762,7 +762,16 @@ public class PreActivityServiceImpl implements PreActivityService {
         if(StrUtil.isNotBlank(param.getShopName()) && CollUtil.isEmpty(activityIds) ){
             return null;
         }
-        List<Long> ids = (List<Long>)CollUtil.union(businessIds,activityIds);
+
+        List<Long> ids = null;
+        if(CollUtil.isNotEmpty(businessIds) && CollUtil.isNotEmpty(activityIds)){
+            ids = (List<Long>)CollUtil.union(businessIds,activityIds);
+        }else if(CollUtil.isNotEmpty(businessIds) && CollUtil.isEmpty(activityIds)){
+            ids.addAll(businessIds);
+        }else if(CollUtil.isEmpty(businessIds) && CollUtil.isNotEmpty(activityIds)){
+            ids.addAll(activityIds);
+        }
+
         ActivityStateEnum state = param.getActivityState();
         DateTime now = DateTime.now();
         Date start_ = param.getCreateTimeStart();
