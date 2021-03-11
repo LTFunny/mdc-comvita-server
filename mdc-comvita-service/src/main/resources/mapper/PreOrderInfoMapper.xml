@@ -1,7 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper">
-
+    <select id="pagePreOder"  parameterType="com.aquilaflycloud.mdc.param.pre.PreOrderPageParam"
+            resultType="com.aquilaflycloud.mdc.result.pre.PreOrderInfoResult">
+        select
+        a.*,
+        b.activity_name activityName
+        from
+        pre_order_info a
+        left join pre_activity_info b on b.id=a.activity_info_id
+        where a.id is not null
+        <if test="param.shopId != null and param.shopId != ''">
+            and a.shop_id= #{param.shopId}
+        </if>
+        <if test="param.shopName != null and param.shopName != ''">
+            and  a.shop_name= #{param.shopName}
+        </if>
+        <if test="param.guideName != null and param.guideName != ''">
+            and guide_name = #{param.guideName}
+        </if>
+        <if test="param.orderState != null and param.orderState != ''">
+            and  b.order_state= #{param.orderState.type}
+        </if>
+        <if test="param.orderCode != null and param.orderCode != ''">
+            and  a.order_code= #{param.orderCode}
+        </if>
+        <if test="param.memberId != null and param.memberId != ''">
+            and order_info.member_id = #{param.memberId}
+        </if>
+        <if test="param.buyerName != null and param.buyerName != ''">
+            and  a.reserve_name= #{param.buyerName}
+        </if>
+        <if test="param.activityName != null and param.activityName != ''">
+            and  b.activity_name= #{param.activityName}
+        </if>
+        <if test="param.createStartTime != null">
+            AND a.create_time <![CDATA[>=]]> #{param.createStartTime}
+        </if>
+        <if test="param.createEndTime != null">
+            AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
+        </if>
+        group by a.id
+        order by  a.create_time desc
+    </select>
 
     <select id="pageOrderReportList"  parameterType="com.aquilaflycloud.mdc.param.pre.ReportFormParam"
             resultType="com.aquilaflycloud.mdc.result.pre.ReportOrderPageResult">

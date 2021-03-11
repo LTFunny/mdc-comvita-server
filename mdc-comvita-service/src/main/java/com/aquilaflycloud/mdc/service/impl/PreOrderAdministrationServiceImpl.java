@@ -12,6 +12,7 @@ import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
+import com.aquilaflycloud.mdc.model.apply.ApplyActivity;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
@@ -71,6 +72,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     @Resource
     private IUserProvider iUserProvider;
     @Resource
+    private PreActivityInfoMapper preActivityInfoMapper;
+    @Resource
     private PrePickingCardMapper prePickingCardMapper;
     @Resource
     private MemberRewardService memberRewardService;
@@ -107,20 +110,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
-    public IPage<PreOrderInfo> pagePreOder(PreOrderPageParam param) {
-        return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
-                .eq(StringUtils.isNotBlank(param.getShopId()), PreOrderInfo::getShopId, param.getShopId())
-                .like(StringUtils.isNotBlank(param.getShopName()), PreOrderInfo::getShopName, param.getShopName())
-                .like(StringUtils.isNotBlank(param.getGuideName()), PreOrderInfo::getGuideName, param.getGuideName())
-                .eq(ObjectUtil.isNotNull(param.getOrderState()), PreOrderInfo::getOrderState, param.getOrderState())
-                .eq(ObjectUtil.isNotNull(param.getActivityType()), PreOrderInfo::getActivityType, param.getActivityType())
-                .like(StringUtils.isNotBlank(param.getOrderCode()), PreOrderInfo::getOrderCode, param.getOrderCode())
-                .eq(param.getMemberId() != null, PreOrderInfo::getMemberId, param.getMemberId())
-                .like(StringUtils.isNotBlank(param.getBuyerName()), PreOrderInfo::getBuyerName, param.getBuyerName())
-                .ge(param.getCreateStartTime() != null, PreOrderInfo::getCreateTime, param.getCreateStartTime())
-                .le(param.getCreateEndTime() != null, PreOrderInfo::getCreateTime, param.getCreateEndTime())
-                .orderByDesc(PreOrderInfo::getCreateTime)
-        );
+    public IPage<PreOrderInfoResult> pagePreOder(PreOrderPageParam param) {
+        return preOrderInfoMapper.pagePreOder(param.page(), param);
     }
 
     @Override
@@ -289,9 +280,12 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .eq(PreOrderGoods::getOrderId, info.getId()));
         List<PreOrderOperateRecord> preOrderOperateRecordlist = preOrderOperateRecordMapper.selectList(Wrappers.<PreOrderOperateRecord>lambdaQuery()
                 .eq(PreOrderOperateRecord::getOrderId, info.getId()));
+        PreActivityInfo preActivityInfo = preActivityInfoMapper.selectById(info.getActivityInfoId());
         AdministrationDetailsResult result = new AdministrationDetailsResult();
         //(value = "订单编码")
         result.setOrderCode(info.getOrderCode());
+        //关联活动
+        result.setActivityName(preActivityInfo.getActivityName());
         //(value = "门店名称")
         result.setShopName(info.getShopName());
         //(value = "导购员名称")
