@@ -175,6 +175,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             }
             List<PreActivityInfoApiResult.ShopInfo> shopInfoList = preActivityQrCodeInfoMapper.selectList(Wrappers.<PreActiveQrCodeInfo>lambdaQuery()
                     .eq(PreActiveQrCodeInfo::getActivityId, result.getId())
+                    .isNotNull(PreActiveQrCodeInfo::getOrgId)
             ).stream().map(qrCodeInfo -> {
                 PreActivityInfoApiResult.ShopInfo shopInfo = new PreActivityInfoApiResult.ShopInfo();
                 shopInfo.setShopId(qrCodeInfo.getOrgId());
