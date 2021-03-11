@@ -385,7 +385,7 @@ public class PreActivityServiceImpl implements PreActivityService {
     @Transactional
     @Override
     public void add(PreActivityAddParam param) {
-        checkNameParam(param.getActivityName());
+        checkNameParam(param.getActivityName(),param.getActivityType());
         checkTimeParam(param.getBeginTime(),param.getEndTime());
 
         PreActivityInfo activityInfo = new PreActivityInfo();
@@ -449,11 +449,14 @@ public class PreActivityServiceImpl implements PreActivityService {
     /**
      * 重名校验
      * 活动名称不允许重复
+     *  不同类型之间可以重复
      * @param activityName
+     * @param activityType 活动类型
      */
-    private void checkNameParam(String activityName) {
+    private void checkNameParam(String activityName, ActivityTypeEnum activityType) {
         PreActivityInfo info =  preActivityInfoMapper.selectOne(Wrappers.<PreActivityInfo>lambdaQuery()
-                .eq(PreActivityInfo::getActivityName,activityName));
+                .eq(PreActivityInfo::getActivityName,activityName)
+                .eq(PreActivityInfo::getActivityType,activityType));
         if(null != info){
             throw new ServiceException("已存在相同名称的活动,名称为:" + info.getActivityName());
         }
