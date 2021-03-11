@@ -386,10 +386,10 @@ public class PreActivityServiceImpl implements PreActivityService {
     @Override
     public void add(PreActivityAddParam param) {
         checkNameParam(param.getActivityName());
-        checkTimeParam(param.getBeginTime(),param.getEndTime());
+        checkTimeParam(param.getBeginTime(), param.getEndTime());
 
         PreActivityInfo activityInfo = new PreActivityInfo();
-        BeanUtil.copyProperties(param, activityInfo,"refGoods");
+        BeanUtil.copyProperties(param, activityInfo, "refGoods");
         activityInfo.setId(MdcUtil.getSnowflakeId());
         activityInfo.setRewardRuleContent(JSONUtil.toJsonStr(param.getRewardRuleList()));
         activityInfo.setRefGoods(JSONUtil.toJsonStr(param.getRefGoods()));
@@ -403,14 +403,14 @@ public class PreActivityServiceImpl implements PreActivityService {
             activityInfo.setActivityState(ActivityStateEnum.FINISHED);
         }
         //设置默认规则 预售活动才有
-        if(ActivityTypeEnum.PRE_SALES == param.getActivityType()){
-            if(null == param.getRefRule()){
+        if (ActivityTypeEnum.PRE_SALES == param.getActivityType()) {
+            if (null == param.getRefRule()) {
                 QueryWrapper<PreRuleInfo> qw = new QueryWrapper<>();
                 qw.eq("is_default", RuleDefaultEnum.DEFAULT.getType());
                 PreRuleInfo info = preRuleInfoMapper.selectOne(qw);
-                if(null != info){
+                if (null != info) {
                     activityInfo.setRefRule(info.getId());
-                }else{
+                } else {
                     log.info("无法找到默认规则,活动设置规则失败!");
                 }
             }
@@ -420,6 +420,12 @@ public class PreActivityServiceImpl implements PreActivityService {
             log.info("新增活动成功");
             folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREACTIVITY, activityInfo.getId(), param.getFolksonomyIds());
             log.info("处理标签成功");
+            if (ActivityTypeEnum.FLASH == param.getActivityType()) {
+                //快闪活动自动生成默认二维码
+                PreActiveQrCodeInfo info = new PreActiveQrCodeInfo();
+                info.setActivityId(activityInfo.getId());
+                createMiniQrcode(info);
+            }
         } else {
             throw new ServiceException("新增活动失败");
         }
@@ -1046,7 +1052,8 @@ public class PreActivityServiceImpl implements PreActivityService {
                         qrCode.setAppId(appId);
                         qrCode.setPagePath(pagePath);
                         File file = wechatMiniService.getWxMaServiceByAppId(qrCode.getAppId())
-                                .getQrcodeService().createQrcode(pagePath + "?id=" + qrCode.getActivityId() + "&orgId=" + qrCode.getOrgId());
+                                .getQrcodeService().createQrcode(pagePath + "?id=" + qrCode.getActivityId() +
+                                        (qrCode.getOrgId() != null ? "&orgId=" + qrCode.getOrgId() : ""));
                         String path = qrCode.getAppId() + "/" + qrCode.getPagePath().replace("/", ".");
                         OssResult ossResult = AliOssUtil.uploadFileReturn(path, StrUtil.appendIfMissing(qrCode.getActivityId() + "_" + DateTime.now().getTime(),
                                 ".png"), new FileInputStream(file), AliOssUtil.MEMBER_STYLE);
