@@ -487,6 +487,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             endTime = activityInfo.getEndTime();
         }
         checkTimeParam(beginTime,endTime);
+        checkNameParam(param.getActivityName(), param.getActivityType());
         BeanUtil.copyProperties(param, activityInfo,"id","activityState","refGoods");
         //时间有更新的话 同步更新状态 但是已下架状态的要先上架
         if(null != activityInfo.getActivityState() && activityInfo.getActivityState() != ActivityStateEnum.CANCELED){
