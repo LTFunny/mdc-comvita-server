@@ -935,7 +935,7 @@ public class PreActivityServiceImpl implements PreActivityService {
      */
     private Map<String, String> getParticipantsCountMap() {
         QueryWrapper<PreOrderInfo> qw = new QueryWrapper<>();
-        qw.select("activity_info_id","count(member_id) as count")
+        qw.select("activity_info_id","count(distinct member_id) as count")
                 .groupBy("activity_info_id");
         List<Map<String, Object>> maps = preOrderInfoMapper.selectMaps(qw);
         //key : activity id value:member count
