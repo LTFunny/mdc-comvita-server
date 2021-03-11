@@ -428,6 +428,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                 //快闪活动自动生成默认二维码
                 PreActiveQrCodeInfo info = new PreActiveQrCodeInfo();
                 info.setActivityId(activityInfo.getId());
+                info.setOrgName("通用");
                 count = preActivityQrCodeInfoMapper.insert(info);
                 if (count <= 0) {
                     throw new ServiceException("保存小程序二维码失败");
