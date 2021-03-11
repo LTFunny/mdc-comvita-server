@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.model.pre;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.aquilaflycloud.mdc.enums.member.SexEnum;
+import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.ChildOrderInfoStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.FailSymbolEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
@@ -34,6 +35,12 @@ public class PreOrderInfo implements Serializable {
     @TableField(value = "flash_id")
     @ApiModelProperty(value = "快闪活动id")
     private Long flashId;
+    /**
+     * 订单账号
+     */
+    @TableField(value = "activity_type")
+    @ApiModelProperty(value = "关联活动")
+    private ActivityTypeEnum activityType;
     /**
      * 订单编码
      */

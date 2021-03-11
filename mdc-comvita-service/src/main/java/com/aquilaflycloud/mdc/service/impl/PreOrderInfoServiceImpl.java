@@ -119,6 +119,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         preOrderInfo.setShopId(pUmsUserDetail.getOrgId());
         preOrderInfo.setShopName(pUmsUserDetail.getOrgName());
         preOrderInfo.setShopAddress(pUmsUserDetail.getOrgAddress());
+        preOrderInfo.setActivityType(ActivityTypeEnum.PRE_SALES);
         int orderInfo = preOrderInfoMapper.insert(preOrderInfo);
         if(orderInfo < 0){
             throw new ServiceException("生成待确认订单失败。");

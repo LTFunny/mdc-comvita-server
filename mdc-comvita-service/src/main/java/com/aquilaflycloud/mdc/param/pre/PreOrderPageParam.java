@@ -1,6 +1,7 @@
 package com.aquilaflycloud.mdc.param.pre;
 
 import com.aquilaflycloud.dataAuth.common.PageParam;
+import com.aquilaflycloud.mdc.enums.pre.ActivityTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.OrderInfoStateEnum;
 import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import io.swagger.annotations.ApiModelProperty;
@@ -35,6 +36,9 @@ public class PreOrderPageParam extends PageParam<PreOrderInfo> {
 
     @ApiModelProperty(value = "订单状态")
     private OrderInfoStateEnum orderState;
+
+    @ApiModelProperty(value = "关联活动-ActivityTypeEnum")
+    private ActivityTypeEnum activityType;
 
     @ApiModelProperty(value = "订单编码")
     private String orderCode;

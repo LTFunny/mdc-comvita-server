@@ -91,6 +91,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preOrderInfo.setShopName(param.getShopName());
         preOrderInfo.setShopAddress(param.getShopAddress());
         preOrderInfo.setFlashId(preFlashOrderInfo.getId());
+        preOrderInfo.setActivityType(ActivityTypeEnum.FLASH);
         int orderInfo = preOrderInfoMapper.insert(preOrderInfo);
         if(orderInfo < 0){
             throw new ServiceException("生成订单失败。");
