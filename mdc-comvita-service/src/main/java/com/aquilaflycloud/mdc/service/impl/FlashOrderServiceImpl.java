@@ -6,7 +6,6 @@ import cn.hutool.core.date.DateUtil;
 import com.alibaba.schedulerx.shade.net.sf.json.JSONArray;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.pre.*;
-import com.aquilaflycloud.mdc.feign.consumer.org.IUserConsumer;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
@@ -38,8 +37,6 @@ public class FlashOrderServiceImpl implements FlashOrderService {
     private PreActivityInfoMapper activityInfoMapper;
     @Resource
     private PreFlashOrderInfoMapper flashOrderInfoMapper;
-    @Resource
-    private IUserConsumer userConsumer;
     @Resource
     private PreGoodsInfoMapper goodsInfoMapper;
     @Resource
@@ -162,14 +159,14 @@ public class FlashOrderServiceImpl implements FlashOrderService {
                 .select(PreFlashOrderInfo::getActivityInfoId)
                 .eq(PreFlashOrderInfo::getMemberId, memberId)
                 .nested(state == FlashOrderInfoStateEnum.TOBEWRITTENOFF,
-                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, state)
+                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, FlashOrderInfoStateEnum.TOBEWRITTENOFF)
                                 .ge(PreFlashOrderInfo::getEndTime, now)
                 )
                 .nested(state == FlashOrderInfoStateEnum.EXPIRED,
-                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, state)
+                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, FlashOrderInfoStateEnum.TOBEWRITTENOFF)
                                 .lt(PreFlashOrderInfo::getEndTime, now)
                 )
-                .eq(state == FlashOrderInfoStateEnum.WRITTENOFF, PreFlashOrderInfo::getFlashOrderState, state)
+                .eq(state == FlashOrderInfoStateEnum.WRITTENOFF, PreFlashOrderInfo::getFlashOrderState, FlashOrderInfoStateEnum.WRITTENOFF)
         ).stream().map(PreFlashOrderInfo::getActivityInfoId).collect(Collectors.toList());
         if (CollUtil.isNotEmpty(activityIds)) {
             return activityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
@@ -211,6 +208,19 @@ public class FlashOrderServiceImpl implements FlashOrderService {
 
     }
 
+    private PreFlashOrderInfo stateHandler(PreFlashOrderInfo flashOrderInfo) {
+        if (flashOrderInfo == null) {
+            throw new ServiceException("记录不存在");
+        }
+        DateTime now = DateTime.now();
+        if (flashOrderInfo.getFlashOrderState() == FlashOrderInfoStateEnum.TOBEWRITTENOFF) {
+            if (flashOrderInfo.getEndTime() != null && now.isAfter(flashOrderInfo.getEndTime())) {
+                flashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.EXPIRED);
+            }
+        }
+        return flashOrderInfo;
+    }
+
     @Override
     public IPage<PreFlashOrderInfo> pageFlashOrderInfo(FlashPageParam param) {
         DateTime now = DateTime.now();
@@ -218,18 +228,18 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         return flashOrderInfoMapper.selectPage(param.page(), Wrappers.<PreFlashOrderInfo>lambdaQuery()
                 .eq(PreFlashOrderInfo::getActivityInfoId, param.getId())
                 .nested(state == FlashOrderInfoStateEnum.TOBEWRITTENOFF,
-                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, state)
+                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, FlashOrderInfoStateEnum.TOBEWRITTENOFF)
                                 .ge(PreFlashOrderInfo::getEndTime, now)
                 )
                 .nested(state == FlashOrderInfoStateEnum.EXPIRED,
-                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, state)
+                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, FlashOrderInfoStateEnum.TOBEWRITTENOFF)
                                 .lt(PreFlashOrderInfo::getEndTime, now)
                 )
-                .eq(state == FlashOrderInfoStateEnum.WRITTENOFF, PreFlashOrderInfo::getFlashOrderState, state)
+                .eq(state == FlashOrderInfoStateEnum.WRITTENOFF, PreFlashOrderInfo::getFlashOrderState, FlashOrderInfoStateEnum.WRITTENOFF)
                 .ge(param.getCreateStartTime() != null, PreFlashOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreFlashOrderInfo::getCreateTime, param.getCreateEndTime())
                 .eq(StringUtils.isNotBlank(param.getShopId()), PreFlashOrderInfo::getShopId, param.getShopId())
                 .orderByDesc(PreFlashOrderInfo::getCreateTime)
-        );
+        ).convert(this::stateHandler);
     }
 }
