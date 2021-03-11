@@ -16,7 +16,7 @@ public interface PreOrderAdministrationService {
 
     PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param);
 
-    IPage<PreOrderInfo> pagePreOder(PreOrderPageParam param);
+    IPage<PreOrderInfoResult> pagePreOder(PreOrderPageParam param);
 
     IPage<PreOrderInfo> pageMobilePreOder(PreOrderPageParam param);
 
