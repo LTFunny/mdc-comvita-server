@@ -103,6 +103,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                         j -> j.and(k -> k.le(PreActivityInfo::getBeginTime, now).ge(PreActivityInfo::getEndTime, now)))
                 .and(state == ActivityStateEnum.FINISHED,
                         j -> j.and(k -> k.le(PreActivityInfo::getEndTime, now)))
+                .orderByDesc(PreActivityInfo::getCreateTime)
         ).convert(info -> {
             info = stateHandler(info);
             PreActivityPageApiResult result = BeanUtil.copyProperties(info, PreActivityPageApiResult.class);
