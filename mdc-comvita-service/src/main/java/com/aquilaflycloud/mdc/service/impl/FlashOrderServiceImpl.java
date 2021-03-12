@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.schedulerx.shade.net.sf.json.JSONArray;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.pre.*;
@@ -270,6 +271,11 @@ public class FlashOrderServiceImpl implements FlashOrderService {
                 .le(param.getCreateEndTime() != null, PreFlashOrderInfo::getCreateTime, param.getCreateEndTime())
                 .eq(StringUtils.isNotBlank(param.getShopId()), PreFlashOrderInfo::getShopId, param.getShopId())
                 .orderByDesc(PreFlashOrderInfo::getCreateTime)
-        ).convert(this::stateHandler);
+        ).convert(this::stateHandler).convert(info -> {
+            if(StrUtil.isBlank(info.getShopName())){
+                info.setShopName("通用");
+            }
+            return info;
+        });
     }
 }
