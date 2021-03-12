@@ -36,7 +36,7 @@
             and  a.reserve_name= #{param.buyerName}
         </if>
         <if test="param.activityName != null and param.activityName != ''">
-            and  b.activity_name= #{param.activityName}
+            and b.activity_name like CONCAT('%',#{param.activityName},'%')
         </if>
         <if test="param.createStartTime != null">
             AND a.create_time <![CDATA[>=]]> #{param.createStartTime}
