@@ -652,6 +652,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         List<Long> orgIdList = preActivityQrCodeInfoMapper.selectList(Wrappers.<PreActiveQrCodeInfo>lambdaQuery()
                 .select(PreActiveQrCodeInfo::getOrgId)
                 .eq(PreActiveQrCodeInfo::getActivityId, param.getId())
+                .isNotNull(PreActiveQrCodeInfo::getOrgId)
         ).stream().map(PreActiveQrCodeInfo::getOrgId).collect(Collectors.toList());
         List<String> duplicateOrg = new ArrayList<>();
         List<PreActiveQrCodeInfo> infoList = new ArrayList<>();
