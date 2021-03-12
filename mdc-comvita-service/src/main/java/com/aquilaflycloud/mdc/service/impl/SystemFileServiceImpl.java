@@ -185,6 +185,12 @@ public class SystemFileServiceImpl implements SystemFileService {
                 page = preActivityService.pageExportFlashActivityPageResultList(flashExportParam);
                 break;
             }
+            case FLASH_ORDER_INFO: {
+                PreOrderPageParam flashExportParam = buildParam(param.getExportParam(), PreOrderPageParam.class);
+                page = preOrderAdministrationService.pagePreOder(flashExportParam);
+                break;
+            }
+
             default:
                 throw new ServiceException("导出类型有误" + param.getExportType());
         }

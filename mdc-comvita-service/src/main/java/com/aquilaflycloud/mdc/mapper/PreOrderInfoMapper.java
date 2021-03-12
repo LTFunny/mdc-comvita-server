@@ -11,7 +11,6 @@ import org.apache.ibatis.annotations.Param;
 
 public interface PreOrderInfoMapper extends AfcBaseMapper<PreOrderInfo> {
 
-
     @InterceptorIgnore(tenantLine = "true")
     IPage<PreOrderInfoResult> pagePreOder(IPage page, @Param("param")PreOrderPageParam param);
 

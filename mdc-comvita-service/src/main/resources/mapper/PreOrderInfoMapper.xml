@@ -13,6 +13,10 @@
         <if test="param.shopId != null and param.shopId != ''">
             and a.shop_id= #{param.shopId}
         </if>
+        <if test="param.activityType != null and param.activityType != ''">
+            and a.activity_type= #{param.activityType}
+            and a.express_order is null
+        </if>
         <if test="param.shopName != null and param.shopName != ''">
             and  a.shop_name= #{param.shopName}
         </if>

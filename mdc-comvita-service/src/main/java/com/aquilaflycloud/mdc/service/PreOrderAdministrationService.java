@@ -13,7 +13,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
  * @Author zly
  */
 public interface PreOrderAdministrationService {
-
     PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param);
 
     IPage<PreOrderInfoResult> pagePreOder(PreOrderPageParam param);
@@ -23,6 +22,8 @@ public interface PreOrderAdministrationService {
     IPage<PreRefundOrderInfo>pageOrderInfoList (PreRefundOrderListParam param);
 
    void inputOrderNumber(InputOrderNumberParam param);
+
+   void inputFlashOrderNumber(InputOrderNumberParam param);
 
     AdministrationDetailsResult getOrderDetails(OrderDetailsParam param);
 

@@ -80,6 +80,11 @@ public class PreOrderInfoController {
     public IPage<PreOrderInfoResult> pagePreOder(PreOrderPageParam param) {
         return preOrderAdministrationService.pagePreOder(param);
     }
+    @ApiOperation(value = "录入普通订单快递单号", notes = "录入普通订单快递单号")
+    @ApiMapping(value = "backend.comvita.input.flash.order.number", method = RequestMethod.POST, permission = true)
+    public void inputFlashOrderNumber (InputOrderNumberParam param) {
+        preOrderAdministrationService.inputFlashOrderNumber(param);
+    }
     @ApiOperation(value = "移动端订单列表", notes = "移动端订单列表")
     @ApiMapping(value = "backend.comvita.administration.mobile.page", method = RequestMethod.POST, permission = true)
     public IPage<PreOrderInfo> pageMobilePreOder(PreOrderPageParam param) {

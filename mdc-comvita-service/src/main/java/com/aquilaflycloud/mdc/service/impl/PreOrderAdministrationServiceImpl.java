@@ -108,7 +108,6 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     CopyOptions.create().ignoreError());
         }).collect(Collectors.toList()).get(0);
     }
-
     @Override
     public IPage<PreOrderInfoResult> pagePreOder(PreOrderPageParam param) {
         return preOrderInfoMapper.pagePreOder(param.page(), param);
@@ -174,66 +173,138 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             throw new ServiceException("商品不存在");
         }
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(info.getOrderId());
-        boolean allGoodsSend = false;
-        if (GoodsTypeEnum.GIFTS.equals(info.getGoodsType())) { //填赠品的时候是否所有商品都发货了
-            List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                    .eq(PreOrderGoods::getOrderId, info.getOrderId())
-                    .notIn(PreOrderGoods::getId, info.getId())
-                    .notIn(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
-                    .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
-            );
-            if (list.size() > 0) {
-                throw new ServiceException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
-            }
-            preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
-            preOrderInfo.setDeliveryTime(new DateTime());
-            //当赠品录入快递时,反填快递信息给订单
-            preOrderInfo.setExpressOrder(param.getExpressOrder());
-            preOrderInfo.setExpressName(param.getExpressName());
-            preOrderInfo.setExpressCode(param.getExpressCode());
-            preOrderInfoMapper.updateById(preOrderInfo);
-        } else {//不是赠品。判断是否有
-            //查询是否有赠品
-            List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                    .eq(PreOrderGoods::getOrderId, info.getOrderId())
-                    .ne(PreOrderGoods::getId, info.getId())
-                    .eq(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
-            );
-            List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
-                    .eq(PreOrderGoods::getOrderId, info.getOrderId())
-                    .ne(PreOrderGoods::getId, info.getId())
-                    .ne(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
-                    .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
-            );
-            if (CollUtil.isEmpty(list2)) {
-                allGoodsSend = true;
-            }
-            if (CollUtil.isEmpty(list)) {//没有赠品，查询是否这是最后一个商品，是的话填写订单表商品状态和发货时间
-                if (allGoodsSend) {//是空则商品都发完了，更新订单表
-                    preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+            if(preOrderInfo.getFlashId()==null){
+                boolean allGoodsSend = false;
+                if (GoodsTypeEnum.GIFTS.equals(info.getGoodsType())) { //填赠品的时候是否所有商品都发货了
+                    List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                            .eq(PreOrderGoods::getOrderId, info.getOrderId())
+                            .notIn(PreOrderGoods::getId, info.getId())
+                            .notIn(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
+                            .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
+                    );
+                    if (list.size() > 0) {
+                        throw new ServiceException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
+                    }
+                    preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
                     preOrderInfo.setDeliveryTime(new DateTime());
-                    MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
-                    Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
-                    if (CollUtil.isNotEmpty(map) && map.get(RewardTypeEnum.SCORE) != null) {
-                        preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
-                    }
+                    //当赠品录入快递时,反填快递信息给订单
+                    preOrderInfo.setExpressOrder(param.getExpressOrder());
+                    preOrderInfo.setExpressName(param.getExpressName());
+                    preOrderInfo.setExpressCode(param.getExpressCode());
                     preOrderInfoMapper.updateById(preOrderInfo);
-                }
-            } else {//待发货状态
-                if (allGoodsSend) {
-                    preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
-                    preOrderInfoMapper.updateById(preOrderInfo);
-                    PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
-                    .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
-                    .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
-                    preOrderGoods.setGiftsSymbol(GiftsSymbolEnum.AFTER);
-                    int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
-                    if(orderGoods < 0){
-                        throw new ServiceException("修改赠品标识失败。");
+                } else {//不是赠品。判断是否有
+                    //查询是否有赠品
+                    List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                            .eq(PreOrderGoods::getOrderId, info.getOrderId())
+                            .ne(PreOrderGoods::getId, info.getId())
+                            .eq(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
+                    );
+                    List<PreOrderGoods> list2 = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                            .eq(PreOrderGoods::getOrderId, info.getOrderId())
+                            .ne(PreOrderGoods::getId, info.getId())
+                            .ne(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS)
+                            .in(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE, OrderGoodsStateEnum.PREPARE)
+                    );
+                    if (CollUtil.isEmpty(list2)) {
+                        allGoodsSend = true;
+                    }
+                    if (CollUtil.isEmpty(list)) {//没有赠品，查询是否这是最后一个商品，是的话填写订单表商品状态和发货时间
+                        if (allGoodsSend) {//是空则商品都发完了，更新订单表
+                            preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+                            preOrderInfo.setDeliveryTime(new DateTime());
+                            MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
+                            Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
+                            if (CollUtil.isNotEmpty(map) && map.get(RewardTypeEnum.SCORE) != null) {
+                                preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+                            }
+                            preOrderInfoMapper.updateById(preOrderInfo);
+                        }
+                    } else {//待发货状态
+                        if (allGoodsSend) {
+                            preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
+                            preOrderInfoMapper.updateById(preOrderInfo);
+                            PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+                                    .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
+                                    .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
+                            preOrderGoods.setGiftsSymbol(GiftsSymbolEnum.AFTER);
+                            int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+                            if(orderGoods < 0){
+                                throw new ServiceException("修改赠品标识失败。");
+                            }
+                        }
                     }
                 }
+                info.setExpressName(param.getExpressName());
+                info.setExpressOrderCode(param.getExpressOrder());
+                info.setExpressCode(param.getExpressCode());
+                info.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
+                info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
+                info.setDeliveryTime(new DateTime());
+                preOrderGoodsMapper.updateById(info);
+
+                PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+                        .eq(PrePickingCard::getPickingCode, info.getCardCode())
+                );
+                if (prePickingCard != null) {
+                    prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
+                    prePickingCardMapper.updateById(prePickingCard);
+                }
+            }else{
+                //快闪活动快递单号录入
+                changeFlashState(param,preOrderInfo,info);
+            }
+            //快闪订单核销
+            changeFlashState(info.getOrderId(),info.getExpressOrderCode());
+            //添加操作记录
+            orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getGuideName(), preOrderInfo.getId(), "进行了发货。");
+
+            if (info.getGoodsType() == GoodsTypeEnum.GIFTS) {
+                //赠品发货,发送订单发货微信订阅消息
+                wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
+                                .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERDELIVERY, null,
+                        preOrderInfo.getOrderCode(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress() + "收",
+                        info.getExpressName(), info.getExpressOrderCode(), "商品已发货，请注意查收。");
+            } else {
+                //商品发货,发送商品发货微信订阅消息
+                MemberInfo memberInfo = memberInfoMapper.selectById(info.getReserveId());
+                wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(memberInfo.getWxAppId())
+                                .setOpenId(memberInfo.getOpenId())), MiniMessageTypeEnum.PREORDERGOODSELIVERY, null,
+                        info.getGoodsName(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress() + "收",
+                        info.getExpressName(), info.getExpressOrderCode(), "商品已发货，请注意查收。");
+            }
+
+    }
+
+    @Override
+    @Transactional
+    public void inputFlashOrderNumber(InputOrderNumberParam param) {
+        PreOrderInfo info = preOrderInfoMapper.selectById(param.getId());
+        if (info == null) {
+            throw new ServiceException("输入的主键值有误");
+        }
+        List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId, info.getId())
+        );
+        if(CollUtil.isNotEmpty(list)){
+            for(PreOrderGoods preOrderGoods:list){
+                preOrderGoods.setExpressOrderCode(param.getExpressCode());
+                preOrderGoods.setExpressCode(param.getExpressCode());
+                preOrderGoods.setExpressName(param.getExpressName());
+                preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
+                preOrderGoods.setPickingCardState(PickingCardStateEnum.VERIFICATE);
+                preOrderGoods.setDeliveryTime(new DateTime());
+                preOrderGoodsMapper.updateById(preOrderGoods);
             }
         }
+        info.setExpressCode(param.getExpressCode());
+        info.setExpressOrder(param.getExpressOrder());
+        info.setExpressName(param.getExpressName());
+        info.setOrderState(OrderInfoStateEnum.STAYSIGN);
+        info.setDeliveryTime(new DateTime());
+        preOrderInfoMapper.updateById(info);
+    }
+
+    private void changeFlashState(InputOrderNumberParam param, PreOrderInfo preOrderInfo, PreOrderGoods info){
         info.setExpressName(param.getExpressName());
         info.setExpressOrderCode(param.getExpressOrder());
         info.setExpressCode(param.getExpressCode());
@@ -242,34 +313,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         info.setDeliveryTime(new DateTime());
         preOrderGoodsMapper.updateById(info);
 
-        PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
-                .eq(PrePickingCard::getPickingCode, info.getCardCode())
-        );
-        if (prePickingCard != null) {
-            prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
-            prePickingCardMapper.updateById(prePickingCard);
-        }
-        //快闪订单核销
-        changeFlashState(info.getOrderId(),info.getExpressOrderCode());
-        //添加操作记录
-        orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getGuideName(), preOrderInfo.getId(), "进行了发货。");
-
-        if (info.getGoodsType() == GoodsTypeEnum.GIFTS) {
-            //赠品发货,发送订单发货微信订阅消息
-            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
-                            .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERDELIVERY, null,
-                    preOrderInfo.getOrderCode(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress() + "收",
-                    info.getExpressName(), info.getExpressOrderCode(), "商品已发货，请注意查收。");
-        } else {
-            //商品发货,发送商品发货微信订阅消息
-            MemberInfo memberInfo = memberInfoMapper.selectById(info.getReserveId());
-            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(memberInfo.getWxAppId())
-                            .setOpenId(memberInfo.getOpenId())), MiniMessageTypeEnum.PREORDERGOODSELIVERY, null,
-                    info.getGoodsName(), info.getDeliveryProvince() + info.getDeliveryCity() + info.getDeliveryDistrict() + info.getDeliveryAddress() + "收",
-                    info.getExpressName(), info.getExpressOrderCode(), "商品已发货，请注意查收。");
-        }
     }
-
     @Override
     public AdministrationDetailsResult getOrderDetails(OrderDetailsParam param) {
         PreOrderInfo info = preOrderInfoMapper.selectById(param.getId());

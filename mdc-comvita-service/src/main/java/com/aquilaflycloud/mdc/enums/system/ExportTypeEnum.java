@@ -26,7 +26,8 @@ public enum ExportTypeEnum {
     READY_INFO(16,"统计订单报表"),
     GUIDE_INFO(17,"导购员报表"),
     PRE_ACTIVITY_INFO(18,"预售活动报表"),
-    FLASH_ACTIVITY_INFO(19,"快闪活动报表")
+    FLASH_ACTIVITY_INFO(19,"快闪活动报表"),
+    FLASH_ORDER_INFO(20,"普通订单报表")
     ;
 
     ExportTypeEnum(int type, String name) {

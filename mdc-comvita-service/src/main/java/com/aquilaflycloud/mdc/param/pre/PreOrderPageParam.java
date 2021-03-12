@@ -40,6 +40,9 @@ public class PreOrderPageParam extends PageParam<PreOrderInfo> {
     @ApiModelProperty(value = "关联活动")
     private String activityName;
 
+    @ApiModelProperty(value = "关联类型")
+    private ActivityTypeEnum activityType;
+
     @ApiModelProperty(value = "订单编码")
     private String orderCode;
 
