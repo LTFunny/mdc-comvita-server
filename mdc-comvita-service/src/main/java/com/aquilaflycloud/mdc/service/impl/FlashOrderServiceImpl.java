@@ -159,6 +159,23 @@ public class FlashOrderServiceImpl implements FlashOrderService {
 
     }
 
+    private PreActivityInfo stateHandler(PreActivityInfo info) {
+        if (info == null) {
+            throw new ServiceException("活动不存在");
+        }
+        DateTime now = DateTime.now();
+        if (info.getActivityState() != ActivityStateEnum.CANCELED) {
+            if (now.isAfterOrEquals(info.getBeginTime()) && now.isBeforeOrEquals(info.getEndTime())) {
+                info.setActivityState(ActivityStateEnum.IN_PROGRESS);
+            } else if (now.isBefore(info.getBeginTime())) {
+                info.setActivityState(ActivityStateEnum.NOT_STARTED);
+            } else if (now.isAfter(info.getEndTime())) {
+                info.setActivityState(ActivityStateEnum.FINISHED);
+            }
+        }
+        return info;
+    }
+
     @Override
     public IPage<PreActivityInfo> pageMemberFlash(MemberFlashPageParam param) {
         Long memberId = MdcUtil.getCurrentMemberId();
@@ -183,7 +200,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
                     .last("order by field(id," + ArrayUtil.join(activityIds.toArray(), ",") + ")")
                     .lambda()
                     .in(PreActivityInfo::getId, activityIds)
-            );
+            ).convert(this::stateHandler);
         }
         return param.page();
     }
