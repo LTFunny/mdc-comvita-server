@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.schedulerx.shade.net.sf.json.JSONArray;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.pre.*;
@@ -158,6 +159,23 @@ public class FlashOrderServiceImpl implements FlashOrderService {
 
     }
 
+    private PreActivityInfo stateHandler(PreActivityInfo info) {
+        if (info == null) {
+            throw new ServiceException("活动不存在");
+        }
+        DateTime now = DateTime.now();
+        if (info.getActivityState() != ActivityStateEnum.CANCELED) {
+            if (now.isAfterOrEquals(info.getBeginTime()) && now.isBeforeOrEquals(info.getEndTime())) {
+                info.setActivityState(ActivityStateEnum.IN_PROGRESS);
+            } else if (now.isBefore(info.getBeginTime())) {
+                info.setActivityState(ActivityStateEnum.NOT_STARTED);
+            } else if (now.isAfter(info.getEndTime())) {
+                info.setActivityState(ActivityStateEnum.FINISHED);
+            }
+        }
+        return info;
+    }
+
     @Override
     public IPage<PreActivityInfo> pageMemberFlash(MemberFlashPageParam param) {
         Long memberId = MdcUtil.getCurrentMemberId();
@@ -175,11 +193,14 @@ public class FlashOrderServiceImpl implements FlashOrderService {
                                 .lt(PreFlashOrderInfo::getEndTime, now)
                 )
                 .eq(state == FlashOrderInfoStateEnum.WRITTENOFF, PreFlashOrderInfo::getFlashOrderState, FlashOrderInfoStateEnum.WRITTENOFF)
+                .orderByDesc(PreFlashOrderInfo::getCreateTime)
         ).stream().map(PreFlashOrderInfo::getActivityInfoId).collect(Collectors.toList());
         if (CollUtil.isNotEmpty(activityIds)) {
-            return activityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>lambdaQuery()
+            return activityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>query()
+                    .last("order by field(id," + ArrayUtil.join(activityIds.toArray(), ",") + ")")
+                    .lambda()
                     .in(PreActivityInfo::getId, activityIds)
-            );
+            ).convert(this::stateHandler);
         }
         return param.page();
     }

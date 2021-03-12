@@ -22,8 +22,8 @@ public class PreQrcodeDownloadParam {
     @NotNull(message = "活动名称不能为空")
     private String activityName;
 
-    @ApiModelProperty(value = "门店Id列表", required = true)
-    @NotEmpty(message = "门店Id列表不能为空")
-    private List<Long> orgIdList;
+    @ApiModelProperty(value = "二维码Id列表", required = true)
+    @NotEmpty(message = "二维码Id列表不能为空")
+    private List<Long> qrIdList;
 
 }

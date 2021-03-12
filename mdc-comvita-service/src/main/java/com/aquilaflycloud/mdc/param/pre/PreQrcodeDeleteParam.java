@@ -15,8 +15,8 @@ public class PreQrcodeDeleteParam {
     @NotNull(message = "活动id不能为空")
     private Long id;
 
-    @ApiModelProperty(value = "门店id", required = true)
-    @NotNull(message = "门店id不能为空")
-    private Long orgId;
+    @ApiModelProperty(value = "二维码id", required = true)
+    @NotNull(message = "二维码id不能为空")
+    private Long qrId;
 
 }

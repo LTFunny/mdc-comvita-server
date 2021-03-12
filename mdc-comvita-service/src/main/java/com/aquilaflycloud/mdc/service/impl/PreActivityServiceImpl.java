@@ -639,9 +639,9 @@ public class PreActivityServiceImpl implements PreActivityService {
                 .eq(PreFlashOrderInfo::getActivityInfoId, param.getId())
         );
         statisticsResult.setParticipantsCount(Convert.toLong(participantsCount));
-        if (participantsCount != 0) {
+        if (statisticsResult.getClickUv() != 0) {
             statisticsResult.setConversionRate(NumberUtil.formatPercent(
-                    NumberUtil.div(statisticsResult.getClickUv(), statisticsResult.getParticipantsCount()).doubleValue(), 2));
+                    NumberUtil.div(statisticsResult.getParticipantsCount(), statisticsResult.getClickUv()).doubleValue(), 2));
         }
         return statisticsResult;
     }
@@ -655,6 +655,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         List<Long> orgIdList = preActivityQrCodeInfoMapper.selectList(Wrappers.<PreActiveQrCodeInfo>lambdaQuery()
                 .select(PreActiveQrCodeInfo::getOrgId)
                 .eq(PreActiveQrCodeInfo::getActivityId, param.getId())
+                .isNotNull(PreActiveQrCodeInfo::getOrgId)
         ).stream().map(PreActiveQrCodeInfo::getOrgId).collect(Collectors.toList());
         List<String> duplicateOrg = new ArrayList<>();
         List<PreActiveQrCodeInfo> infoList = new ArrayList<>();
@@ -689,20 +690,20 @@ public class PreActivityServiceImpl implements PreActivityService {
         if(param.getId()==null) {
             throw new ServiceException("活动主键id为空!" );
         }
-        if(param.getOrgId()==null) {
-            throw new ServiceException("门店id为空!" );
+        if(param.getQrId()==null) {
+            throw new ServiceException("二维码id为空!" );
         }
         preActivityQrCodeInfoMapper.delete(new QueryWrapper<PreActiveQrCodeInfo>()
                 .eq("activity_id", param.getId())
-                .eq("org_id", param.getOrgId()));
+                .eq("id", param.getQrId()));
     }
 
     private int incrementalCount = 0;
 
     @Override
     public BaseResult<String> downloadQrcode(PreQrcodeDownloadParam param) {
-        if (CollUtil.isEmpty(param.getOrgIdList())) {
-            throw new ServiceException("门店id列表为空");
+        if (CollUtil.isEmpty(param.getQrIdList())) {
+            throw new ServiceException("二维码id列表为空");
         }
         if(param.getActivityName()==null) {
             throw new ServiceException("活动名称为空!" );
@@ -710,7 +711,7 @@ public class PreActivityServiceImpl implements PreActivityService {
 
         List<PreActiveQrCodeInfo> qrCodeList = preActivityQrCodeInfoMapper.selectList(Wrappers.<PreActiveQrCodeInfo>lambdaQuery()
                 .eq(PreActiveQrCodeInfo::getActivityId, param.getActivityId())
-                .in(PreActiveQrCodeInfo::getOrgId, param.getOrgIdList())
+                .in(PreActiveQrCodeInfo::getId, param.getQrIdList())
         );
         List<InputStream> isList = new ArrayList<>();
         List<String> pathList = new ArrayList<>();
@@ -746,6 +747,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                 qrCodeResult.setActivityId(f.getActivityId());
                 qrCodeResult.setOrgId(f.getOrgId());
                 qrCodeResult.setOrgName(f.getOrgName());
+                qrCodeResult.setQrId(f.getId());
                 result.add(qrCodeResult);
             });
         }

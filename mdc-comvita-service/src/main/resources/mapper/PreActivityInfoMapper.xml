@@ -30,7 +30,11 @@
         SELECT o.activity_info_id, o.member_id, o.shop_id,o.shop_name,o.shop_address,
             m.id as memberId,m.real_name,m.sex,m.birthday,
             m.province,m.city,m.county,m.address
-        FROM `pre_order_info` o
+        FROM (
+	        SELECT distinct o.activity_info_id, o.member_id, o.shop_id,o.shop_name,o.shop_address
+	        FROM `pre_order_info` o
+	        WHERE activity_info_id is not null AND shop_id is not null
+        ) o
         LEFT JOIN `member_info` m
         ON o.member_id = m.id
     </select>
