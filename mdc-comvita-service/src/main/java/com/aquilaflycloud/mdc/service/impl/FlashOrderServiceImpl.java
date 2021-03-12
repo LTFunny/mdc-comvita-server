@@ -93,6 +93,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preOrderInfo.setShopAddress(param.getShopAddress());
         preOrderInfo.setFlashId(preFlashOrderInfo.getId());
         preOrderInfo.setActivityType(ActivityTypeEnum.FLASH);
+        preOrderInfo.setActivityInfoId(preActivityInfo.getId());
         preOrderInfo.setBuyerAddress(param.getBuyerAddress());
         preOrderInfo.setBuyerProvince(param.getBuyerProvince());
         preOrderInfo.setBuyerCity(param.getBuyerCity());
