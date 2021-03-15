@@ -30,7 +30,7 @@
             and  a.order_code= #{param.orderCode}
         </if>
         <if test="param.memberId != null and param.memberId != ''">
-            and order_info.member_id = #{param.memberId}
+            and a.member_id = #{param.memberId}
         </if>
         <if test="param.buyerName != null and param.buyerName != ''">
             and  a.reserve_name= #{param.buyerName}
@@ -141,7 +141,7 @@
             and order_info.guide_id = #{param.guideId}
         </if>
         <if test="param.memberId != null and param.memberId != ''">
-            and a.member_id = #{param.memberId}
+            and order_info.member_id = #{param.memberId}
         </if>
         <if test="param.orderState != null">
             AND order_info.order_state = #{param.orderState}
