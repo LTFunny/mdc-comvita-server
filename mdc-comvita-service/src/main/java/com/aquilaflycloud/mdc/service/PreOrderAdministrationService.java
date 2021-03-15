@@ -40,4 +40,7 @@ public interface PreOrderAdministrationService {
     IPage<SalePageResult> pageSalePageResultList(AdministrationListParam param);
 
     void importOrderCode(FileUploadParam param);
+
+    void flashImportOrderCode(FileUploadParam param);
+
 }
