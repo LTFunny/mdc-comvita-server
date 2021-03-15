@@ -416,15 +416,15 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     }
 
     @Override
-    public IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageParam param) {
-        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
-        param.setMemberId(infoResult.getId());
-        IPage<PreOrderInfo> page =  preOrderInfoMapper.pageOrderInfoPageResult(param.page(),param);
-        IPage<PreOrderInfoPageResult> pageResultIPage = page.convert(order ->{
-            PreOrderInfoPageResult result  = orderInfo(order);
-            return result;
-        });
-        return pageResultIPage;
+    public IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageApiParam param) {
+        Long memberId = MdcUtil.getRequireCurrentMemberId();
+        return preOrderInfoMapper.selectPage(param.page(), Wrappers.<PreOrderInfo>lambdaQuery()
+                .eq(PreOrderInfo::getMemberId, memberId)
+                .eq(param.getActivityType() != null, PreOrderInfo::getActivityType, param.getActivityType())
+                .eq(param.getOrderState() != null, PreOrderInfo::getOrderState, param.getOrderState())
+                .exists(param.getAfter() == 1, "select id from pre_refund_order_info where pre_order_info.id = pre_refund_order_info.order_id")
+                .orderByDesc(PreOrderInfo::getCreateTime)
+        ).convert(this::orderInfo);
     }
 
     @Override

@@ -4,7 +4,6 @@ import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsGetResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderInfoPageResult;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @Author pengyongliang
@@ -43,7 +42,7 @@ public interface PreOrderInfoService{
      * @param param
      * @return
      */
-    IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageParam param);
+    IPage<PreOrderInfoPageResult> orderInfoPage(PreOrderInfoPageApiParam param);
 
     /**
      * 退货列表

@@ -33,7 +33,7 @@ public class PreOrderInfoApi {
 
     @ApiOperation(value = "我的订单列表", notes = "我的订单列表")
     @ApiMapping(value = "comvita.order.info.my.list", method = RequestMethod.POST)
-    public IPage<PreOrderInfoPageResult> addStatConfirmOrder(PreOrderInfoPageParam param) {
+    public IPage<PreOrderInfoPageResult> addStatConfirmOrder(PreOrderInfoPageApiParam param) {
         return orderInfoService.orderInfoPage(param);
     }
 
