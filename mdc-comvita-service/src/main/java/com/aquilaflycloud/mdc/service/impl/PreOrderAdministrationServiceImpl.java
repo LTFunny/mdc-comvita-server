@@ -578,6 +578,116 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             throw new ServiceException("请检查导入的数据是否有效");
         }
     }
+
+    @Override
+    public void flashImportOrderCode(FileUploadParam param) {
+        //读导入文件的数据到集合
+        MultipartFile file = param.getFile();
+        String fileName = file.getOriginalFilename();
+        InputStream inputStream = null;
+        try {
+            inputStream = file.getInputStream();
+        } catch (IOException e) {
+            throw new ServiceException("获取表格数据失败，请重试");
+        }
+        List<Map<String, String>> dataMap = PoiUtil.readExcel(inputStream, fileName, 0, 0, 0);
+
+        if (null == dataMap || dataMap.size() == 0) {
+            throw new ServiceException("表格数据为空，请导入数据");
+        }
+
+        //反射查询物流编号和物流单号
+        Map<String, String> fieldMap = new HashMap<>();
+        Field[] fields = ReflectUtil.getFields(PreOrderGoods.class);
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            ApiModelProperty annotation = field.getAnnotation(ApiModelProperty.class);
+            if ("expressCode".equals(field.getName())) {
+                fieldMap.put("expressCode", annotation.value());
+            } else if ("expressOrderCode".equals(field.getName())) {
+                fieldMap.put("expressOrderCode", annotation.value());
+            } else if ("id".equals(field.getName())) {
+                fieldMap.put("id", annotation.value());
+            } else if ("expressName".equals(field.getName())) {
+                fieldMap.put("expressName", annotation.value());
+            }
+        }
+        //确保导入字段名称
+        if (fieldMap.size() != 4) {
+            throw new ServiceException("导入失败");
+        }
+
+        //判断数据是否合法
+        List<Long> ids = new ArrayList<>();
+        Map<Long, Map<String, String>> importMap = new HashMap<>();
+        for (int i = 0; i < dataMap.size(); i++) {
+            Map<String, String> item = dataMap.get(i);
+            //关键字段判空
+            String expressCodeName = fieldMap.get("expressCode");
+            String expressOrderCodeName = fieldMap.get("expressOrderCode");
+            String expressName = fieldMap.get("expressName");
+            String idName = fieldMap.get("id");
+
+            Long id = Long.valueOf(item.get(idName));
+            boolean expressCodeSign = StrUtil.isBlank(item.get(expressCodeName));
+            boolean expressOrderCodeSign = StrUtil.isBlank(item.get(expressOrderCodeName));
+            boolean expressNameSign = StrUtil.isBlank(item.get(expressName));
+            boolean idSign = ObjectUtil.isNull(id);
+
+            //物流相关字段都为空，则跳过这条记录
+            if (expressCodeSign && expressOrderCodeSign && expressNameSign) {
+                continue;
+            }
+
+            if (expressCodeSign) {
+                throw new ServiceException("物流信息需填写完整：" + expressCodeName + "不能为空");
+            } else if (expressOrderCodeSign) {
+                throw new ServiceException("物流信息需填写完整：" + expressOrderCodeName + "不能为空");
+            } else if (idSign) {
+                throw new ServiceException("id不能为空，请重新导出数据进行信息填写后再导入");
+            } else if (expressNameSign) {
+                throw new ServiceException("物流信息需填写完整：" + expressName + "物流名称不能为空");
+            }
+
+            ids.add(id);
+            importMap.put(id, item);
+        }
+
+        if (null != ids && ids.size() > 0) {
+            //判断导入的id数和查询数据库的id数是否相同，根据商品类型排序，先发货预售商品，再发货赠品
+            List<PreOrderInfo> infoList = preOrderInfoMapper.selectList(Wrappers.<PreOrderInfo>lambdaQuery()
+                    .in(PreOrderInfo::getId, ids));
+            log.info("物流单号批量导入开始");
+            //待发货，更新状态和发送发货信息给c端用户
+            if (null != infoList && infoList.size() > 0) {
+                for (int i = 0; i < infoList.size(); i++) {
+                    PreOrderInfo item = infoList.get(i);
+                    Map<String, String> itemDataMap = importMap.get(item.getId());
+
+                    if (null == itemDataMap || itemDataMap.size() == 0) {
+                        throw new ServiceException("表格的数据有误，请检查再重试");
+                    }
+
+                    String expressCode = itemDataMap.get(fieldMap.get("expressCode"));
+                    String expressOrderCode = itemDataMap.get(fieldMap.get("expressOrderCode"));
+                    String id = itemDataMap.get(fieldMap.get("id"));
+                    String expressName = itemDataMap.get(fieldMap.get("expressName"));
+
+                    InputOrderNumberParam inputOrderNumberParam = new InputOrderNumberParam();
+                    inputOrderNumberParam.setId(id);
+                    inputOrderNumberParam.setExpressCode(expressCode);
+                    inputOrderNumberParam.setExpressOrder(expressOrderCode);
+                    inputOrderNumberParam.setExpressName(expressName);
+
+                    log.info("待发货订单物流单号更新信息：{id=" + id + ", expressCode=" + expressCode + ", expressOrderCode" + expressOrderCode + ", expressName" + expressName + "}");
+                    this.inputFlashOrderNumber(inputOrderNumberParam);
+                }
+            }
+        } else {
+            throw new ServiceException("请检查导入的数据是否有效");
+        }
+    }
+
     //根据订单id查询订单表
     private void changeFlashState(Long id,String code){
         PreOrderInfo preOrderInfo=preOrderInfoMapper.selectById(id);

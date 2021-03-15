@@ -37,6 +37,7 @@ import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.param.system.*;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsReportPageResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsResult;
+import com.aquilaflycloud.mdc.result.pre.PreOrderInfoResult;
 import com.aquilaflycloud.mdc.result.system.SqlResult;
 import com.aquilaflycloud.mdc.service.*;
 import com.aquilaflycloud.mdc.util.MdcUtil;
@@ -188,7 +189,18 @@ public class SystemFileServiceImpl implements SystemFileService {
             }
             case FLASH_ORDER_INFO: {
                 PreOrderPageParam flashExportParam = buildParam(param.getExportParam(), PreOrderPageParam.class);
-                page = preOrderAdministrationService.pagePreOder(flashExportParam);
+                IPage<PreOrderInfoResult> orderGoodsIPage = preOrderAdministrationService.pagePreOder(flashExportParam);
+                List<PreOrderGoodsReportPageResult> list=new ArrayList<>();
+                if(CollUtil.isNotEmpty(orderGoodsIPage.getRecords())){
+                    for(PreOrderInfoResult goods:orderGoodsIPage.getRecords()){
+                        PreOrderGoodsReportPageResult preOrderGoodsReportPageResult=new PreOrderGoodsReportPageResult();
+                        BeanUtils.copyProperties(goods, preOrderGoodsReportPageResult);
+                        preOrderGoodsReportPageResult.setDeliveryAddress(goods.getBuyerProvince()+goods.getBuyerCity()+goods.getBuyerDistrict()+goods.getBuyerAddress());
+                        list.add(preOrderGoodsReportPageResult);
+                    }
+                }
+                page = new Page(flashExportParam.getPageNum(), flashExportParam.getPageSize(), orderGoodsIPage.getTotal());
+                page.setRecords(list);
                 break;
             }
 
@@ -219,6 +231,7 @@ public class SystemFileServiceImpl implements SystemFileService {
             }*/
             case READY_GOODS: {
                 aliasMap = new HashMap<>();
+                aliasMap.put("id", "订单id");
                 aliasMap.put("orderCode", "订单编号");
                 aliasMap.put("goodsCode", "商品编号");
                 aliasMap.put("goodsName", "商品名称");
@@ -230,6 +243,7 @@ public class SystemFileServiceImpl implements SystemFileService {
                 aliasMap.put("reserveStartTime", "提交预约时间");
                 aliasMap.put("expressCode", "快递编码");
                 aliasMap.put("expressOrderCode", "快递单号");
+                aliasMap.put("expressName", "快递名称");
                 break;
             }
             default:
