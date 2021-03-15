@@ -20,6 +20,9 @@ public class PreFlashReportPageResult {
     @ApiModelProperty(value = "会员Id")
     private Long memberId;
 
+    @ApiModelProperty(value = "门店Id")
+    private Long orgId;
+
     @ApiModelProperty(value = "活动名称")
     private String activityName;
 

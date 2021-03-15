@@ -839,15 +839,157 @@ public class PreActivityServiceImpl implements PreActivityService {
             for (PreFlashReportPageResult result : resultList) {
                 activityId2Result.put(Convert.toStr(result.getActivityId()), result);
             }
+            //2，补充活动关联的门店
+            List<PreFlashReportPageResult> resultList2 = fillShopInfo(resultList);
+            if(CollUtil.isEmpty(resultList2)){
+                resultList2 = resultList;
+            }
             //2，补充是否曾经购买属性
             Map<String,String> map = getEverBought();
             //3，补充会员以及门店等信息
-            List<PreFlashReportPageResult> result2 = getShopAndMember(activityId2Result,map);
-            if(CollUtil.isNotEmpty(result2)){
-                resultIPage.setRecords(result2);
+            List<PreFlashReportPageResult> resultList3 = fillMemberInfo(resultList2,map);
+            if(CollUtil.isEmpty(resultList3)){
+                resultList3 = resultList2;
+            }
+            if(CollUtil.isNotEmpty(resultList3)){
+                resultIPage.setRecords(resultList3);
             }
         }
         return resultIPage;
+    }
+
+    /**
+     * 补充关联的会员信息
+     * @param paramList
+     * @param memberId2isEvenBought
+     * @return
+     */
+    private List<PreFlashReportPageResult> fillMemberInfo(List<PreFlashReportPageResult> paramList, Map<String, String> memberId2isEvenBought) {
+        Map<String,PreFlashReportPageResult> preMap = new HashMap<>();
+        List<String> allKey = new ArrayList<>();
+        for(PreFlashReportPageResult result : paramList){
+            String key = Convert.toStr(result.getActivityId());
+            if(null != result.getOrgId()){
+                key = key + Convert.toStr(result.getOrgId());
+            }
+            if(StrUtil.isNotBlank(result.getOrgName())){
+                key = key + result.getOrgName();
+            }
+            allKey.add(key);
+            preMap.put(key,result);
+        }
+        Set<String> alreadyResult = new HashSet<>();
+        List<PreFlashReportPageResult> resultList = new ArrayList<>();
+        List<Map<String, Object>> list = preActivityInfoMapper.getMembers();
+        if(CollUtil.isNotEmpty(list)){
+            list.forEach(l -> {
+                Long activity_info_id = (Long) l.get("activity_info_id");
+                Long shop_id = (Long) l.get("shop_id");
+                String shop_name = (String) l.get("shop_name");
+                String mapKey = Convert.toStr(activity_info_id);
+                if(null != shop_id){
+                    mapKey = mapKey + Convert.toStr(shop_id);
+                }
+                if(StrUtil.isNotBlank(shop_name)){
+                    mapKey = mapKey + shop_name;
+                }
+                PreFlashReportPageResult result = preMap.get(mapKey);
+                if(null != result){
+                    alreadyResult.add(mapKey);
+                    PreFlashReportPageResult newResult = new PreFlashReportPageResult();
+                    BeanUtil.copyProperties(result, newResult);
+                    resultList.add(newResult);
+                    //是否曾经购买
+                    Long member_id = (Long) l.get("member_id");
+                    String isEvenBought = memberId2isEvenBought.get(Convert.toStr(member_id));
+                    if(StrUtil.isNotBlank(isEvenBought)){
+                        newResult.setIsEverBought(isEvenBought);
+                    }
+                    //门店信息
+                    String org_name = (String) l.get("shop_name");
+                    newResult.setOrgName(org_name);
+                    String org_address = (String) l.get("shop_address");
+                    newResult.setOrgAddress(org_address);
+                    //会员信息
+                    String real_name = (String) l.get("real_name");
+                    newResult.setParticipantName(real_name);
+                    if(null != l.get("sex")){
+                        int sex = (Integer) l.get("sex");
+                        if(0 == sex){
+                            newResult.setParticipantSex("未知");
+                        }else if(1 == sex){
+                            newResult.setParticipantSex("男");
+                        }else if(2 == sex){
+                            newResult.setParticipantSex("女");
+                        }
+                    }
+                    if(null != l.get("birthday")){
+                        Date birthday = (Date) l.get("birthday");
+                        newResult.setParticipantBirthdate(DateUtil.format(birthday,"yyyy-MM-dd"));
+                    }
+                    StringBuffer sb = new StringBuffer();
+                    if(null !=  l.get("province")){
+                        sb.append((String) l.get("province"));
+                    }
+                    if(null !=  l.get("city")){
+                        sb.append((String) l.get("city"));
+                    }
+                    if(null !=  l.get("county")){
+                        sb.append((String) l.get("county"));
+                    }
+                    if(null !=  l.get("address")){
+                        sb.append((String) l.get("address"));
+                    }
+                    newResult.setParticipantAddress(sb.toString());
+                    Date create_time = (Date) l.get("create_time");
+                    //同一天注册即为新会员
+                    boolean isSameDay = DateUtil.isSameDay(create_time, DateTime.now());
+                    if(isSameDay){
+                        newResult.setIsNewMember("是");
+                    }else{
+                        newResult.setIsNewMember("否");
+                    }
+                }
+            });
+        }
+
+        List<String> disjunction = (List<String>) CollUtil.disjunction(allKey,alreadyResult);
+        if(CollUtil.isNotEmpty(disjunction)){
+            for(String str : disjunction){
+                PreFlashReportPageResult re = preMap.get(str);
+                if(null != re){
+                    resultList.add(re);
+                }
+            }
+        }
+
+        return CollUtil.sortByProperty(resultList,"activityId");
+    }
+
+    /**
+     * 补充门店信息
+     * @param resultList
+     * @return
+     */
+    private List<PreFlashReportPageResult> fillShopInfo(List<PreFlashReportPageResult> resultList) {
+        List<PreFlashReportPageResult> returnList = new ArrayList<>();
+        if (resultList != null) {
+            for(PreFlashReportPageResult result : resultList){
+                List<PreActiveQrCodeInfo> qrCodeInfos = preActivityQrCodeInfoMapper.selectList(Wrappers.<PreActiveQrCodeInfo>lambdaQuery()
+                        .eq(PreActiveQrCodeInfo::getActivityId, result.getActivityId()));
+                if(CollUtil.isNotEmpty(qrCodeInfos)){
+                    for(PreActiveQrCodeInfo qrCodeInfo : qrCodeInfos){
+                        PreFlashReportPageResult preFlashReportPageResult = new PreFlashReportPageResult();
+                        BeanUtil.copyProperties(result, preFlashReportPageResult);
+                        returnList.add(preFlashReportPageResult);
+                        preFlashReportPageResult.setOrgName(qrCodeInfo.getOrgName());
+                        preFlashReportPageResult.setOrgAddress(qrCodeInfo.getOrgAddress());
+                        preFlashReportPageResult.setOrgId(qrCodeInfo.getOrgId());
+                    }
+                }
+            }
+        }
+        return returnList;
     }
 
     @Override

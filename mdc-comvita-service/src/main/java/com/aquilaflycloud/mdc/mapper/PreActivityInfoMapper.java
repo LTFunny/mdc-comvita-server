@@ -20,6 +20,12 @@ public interface PreActivityInfoMapper extends BaseMapper<PreActivityInfo> {
     List<Map<String, Object>> getShopAndMember();
 
     /**
+     * 获取会员
+     * @return
+     */
+    List<Map<String, Object>> getMembers();
+
+    /**
      * 获取预售活动关联门店以及会员的信息
      * @return
      */
