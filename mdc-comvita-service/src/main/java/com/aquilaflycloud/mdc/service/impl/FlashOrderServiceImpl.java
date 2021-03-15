@@ -230,8 +230,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         if(preFlashOrderInfo==null){
             throw new ServiceException("核销码有误");
         }
-        PreActivityInfo activityInfo=preActivityInfoMapper.selectOne(Wrappers.<PreActivityInfo>lambdaQuery()
-                .eq(PreActivityInfo::getId,preFlashOrderInfo.getActivityInfoId()));
+        PreActivityInfo activityInfo=preActivityInfoMapper.selectById(preFlashOrderInfo.getActivityInfoId());
         if(ActivityGettingWayEnum.OFF_LINE.equals(activityInfo.getActivityGettingWay())){
             if(ActivityStateEnum.CANCELED.equals(activityInfo.getActivityState())){
                  throw new ServiceException("该活动已下架");
