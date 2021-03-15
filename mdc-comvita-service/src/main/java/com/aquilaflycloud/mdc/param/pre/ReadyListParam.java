@@ -22,6 +22,9 @@ public class ReadyListParam extends PageParam<PreOrderGoods> {
     @ApiModelProperty(value = "销售门店")
     private String reserveShop;
 
+    @ApiModelProperty(value = "销售门店id")
+    private String reserveShopId;
+
     @ApiModelProperty(value = "导购员名称")
     private String guideName;
 

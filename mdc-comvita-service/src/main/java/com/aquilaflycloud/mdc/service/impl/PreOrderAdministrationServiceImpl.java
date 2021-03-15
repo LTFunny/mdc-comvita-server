@@ -397,6 +397,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
                 .like(StringUtils.isNotBlank(param.getOrderCode()), PreOrderGoods::getOrderCode, param.getOrderCode())
                 .like(StringUtils.isNotBlank(param.getReserveShop()), PreOrderGoods::getReserveShop, param.getReserveShop())
+                .eq(StringUtils.isNotBlank(param.getReserveShopId()), PreOrderGoods::getReserveShopId, param.getReserveShopId())
                 .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
                 .ge(param.getReserveStartTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveStartTime())
