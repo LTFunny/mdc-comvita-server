@@ -33,7 +33,7 @@
             and a.member_id = #{param.memberId}
         </if>
         <if test="param.buyerName != null and param.buyerName != ''">
-            and  a.reserve_name= #{param.buyerName}
+            and  a.buyer_name= #{param.buyerName}
         </if>
         <if test="param.activityName != null and param.activityName != ''">
             and b.activity_name like CONCAT('%',#{param.activityName},'%')
