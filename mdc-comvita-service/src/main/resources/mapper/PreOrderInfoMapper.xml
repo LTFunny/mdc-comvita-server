@@ -30,7 +30,7 @@
             and  a.order_code= #{param.orderCode}
         </if>
         <if test="param.memberId != null and param.memberId != ''">
-            and order_info.member_id = #{param.memberId}
+            and a.member_id = #{param.memberId}
         </if>
         <if test="param.buyerName != null and param.buyerName != ''">
             and  a.reserve_name= #{param.buyerName}
