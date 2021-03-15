@@ -1,9 +1,11 @@
 package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.schedulerx.shade.net.sf.json.JSONArray;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
@@ -68,7 +70,11 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preFlashOrderInfo.setShopId(param.getShopId());
         preFlashOrderInfo.setShopName(param.getShopName());
         preFlashOrderInfo.setShopAddress(param.getShopAddress());
-        preFlashOrderInfo.setFlashCode(MdcUtil.getTenantIncIdStr("flashCode", "O" + DateTime.now().toString("yyMMdd"), 5));
+        String time = Convert.toStr(DateTime.now().getTime());
+        String random = RandomUtil.randomNumbers(4);
+        String memberIdStr = Convert.toStr(infoResult.getId());
+        String verificateCode = StrUtil.subSuf(time, time.length() - 6) + random + StrUtil.subSuf(memberIdStr, memberIdStr.length() - 4);
+        preFlashOrderInfo.setFlashCode(verificateCode);
         preFlashOrderInfo.setBuyerName(infoResult.getRealName());
         preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.TOBEWRITTENOFF);
         preFlashOrderInfo.setBeginTime(preActivityInfo.getBeginTime());
