@@ -35,7 +35,7 @@ public class PreOrderPageParam extends PageParam<PreOrderInfo> {
     private String afterGuideName;
 
     @ApiModelProperty(value = "订单状态")
-    private OrderInfoStateEnum orderState;
+    private String orderState;
 
     @ApiModelProperty(value = "关联活动")
     private String activityName;
