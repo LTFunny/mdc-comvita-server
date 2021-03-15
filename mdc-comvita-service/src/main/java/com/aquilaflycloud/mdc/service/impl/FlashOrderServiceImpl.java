@@ -49,6 +49,8 @@ public class FlashOrderServiceImpl implements FlashOrderService {
     private PreOrderOperateRecordService orderOperateRecordService;
     @Resource
     private PreOrderGoodsMapper preOrderGoodsMapper;
+    @Resource
+    private PreActivityInfoMapper preActivityInfoMapper;
     @Override
     @Transactional
     public void getFlashOrderInfo(FlashConfirmOrderParam param) {
@@ -226,15 +228,25 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         PreFlashOrderInfo preFlashOrderInfo = flashOrderInfoMapper.selectOne(Wrappers.<PreFlashOrderInfo>lambdaQuery()
                 .eq(PreFlashOrderInfo::getFlashCode,param.getFlashCode()));
         if(preFlashOrderInfo==null){
-            throw new ServiceException("核销码有误。");
+            throw new ServiceException("核销码有误");
+        }
+        PreActivityInfo activityInfo=preActivityInfoMapper.selectOne(Wrappers.<PreActivityInfo>lambdaQuery()
+                .eq(PreActivityInfo::getId,preFlashOrderInfo.getActivityInfoId()));
+        if(ActivityGettingWayEnum.OFF_LINE.equals(activityInfo.getActivityGettingWay())){
+            if(ActivityStateEnum.CANCELED.equals(activityInfo.getActivityState())){
+                 throw new ServiceException("该活动已下架");
+            }
+            if(ActivityStateEnum.FINISHED.equals(activityInfo.getActivityState())){
+                throw new ServiceException("该活动已结束");
+             }
         }
         if(FlashOrderInfoStateEnum.WRITTENOFF.equals(preFlashOrderInfo.getFlashOrderState())){
-            throw new ServiceException("该码已核销。");
+            throw new ServiceException("该码已核销");
         }
         preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.WRITTENOFF);
         int orderInfo=flashOrderInfoMapper.updateById(preFlashOrderInfo);
         if(orderInfo < 0){
-            throw new ServiceException("核销失败。");
+            throw new ServiceException("核销失败");
         }
     }
 
