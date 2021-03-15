@@ -740,6 +740,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         List<PreActivityQrCodeResult> result = new ArrayList<>();
         QueryWrapper<PreActiveQrCodeInfo> qw = new QueryWrapper<>();
         qw.eq("activity_id", param.getActivityId());
+        qw.like(param.getShopName() != null,"org_name",param.getShopName());
         List<PreActiveQrCodeInfo> preActiveQrCodeInfos = preActivityQrCodeInfoMapper.selectList(qw);
         if(CollUtil.isNotEmpty(preActiveQrCodeInfos)){
             preActiveQrCodeInfos.forEach(f -> {
@@ -925,7 +926,8 @@ public class PreActivityServiceImpl implements PreActivityService {
                 Long activity_info_id = (Long) l.get("activity_info_id");
                 PreActivityReportPageResult result = activityId2Result.get(Convert.toStr(activity_info_id));
                 if(null != result){
-                    PreActivityReportPageResult newResult = ObjectUtil.cloneIfPossible(result);
+                    PreActivityReportPageResult newResult = new PreActivityReportPageResult();
+                    BeanUtil.copyProperties(result, newResult);
                     resultList.add(newResult);
                     //参加人数
                     String count = activityId2Count.get(Convert.toStr(activity_info_id));
@@ -1002,7 +1004,8 @@ public class PreActivityServiceImpl implements PreActivityService {
                 Long activity_info_id = (Long) l.get("activity_info_id");
                 PreFlashReportPageResult result = activityId2result.get(Convert.toStr(activity_info_id));
                 if(null != result){
-                    PreFlashReportPageResult newResult = ObjectUtil.cloneIfPossible(result);
+                    PreFlashReportPageResult newResult = new PreFlashReportPageResult();
+                    BeanUtil.copyProperties(result, newResult);
                     resultList.add(newResult);
                     //是否曾经购买
                     Long member_id = (Long) l.get("member_id");

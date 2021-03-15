@@ -1,11 +1,9 @@
 package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.schedulerx.shade.net.sf.json.JSONArray;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
@@ -70,11 +68,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preFlashOrderInfo.setShopId(param.getShopId());
         preFlashOrderInfo.setShopName(param.getShopName());
         preFlashOrderInfo.setShopAddress(param.getShopAddress());
-        String time = Convert.toStr(DateTime.now().getTime());
-        String random = RandomUtil.randomNumbers(4);
-        String memberIdStr = Convert.toStr(infoResult.getId());
-        String verificateCode = StrUtil.subSuf(time, time.length() - 6) + random + StrUtil.subSuf(memberIdStr, memberIdStr.length() - 4);
-        preFlashOrderInfo.setFlashCode(verificateCode);
+        preFlashOrderInfo.setFlashCode(MdcUtil.getTenantIncIdStr("flashCode", "O" + DateTime.now().toString("yyMMdd"), 5));
         preFlashOrderInfo.setBuyerName(infoResult.getRealName());
         preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.TOBEWRITTENOFF);
         preFlashOrderInfo.setBeginTime(preActivityInfo.getBeginTime());
@@ -100,6 +94,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preOrderInfo.setShopAddress(param.getShopAddress());
         preOrderInfo.setFlashId(preFlashOrderInfo.getId());
         preOrderInfo.setActivityType(ActivityTypeEnum.FLASH);
+        preOrderInfo.setActivityInfoId(preActivityInfo.getId());
         preOrderInfo.setBuyerAddress(param.getBuyerAddress());
         preOrderInfo.setBuyerProvince(param.getBuyerProvince());
         preOrderInfo.setBuyerCity(param.getBuyerCity());
@@ -276,6 +271,11 @@ public class FlashOrderServiceImpl implements FlashOrderService {
                 .le(param.getCreateEndTime() != null, PreFlashOrderInfo::getCreateTime, param.getCreateEndTime())
                 .eq(StringUtils.isNotBlank(param.getShopId()), PreFlashOrderInfo::getShopId, param.getShopId())
                 .orderByDesc(PreFlashOrderInfo::getCreateTime)
-        ).convert(this::stateHandler);
+        ).convert(this::stateHandler).convert(info -> {
+            if(StrUtil.isBlank(info.getShopName())){
+                info.setShopName("通用");
+            }
+            return info;
+        });
     }
 }
