@@ -219,6 +219,7 @@ public class SystemFileServiceImpl implements SystemFileService {
             }*/
             case READY_GOODS: {
                 aliasMap = new HashMap<>();
+                aliasMap.put("id", "订单id");
                 aliasMap.put("orderCode", "订单编号");
                 aliasMap.put("goodsCode", "商品编号");
                 aliasMap.put("goodsName", "商品名称");
@@ -230,6 +231,7 @@ public class SystemFileServiceImpl implements SystemFileService {
                 aliasMap.put("reserveStartTime", "提交预约时间");
                 aliasMap.put("expressCode", "快递编码");
                 aliasMap.put("expressOrderCode", "快递单号");
+                aliasMap.put("expressName", "快递名称");
                 break;
             }
             default:
