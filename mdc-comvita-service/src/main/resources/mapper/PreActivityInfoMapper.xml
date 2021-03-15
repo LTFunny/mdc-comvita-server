@@ -39,7 +39,32 @@
         ON o.member_id = m.id
     </select>
 
-
-
-
+    <select id="pageMemberOrder" resultType="com.aquilaflycloud.mdc.model.pre.PreActivityInfo">
+        select pre_activity_info.*
+        from pre_flash_order_info pre_flash_order_info
+        join pre_activity_info pre_activity_info on pre_flash_order_info.activity_info_id = pre_activity_info.id
+        where pre_flash_order_info.member_id = ${memberId}
+        <if test="param.flashOrderState != null">
+            <if test="param.flashOrderState.type == 0">
+                and pre_flash_order_info.flash_order_state = 0
+                and pre_flash_order_info.end_time <![CDATA[>=]]> now()
+                and pre_activity_info.activity_state = 2
+                and pre_activity_info.end_time <![CDATA[>=]]> now()
+            </if>
+            <if test="param.flashOrderState.type == 1">
+                and pre_flash_order_info.flash_order_state = 1
+            </if>
+            <if test="param.flashOrderState.type == 2">
+                and (pre_flash_order_info.flash_order_state = 0
+                and (
+                        pre_flash_order_info.end_time <![CDATA[<]]> now()
+                        or pre_activity_info.activity_state = 4
+                        or (pre_activity_info.activity_state = 2
+                            and pre_activity_info.end_time <![CDATA[<]]> now())
+                    )
+                )
+            </if>
+        </if>
+        order by pre_flash_order_info.create_time desc
+    </select>
 </mapper>

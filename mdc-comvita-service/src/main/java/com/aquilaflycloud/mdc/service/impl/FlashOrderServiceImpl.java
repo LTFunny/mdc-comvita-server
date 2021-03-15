@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.schedulerx.shade.net.sf.json.JSONArray;
@@ -29,7 +28,6 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @Author zly
@@ -194,30 +192,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
     @Override
     public IPage<PreActivityInfo> pageMemberFlash(MemberFlashPageParam param) {
         Long memberId = MdcUtil.getCurrentMemberId();
-        DateTime now = DateTime.now();
-        FlashOrderInfoStateEnum state = param.getFlashOrderState();
-        List<Long> activityIds = flashOrderInfoMapper.selectList(Wrappers.<PreFlashOrderInfo>lambdaQuery()
-                .select(PreFlashOrderInfo::getActivityInfoId)
-                .eq(PreFlashOrderInfo::getMemberId, memberId)
-                .nested(state == FlashOrderInfoStateEnum.TOBEWRITTENOFF,
-                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, FlashOrderInfoStateEnum.TOBEWRITTENOFF)
-                                .ge(PreFlashOrderInfo::getEndTime, now)
-                )
-                .nested(state == FlashOrderInfoStateEnum.EXPIRED,
-                        i -> i.eq(PreFlashOrderInfo::getFlashOrderState, FlashOrderInfoStateEnum.TOBEWRITTENOFF)
-                                .lt(PreFlashOrderInfo::getEndTime, now)
-                )
-                .eq(state == FlashOrderInfoStateEnum.WRITTENOFF, PreFlashOrderInfo::getFlashOrderState, FlashOrderInfoStateEnum.WRITTENOFF)
-                .orderByDesc(PreFlashOrderInfo::getCreateTime)
-        ).stream().map(PreFlashOrderInfo::getActivityInfoId).collect(Collectors.toList());
-        if (CollUtil.isNotEmpty(activityIds)) {
-            return activityInfoMapper.selectPage(param.page(), Wrappers.<PreActivityInfo>query()
-                    .last("order by field(id," + ArrayUtil.join(activityIds.toArray(), ",") + ")")
-                    .lambda()
-                    .in(PreActivityInfo::getId, activityIds)
-            ).convert(this::stateHandler);
-        }
-        return param.page();
+        return activityInfoMapper.pageMemberOrder(param.page(), memberId, param);
     }
 
     @Override
