@@ -29,7 +29,7 @@ public interface PreOrderAdministrationService {
 
     AfterSalesDetailsResult getAfterOrderDetails(OrderDetailsParam param);
 
-    IPage<PreOrderGoods> pagereadySalesList(ReadyListParam param);
+    IPage<PreOrderGoodsResult> pagereadySalesList(ReadyListParam param);
 
     IPage<ReportOrderPageResult> pageOrderReportList(ReportFormParam param);
 

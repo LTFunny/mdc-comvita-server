@@ -36,6 +36,7 @@ import com.aquilaflycloud.mdc.param.member.RewardRecordPageParam;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.param.system.*;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsReportPageResult;
+import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsResult;
 import com.aquilaflycloud.mdc.result.system.SqlResult;
 import com.aquilaflycloud.mdc.service.*;
 import com.aquilaflycloud.mdc.util.MdcUtil;
@@ -151,7 +152,7 @@ public class SystemFileServiceImpl implements SystemFileService {
             }
             case READY_GOODS: {
                 ReadyListParam exportParam = buildParam(param.getExportParam(), ReadyListParam.class);
-                IPage<PreOrderGoods> orderGoodsIPage = preOrderAdministrationService.pagereadySalesList(exportParam);
+                IPage<PreOrderGoodsResult> orderGoodsIPage = preOrderAdministrationService.pagereadySalesList(exportParam);
                 List<PreOrderGoodsReportPageResult> list=new ArrayList<>();
                 if(CollUtil.isNotEmpty(orderGoodsIPage.getRecords())){
                    for(PreOrderGoods goods:orderGoodsIPage.getRecords()){

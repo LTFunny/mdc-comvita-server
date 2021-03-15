@@ -390,21 +390,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
-    public IPage<PreOrderGoods> pagereadySalesList(ReadyListParam param) {
-        return preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
-                .like(StringUtils.isNotBlank(param.getGuideName()), PreOrderGoods::getGuideName, param.getGuideName())
-                .like(StringUtils.isNotBlank(param.getReserveName()), PreOrderGoods::getReserveName, param.getReserveName())
-                .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
-                .like(StringUtils.isNotBlank(param.getOrderCode()), PreOrderGoods::getOrderCode, param.getOrderCode())
-                .like(StringUtils.isNotBlank(param.getReserveShop()), PreOrderGoods::getReserveShop, param.getReserveShop())
-                .eq(StringUtils.isNotBlank(param.getReserveShopId()), PreOrderGoods::getReserveShopId, param.getReserveShopId())
-                .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
-                .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
-                .ge(param.getReserveStartTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveStartTime())
-                .le(param.getReserveEndTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveEndTime())
-                .notIn(PreOrderGoods::getGiftsSymbol,GiftsSymbolEnum.NOTAFTER)
-                .orderByDesc(PreOrderGoods::getCreateTime)
-        );
+    public IPage<PreOrderGoodsResult> pagereadySalesList(ReadyListParam param) {
+        return preOrderInfoMapper.pagereadySalesList(param.page(), param);
     }
 
     @Override

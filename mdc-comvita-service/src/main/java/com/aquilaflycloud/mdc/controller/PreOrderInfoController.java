@@ -123,7 +123,7 @@ public class PreOrderInfoController {
 
     @ApiOperation(value = "待发货订单列表", notes = "待发货订单列表")
     @ApiMapping(value = "backend.comvita.ready.sales.page", method = RequestMethod.POST, permission = true)
-    public IPage<PreOrderGoods> pagereadySalesList(ReadyListParam param) {
+    public IPage<PreOrderGoodsResult> pagereadySalesList(ReadyListParam param) {
         return preOrderAdministrationService.pagereadySalesList(param);
     }
 

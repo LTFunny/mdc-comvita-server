@@ -15,6 +15,9 @@ public interface PreOrderInfoMapper extends AfcBaseMapper<PreOrderInfo> {
     IPage<PreOrderInfoResult> pagePreOder(IPage page, @Param("param")PreOrderPageParam param);
 
     @InterceptorIgnore(tenantLine = "true")
+    IPage<PreOrderGoodsResult> pagereadySalesList(IPage page, @Param("param")ReadyListParam param);
+
+    @InterceptorIgnore(tenantLine = "true")
     IPage<ReportOrderPageResult> pageOrderReportList(IPage page, @Param("param") ReportFormParam param);
 
     @InterceptorIgnore(tenantLine = "true")

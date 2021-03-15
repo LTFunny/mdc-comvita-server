@@ -1,6 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.aquilaflycloud.mdc.mapper.PreOrderInfoMapper">
+    <select id="pagereadySalesList"  parameterType="com.aquilaflycloud.mdc.param.pre.ReadyListParam"
+            resultType="com.aquilaflycloud.mdc.result.pre.PreOrderGoodsResult">
+        select
+        a.*,
+        c.activity_name activityName
+        from
+        pre_order_goods a
+        left join pre_order_info b on b.id=a.order_id
+        left join pre_activity_info c on c.id=b.activity_info_id
+        where
+        a.order_goods_state=2
+        <if test="param.activityName != null and param.activityName != ''">
+            and c.activity_name like CONCAT('%',#{param.activityName},'%')
+        </if>
+        <if test="param.reserveShopId != null and param.reserveShopId != ''">
+            and a.reserve_shop_id= #{param.reserveShopId}
+        </if>
+        <if test="param.reserveName != null and param.reserveName != ''">
+            and  a.reserve_name= #{param.reserveName}
+        </if>
+        <if test="param.guideName != null and param.guideName != ''">
+            and  a.guide_name= #{param.guideName}
+        </if>
+        <if test="param.orderCode != null and param.orderCode != ''">
+            and  a.order_code= #{param.orderCode}
+        </if>
+        <if test="param.createStartTime != null">
+            AND a.create_time <![CDATA[>=]]> #{param.createStartTime}
+        </if>
+        <if test="param.createEndTime != null">
+            AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
+        </if>
+        <if test="param.reserveStartTime != null">
+            AND a.reserve_end_time <![CDATA[>=]]> #{param.reserveStartTime}
+        </if>
+        <if test="param.reserveEndTime != null">
+            AND a.reserve_end_time <![CDATA[<=]]> #{param.reserveEndTime}
+        </if>
+        order by  a.create_time desc
+    </select>
     <select id="pagePreOder"  parameterType="com.aquilaflycloud.mdc.param.pre.PreOrderPageParam"
             resultType="com.aquilaflycloud.mdc.result.pre.PreOrderInfoResult">
         select
