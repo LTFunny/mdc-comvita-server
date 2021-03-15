@@ -740,6 +740,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         List<PreActivityQrCodeResult> result = new ArrayList<>();
         QueryWrapper<PreActiveQrCodeInfo> qw = new QueryWrapper<>();
         qw.eq("activity_id", param.getActivityId());
+        qw.like(param.getShopName() != null,"org_name",param.getShopName());
         List<PreActiveQrCodeInfo> preActiveQrCodeInfos = preActivityQrCodeInfoMapper.selectList(qw);
         if(CollUtil.isNotEmpty(preActiveQrCodeInfos)){
             preActiveQrCodeInfos.forEach(f -> {
