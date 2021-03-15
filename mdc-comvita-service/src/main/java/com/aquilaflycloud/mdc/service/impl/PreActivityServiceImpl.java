@@ -956,11 +956,20 @@ public class PreActivityServiceImpl implements PreActivityService {
                         Date birthday = (Date) l.get("birthday");
                         newResult.setParticipantBirthdate(DateUtil.format(birthday,"yyyy-MM-dd"));
                     }
-                    String province = (String) l.get("province");
-                    String city = (String) l.get("city");
-                    String county = (String) l.get("county");
-                    String address = (String) l.get("address");
-                    newResult.setParticipantAddress(province + city + county + address);
+                    StringBuffer sb = new StringBuffer();
+                    if(null !=  l.get("province")){
+                        sb.append((String) l.get("province"));
+                    }
+                    if(null !=  l.get("city")){
+                        sb.append((String) l.get("city"));
+                    }
+                    if(null !=  l.get("county")){
+                        sb.append((String) l.get("county"));
+                    }
+                    if(null !=  l.get("address")){
+                        sb.append((String) l.get("address"));
+                    }
+                    newResult.setParticipantAddress(sb.toString());
                 }
             });
         }
@@ -1035,11 +1044,20 @@ public class PreActivityServiceImpl implements PreActivityService {
                         Date birthday = (Date) l.get("birthday");
                         newResult.setParticipantBirthdate(DateUtil.format(birthday,"yyyy-MM-dd"));
                     }
-                    String province = (String) l.get("province");
-                    String city = (String) l.get("city");
-                    String county = (String) l.get("county");
-                    String address = (String) l.get("address");
-                    newResult.setParticipantAddress(province + city + county + address);
+                    StringBuffer sb = new StringBuffer();
+                    if(null !=  l.get("province")){
+                        sb.append((String) l.get("province"));
+                    }
+                    if(null !=  l.get("city")){
+                        sb.append((String) l.get("city"));
+                    }
+                    if(null !=  l.get("county")){
+                        sb.append((String) l.get("county"));
+                    }
+                    if(null !=  l.get("address")){
+                        sb.append((String) l.get("address"));
+                    }
+                    newResult.setParticipantAddress(sb.toString());
                     Date create_time = (Date) l.get("create_time");
                     //同一天注册即为新会员
                     boolean isSameDay = DateUtil.isSameDay(create_time, DateTime.now());
