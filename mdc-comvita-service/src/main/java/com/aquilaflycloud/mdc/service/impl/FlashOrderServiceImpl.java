@@ -63,7 +63,14 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         if(preActivityInfo == null){
             throw new ServiceException("活动不存在");
         }
-
+        if(ActivityGettingWayEnum.OFF_LINE.equals(preActivityInfo.getActivityGettingWay())){
+           List<PreFlashOrderInfo>  list = flashOrderInfoMapper.selectList(Wrappers.<PreFlashOrderInfo>lambdaQuery()
+                    .eq(PreFlashOrderInfo::getActivityInfoId,param.getActivityInfoId())
+                    );
+           if(list.size()>=preActivityInfo.getMaxParticipationCount()){
+               throw new ServiceException("该活动参加人数已达上限");
+            }
+        }
         preFlashOrderInfo=new PreFlashOrderInfo();
         preFlashOrderInfo.setActivityInfoId(param.getActivityInfoId());
         preFlashOrderInfo.setMemberId(infoResult.getId());
