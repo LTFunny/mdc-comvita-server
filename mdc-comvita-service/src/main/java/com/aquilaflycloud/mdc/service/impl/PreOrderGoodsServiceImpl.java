@@ -55,10 +55,11 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
     @Override
     public IPage<PreOrderGoods> pagePreOrderGoods(PreOrderGoodsPageParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
-        return preOrderGoodsMapper.selectPage(param.page(),Wrappers.<PreOrderGoods>lambdaQuery()
-        .eq(PreOrderGoods::getReserveId,infoResult.getId())
-        .eq(PreOrderGoods::getOrderGoodsState,param.getOrderGoodsState())
-        .ne(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
+        return preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
+                .isNotNull(PreOrderGoods::getGuideId)
+                .eq(PreOrderGoods::getReserveId, infoResult.getId())
+                .eq(PreOrderGoods::getOrderGoodsState, param.getOrderGoodsState())
+                .ne(PreOrderGoods::getGoodsType, GoodsTypeEnum.GIFTS));
     }
 
     @Override
