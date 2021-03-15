@@ -770,8 +770,14 @@ public class PreActivityServiceImpl implements PreActivityService {
         if(CollUtil.isNotEmpty(businessIds) && CollUtil.isNotEmpty(activityIds)){
             ids = (List<Long>)CollUtil.union(businessIds,activityIds);
         }else if(CollUtil.isNotEmpty(businessIds) && CollUtil.isEmpty(activityIds)){
+            if(null == ids){
+                ids = new ArrayList<>();
+            }
             ids.addAll(businessIds);
         }else if(CollUtil.isEmpty(businessIds) && CollUtil.isNotEmpty(activityIds)){
+            if(null == ids){
+                ids = new ArrayList<>();
+            }
             ids.addAll(activityIds);
         }
 
