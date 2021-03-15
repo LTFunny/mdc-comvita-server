@@ -76,7 +76,7 @@ public class PreOrderInfoController {
     }
 
     @ApiOperation(value = "订单管理列表", notes = "订单管理列表")
-    @ApiMapping(value = "backend.comvita.administration.page", method = RequestMethod.POST, permission = true)
+    @ApiMapping(value = "backend.comvita.administration.page", method = RequestMethod.POST)
     public IPage<PreOrderInfoResult> pagePreOder(PreOrderPageParam param) {
         return preOrderAdministrationService.pagePreOder(param);
     }
