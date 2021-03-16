@@ -139,8 +139,8 @@ public class PreActivityServiceImpl implements PreActivityService {
                 result.setButtonState(ButtonStateEnum.JOIN);
                 if (memberInfo != null) {
                     if (orderInfo == null) {
-                        int orderCount = preOrderInfoMapper.selectCount(Wrappers.<PreOrderInfo>lambdaQuery()
-                                .eq(PreOrderInfo::getActivityInfoId, result.getId())
+                        int orderCount = preFlashOrderInfoMapper.selectCount(Wrappers.<PreFlashOrderInfo>lambdaQuery()
+                                .eq(PreFlashOrderInfo::getActivityInfoId, result.getId())
                         );
                         if (orderCount >= result.getMaxParticipationCount()) {
                             result.setButtonState(ButtonStateEnum.FULL);
@@ -912,7 +912,14 @@ public class PreActivityServiceImpl implements PreActivityService {
                     newResult.setOrgAddress(org_address);
                     //会员信息
                     String real_name = (String) l.get("real_name");
-                    newResult.setParticipantName(real_name);
+                    String nick_name = (String) l.get("nick_name");
+                    if(StrUtil.isNotBlank(real_name)){
+                        newResult.setParticipantName(real_name);
+                    }else{
+                        newResult.setParticipantName(nick_name);
+                    }
+                    String phone_number = (String) l.get("phone_number");
+                    newResult.setParticipantPhoneNum(phone_number);
                     if(null != l.get("sex")){
                         int sex = (Integer) l.get("sex");
                         if(0 == sex){
@@ -986,6 +993,8 @@ public class PreActivityServiceImpl implements PreActivityService {
                         preFlashReportPageResult.setOrgAddress(qrCodeInfo.getOrgAddress());
                         preFlashReportPageResult.setOrgId(qrCodeInfo.getOrgId());
                     }
+                }else{
+                    returnList.add(result);
                 }
             }
         }
@@ -1098,7 +1107,14 @@ public class PreActivityServiceImpl implements PreActivityService {
                     newResult.setOrgAddress(shop_address);
                     //会员信息
                     String real_name = (String) l.get("real_name");
-                    newResult.setParticipantName(real_name);
+                    String nick_name = (String) l.get("nick_name");
+                    if (StrUtil.isNotBlank(real_name)){
+                        newResult.setParticipantName(real_name);
+                    }else{
+                        newResult.setParticipantName(nick_name);
+                    }
+                    String phone_number = (String) l.get("phone_number");
+                    newResult.setParticipantPhoneNum(phone_number);
                     if(null != l.get("sex")){
                         int sex = Convert.toInt(l.get("sex"));
                         if(0 == sex){

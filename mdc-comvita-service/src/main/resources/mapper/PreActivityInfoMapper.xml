@@ -30,7 +30,7 @@
     <select id="getMembers" resultType ="java.util.Map" >
         SELECT o.activity_info_id, o.member_id, o.shop_id,o.shop_name,o.shop_address,
             m.id as memberId,m.real_name,m.sex,m.birthday,
-            m.province,m.city,m.county,m.address,m.create_time
+            m.province,m.city,m.county,m.address,m.create_time,m.phone_number,m.nick_name
             FROM `pre_flash_order_info` o
             LEFT JOIN `member_info` m
             ON o.member_id = m.id
@@ -39,7 +39,7 @@
     <select id="getPreActivityRefShopAndMember" resultType ="java.util.Map" >
         SELECT o.activity_info_id, o.member_id, o.shop_id,o.shop_name,o.shop_address,
             m.id as memberId,m.real_name,m.sex,m.birthday,
-            m.province,m.city,m.county,m.address
+            m.province,m.city,m.county,m.address,m.phone_number,m.nick_name
         FROM (
 	        SELECT distinct o.activity_info_id, o.member_id, o.shop_id,o.shop_name,o.shop_address
 	        FROM `pre_order_info` o
