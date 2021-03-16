@@ -139,8 +139,8 @@ public class PreActivityServiceImpl implements PreActivityService {
                 result.setButtonState(ButtonStateEnum.JOIN);
                 if (memberInfo != null) {
                     if (orderInfo == null) {
-                        int orderCount = preOrderInfoMapper.selectCount(Wrappers.<PreOrderInfo>lambdaQuery()
-                                .eq(PreOrderInfo::getActivityInfoId, result.getId())
+                        int orderCount = preFlashOrderInfoMapper.selectCount(Wrappers.<PreFlashOrderInfo>lambdaQuery()
+                                .eq(PreFlashOrderInfo::getActivityInfoId, result.getId())
                         );
                         if (orderCount >= result.getMaxParticipationCount()) {
                             result.setButtonState(ButtonStateEnum.FULL);
