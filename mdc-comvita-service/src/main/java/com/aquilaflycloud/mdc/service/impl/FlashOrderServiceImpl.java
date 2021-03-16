@@ -194,7 +194,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
     @Override
     public IPage<PreActivityInfo> pageMemberFlash(MemberFlashPageParam param) {
         Long memberId = MdcUtil.getCurrentMemberId();
-        return activityInfoMapper.pageMemberOrder(param.page(), memberId, param);
+        return activityInfoMapper.pageMemberOrder(param.page(), memberId, param).convert(this::stateHandler);
     }
 
     @Override
