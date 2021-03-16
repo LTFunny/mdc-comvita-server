@@ -75,7 +75,11 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preFlashOrderInfo.setActivityInfoId(param.getActivityInfoId());
         preFlashOrderInfo.setMemberId(infoResult.getId());
         preFlashOrderInfo.setShopId(param.getShopId());
-        preFlashOrderInfo.setShopName(param.getShopName());
+        if(StrUtil.isBlank(param.getShopName())){
+            preFlashOrderInfo.setShopName("通用");
+        }else{
+            preFlashOrderInfo.setShopName(param.getShopName());
+        }
         preFlashOrderInfo.setShopAddress(param.getShopAddress());
         String time = Convert.toStr(DateTime.now().getTime());
         String random = RandomUtil.randomNumbers(4);
