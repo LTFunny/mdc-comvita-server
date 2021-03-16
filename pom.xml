@@ -10,7 +10,7 @@
   </parent>
   <groupId>com.aquilaflycloud</groupId>
   <artifactId>mdc-comvita-server</artifactId>
-  <version>1.0.0-RELEASE</version>
+  <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>mdc-comvita-server</name>
   <description>MDC大会员营销系统</description>
