@@ -38,10 +38,10 @@
             AND a.create_time <![CDATA[<=]]> #{param.createEndTime}
         </if>
         <if test="param.reserveStartTime != null">
-            AND a.reserve_end_time <![CDATA[>=]]> #{param.reserveStartTime}
+            AND a.reserve_start_time <![CDATA[>=]]> #{param.reserveStartTime}
         </if>
         <if test="param.reserveEndTime != null">
-            AND a.reserve_end_time <![CDATA[<=]]> #{param.reserveEndTime}
+            AND a.reserve_start_time <![CDATA[<=]]> #{param.reserveEndTime}
         </if>
         order by  a.create_time desc
     </select>
