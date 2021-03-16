@@ -912,7 +912,14 @@ public class PreActivityServiceImpl implements PreActivityService {
                     newResult.setOrgAddress(org_address);
                     //会员信息
                     String real_name = (String) l.get("real_name");
-                    newResult.setParticipantName(real_name);
+                    String nick_name = (String) l.get("nick_name");
+                    if(StrUtil.isNotBlank(real_name)){
+                        newResult.setParticipantName(real_name);
+                    }else{
+                        newResult.setParticipantName(nick_name);
+                    }
+                    String phone_number = (String) l.get("phone_number");
+                    newResult.setParticipantPhoneNum(phone_number);
                     if(null != l.get("sex")){
                         int sex = (Integer) l.get("sex");
                         if(0 == sex){
@@ -1098,7 +1105,14 @@ public class PreActivityServiceImpl implements PreActivityService {
                     newResult.setOrgAddress(shop_address);
                     //会员信息
                     String real_name = (String) l.get("real_name");
-                    newResult.setParticipantName(real_name);
+                    String nick_name = (String) l.get("nick_name");
+                    if (StrUtil.isNotBlank(real_name)){
+                        newResult.setParticipantName(real_name);
+                    }else{
+                        newResult.setParticipantName(nick_name);
+                    }
+                    String phone_number = (String) l.get("phone_number");
+                    newResult.setParticipantPhoneNum(phone_number);
                     if(null != l.get("sex")){
                         int sex = Convert.toInt(l.get("sex"));
                         if(0 == sex){

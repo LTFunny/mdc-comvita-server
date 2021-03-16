@@ -62,6 +62,9 @@ public class PreFlashReportPageResult {
     @ApiModelProperty(value = "参加人生日")
     private String participantBirthdate;
 
+    @ApiModelProperty(value = "参加人手机号码")
+    private String participantPhoneNum;
+
     @ApiModelProperty(value = "地址信息")
     private String participantAddress;
 
