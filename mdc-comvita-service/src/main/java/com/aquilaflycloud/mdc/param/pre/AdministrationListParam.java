@@ -70,4 +70,7 @@ public class AdministrationListParam extends PageParam<PreOrderInfo> {
 
     @ApiModelProperty(value = "售后结束时间")
     private Date afterSalEndTime;
+
+    @ApiModelProperty(value = "关联活动")
+    private String activityName;
 }

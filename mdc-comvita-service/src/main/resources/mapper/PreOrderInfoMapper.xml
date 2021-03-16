@@ -223,9 +223,13 @@
             from
             pre_order_goods a
             left join pre_order_info b on b.id=a.order_id
+            left join pre_activity_info c on c.id=b.activity_info_id
             where a.id is not null
         <if test="param.shopId != null and param.shopId != ''">
             and a.shop_id= #{param.shopId}
+        </if>
+        <if test="param.activityName != null and param.activityName != ''">
+            and c.activity_name like CONCAT('%',#{param.activityName},'%')
         </if>
         <if test="param.guideName != null and param.guideName != ''">
             and  a.guide_name= #{param.guideName}
