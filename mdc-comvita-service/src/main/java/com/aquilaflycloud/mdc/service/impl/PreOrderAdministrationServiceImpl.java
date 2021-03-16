@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
@@ -16,6 +17,7 @@ import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.param.system.FileUploadParam;
+import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
 import com.aquilaflycloud.mdc.result.member.MemberScanRewardResult;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.result.wechat.MiniMemberInfo;
@@ -43,10 +45,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -83,11 +82,24 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     private PreOrderOperateRecordService orderOperateRecordService;
 
     @Override
+    @Transactional
     public void completeButton(PreOrderGetParam param) {
-        PreOrderInfo info = preOrderInfoMapper.selectById(param.getOrderId());
-        if (info == null) {
-            throw new ServiceException("输入的主键值有误");
+        String name= MdcUtil.getCurrentUserName();
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
+        preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+        MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
+        Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord
+                (memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
+        if (CollUtil.isNotEmpty(map) && map.get(RewardTypeEnum.SCORE) != null) {
+            preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
         }
+        int order = preOrderInfoMapper.updateById(preOrderInfo);
+        if (order < 0) {
+            throw new ServiceException("签收订单失败。");
+        }
+        String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
+                + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了订单签收。";
+        orderOperateRecordService.addOrderOperateRecordLog(name,preOrderInfo.getId(),content);
 
     }
 
