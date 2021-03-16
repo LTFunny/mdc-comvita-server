@@ -1050,7 +1050,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             //2，获取活动以及参加人数Map
             Map<String,String> map = getParticipantsCountMap();
             //3，补充会员以及门店等信息
-            List<PreActivityReportPageResult> result1 = getPreActivityRefShopAndMember(activityId2Result,map);
+            List<PreActivityReportPageResult> result1 = getPreActivityRefShopAndMember(resultList,activityId2Result,map);
             if(CollUtil.isNotEmpty(result1)){
                 resultIPage.setRecords(result1);
             }
@@ -1060,13 +1060,21 @@ public class PreActivityServiceImpl implements PreActivityService {
 
     /**
      * 补充预售活动的关联会员以及门店信息
+     *
+     * @param results
      * @param activityId2Result
      * @param activityId2Count
      * @return
      */
     private List<PreActivityReportPageResult> getPreActivityRefShopAndMember(
+            List<PreActivityReportPageResult> results,
             Map<String, PreActivityReportPageResult> activityId2Result,
             Map<String, String> activityId2Count) {
+        //所有查询出来的活动id列表
+        List<String> allKey = new ArrayList<>();
+        results.forEach(r-> allKey.add(Convert.toStr(r.getActivityId())));
+        //已经存在会员以及门店的活动id 即有关联的会员以及门店的活动
+        Set<String> alreadyResult = new HashSet<>();
         List<PreActivityReportPageResult> resultList = new ArrayList<>();
         List<Map<String, Object>> list = preActivityInfoMapper.getPreActivityRefShopAndMember();
         if(CollUtil.isNotEmpty(list)){
@@ -1074,6 +1082,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                 Long activity_info_id = (Long) l.get("activity_info_id");
                 PreActivityReportPageResult result = activityId2Result.get(Convert.toStr(activity_info_id));
                 if(null != result){
+                    alreadyResult.add(Convert.toStr(result.getActivityId()));
                     PreActivityReportPageResult newResult = new PreActivityReportPageResult();
                     BeanUtil.copyProperties(result, newResult);
                     resultList.add(newResult);
@@ -1121,7 +1130,19 @@ public class PreActivityServiceImpl implements PreActivityService {
                 }
             });
         }
-        return resultList;
+        //获取没有关联门店的活动 并写入返回结果
+        List<String> disjunction = (List<String>) CollUtil.disjunction(allKey,alreadyResult);
+        if(CollUtil.isNotEmpty(disjunction)){
+            for(String str : disjunction){
+                PreActivityReportPageResult re = activityId2Result.get(str);
+                if(null != re){
+                    //参加人数为空
+                    re.setParticipantsCount(0L);
+                    resultList.add(re);
+                }
+            }
+        }
+        return CollUtil.sortByProperty(resultList,"activityId");
     }
 
     /**
