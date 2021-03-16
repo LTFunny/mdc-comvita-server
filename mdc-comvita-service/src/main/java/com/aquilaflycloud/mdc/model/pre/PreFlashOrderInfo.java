@@ -48,6 +48,11 @@ public class PreFlashOrderInfo implements Serializable {
     @TableField(value = "buyer_name")
     @ApiModelProperty(value = "领取人")
     private String buyerName;
+
+    @TableField(value = "buyer_phone_number")
+    @ApiModelProperty(value = "领取人手机号码")
+    private String buyerPhoneNum;
+
     /**
      * 门店id
      */
