@@ -86,7 +86,12 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         String memberIdStr = Convert.toStr(infoResult.getId());
         String verificateCode = StrUtil.subSuf(time, time.length() - 6) + random + StrUtil.subSuf(memberIdStr, memberIdStr.length() - 4);
         preFlashOrderInfo.setFlashCode(verificateCode);
-        preFlashOrderInfo.setBuyerName(infoResult.getRealName());
+        if(StrUtil.isNotBlank(infoResult.getRealName())){
+            preFlashOrderInfo.setBuyerName(infoResult.getRealName());
+        }else{
+            preFlashOrderInfo.setBuyerName(infoResult.getNickName());
+        }
+        preFlashOrderInfo.setBuyerPhoneNum(infoResult.getPhoneNumber());
         preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.TOBEWRITTENOFF);
         preFlashOrderInfo.setBeginTime(preActivityInfo.getBeginTime());
         preFlashOrderInfo.setEndTime(preActivityInfo.getEndTime());
