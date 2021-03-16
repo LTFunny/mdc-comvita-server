@@ -516,21 +516,42 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if (order < 0) {
             throw new ServiceException("签收订单失败。");
         }
-        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
-                .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
-                .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
-        if(preOrderGoods != null) {
-            preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
-            int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
-            if (orderGoods < 0) {
-                throw new ServiceException("更改商品明细状态失败。");
+        if(ActivityTypeEnum.PRE_SALES.equals(preOrderInfo.getActivityType())){
+            PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
+                    .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
+            if(preOrderGoods != null) {
+                preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
+                int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+                if (orderGoods < 0) {
+                    throw new ServiceException("更改商品明细状态失败。");
+                }
+                //签收赠品,发送微信订阅消息
+                wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
+                                .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERSIGN, null,
+                        preOrderInfo.getOrderCode(), preOrderGoods.getGoodsName(), preOrderGoods.getExpressName(),
+                        preOrderGoods.getExpressOrderCode(), "商品已签收。感谢您对康维他的支持。");
             }
-            //签收赠品,发送微信订阅消息
-            wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
-                            .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERSIGN, null,
-                    preOrderInfo.getOrderCode(), preOrderGoods.getGoodsName(), preOrderGoods.getExpressName(),
-                    preOrderGoods.getExpressOrderCode(), "商品已签收。感谢您对康维他的支持。");
+        }else{
+            List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                    .eq(PreOrderGoods::getOrderId,preOrderInfo.getId()));
+            if(CollUtil.isNotEmpty(list)) {
+                for(PreOrderGoods preOrderGoods:list ){
+                    preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
+                    int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+                    if (orderGoods < 0) {
+                        throw new ServiceException("更改商品明细状态失败。");
+                    }
+                    //签收赠品,发送微信订阅消息
+                    wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
+                                    .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERSIGN, null,
+                            preOrderInfo.getOrderCode(), preOrderGoods.getGoodsName(), preOrderGoods.getExpressName(),
+                            preOrderGoods.getExpressOrderCode(), "商品已签收。感谢您对康维他的支持。");
+                }
+
+            }
         }
+
         String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了订单签收。";
         orderOperateRecordService.addOrderOperateRecordLog(infoResult.getRealName(),preOrderInfo.getId(),content);
