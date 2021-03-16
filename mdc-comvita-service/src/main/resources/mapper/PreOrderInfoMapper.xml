@@ -12,6 +12,7 @@
         left join pre_activity_info c on c.id=b.activity_info_id
         where
         a.order_goods_state=2
+        and a.gifts_symbol not in 0
         <if test="param.activityType != null and param.activityType != ''">
             and c.activity_type= #{param.activityType}
         </if>

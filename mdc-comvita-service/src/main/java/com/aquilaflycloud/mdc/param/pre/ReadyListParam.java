@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.param.pre;
 import cn.hutool.core.date.DateTime;
 import com.aquilaflycloud.dataAuth.common.PageParam;
 import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
+import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsResult;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,7 +19,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @Data
-public class ReadyListParam extends PageParam<PreOrderGoods> {
+public class ReadyListParam extends PageParam<PreOrderGoodsResult> {
     @ApiModelProperty(value = "销售门店")
     private String reserveShop;
 

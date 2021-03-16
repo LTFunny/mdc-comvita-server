@@ -16,4 +16,7 @@ import lombok.EqualsAndHashCode;
 public class PreOrderGoodsResult extends PreOrderGoods {
     @ApiModelProperty(value = "收件详细地址")
     private String deliveryDetailAddress;
+
+    @ApiModelProperty(value = "活动名称")
+    private String activityName;
 }

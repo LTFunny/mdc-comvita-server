@@ -393,7 +393,11 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
     @Override
     public IPage<PreOrderGoodsResult> pagereadySalesList(ReadyListParam param) {
-        return preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
+        return preOrderInfoMapper.pagereadySalesList(param.page(),param).convert(result -> {
+            result.setDeliveryDetailAddress(result.getDeliveryProvince() + result.getDeliveryCity() + result.getDeliveryDistrict() + result.getDeliveryAddress());
+            return result;
+        });
+        /*return preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
                 .like(StringUtils.isNotBlank(param.getGuideName()), PreOrderGoods::getGuideName, param.getGuideName())
                 .like(StringUtils.isNotBlank(param.getReserveName()), PreOrderGoods::getReserveName, param.getReserveName())
                 .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
@@ -409,7 +413,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             PreOrderGoodsResult result = BeanUtil.copyProperties(orderGoods, PreOrderGoodsResult.class);
             result.setDeliveryDetailAddress(orderGoods.getDeliveryProvince() + orderGoods.getDeliveryCity() + orderGoods.getDeliveryDistrict() + orderGoods.getDeliveryAddress());
             return result;
-        });
+        });*/
     }
 
     @Override
@@ -598,6 +602,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     @Override
+    @Transactional
     public void flashImportOrderCode(FileUploadParam param) {
         //读导入文件的数据到集合
         MultipartFile file = param.getFile();
