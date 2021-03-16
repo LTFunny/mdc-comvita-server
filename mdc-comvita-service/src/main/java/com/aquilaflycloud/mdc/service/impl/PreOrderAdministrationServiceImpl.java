@@ -83,6 +83,15 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     private PreOrderOperateRecordService orderOperateRecordService;
 
     @Override
+    public void completeButton(PreOrderGetParam param) {
+        PreOrderInfo info = preOrderInfoMapper.selectById(param.getOrderId());
+        if (info == null) {
+            throw new ServiceException("输入的主键值有误");
+        }
+
+    }
+
+    @Override
     public PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param) {
         return preOrderInfoMapper.selectMaps(new QueryWrapper<PreOrderInfo>()
                 .select("count(1) orderCount,"
@@ -255,8 +264,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 //快闪活动快递单号录入
                 changeFlashState(param,preOrderInfo,info);
             }
-            //快闪订单核销
-            changeFlashState(info.getOrderId(),info.getExpressOrderCode());
+
             //添加操作记录
             orderOperateRecordService.addOrderOperateRecordLog(preOrderInfo.getGuideName(), preOrderInfo.getId(), "进行了发货。");
 
@@ -304,6 +312,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         info.setOrderState(OrderInfoStateEnum.STAYSIGN);
         info.setDeliveryTime(new DateTime());
         preOrderInfoMapper.updateById(info);
+        //快闪订单核销
+        changeFlashState(info.getId(),info.getExpressOrder());
     }
 
     private void changeFlashState(InputOrderNumberParam param, PreOrderInfo preOrderInfo, PreOrderGoods info){

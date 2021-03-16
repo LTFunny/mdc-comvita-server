@@ -12,6 +12,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
  * @Author zly
  */
 public interface PreOrderAdministrationService {
+    void completeButton(PreOrderGetParam param);
+
     PreOrderStatisticsResult getPreOderStatistics(PreOrderListParam param);
 
     IPage<PreOrderInfoResult> pagePreOder(PreOrderPageParam param);

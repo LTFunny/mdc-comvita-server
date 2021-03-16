@@ -79,6 +79,11 @@ public class PreOrderInfoController {
     public IPage<PreOrderInfoResult> pagePreOder(PreOrderPageParam param) {
         return preOrderAdministrationService.pagePreOder(param);
     }
+    @ApiOperation(value = "线下订单完成按钮", notes = "线下订单完成按钮")
+    @ApiMapping(value = "backend.comvita.complete.button", method = RequestMethod.POST, permission = true)
+    public void completeButton (PreOrderGetParam param) {
+        preOrderAdministrationService.completeButton(param);
+    }
     @ApiOperation(value = "录入普通订单快递单号", notes = "录入普通订单快递单号")
     @ApiMapping(value = "backend.comvita.input.flash.order.number", method = RequestMethod.POST, permission = true)
     public void inputFlashOrderNumber (InputOrderNumberParam param) {
