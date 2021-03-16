@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.aquilaflycloud</groupId>
     <artifactId>mdc-comvita-server</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0-RELEASE</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>mdc-comvita-interface</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0-RELEASE</version>
   <packaging>jar</packaging>
   <name>mdc-comvita-interface</name>
 

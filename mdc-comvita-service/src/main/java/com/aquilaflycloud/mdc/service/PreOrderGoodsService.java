@@ -3,9 +3,7 @@ package com.aquilaflycloud.mdc.service;
 import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.param.pre.PreOrderGoodsPageParam;
 import com.aquilaflycloud.mdc.param.pre.PreReservationOrderGoodsParam;
-import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsPageResult;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @Author pengyongliang

@@ -391,7 +391,23 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
 
     @Override
     public IPage<PreOrderGoodsResult> pagereadySalesList(ReadyListParam param) {
-        return preOrderInfoMapper.pagereadySalesList(param.page(), param);
+        return preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
+                .like(StringUtils.isNotBlank(param.getGuideName()), PreOrderGoods::getGuideName, param.getGuideName())
+                .like(StringUtils.isNotBlank(param.getReserveName()), PreOrderGoods::getReserveName, param.getReserveName())
+                .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
+                .like(StringUtils.isNotBlank(param.getOrderCode()), PreOrderGoods::getOrderCode, param.getOrderCode())
+                .like(StringUtils.isNotBlank(param.getReserveShop()), PreOrderGoods::getReserveShop, param.getReserveShop())
+                .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
+                .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
+                .ge(param.getReserveStartTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveStartTime())
+                .le(param.getReserveEndTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveEndTime())
+                .notIn(PreOrderGoods::getGiftsSymbol, GiftsSymbolEnum.NOTAFTER)
+                .orderByDesc(PreOrderGoods::getCreateTime)
+        ).convert(orderGoods -> {
+            PreOrderGoodsResult result = BeanUtil.copyProperties(orderGoods, PreOrderGoodsResult.class);
+            result.setDeliveryDetailAddress(orderGoods.getDeliveryProvince() + orderGoods.getDeliveryCity() + orderGoods.getDeliveryDistrict() + orderGoods.getDeliveryAddress());
+            return result;
+        });
     }
 
     @Override

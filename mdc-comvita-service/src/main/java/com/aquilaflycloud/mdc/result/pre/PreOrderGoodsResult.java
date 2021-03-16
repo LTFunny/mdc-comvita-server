@@ -1,19 +1,19 @@
 package com.aquilaflycloud.mdc.result.pre;
 
 import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
-import com.aquilaflycloud.mdc.model.pre.PreOrderInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.EqualsAndHashCode;
 
 /**
- * PreOrderInfoResult
- * @author zly
+ * PreOrderGoodsResult
+ *
+ * @author star
+ * @date 2021/3/16
  */
-@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class PreOrderGoodsResult extends PreOrderGoods {
-
-    @ApiModelProperty(value = "活动名称")
-    private String activityName;
+    @ApiModelProperty(value = "收件详细地址")
+    private String deliveryDetailAddress;
 }
