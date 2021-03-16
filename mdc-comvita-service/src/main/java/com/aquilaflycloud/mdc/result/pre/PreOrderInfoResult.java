@@ -5,8 +5,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.List;
-
 /**
  * PreOrderInfoResult
  * @author zly
@@ -14,7 +12,9 @@ import java.util.List;
 @Accessors(chain = true)
 @Data
 public class PreOrderInfoResult extends PreOrderInfo {
-
     @ApiModelProperty(value = "活动名称")
     private String activityName;
+
+    @ApiModelProperty(value = "收件详细地址")
+    private String deliveryDetailAddress;
 }

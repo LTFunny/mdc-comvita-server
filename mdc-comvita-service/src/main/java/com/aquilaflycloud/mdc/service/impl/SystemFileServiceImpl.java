@@ -172,18 +172,7 @@ public class SystemFileServiceImpl implements SystemFileService {
             }
             case FLASH_ORDER_INFO: {
                 PreOrderPageParam flashExportParam = buildParam(param.getExportParam(), PreOrderPageParam.class);
-                IPage<PreOrderInfoResult> orderGoodsIPage = preOrderAdministrationService.pagePreOder(flashExportParam);
-                List<PreOrderGoodsReportPageResult> list=new ArrayList<>();
-                if(CollUtil.isNotEmpty(orderGoodsIPage.getRecords())){
-                    for(PreOrderInfoResult goods:orderGoodsIPage.getRecords()){
-                        PreOrderGoodsReportPageResult preOrderGoodsReportPageResult=new PreOrderGoodsReportPageResult();
-                        BeanUtils.copyProperties(goods, preOrderGoodsReportPageResult);
-                        preOrderGoodsReportPageResult.setDeliveryAddress(goods.getBuyerProvince()+goods.getBuyerCity()+goods.getBuyerDistrict()+goods.getBuyerAddress());
-                        list.add(preOrderGoodsReportPageResult);
-                    }
-                }
-                page = new Page(flashExportParam.getPageNum(), flashExportParam.getPageSize(), orderGoodsIPage.getTotal());
-                page.setRecords(list);
+                page = preOrderAdministrationService.pagePreOder(flashExportParam);
                 break;
             }
 

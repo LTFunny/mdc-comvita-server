@@ -12,7 +12,6 @@ import com.aquilaflycloud.mdc.enums.member.RewardTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.enums.wechat.MiniMessageTypeEnum;
 import com.aquilaflycloud.mdc.mapper.*;
-import com.aquilaflycloud.mdc.model.apply.ApplyActivity;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.pre.*;
@@ -110,7 +109,10 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
     @Override
     public IPage<PreOrderInfoResult> pagePreOder(PreOrderPageParam param) {
-        return preOrderInfoMapper.pagePreOder(param.page(), param);
+        return preOrderInfoMapper.pagePreOder(param.page(), param).convert(result -> {
+            result.setDeliveryDetailAddress(result.getBuyerProvince() + result.getBuyerCity() + result.getBuyerDistrict() + result.getBuyerAddress());
+            return result;
+        });
     }
 
     @Override
