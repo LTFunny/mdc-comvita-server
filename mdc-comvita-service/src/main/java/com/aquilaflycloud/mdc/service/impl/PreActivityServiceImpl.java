@@ -993,6 +993,8 @@ public class PreActivityServiceImpl implements PreActivityService {
                         preFlashReportPageResult.setOrgAddress(qrCodeInfo.getOrgAddress());
                         preFlashReportPageResult.setOrgId(qrCodeInfo.getOrgId());
                     }
+                }else{
+                    returnList.add(result);
                 }
             }
         }
