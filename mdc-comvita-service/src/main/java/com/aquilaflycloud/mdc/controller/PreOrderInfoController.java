@@ -96,7 +96,6 @@ public class PreOrderInfoController {
     }
 
     @ApiOperation(value = "批量导入快递单号", notes = "批量导入快递单号")
-    @PreAuthorize("hasAuthority('mdc:pre:order:info:batchImport')")
     @ApiMapping(value = "backend.comvita.import.order.code", method = RequestMethod.POST, permission = true)
     public void importOrderCode (FileUploadParam param) {
         preOrderAdministrationService.importOrderCode(param);
