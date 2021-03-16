@@ -124,6 +124,23 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         preOrderInfo.setMemberId(preOrderInfo.getMemberId());
         preOrderInfo.setBuyerName(param.getBuyerName());
         preOrderInfo.setBuyerPhone(param.getBuyerPhone());
+        JSONArray dataJson= JSONArray .fromObject(preActivityInfo.getRefGoods());
+        List<String> list = (List<String>) JSONArray.toCollection(dataJson);
+        if(CollUtil.isEmpty(list)){
+            throw new ServiceException("活动里不存在商品,无法生成订单。");
+        }
+        BigDecimal price=new BigDecimal(0);
+        for(String id:list) {
+            if (StringUtils.isNotBlank(id)) {
+                PreGoodsInfo preGoodsInfo = goodsInfoMapper.selectById(id);
+                if (preGoodsInfo == null) {
+                    throw new ServiceException("活动里不存在商品,无法生成订单。");
+                }
+                price=price.add(preGoodsInfo.getGoodsPrice());
+            }
+        }
+        //计算总金额
+        preOrderInfo.setTotalPrice(price);
         int orderInfo = preOrderInfoMapper.insert(preOrderInfo);
         if(orderInfo < 0){
             throw new ServiceException("生成订单失败。");
