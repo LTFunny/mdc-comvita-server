@@ -766,6 +766,11 @@ public class PreActivityServiceImpl implements PreActivityService {
         return result;
     }
 
+    /**
+     * 快闪活动
+     * @param param
+     * @return
+     */
     @Override
     public IPage<PreFlashReportPageResult> pageExportFlashActivityPageResultList(FlashExportParam param) {
         List<Long> businessIds = getFolksonomyBusinessRels(param.getFolksonomyIds());
@@ -850,17 +855,12 @@ public class PreActivityServiceImpl implements PreActivityService {
             for (PreFlashReportPageResult result : resultList) {
                 activityId2Result.put(Convert.toStr(result.getActivityId()), result);
             }
-            //2，补充活动关联的门店
-            List<PreFlashReportPageResult> resultList2 = fillShopInfo(resultList);
-            if(CollUtil.isEmpty(resultList2)){
-                resultList2 = resultList;
-            }
-            //2，补充是否曾经购买属性
+            //1，补充是否曾经购买属性
             Map<String,String> map = getEverBought();
-            //3，补充会员以及门店等信息
-            List<PreFlashReportPageResult> resultList3 = fillMemberInfo(resultList2,map);
+            //2，补充会员以及门店等信息
+            List<PreFlashReportPageResult> resultList3 = getShopAndMember(activityId2Result,map);
             if(CollUtil.isEmpty(resultList3)){
-                resultList3 = resultList2;
+                resultList3 = resultList;
             }
             if(CollUtil.isNotEmpty(resultList3)){
                 resultIPage.setRecords(resultList3);
@@ -1012,6 +1012,11 @@ public class PreActivityServiceImpl implements PreActivityService {
         return returnList;
     }
 
+    /**
+     * 预售活动
+     * @param param
+     * @return
+     */
     @Override
     public IPage<PreActivityReportPageResult> pageExportPreActivityPageResultList(PreActivityExportParam param) {
         //1,获取活动
@@ -1225,7 +1230,14 @@ public class PreActivityServiceImpl implements PreActivityService {
                     newResult.setOrgAddress(org_address);
                     //会员信息
                     String real_name = (String) l.get("real_name");
-                    newResult.setParticipantName(real_name);
+                    String nick_name = (String) l.get("nick_name");
+                    if(StrUtil.isNotBlank(real_name)){
+                        newResult.setParticipantName(real_name);
+                    }else{
+                        newResult.setParticipantName(nick_name);
+                    }
+                    String phone_number = (String) l.get("phone_number");
+                    newResult.setParticipantPhoneNum(phone_number);
                     if(null != l.get("sex")){
                         int sex = (Integer) l.get("sex");
                         if(0 == sex){

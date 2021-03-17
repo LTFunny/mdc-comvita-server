@@ -14,16 +14,16 @@
     </select>
 
     <select id="getShopAndMember" resultType ="java.util.Map" >
-        SELECT a.*, b.org_id,b.org_name,b.org_address FROM (
-            SELECT o.activity_info_id, o.member_id, o.shop_id,
-            m.id as memberId,m.real_name,m.sex,m.birthday,
-            m.province,m.city,m.county,m.address,m.create_time
-            FROM `pre_flash_order_info` o
-            LEFT JOIN `member_info` m
-            ON o.member_id = m.id
-        ) a LEFT JOIN `pre_activity_qr_code_info` b
-        ON a.activity_info_id = b.activity_id
-        AND a.shop_id = b.org_id
+        SELECT a.activity_name,o.activity_info_id, o.member_id, o.shop_id,
+            o.shop_name,o.shop_address, m.real_name,m.sex,m.birthday,
+            m.province,m.city,m.county,m.address,m.create_time,m.phone_number,m.nick_name
+        FROM pre_activity_info a
+        LEFT JOIN pre_flash_order_info o
+        ON a.id = o.activity_info_id
+        LEFT JOIN member_info m
+        ON m.id = o.member_id
+        WHERE a.activity_type = 2
+        ORDER BY a.create_time DESC
     </select>
 
 
