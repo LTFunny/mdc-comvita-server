@@ -320,7 +320,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         );
         if(CollUtil.isNotEmpty(list)){
             for(PreOrderGoods preOrderGoods:list){
-                preOrderGoods.setExpressOrderCode(param.getExpressCode());
+                preOrderGoods.setExpressOrderCode(param.getExpressOrder());
                 preOrderGoods.setExpressCode(param.getExpressCode());
                 preOrderGoods.setExpressName(param.getExpressName());
                 preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
