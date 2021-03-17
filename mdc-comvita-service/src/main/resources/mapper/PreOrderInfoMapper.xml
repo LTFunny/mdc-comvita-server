@@ -205,7 +205,7 @@
                 a.delivery_province deliveryProvince,
                 a.delivery_city deliveryCity,
                 a.delivery_address deliveryAddress,
-                a.order_code orderCode,
+                b.order_code orderCode,
                 a.create_time createTime,
                 a.reserve_start_time reserveStartTime,
                 a.delivery_time takeTime,
