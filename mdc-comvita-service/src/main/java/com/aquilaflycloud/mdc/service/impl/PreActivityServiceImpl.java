@@ -1224,9 +1224,9 @@ public class PreActivityServiceImpl implements PreActivityService {
                         newResult.setIsEverBought(isEvenBought);
                     }
                     //门店信息
-                    String org_name = (String) l.get("org_name");
+                    String org_name = (String) l.get("shop_name");
                     newResult.setOrgName(org_name);
-                    String org_address = (String) l.get("org_address");
+                    String org_address = (String) l.get("shop_address");
                     newResult.setOrgAddress(org_address);
                     //会员信息
                     String real_name = (String) l.get("real_name");
