@@ -98,9 +98,20 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             throw new ServiceException("签收订单失败。");
         }
         String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
-                + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了订单签收。";
+                + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了完成按钮操作。";
         orderOperateRecordService.addOrderOperateRecordLog(name,preOrderInfo.getId(),content);
+        List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,preOrderInfo.getId()));
+        if(CollUtil.isNotEmpty(preOrderGoodsList)){
+            for(PreOrderGoods preOrderGoods:preOrderGoodsList){
+                preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
+                int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+                if(orderGoods < 0){
+                    throw new ServiceException("修改状态失败。");
+                }
 
+            }
+        }
     }
 
     @Override
@@ -326,6 +337,9 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         preOrderInfoMapper.updateById(info);
         //快闪订单核销
         changeFlashState(info.getId(),info.getExpressOrder());
+        //添加操作记录
+        orderOperateRecordService.addOrderOperateRecordLog(info.getGuideName(), info.getId(), "进行了发货。");
+
     }
 
     private void changeFlashState(InputOrderNumberParam param, PreOrderInfo preOrderInfo, PreOrderGoods info){
@@ -419,23 +433,7 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             result.setDeliveryDetailAddress(result.getDeliveryProvince() + result.getDeliveryCity() + result.getDeliveryDistrict() + result.getDeliveryAddress());
             return result;
         });
-        /*return preOrderGoodsMapper.selectPage(param.page(), Wrappers.<PreOrderGoods>lambdaQuery()
-                .like(StringUtils.isNotBlank(param.getGuideName()), PreOrderGoods::getGuideName, param.getGuideName())
-                .like(StringUtils.isNotBlank(param.getReserveName()), PreOrderGoods::getReserveName, param.getReserveName())
-                .eq(PreOrderGoods::getOrderGoodsState, OrderGoodsStateEnum.PRETAKE)
-                .like(StringUtils.isNotBlank(param.getOrderCode()), PreOrderGoods::getOrderCode, param.getOrderCode())
-                .like(StringUtils.isNotBlank(param.getReserveShop()), PreOrderGoods::getReserveShop, param.getReserveShop())
-                .ge(param.getCreateStartTime() != null, PreOrderGoods::getCreateTime, param.getCreateStartTime())
-                .le(param.getCreateEndTime() != null, PreOrderGoods::getCreateTime, param.getCreateEndTime())
-                .ge(param.getReserveStartTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveStartTime())
-                .le(param.getReserveEndTime() != null, PreOrderGoods::getReserveStartTime, param.getReserveEndTime())
-                .notIn(PreOrderGoods::getGiftsSymbol, GiftsSymbolEnum.NOTAFTER)
-                .orderByDesc(PreOrderGoods::getCreateTime)
-        ).convert(orderGoods -> {
-            PreOrderGoodsResult result = BeanUtil.copyProperties(orderGoods, PreOrderGoodsResult.class);
-            result.setDeliveryDetailAddress(orderGoods.getDeliveryProvince() + orderGoods.getDeliveryCity() + orderGoods.getDeliveryDistrict() + orderGoods.getDeliveryAddress());
-            return result;
-        });*/
+
     }
 
     @Override
@@ -678,12 +676,10 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             boolean expressOrderCodeSign = StrUtil.isBlank(item.get(expressOrderCodeName));
             boolean expressNameSign = StrUtil.isBlank(item.get(expressName));
             boolean idSign = ObjectUtil.isNull(id);
-
             //物流相关字段都为空，则跳过这条记录
             if (expressCodeSign && expressOrderCodeSign && expressNameSign) {
                 continue;
             }
-
             if (expressCodeSign) {
                 throw new ServiceException("物流信息需填写完整：" + expressCodeName + "不能为空");
             } else if (expressOrderCodeSign) {
