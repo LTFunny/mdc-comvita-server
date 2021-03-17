@@ -230,6 +230,9 @@ public class FlashOrderServiceImpl implements FlashOrderService {
             if(ActivityStateEnum.FINISHED.equals(activityInfo.getActivityState())){
                 throw new ServiceException("该活动已结束");
              }
+            if((new Date()).after(activityInfo.getEndTime())){
+                throw new ServiceException("该活动已过期");
+            }
         }
         if(FlashOrderInfoStateEnum.WRITTENOFF.equals(preFlashOrderInfo.getFlashOrderState())){
             throw new ServiceException("该码已核销");
