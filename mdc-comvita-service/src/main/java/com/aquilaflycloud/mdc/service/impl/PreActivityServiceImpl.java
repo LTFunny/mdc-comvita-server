@@ -1268,11 +1268,13 @@ public class PreActivityServiceImpl implements PreActivityService {
                     newResult.setParticipantAddress(sb.toString());
                     Date create_time = (Date) l.get("create_time");
                     //同一天注册即为新会员
-                    boolean isSameDay = DateUtil.isSameDay(create_time, DateTime.now());
-                    if(isSameDay){
-                        newResult.setIsNewMember("是");
-                    }else{
-                        newResult.setIsNewMember("否");
+                    if(null != create_time){
+                        boolean isSameDay = DateUtil.isSameDay(create_time, DateTime.now());
+                        if(isSameDay){
+                            newResult.setIsNewMember("是");
+                        }else{
+                            newResult.setIsNewMember("否");
+                        }
                     }
                 }
             });

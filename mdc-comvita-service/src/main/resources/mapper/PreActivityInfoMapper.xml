@@ -14,7 +14,7 @@
     </select>
 
     <select id="getShopAndMember" resultType ="java.util.Map" >
-        SELECT a.activity_name,o.activity_info_id, o.member_id, o.shop_id,
+        SELECT a.activity_name,a.id as activity_info_id, o.member_id, o.shop_id,
             o.shop_name,o.shop_address, m.real_name,m.sex,m.birthday,
             m.province,m.city,m.county,m.address,m.create_time,m.phone_number,m.nick_name
         FROM pre_activity_info a
