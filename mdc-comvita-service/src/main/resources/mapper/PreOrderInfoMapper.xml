@@ -12,6 +12,7 @@
         left join pre_activity_info c on c.id=b.activity_info_id
         where
         a.order_goods_state=2
+        and a.gifts_symbol=1
         and c.activity_type=1
         <if test="param.activityName != null and param.activityName != ''">
             and c.activity_name like CONCAT('%',#{param.activityName},'%')
