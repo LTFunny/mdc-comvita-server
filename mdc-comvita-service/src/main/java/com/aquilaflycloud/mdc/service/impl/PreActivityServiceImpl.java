@@ -514,7 +514,18 @@ public class PreActivityServiceImpl implements PreActivityService {
         if (CollUtil.isNotEmpty(param.getRefGoods())) {
             activityInfo.setRefGoods(JSONUtil.toJsonStr(param.getRefGoods()));
         }
-        preActivityInfoMapper.updateById(activityInfo);
+        int count = preActivityInfoMapper.updateById(activityInfo);
+        if (count <= 0) {
+            throw new ServiceException("编辑活动失败");
+        }
+        if (activityInfo.getActivityType() == ActivityTypeEnum.FLASH) {
+            PreFlashOrderInfo update = new PreFlashOrderInfo();
+            update.setBeginTime(activityInfo.getBeginTime());
+            update.setEndTime(activityInfo.getEndTime());
+            preFlashOrderInfoMapper.update(update, Wrappers.<PreFlashOrderInfo>lambdaUpdate()
+                    .eq(PreFlashOrderInfo::getActivityInfoId, activityInfo.getId())
+            );
+        }
         log.info("编辑活动信息成功");
         folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.PREACTIVITY, activityInfo.getId(), param.getFolksonomyIds());
         log.info("处理标签成功");
