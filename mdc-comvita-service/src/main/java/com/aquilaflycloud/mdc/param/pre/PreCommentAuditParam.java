@@ -28,7 +28,7 @@ public class PreCommentAuditParam {
     /**
      * 审核操作 通过/不通过
      */
-    @ApiModelProperty(value = "审核操作(pre.ActivityCommentStateEnum)")
+    @ApiModelProperty(value = "审核操作(pre.ActivityCommentStateEnum)", required = true)
     private ActivityCommentStateEnum auditOperateType;
 
 

@@ -2,7 +2,7 @@ package com.aquilaflycloud.mdc.controller;
 
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.*;
-import com.aquilaflycloud.mdc.service.PreActivityCommentService;
+import com.aquilaflycloud.mdc.service.PreCommentService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
 import io.swagger.annotations.Api;
@@ -21,7 +21,7 @@ import javax.annotation.Resource;
 public class PreCommentController {
 
     @Resource
-    private PreActivityCommentService preActivityCommentService;
+    private PreCommentService preCommentService;
 
     /**
      * 分页获取点评信息
@@ -31,7 +31,7 @@ public class PreCommentController {
     @ApiOperation(value = "活动点评分页信息", notes = "活动点评分页信息")
     @ApiMapping(value = "backend.comvita.comment.page", method = RequestMethod.POST, permission = true)
     public IPage<PreCommentPageResult> page(PreCommentPageParam param) {
-        return preActivityCommentService.page(param);
+        return preCommentService.page(param);
     }
 
     /**
@@ -42,7 +42,7 @@ public class PreCommentController {
     @ApiOperation(value = "活动点评详情", notes = "活动点评详情")
     @ApiMapping(value = "backend.comvita.comment.get", method = RequestMethod.POST, permission = true)
     public PreCommentPageResult get(PreCommentGetParam param) {
-        return preActivityCommentService.get(param);
+        return preCommentService.get(param);
     }
 
     /**
@@ -52,9 +52,8 @@ public class PreCommentController {
     @ApiOperation(value = "活动点评审核", notes = "活动点评审核")
     @ApiMapping(value = "backend.comvita.comment.audit", method = RequestMethod.POST, permission = true)
     public void audit(PreCommentAuditParam param) {
-        preActivityCommentService.audit(param);
+        preCommentService.audit(param);
     }
-
 
     /**
      * 改变展示状态
@@ -63,7 +62,7 @@ public class PreCommentController {
     @ApiOperation(value = "活动点评隐藏(公开)", notes = "活动点评隐藏(公开)")
     @ApiMapping(value = "backend.comvita.comment.view.state.change", method = RequestMethod.POST, permission = true)
     public void changeViewState(PreCommentChangViewStateParam param) {
-        preActivityCommentService.changeViewState(param);
+        preCommentService.changeViewState(param);
     }
 
 }

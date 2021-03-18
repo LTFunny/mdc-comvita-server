@@ -16,8 +16,8 @@ import java.util.List;
 @Data
 public class PreCommentPageResult extends PreCommentInfo {
 
-    @ApiModelProperty(value = "标签名称列表")
-    private List<String> folksonomyIds;
+    @ApiModelProperty(value = "标签名称")
+    private String folksonomyNames;
 
     @ApiModelProperty(value = "点赞记录列表")
     private List<LikeRecord> likeRecordList;
