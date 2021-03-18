@@ -8,8 +8,6 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.EnumUtil;
-import cn.hutool.crypto.SecureUtil;
-import cn.hutool.json.JSONUtil;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.member.EventTypeEnum;
 import com.aquilaflycloud.mdc.mapper.MemberEventLogMapper;
@@ -84,8 +82,8 @@ public class MemberEventLogServiceImpl implements MemberEventLogService {
     }
 
     private boolean loadNum(MemberEventParam param) {
-        String lockName = "eventNumLock_" + SecureUtil.md5(JSONUtil.toJsonStr(param));
-        String key = "eventNum_" + SecureUtil.md5(JSONUtil.toJsonStr(param));
+        String lockName = "eventNumLock_" + param.getBusinessType() + param.getEventType();
+        String key = "eventNum_" + param.getBusinessType() + param.getEventType();
         if (!RedisUtil.redis().hasKey(key)) {
             return RedisUtil.syncLoad(lockName, () -> {
                 List<MemberEventLogResult> list = memberEventLogMapper.selectLogCount(Wrappers.<MemberEventLog>lambdaQuery()
@@ -110,8 +108,8 @@ public class MemberEventLogServiceImpl implements MemberEventLogService {
     }
 
     private boolean loadMemberNum(MemberEventParam param) {
-        String lockName = "eventMemberNumLock_" + SecureUtil.md5(JSONUtil.toJsonStr(param));
-        String key = "eventMemberNum_" + SecureUtil.md5(JSONUtil.toJsonStr(param));
+        String lockName = "eventMemberNumLock_" + param.getBusinessType() + param.getEventType() + param.getBusinessId();
+        String key = "eventMemberNum_" + param.getBusinessType() + param.getEventType() + param.getBusinessId();
         if (!RedisUtil.redis().hasKey(key)) {
             return RedisUtil.syncLoad(lockName, () -> {
                 List<MemberEventLogResult> list = memberEventLogMapper.selectLogCount(Wrappers.<MemberEventLog>lambdaQuery()
