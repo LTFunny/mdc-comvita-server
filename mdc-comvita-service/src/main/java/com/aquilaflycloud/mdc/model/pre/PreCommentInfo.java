@@ -76,11 +76,25 @@ public class PreCommentInfo implements Serializable {
     private String commentator;
 
     /**
+     * 点评人Id
+     */
+    @TableField(value = "commentator_id")
+    @ApiModelProperty(value = "点评人Id")
+    private Long commentatorId;
+
+    /**
      * 审核人
      */
     @TableField(value = "auditor")
     @ApiModelProperty(value = "审核人")
     private String auditor;
+
+    /**
+     * 审核人Id
+     */
+    @TableField(value = "auditor_id")
+    @ApiModelProperty(value = "审核人Id")
+    private Long auditorId;
 
     /**
      * 审核备注
