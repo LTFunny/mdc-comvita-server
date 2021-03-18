@@ -298,6 +298,7 @@ public class FlashOrderServiceImpl implements FlashOrderService {
                 .ge(param.getCreateStartTime() != null, PreFlashOrderInfo::getCreateTime, param.getCreateStartTime())
                 .le(param.getCreateEndTime() != null, PreFlashOrderInfo::getCreateTime, param.getCreateEndTime())
                 .eq(StringUtils.isNotBlank(param.getShopId()), PreFlashOrderInfo::getShopId, param.getShopId())
+                .eq(StringUtils.isNotBlank(param.getShopName()), PreFlashOrderInfo::getShopName, param.getShopName())
                 .orderByDesc(PreFlashOrderInfo::getCreateTime)
         ).convert(this::stateHandler).convert(info -> {
             if(StrUtil.isBlank(info.getShopName())){

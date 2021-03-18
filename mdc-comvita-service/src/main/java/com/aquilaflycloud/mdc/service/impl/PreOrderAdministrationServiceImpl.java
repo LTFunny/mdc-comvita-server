@@ -338,7 +338,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         //快闪订单核销
         changeFlashState(info.getId(),info.getExpressOrder());
         //添加操作记录
-        orderOperateRecordService.addOrderOperateRecordLog(info.getGuideName(), info.getId(), "进行了发货。");
+        String name=MdcUtil.getCurrentUserName();
+        orderOperateRecordService.addOrderOperateRecordLog(name, info.getId(), "进行了发货。");
 
     }
 

@@ -25,6 +25,8 @@ public class FlashPageParam  extends PageParam<PreFlashOrderInfo> {
     @ApiModelProperty(value = "参加渠道")
     private String shopId;
 
+    @ApiModelProperty(value = "参加渠道(店铺名称)")
+    private String shopName;
 
     @ApiModelProperty(value = "领取时间")
     private Date createStartTime;
