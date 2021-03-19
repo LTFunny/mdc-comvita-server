@@ -85,4 +85,14 @@ public class PreCommentController {
         return memberInteractionService.pageMemberInteraction(pageParam);
     }
 
+    /**
+     * 回复
+     * @param param
+     */
+    @ApiOperation(value = "活动点评回复", notes = "活动点评回复")
+    @ApiMapping(value = "backend.comvita.comment.reply", method = RequestMethod.POST, permission = true)
+    public void reply(PreCommentReplyParam param) {
+        preCommentService.reply(param);
+    }
+
 }

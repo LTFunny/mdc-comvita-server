@@ -241,6 +241,20 @@ public class PreCommentServiceImpl implements PreCommentService {
         ).convert(this::dataConvertResult);
     }
 
+    @Override
+    public void reply(PreCommentReplyParam param) {
+        if(param.getId()==null) {
+            throw new ServiceException("活动点评主键id为空" );
+        }
+        PreCommentInfo preCommentInfo =  preCommentInfoMapper.selectById(param.getId());
+        preCommentInfo.setComReply(param.getMessage());
+        int count = preCommentInfoMapper.updateById(preCommentInfo);
+        if (count <= 0) {
+            throw new ServiceException("回复点评失败");
+        }
+        log.info("回复点评完成");
+    }
+
     private List<Long> getFolksonomyBusinessRels(List<Long> folksonomyIds) {
         if(CollUtil.isEmpty(folksonomyIds)){
             return null;

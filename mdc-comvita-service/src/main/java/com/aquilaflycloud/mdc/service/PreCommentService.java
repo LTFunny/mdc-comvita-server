@@ -46,4 +46,10 @@ public interface PreCommentService {
      * @return
      */
     IPage<PreCommentPageResult> page(PreCommentPageParam param);
+
+    /**
+     * 回复
+     * @param param
+     */
+    void reply(PreCommentReplyParam param);
 }

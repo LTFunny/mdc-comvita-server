@@ -104,6 +104,13 @@ public class PreCommentInfo implements Serializable {
     private String auditRemark;
 
     /**
+     * 官方回复
+     */
+    @TableField(value = "com_reply")
+    @ApiModelProperty(value = "官方回复")
+    private String comReply;
+
+    /**
      * 点赞数量
      */
     @TableField(value = "com_like_count")
