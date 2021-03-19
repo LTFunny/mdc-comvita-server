@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aquilaflycloud.auth.bean.User;
 import com.aquilaflycloud.dataAuth.common.PageParam;
 import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
@@ -157,13 +158,9 @@ public class PreCommentServiceImpl implements PreCommentService {
         folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.ACTIVITYCOMMENT, param.getId(), param.getFolksonomyIds());
         log.info("处理标签完成");
         PreCommentInfo preCommentInfo =  preCommentInfoMapper.selectById(param.getId());
-        MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
-        if(StrUtil.isBlank(infoResult.getRealName())){
-            preCommentInfo.setAuditor(infoResult.getNickName());
-        }else{
-            preCommentInfo.setAuditor(infoResult.getRealName());
-        }
-        preCommentInfo.setAuditorId(infoResult.getId());
+        User user = MdcUtil.getCurrentUser();
+        preCommentInfo.setAuditor(user.getUsername());
+        preCommentInfo.setAuditorId(user.getId());
         if(ActivityCommentStateEnum.PASS == param.getAuditOperateType()){
             preCommentInfo.setAuditRemark(param.getAuditFeedback());
             preCommentInfo.setComViewState(ActivityCommentViewStateEnum.OPEN);
