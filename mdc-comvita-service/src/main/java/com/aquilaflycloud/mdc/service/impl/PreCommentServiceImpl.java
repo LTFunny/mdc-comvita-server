@@ -163,12 +163,14 @@ public class PreCommentServiceImpl implements PreCommentService {
         if(ActivityCommentStateEnum.PASS == param.getAuditOperateType()){
             preCommentInfo.setAuditRemark(param.getAuditFeedback());
             preCommentInfo.setComViewState(ActivityCommentViewStateEnum.OPEN);
+            preCommentInfo.setComState(ActivityCommentStateEnum.PASS);
         }else if(ActivityCommentStateEnum.NO_PASS == param.getAuditOperateType()){
             if(StrUtil.isBlank(param.getAuditFeedback())){
                 throw new ServiceException("请填写审核反馈");
             }
             preCommentInfo.setAuditRemark(param.getAuditFeedback());
             preCommentInfo.setComViewState(ActivityCommentViewStateEnum.HIDE);
+            preCommentInfo.setComState(ActivityCommentStateEnum.NO_PASS);
         }else{
             throw new ServiceException("无效的参数" );
         }
@@ -209,8 +211,8 @@ public class PreCommentServiceImpl implements PreCommentService {
                 }
             }
             result.setFolksonomyNames(sb.toString());
-            //@TODO补充点赞记录
-
+            result.setComLikeCount(memberInteractionService.getInteractionNum(new MemberInteractionParam().setBusinessId(result.getId())
+                    .setBusinessType(InteractionBusinessTypeEnum.COMMENT).setInteractionType(InteractionTypeEnum.LIKE)));
             return result;
         } else {
             return null;
