@@ -384,6 +384,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         if(CollUtil.isNotEmpty(folksonomyIds)){
             QueryWrapper<FolksonomyBusinessRel> qw = new QueryWrapper<>();
             qw.in("folksonomy_id", folksonomyIds);
+            qw.eq("business_type",BusinessTypeEnum.PREACTIVITY.getType());
             List<FolksonomyBusinessRel> folksonomyBusinessRels = folksonomyBusinessRelMapper.selectList(qw);
             if(CollUtil.isNotEmpty(folksonomyBusinessRels)){
                 folksonomyBusinessRels.forEach(f -> {

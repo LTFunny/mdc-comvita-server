@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aquilaflycloud.mdc.mapper.MemberInteractionMapper">
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id,member_id,business_type,business_id,interaction_type,interaction_time,is_cancel,create_time,last_update_time,
+    tenant_id,sub_tenant_id,app_key
+  </sql>
+
+  <select id="selectInteractionCommentPage" resultType="com.aquilaflycloud.mdc.model.pre.PreCommentInfo">
+    select pre_comment.*
+    from member_interaction member_interaction
+    join pre_comment pre_comment on member_interaction.business_id = pre_comment.id
+    ${ew.customSqlSegment}
+  </select>
+
+  <select id="selectInteractionPage" resultType="com.aquilaflycloud.mdc.result.member.MemberInteractionResult">
+    select member_info.nick_name, pre_comment.*
+    from member_interaction member_interaction
+    join member_info member_info on member_interaction.member_id = member_info.id
+    ${ew.customSqlSegment}
+  </select>
+</mapper>
