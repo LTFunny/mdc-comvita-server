@@ -111,13 +111,6 @@ public class PreCommentInfo implements Serializable {
     private String comReply;
 
     /**
-     * 点赞数量
-     */
-    @TableField(value = "com_like_count")
-    @ApiModelProperty(value = "点赞数量")
-    private Long comLikeCount;
-
-    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
