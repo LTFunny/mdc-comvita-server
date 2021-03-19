@@ -12,10 +12,12 @@ import com.aquilaflycloud.mdc.enums.pre.ActivityCommentStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityCommentViewStateEnum;
 import com.aquilaflycloud.mdc.mapper.FolksonomyBusinessRelMapper;
 import com.aquilaflycloud.mdc.mapper.MemberInteractionMapper;
+import com.aquilaflycloud.mdc.mapper.PreActivityInfoMapper;
 import com.aquilaflycloud.mdc.mapper.PreCommentInfoMapper;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInteraction;
+import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.model.pre.PreCommentInfo;
 import com.aquilaflycloud.mdc.param.member.MemberInteractionParam;
 import com.aquilaflycloud.mdc.param.pre.*;
@@ -56,7 +58,8 @@ public class PreCommentServiceImpl implements PreCommentService {
     private FolksonomyService folksonomyService;
     @Resource
     private FolksonomyBusinessRelMapper folksonomyBusinessRelMapper;
-
+    @Resource
+    private PreActivityInfoMapper preActivityInfoMapper;
     @Override
     @Transactional
     public void commentInfo(CommentParam param) {
@@ -98,6 +101,13 @@ public class PreCommentServiceImpl implements PreCommentService {
         PreCommentInfoResult result = BeanUtil.copyProperties(info, PreCommentInfoResult.class);
         result.setLikeNum(memberInteractionService.getInteractionNum(new MemberInteractionParam().setBusinessId(result.getId())
                 .setBusinessType(InteractionBusinessTypeEnum.COMMENT).setInteractionType(InteractionTypeEnum.LIKE)));
+        PreActivityInfo preActivityInfo=preActivityInfoMapper.selectById(info.getActivityId());
+        if(preActivityInfo!=null){
+            result.setActivityName(preActivityInfo.getActivityName());
+            result.setActivityPicture(preActivityInfo.getActivityPicture());
+        }else{
+            throw new ServiceException("活动信息查询有误");
+        }
         return result;
     }
 
