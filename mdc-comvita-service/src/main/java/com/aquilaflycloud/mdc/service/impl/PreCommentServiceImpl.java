@@ -104,7 +104,6 @@ public class PreCommentServiceImpl implements PreCommentService {
                 .setBusinessType(InteractionBusinessTypeEnum.COMMENT).setInteractionType(InteractionTypeEnum.LIKE)));
         PreActivityInfo preActivityInfo=preActivityInfoMapper.selectById(info.getActivityId());
         if(preActivityInfo!=null){
-            result.setActivityName(preActivityInfo.getActivityName());
             result.setActivityPicture(preActivityInfo.getActivityPicture());
         }else{
             throw new ServiceException("活动信息查询有误");
