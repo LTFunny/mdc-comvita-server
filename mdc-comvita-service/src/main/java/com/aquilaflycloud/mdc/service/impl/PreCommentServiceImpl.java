@@ -3,18 +3,27 @@ package com.aquilaflycloud.mdc.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aquilaflycloud.dataAuth.common.PageParam;
+import com.aquilaflycloud.mdc.enums.common.WhetherEnum;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
+import com.aquilaflycloud.mdc.enums.member.InteractionBusinessTypeEnum;
+import com.aquilaflycloud.mdc.enums.member.InteractionTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityCommentStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityCommentViewStateEnum;
 import com.aquilaflycloud.mdc.mapper.FolksonomyBusinessRelMapper;
+import com.aquilaflycloud.mdc.mapper.MemberInteractionMapper;
 import com.aquilaflycloud.mdc.mapper.PreCommentInfoMapper;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
+import com.aquilaflycloud.mdc.model.member.MemberInteraction;
 import com.aquilaflycloud.mdc.model.pre.PreCommentInfo;
+import com.aquilaflycloud.mdc.param.member.MemberInteractionParam;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
+import com.aquilaflycloud.mdc.result.pre.PreCommentInfoResult;
 import com.aquilaflycloud.mdc.result.pre.PreCommentPageResult;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
+import com.aquilaflycloud.mdc.service.MemberInteractionService;
 import com.aquilaflycloud.mdc.service.PreCommentService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -39,10 +48,12 @@ import java.util.Set;
 public class PreCommentServiceImpl implements PreCommentService {
     @Resource
     private PreCommentInfoMapper preCommentInfoMapper;
-
+    @Resource
+    private MemberInteractionMapper memberInteractionMapper;
+    @Resource
+    private MemberInteractionService memberInteractionService;
     @Resource
     private FolksonomyService folksonomyService;
-
     @Resource
     private FolksonomyBusinessRelMapper folksonomyBusinessRelMapper;
 
@@ -82,8 +93,24 @@ public class PreCommentServiceImpl implements PreCommentService {
     }
 
     @Override
-    public PreCommentInfo detailsComment(CommentDetailsParam param) {
-        return preCommentInfoMapper.selectById(param.getId());
+    public PreCommentInfoResult detailsComment(CommentDetailsParam param) {
+        PreCommentInfo info = preCommentInfoMapper.selectById(param.getId());
+        PreCommentInfoResult result = BeanUtil.copyProperties(info, PreCommentInfoResult.class);
+        result.setLikeNum(memberInteractionService.getInteractionNum(new MemberInteractionParam().setBusinessId(result.getId())
+                .setBusinessType(InteractionBusinessTypeEnum.COMMENT).setInteractionType(InteractionTypeEnum.LIKE)));
+        return result;
+    }
+
+    @Override
+    public IPage<PreCommentInfo> pageLikeComment(PageParam<MemberInteraction> param) {
+        Long memberId = MdcUtil.getRequireCurrentMemberId();
+        return memberInteractionMapper.selectInteractionCommentPage(param.page(), Wrappers.<MemberInteraction>lambdaQuery()
+                .eq(MemberInteraction::getBusinessType, InteractionBusinessTypeEnum.COMMENT)
+                .eq(MemberInteraction::getInteractionType, InteractionTypeEnum.LIKE)
+                .eq(MemberInteraction::getIsCancel, WhetherEnum.NO)
+                .eq(MemberInteraction::getMemberId, memberId)
+                .orderByDesc(MemberInteraction::getInteractionTime)
+        );
     }
 
     @Override

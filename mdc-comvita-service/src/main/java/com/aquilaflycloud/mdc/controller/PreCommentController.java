@@ -1,7 +1,12 @@
 package com.aquilaflycloud.mdc.controller;
 
+import com.aquilaflycloud.mdc.enums.member.InteractionBusinessTypeEnum;
+import com.aquilaflycloud.mdc.enums.member.InteractionTypeEnum;
+import com.aquilaflycloud.mdc.param.member.MemberInteractionPageParam;
 import com.aquilaflycloud.mdc.param.pre.*;
-import com.aquilaflycloud.mdc.result.pre.*;
+import com.aquilaflycloud.mdc.result.member.MemberInteractionResult;
+import com.aquilaflycloud.mdc.result.pre.PreCommentPageResult;
+import com.aquilaflycloud.mdc.service.MemberInteractionService;
 import com.aquilaflycloud.mdc.service.PreCommentService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -22,6 +27,9 @@ public class PreCommentController {
 
     @Resource
     private PreCommentService preCommentService;
+
+    @Resource
+    private MemberInteractionService memberInteractionService;
 
     /**
      * 分页获取点评信息
@@ -63,6 +71,18 @@ public class PreCommentController {
     @ApiMapping(value = "backend.comvita.comment.view.state.change", method = RequestMethod.POST, permission = true)
     public void changeViewState(PreCommentChangViewStateParam param) {
         preCommentService.changeViewState(param);
+    }
+
+    @ApiOperation(value = "活动点评点赞记录(分页)", notes = "活动点评点赞记录(分页)")
+    @ApiMapping(value = "backend.comvita.commentLike.page", method = RequestMethod.POST, permission = true)
+    public IPage<MemberInteractionResult> pageCommentLike(PreCommentLikePageParam param) {
+        MemberInteractionPageParam pageParam = new MemberInteractionPageParam();
+        pageParam.setBusinessId(param.getId());
+        pageParam.setBusinessType(InteractionBusinessTypeEnum.COMMENT);
+        pageParam.setInteractionType(InteractionTypeEnum.LIKE);
+        pageParam.setPageNum(param.getPageNum());
+        pageParam.setPageSize(param.getPageSize());
+        return memberInteractionService.pageMemberInteraction(pageParam);
     }
 
 }

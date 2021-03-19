@@ -1,7 +1,12 @@
 package com.aquilaflycloud.mdc.api;
 
+import com.aquilaflycloud.dataAuth.common.PageParam;
+import com.aquilaflycloud.mdc.model.member.MemberInteraction;
 import com.aquilaflycloud.mdc.model.pre.PreCommentInfo;
-import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.param.pre.CommentDetailsParam;
+import com.aquilaflycloud.mdc.param.pre.CommentPageParam;
+import com.aquilaflycloud.mdc.param.pre.CommentParam;
+import com.aquilaflycloud.mdc.result.pre.PreCommentInfoResult;
 import com.aquilaflycloud.mdc.service.PreCommentService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -36,7 +41,13 @@ public class PreCommentInfoApi {
 
     @ApiOperation(value = "获取我的点评明细", notes = "获取我的点评明细")
     @ApiMapping(value = "comvita.comment.details", method = RequestMethod.POST)
-    public PreCommentInfo detailsComment(CommentDetailsParam param) {
+    public PreCommentInfoResult detailsComment(CommentDetailsParam param) {
         return preCommentService.detailsComment(param);
+    }
+
+    @ApiOperation(value = "获取我的点赞评论列表(分页)", notes = "获取我的点赞评论列表(分页)")
+    @ApiMapping(value = "comvita.comment.like.page", method = RequestMethod.POST)
+    public IPage<PreCommentInfo> pageLikeComment(PageParam<MemberInteraction> param) {
+        return preCommentService.pageLikeComment(param);
     }
 }

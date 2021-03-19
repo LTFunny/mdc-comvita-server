@@ -1,7 +1,10 @@
 package com.aquilaflycloud.mdc.service;
 
+import com.aquilaflycloud.dataAuth.common.PageParam;
+import com.aquilaflycloud.mdc.model.member.MemberInteraction;
 import com.aquilaflycloud.mdc.model.pre.PreCommentInfo;
 import com.aquilaflycloud.mdc.param.pre.*;
+import com.aquilaflycloud.mdc.result.pre.PreCommentInfoResult;
 import com.aquilaflycloud.mdc.result.pre.PreCommentPageResult;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -14,7 +17,9 @@ public interface PreCommentService {
 
     IPage<PreCommentInfo> pageComment(CommentPageParam param);
 
-    PreCommentInfo detailsComment(CommentDetailsParam param);
+    PreCommentInfoResult detailsComment(CommentDetailsParam param);
+
+    IPage<PreCommentInfo> pageLikeComment(PageParam<MemberInteraction> param);
 
     /**
      * 改变显示状态 隐藏/公开
