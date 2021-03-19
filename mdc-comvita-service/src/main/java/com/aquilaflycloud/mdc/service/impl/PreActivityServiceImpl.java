@@ -72,7 +72,8 @@ public class PreActivityServiceImpl implements PreActivityService {
     private WechatMiniService wechatMiniService;
     @Resource
     private MemberEventLogService memberEventLogService;
-
+    @Resource
+    private PreCommentInfoMapper preCommentInfoMapper;
     private PreActivityInfo stateHandler(PreActivityInfo info) {
         if (info == null) {
             throw new ServiceException("活动不存在");
@@ -184,6 +185,13 @@ public class PreActivityServiceImpl implements PreActivityService {
                 return shopInfo;
             }).collect(Collectors.toList());
             result.setShopList(shopInfoList);
+        }
+        List<PreCommentInfo> commentInfoList=preCommentInfoMapper.selectList(Wrappers.<PreCommentInfo>lambdaQuery()
+                .eq(PreCommentInfo::getActivityId,info.getId())
+                .eq(PreCommentInfo::getComViewState,ActivityCommentViewStateEnum.OPEN)
+        );
+        if(CollUtil.isNotEmpty(commentInfoList)){
+            result.setCommentList(commentInfoList);
         }
         return result;
     }

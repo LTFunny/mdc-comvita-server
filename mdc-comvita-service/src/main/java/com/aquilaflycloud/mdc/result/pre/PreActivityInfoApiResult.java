@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.result.pre;
 
 import com.aquilaflycloud.mdc.enums.pre.ButtonStateEnum;
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
+import com.aquilaflycloud.mdc.model.pre.PreCommentInfo;
 import com.aquilaflycloud.mdc.param.pre.PreActivityRewardParam;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -35,6 +36,8 @@ public class PreActivityInfoApiResult extends PreActivityInfo {
     @ApiModelProperty(value = "可选门店列表")
     private List<ShopInfo> shopList;
 
+    @ApiModelProperty(value = "点评")
+    private List<PreCommentInfo> commentList;
     @Data
     public static class ShopInfo {
         @ApiModelProperty(value = "可选门店id")
