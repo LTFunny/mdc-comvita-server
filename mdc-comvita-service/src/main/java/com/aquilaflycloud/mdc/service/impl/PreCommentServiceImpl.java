@@ -222,7 +222,7 @@ public class PreCommentServiceImpl implements PreCommentService {
                 .in(CollUtil.isNotEmpty(businessIds),PreCommentInfo::getId,businessIds)
                 .eq(param.getComState() != null, PreCommentInfo::getComState, param.getComState())
                 .like(param.getCommentator() != null, PreCommentInfo::getCommentator, param.getCommentator())
-                .like(param.getAuditor() != null, PreCommentInfo::getAuditor, param.getAuditor())
+                .like(StrUtil.isNotBlank(param.getAuditor()), PreCommentInfo::getAuditor, param.getAuditor())
                 .like(param.getActivityName() != null, PreCommentInfo::getActivityName, param.getActivityName())
                 .eq(param.getComViewState() != null, PreCommentInfo::getComViewState, param.getComViewState())
                 .ge(param.getCommentStartTime() != null, PreCommentInfo::getCreateTime, param.getCommentStartTime())
