@@ -15,7 +15,7 @@
   </select>
 
   <select id="selectInteractionPage" resultType="com.aquilaflycloud.mdc.result.member.MemberInteractionResult">
-    select member_info.nick_name, pre_comment.*
+    select member_info.nick_name, member_interaction.*
     from member_interaction member_interaction
     join member_info member_info on member_interaction.member_id = member_info.id
     ${ew.customSqlSegment}
