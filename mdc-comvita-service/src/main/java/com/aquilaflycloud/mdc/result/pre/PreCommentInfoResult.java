@@ -19,9 +19,6 @@ public class PreCommentInfoResult extends PreCommentInfo {
     @ApiModelProperty(value = "点赞数")
     private Long likeNum;
 
-    @ApiModelProperty(value = "活动名称")
-    private String activityName;
-
     @ApiModelProperty(value = "活动照片")
     private String activityPicture;
 }
