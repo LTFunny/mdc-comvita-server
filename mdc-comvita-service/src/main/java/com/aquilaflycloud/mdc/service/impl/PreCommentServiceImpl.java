@@ -64,14 +64,14 @@ public class PreCommentServiceImpl implements PreCommentService {
     @Transactional
     public void commentInfo(CommentParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
-        PreCommentInfo preCommentInfo=preCommentInfoMapper.selectOne(Wrappers.<PreCommentInfo>lambdaQuery()
+     /*   PreCommentInfo preCommentInfo=preCommentInfoMapper.selectOne(Wrappers.<PreCommentInfo>lambdaQuery()
                 .eq(PreCommentInfo::getActivityId,param.getActivityId())
                 .eq(PreCommentInfo::getCommentatorId,infoResult.getId()));
 
         if(preCommentInfo!=null){
             throw new ServiceException("已点评该活动");
-        }
-        preCommentInfo =new PreCommentInfo();
+        }*/
+        PreCommentInfo  preCommentInfo =new PreCommentInfo();
         preCommentInfo.setCommentatorId(infoResult.getId());
         preCommentInfo.setCommentator(infoResult.getRealName());
         preCommentInfo.setActivityId(param.getActivityId());
