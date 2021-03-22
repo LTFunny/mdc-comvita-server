@@ -74,6 +74,10 @@ public class PreActivityServiceImpl implements PreActivityService {
     private MemberEventLogService memberEventLogService;
     @Resource
     private PreCommentInfoMapper preCommentInfoMapper;
+    @Resource
+    private MemberInfoMapper memberInfoMapper;
+    @Resource
+    private PreCommentReplyInfoMapper preCommentReplyInfoMapper;
     private PreActivityInfo stateHandler(PreActivityInfo info) {
         if (info == null) {
             throw new ServiceException("活动不存在");
@@ -189,9 +193,19 @@ public class PreActivityServiceImpl implements PreActivityService {
         List<PreCommentInfo> commentInfoList=preCommentInfoMapper.selectList(Wrappers.<PreCommentInfo>lambdaQuery()
                 .eq(PreCommentInfo::getActivityId,info.getId())
                 .eq(PreCommentInfo::getComViewState,ActivityCommentViewStateEnum.OPEN)
+                .orderByDesc(PreCommentInfo::getCreateTime)
         );
         if(CollUtil.isNotEmpty(commentInfoList)){
-            result.setCommentList(commentInfoList);
+            List<PreCommentListResult> listResults=new ArrayList<>();
+            for(PreCommentInfo preCommentInfo:commentInfoList){
+                PreCommentListResult preCommentListResult=new PreCommentListResult();
+                MemberInfo member= memberInfoMapper.selectById(preCommentInfo.getCommentatorId());
+                BeanUtil.copyProperties(preCommentInfo, preCommentListResult);
+                preCommentListResult.setAvatarUrl(member.getAvatarUrl());
+
+                listResults.add(preCommentListResult);
+            }
+            result.setCommentList(listResults);
         }
         return result;
     }
