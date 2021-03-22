@@ -160,25 +160,27 @@ public class PreCommentServiceImpl implements PreCommentService {
         folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.ACTIVITYCOMMENT, param.getId(), param.getFolksonomyIds());
         log.info("处理标签完成");
         PreCommentInfo preCommentInfo =  preCommentInfoMapper.selectById(param.getId());
+        PreCommentInfo newCommentInfo = new PreCommentInfo();
+        BeanUtil.copyProperties(param,newCommentInfo);
         User user = MdcUtil.getCurrentUser();
-        preCommentInfo.setAuditor(user.getUsername());
-        preCommentInfo.setAuditorId(user.getId());
+        newCommentInfo.setAuditor(user.getUsername());
+        newCommentInfo.setAuditorId(user.getId());
         if(ActivityCommentStateEnum.PASS == param.getAuditOperateType()){
-            preCommentInfo.setAuditRemark(param.getAuditFeedback());
-            preCommentInfo.setComViewState(ActivityCommentViewStateEnum.OPEN);
-            preCommentInfo.setComState(ActivityCommentStateEnum.PASS);
+            newCommentInfo.setAuditRemark(param.getAuditFeedback());
+            newCommentInfo.setComViewState(ActivityCommentViewStateEnum.OPEN);
+            newCommentInfo.setComState(ActivityCommentStateEnum.PASS);
         }else if(ActivityCommentStateEnum.NO_PASS == param.getAuditOperateType()){
             if(StrUtil.isBlank(param.getAuditFeedback())){
                 throw new ServiceException("请填写审核反馈");
             }
-            preCommentInfo.setAuditRemark(param.getAuditFeedback());
-            preCommentInfo.setComViewState(ActivityCommentViewStateEnum.HIDE);
-            preCommentInfo.setComState(ActivityCommentStateEnum.NO_PASS);
+            newCommentInfo.setAuditRemark(param.getAuditFeedback());
+            newCommentInfo.setComViewState(ActivityCommentViewStateEnum.HIDE);
+            newCommentInfo.setComState(ActivityCommentStateEnum.NO_PASS);
         }else{
             throw new ServiceException("无效的参数" );
         }
 
-        int count = preCommentInfoMapper.updateById(preCommentInfo);
+        int count = preCommentInfoMapper.updateById(newCommentInfo);
         if (count <= 0) {
             throw new ServiceException("处理审核点评失败");
         }
