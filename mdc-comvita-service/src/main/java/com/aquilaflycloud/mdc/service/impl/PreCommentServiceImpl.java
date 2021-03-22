@@ -11,15 +11,13 @@ import com.aquilaflycloud.mdc.enums.member.InteractionBusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.member.InteractionTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityCommentStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityCommentViewStateEnum;
-import com.aquilaflycloud.mdc.mapper.FolksonomyBusinessRelMapper;
-import com.aquilaflycloud.mdc.mapper.MemberInteractionMapper;
-import com.aquilaflycloud.mdc.mapper.PreActivityInfoMapper;
-import com.aquilaflycloud.mdc.mapper.PreCommentInfoMapper;
+import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInteraction;
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.model.pre.PreCommentInfo;
+import com.aquilaflycloud.mdc.model.pre.PreCommentReplyInfo;
 import com.aquilaflycloud.mdc.param.member.MemberInteractionParam;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
@@ -51,6 +49,8 @@ import java.util.Set;
 public class PreCommentServiceImpl implements PreCommentService {
     @Resource
     private PreCommentInfoMapper preCommentInfoMapper;
+    @Resource
+    private PreCommentReplyInfoMapper preCommentReplyInfoMapper;
     @Resource
     private MemberInteractionMapper memberInteractionMapper;
     @Resource
@@ -213,10 +213,36 @@ public class PreCommentServiceImpl implements PreCommentService {
             result.setFolksonomyNames(sb.toString());
             result.setComLikeCount(memberInteractionService.getInteractionNum(new MemberInteractionParam().setBusinessId(result.getId())
                     .setBusinessType(InteractionBusinessTypeEnum.COMMENT).setInteractionType(InteractionTypeEnum.LIKE)));
+            result.setCommentReplyList(getCommentReply(result.getId()));
             return result;
         } else {
             return null;
         }
+    }
+
+    /**
+     * 获取点评回复
+     * @param commentId
+     * @return
+     */
+    private List<PreCommentPageResult.CommentReply> getCommentReply(Long commentId) {
+        List<PreCommentPageResult.CommentReply> result = new ArrayList<>();
+        QueryWrapper<PreCommentReplyInfo> qw = new QueryWrapper<>();
+        qw.eq("comment_id", commentId);
+        qw.orderByDesc("create_time");
+        List<PreCommentReplyInfo> preCommentReplyInfos = preCommentReplyInfoMapper.selectList(qw);
+        if(CollUtil.isNotEmpty(preCommentReplyInfos)){
+            preCommentReplyInfos.forEach(f -> {
+                PreCommentPageResult.CommentReply commentReply = new PreCommentPageResult.CommentReply();
+                commentReply.setReplyId(f.getId());
+                commentReply.setContent(f.getContent());
+                commentReply.setPicture(f.getPicture());
+                commentReply.setReplier(f.getReplier());
+                commentReply.setReplyTime(f.getCreateTime());
+                result.add(commentReply);
+            });
+        }
+        return result;
     }
 
     @Override
@@ -243,14 +269,18 @@ public class PreCommentServiceImpl implements PreCommentService {
 
     @Override
     public void reply(PreCommentReplyParam param) {
-        if(param.getId()==null) {
+        if(param.getCommentId()==null) {
             throw new ServiceException("活动点评主键id为空" );
         }
-        PreCommentInfo preCommentInfo =  preCommentInfoMapper.selectById(param.getId());
-        preCommentInfo.setComReply(param.getMessage());
-        int count = preCommentInfoMapper.updateById(preCommentInfo);
-        if (count <= 0) {
-            throw new ServiceException("回复点评失败");
+        PreCommentReplyInfo preCommentReplyInfo =new PreCommentReplyInfo();
+        preCommentReplyInfo.setCommentId(param.getCommentId());
+        preCommentReplyInfo.setContent(param.getContent());
+        preCommentReplyInfo.setPicture(param.getPicture());
+        User user = MdcUtil.getCurrentUser();
+        preCommentReplyInfo.setReplier(user.getUsername());
+        int preComment =  preCommentReplyInfoMapper.insert(preCommentReplyInfo);
+        if(preComment < 0){
+            throw new ServiceException("点评回复失败");
         }
         log.info("回复点评完成");
     }
