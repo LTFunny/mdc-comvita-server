@@ -13,6 +13,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
  */
 public interface MemberInteractionService {
     /**
+     * 获取互动状态
+     * @param param 互动入参
+     * @return 互动状态
+     */
+    Boolean getIsInteraction(MemberInteractionParam param);
+
+    /**
      * 获取互动次数
      * @param param 互动入参
      * @return 互动次数
