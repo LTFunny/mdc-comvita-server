@@ -15,6 +15,12 @@ import java.util.List;
 public class PreCommentListResult extends PreCommentResult {
 
     /**
+     * 是否点赞
+     */
+    @ApiModelProperty(value = "是否点赞")
+    private boolean isLiked;
+
+    /**
      * 回复列表
      */
     @ApiModelProperty(value = "回复列表")
