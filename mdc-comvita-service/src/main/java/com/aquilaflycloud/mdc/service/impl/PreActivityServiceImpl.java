@@ -220,9 +220,11 @@ public class PreActivityServiceImpl implements PreActivityService {
                     for(PreCommentInfo replyInfo : replyInfoList){
                         PreCommentResult preCommentResult = new PreCommentResult();
                         replyResults.add(preCommentResult);
-                        MemberInfo member2= memberInfoMapper.selectById(replyInfo.getCommentatorId());
+                        MemberInfo member2 = memberInfoMapper.selectById(replyInfo.getCommentatorId());
                         BeanUtil.copyProperties(replyInfo, preCommentResult);
-                        preCommentResult.setAvatarUrl(member2.getAvatarUrl());
+                        if(StrUtil.isNotBlank(member2.getAvatarUrl())){
+                            preCommentResult.setAvatarUrl(member2.getAvatarUrl());
+                        }
                     }
                 }
             }
