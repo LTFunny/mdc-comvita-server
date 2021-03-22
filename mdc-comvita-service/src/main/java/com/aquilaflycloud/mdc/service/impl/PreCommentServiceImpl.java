@@ -90,6 +90,8 @@ public class PreCommentServiceImpl implements PreCommentService {
         return preCommentInfoMapper.selectPage(param.page(), Wrappers.<PreCommentInfo>lambdaQuery()
                 .eq(PreCommentInfo::getCommentatorId, infoResult.getId())
                 .eq(PreCommentInfo::getComState, param.getComState())
+                //回复记录的父记录id 为空表示开始的第一条点评 否则即回复内容
+                .eq(PreCommentInfo::getParentId, null)
         );
     }
 
