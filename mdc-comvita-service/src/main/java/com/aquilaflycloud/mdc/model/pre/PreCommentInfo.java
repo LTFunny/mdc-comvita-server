@@ -27,17 +27,17 @@ public class PreCommentInfo implements Serializable {
     private Long id;
 
     /**
-     * 点评内容
+     * 点评(回复)内容
      */
     @TableField(value = "com_content")
-    @ApiModelProperty(value = "点评内容")
+    @ApiModelProperty(value = "点评(回复)内容")
     private String comContent;
 
     /**
-     * 点评图片
+     * 点评(回复)图片
      */
     @TableField(value = "com_picture")
-    @ApiModelProperty(value = "点评图片")
+    @ApiModelProperty(value = "点评(回复)图片")
     private String comPicture;
 
     /**
@@ -69,17 +69,17 @@ public class PreCommentInfo implements Serializable {
     private ActivityCommentViewStateEnum comViewState;
 
     /**
-     * 点评人
+     * 点评(回复)人
      */
     @TableField(value = "commentator")
-    @ApiModelProperty(value = "点评人")
+    @ApiModelProperty(value = "点评(回复)人")
     private String commentator;
 
     /**
-     * 点评人Id
+     * 点评(回复)人Id
      */
     @TableField(value = "commentator_id")
-    @ApiModelProperty(value = "点评人Id")
+    @ApiModelProperty(value = "点评(回复)人Id")
     private Long commentatorId;
 
     /**
@@ -97,24 +97,33 @@ public class PreCommentInfo implements Serializable {
     private Long auditorId;
 
     /**
+     * 回复记录的父记录id 为空表示开始的第一条点评
+     */
+    @TableField(value = "parent_id")
+    @ApiModelProperty(value = "复记录的父记录ID")
+    private Long parentId;
+
+    /**
      * 审核备注
      */
     @TableField(value = "audit_remark")
     @ApiModelProperty(value = "审核备注")
     private String auditRemark;
 
+
+
     /**
-     * 创建时间
+     * 创建时间 即点评(回复)时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
-    @ApiModelProperty(value = "创建时间")
+    @ApiModelProperty(value = "创建时间 即点评(回复)时间")
     private Date createTime;
 
     /**
-     * 最后更新时间
+     * 最后更新时间 即审核时间
      */
     @TableField(value = "last_update_time", fill = FieldFill.INSERT_UPDATE)
-    @ApiModelProperty(value = "最后更新时间")
+    @ApiModelProperty(value = "最后更新时间 即审核时间")
     private Date lastUpdateTime;
 
     /**

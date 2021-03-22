@@ -17,7 +17,6 @@ import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInteraction;
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.model.pre.PreCommentInfo;
-import com.aquilaflycloud.mdc.model.pre.PreCommentReplyInfo;
 import com.aquilaflycloud.mdc.param.member.MemberInteractionParam;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
@@ -49,8 +48,6 @@ import java.util.Set;
 public class PreCommentServiceImpl implements PreCommentService {
     @Resource
     private PreCommentInfoMapper preCommentInfoMapper;
-    @Resource
-    private PreCommentReplyInfoMapper preCommentReplyInfoMapper;
     @Resource
     private MemberInteractionMapper memberInteractionMapper;
     @Resource
@@ -227,17 +224,17 @@ public class PreCommentServiceImpl implements PreCommentService {
      */
     private List<PreCommentPageResult.CommentReply> getCommentReply(Long commentId) {
         List<PreCommentPageResult.CommentReply> result = new ArrayList<>();
-        QueryWrapper<PreCommentReplyInfo> qw = new QueryWrapper<>();
-        qw.eq("comment_id", commentId);
+        QueryWrapper<PreCommentInfo> qw = new QueryWrapper<>();
+        qw.eq("parent_id", commentId);
         qw.orderByDesc("create_time");
-        List<PreCommentReplyInfo> preCommentReplyInfos = preCommentReplyInfoMapper.selectList(qw);
-        if(CollUtil.isNotEmpty(preCommentReplyInfos)){
-            preCommentReplyInfos.forEach(f -> {
+        List<PreCommentInfo> preCommentInfos = preCommentInfoMapper.selectList(qw);
+        if(CollUtil.isNotEmpty(preCommentInfos)){
+            preCommentInfos.forEach(f -> {
                 PreCommentPageResult.CommentReply commentReply = new PreCommentPageResult.CommentReply();
                 commentReply.setReplyId(f.getId());
-                commentReply.setContent(f.getContent());
-                commentReply.setPicture(f.getPicture());
-                commentReply.setReplier(f.getReplier());
+                commentReply.setContent(f.getComContent());
+                commentReply.setPicture(f.getComPicture());
+                commentReply.setReplier(f.getCommentator());
                 commentReply.setReplyTime(f.getCreateTime());
                 result.add(commentReply);
             });
@@ -263,6 +260,8 @@ public class PreCommentServiceImpl implements PreCommentService {
                 .le(param.getCommentEndTime() != null, PreCommentInfo::getCreateTime, param.getCommentEndTime())
                 .ge(param.getAuditStartTime() != null, PreCommentInfo::getLastUpdateTime, param.getAuditStartTime())
                 .le(param.getAuditEndTime() != null, PreCommentInfo::getLastUpdateTime, param.getAuditEndTime())
+                //回复记录的父记录id为空表示开始的第一条点评 有值即为回复
+                .eq(PreCommentInfo::getParentId,null)
                 .orderByDesc(PreCommentInfo::getCreateTime)
         ).convert(this::dataConvertResult);
     }
@@ -272,13 +271,16 @@ public class PreCommentServiceImpl implements PreCommentService {
         if(param.getCommentId()==null) {
             throw new ServiceException("活动点评主键id为空" );
         }
-        PreCommentReplyInfo preCommentReplyInfo =new PreCommentReplyInfo();
-        preCommentReplyInfo.setCommentId(param.getCommentId());
-        preCommentReplyInfo.setContent(param.getContent());
-        preCommentReplyInfo.setPicture(param.getPicture());
+        PreCommentInfo  preCommentInfo =new PreCommentInfo();
+        preCommentInfo.setParentId(param.getCommentId());
         User user = MdcUtil.getCurrentUser();
-        preCommentReplyInfo.setReplier(user.getUsername());
-        int preComment =  preCommentReplyInfoMapper.insert(preCommentReplyInfo);
+        preCommentInfo.setCommentatorId(user.getId());
+        preCommentInfo.setCommentator(user.getUsername());
+        preCommentInfo.setActivityId(param.getActivityId());
+        preCommentInfo.setActivityName(param.getActivityName());
+        preCommentInfo.setComContent(param.getContent());
+        preCommentInfo.setComPicture(param.getPicture());
+        int preComment =  preCommentInfoMapper.insert(preCommentInfo);
         if(preComment < 0){
             throw new ServiceException("点评回复失败");
         }

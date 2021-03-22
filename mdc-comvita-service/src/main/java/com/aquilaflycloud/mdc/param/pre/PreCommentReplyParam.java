@@ -13,6 +13,20 @@ import javax.validation.constraints.NotNull;
 public class PreCommentReplyParam {
 
     /**
+     * 活动id
+     */
+    @ApiModelProperty(value = "activityId", required = true)
+    @NotNull(message = "活动id不能为空")
+    private Long activityId;
+
+    /**
+     * 活动名称
+     */
+    @ApiModelProperty(value = "activityName", required = true)
+    @NotNull(message = "活动名称不能为空")
+    private String activityName;
+
+    /**
      * 活动点评id
      */
     @ApiModelProperty(value = "id", required = true)
