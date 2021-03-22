@@ -268,8 +268,8 @@ public class PreCommentServiceImpl implements PreCommentService {
                 .eq(param.getComViewState() != null, PreCommentInfo::getComViewState, param.getComViewState())
                 .ge(param.getCommentStartTime() != null, PreCommentInfo::getCreateTime, param.getCommentStartTime())
                 .le(param.getCommentEndTime() != null, PreCommentInfo::getCreateTime, param.getCommentEndTime())
-                .ge(param.getAuditStartTime() != null, PreCommentInfo::getAuditorTime, param.getAuditStartTime())
-                .le(param.getAuditEndTime() != null, PreCommentInfo::getAuditorTime, param.getAuditEndTime())
+                .ge(param.getAuditStartTime() != null, PreCommentInfo::getAuditTime, param.getAuditStartTime())
+                .le(param.getAuditEndTime() != null, PreCommentInfo::getAuditTime, param.getAuditEndTime())
                 //回复记录的父记录id为空表示开始的第一条点评 有值即为回复
                 .isNull(PreCommentInfo::getParentId)
                 .orderByDesc(PreCommentInfo::getCreateTime)

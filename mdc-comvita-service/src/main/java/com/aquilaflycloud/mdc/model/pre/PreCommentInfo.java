@@ -97,13 +97,6 @@ public class PreCommentInfo implements Serializable {
     private Long auditorId;
 
     /**
-     * 回复记录的父记录id 为空表示开始的第一条点评
-     */
-    @TableField(value = "parent_id")
-    @ApiModelProperty(value = "复记录的父记录ID")
-    private Long parentId;
-
-    /**
      * 审核备注
      */
     @TableField(value = "audit_remark")
@@ -113,10 +106,16 @@ public class PreCommentInfo implements Serializable {
     /**
      * 审核时间
      */
-    @TableField(value = "auditor_time")
+    @TableField(value = "audit_time")
     @ApiModelProperty(value = "审核时间")
-    private Date auditorTime;
+    private Date auditTime;
 
+    /**
+     * 回复记录的父记录id 为空表示开始的第一条点评
+     */
+    @TableField(value = "parent_id")
+    @ApiModelProperty(value = "复记录的父记录ID")
+    private Long parentId;
 
     /**
      * 创建时间 即点评(回复)时间
