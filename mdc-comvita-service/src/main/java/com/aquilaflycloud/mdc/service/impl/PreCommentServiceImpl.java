@@ -91,7 +91,7 @@ public class PreCommentServiceImpl implements PreCommentService {
                 .eq(PreCommentInfo::getCommentatorId, infoResult.getId())
                 .eq(PreCommentInfo::getComState, param.getComState())
                 //回复记录的父记录id 为空表示开始的第一条点评 否则即回复内容
-                .eq(PreCommentInfo::getParentId, null)
+                .isNull(PreCommentInfo::getParentId)
         );
     }
 
@@ -263,7 +263,7 @@ public class PreCommentServiceImpl implements PreCommentService {
                 .ge(param.getAuditStartTime() != null, PreCommentInfo::getLastUpdateTime, param.getAuditStartTime())
                 .le(param.getAuditEndTime() != null, PreCommentInfo::getLastUpdateTime, param.getAuditEndTime())
                 //回复记录的父记录id为空表示开始的第一条点评 有值即为回复
-                .eq(PreCommentInfo::getParentId,null)
+                .isNull(PreCommentInfo::getParentId)
                 .orderByDesc(PreCommentInfo::getCreateTime)
         ).convert(this::dataConvertResult);
     }
