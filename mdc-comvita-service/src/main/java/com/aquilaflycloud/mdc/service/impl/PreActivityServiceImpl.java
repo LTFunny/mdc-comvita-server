@@ -76,8 +76,6 @@ public class PreActivityServiceImpl implements PreActivityService {
     private PreCommentInfoMapper preCommentInfoMapper;
     @Resource
     private MemberInfoMapper memberInfoMapper;
-    @Resource
-    private PreCommentReplyInfoMapper preCommentReplyInfoMapper;
     private PreActivityInfo stateHandler(PreActivityInfo info) {
         if (info == null) {
             throw new ServiceException("活动不存在");
