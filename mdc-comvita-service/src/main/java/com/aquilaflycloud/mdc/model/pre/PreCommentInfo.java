@@ -110,6 +110,12 @@ public class PreCommentInfo implements Serializable {
     @ApiModelProperty(value = "审核备注")
     private String auditRemark;
 
+    /**
+     * 审核时间
+     */
+    @TableField(value = "auditor_time")
+    @ApiModelProperty(value = "审核时间")
+    private Date auditorTime;
 
 
     /**
@@ -120,10 +126,10 @@ public class PreCommentInfo implements Serializable {
     private Date createTime;
 
     /**
-     * 最后更新时间 即审核时间
+     * 最后更新时间
      */
     @TableField(value = "last_update_time", fill = FieldFill.INSERT_UPDATE)
-    @ApiModelProperty(value = "最后更新时间 即审核时间")
+    @ApiModelProperty(value = "最后更新时间")
     private Date lastUpdateTime;
 
     /**

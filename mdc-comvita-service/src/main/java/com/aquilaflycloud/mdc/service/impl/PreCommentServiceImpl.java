@@ -132,12 +132,14 @@ public class PreCommentServiceImpl implements PreCommentService {
             throw new ServiceException("活动点评主键id为空" );
         }
         PreCommentInfo preCommentInfo =  preCommentInfoMapper.selectById(param.getId());
+        PreCommentInfo newCommentInfo = new PreCommentInfo();
+        BeanUtil.copyProperties(param,newCommentInfo);
         if(ActivityCommentViewStateEnum.HIDE == preCommentInfo.getComViewState()){
-            preCommentInfo.setComViewState(ActivityCommentViewStateEnum.OPEN);
+            newCommentInfo.setComViewState(ActivityCommentViewStateEnum.OPEN);
         }else if(ActivityCommentViewStateEnum.OPEN == preCommentInfo.getComViewState()){
-            preCommentInfo.setComViewState(ActivityCommentViewStateEnum.HIDE);
+            newCommentInfo.setComViewState(ActivityCommentViewStateEnum.HIDE);
         }
-        int count = preCommentInfoMapper.updateById(preCommentInfo);
+        int count = preCommentInfoMapper.updateById(newCommentInfo);
         if (count <= 0) {
             throw new ServiceException("改变展示状态(隐藏/公开)失败");
         }
@@ -159,7 +161,7 @@ public class PreCommentServiceImpl implements PreCommentService {
         }
         folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.ACTIVITYCOMMENT, param.getId(), param.getFolksonomyIds());
         log.info("处理标签完成");
-        PreCommentInfo preCommentInfo =  preCommentInfoMapper.selectById(param.getId());
+
         PreCommentInfo newCommentInfo = new PreCommentInfo();
         BeanUtil.copyProperties(param,newCommentInfo);
         User user = MdcUtil.getCurrentUser();
@@ -266,8 +268,8 @@ public class PreCommentServiceImpl implements PreCommentService {
                 .eq(param.getComViewState() != null, PreCommentInfo::getComViewState, param.getComViewState())
                 .ge(param.getCommentStartTime() != null, PreCommentInfo::getCreateTime, param.getCommentStartTime())
                 .le(param.getCommentEndTime() != null, PreCommentInfo::getCreateTime, param.getCommentEndTime())
-                .ge(param.getAuditStartTime() != null, PreCommentInfo::getLastUpdateTime, param.getAuditStartTime())
-                .le(param.getAuditEndTime() != null, PreCommentInfo::getLastUpdateTime, param.getAuditEndTime())
+                .ge(param.getAuditStartTime() != null, PreCommentInfo::getAuditorTime, param.getAuditStartTime())
+                .le(param.getAuditEndTime() != null, PreCommentInfo::getAuditorTime, param.getAuditEndTime())
                 //回复记录的父记录id为空表示开始的第一条点评 有值即为回复
                 .isNull(PreCommentInfo::getParentId)
                 .orderByDesc(PreCommentInfo::getCreateTime)
