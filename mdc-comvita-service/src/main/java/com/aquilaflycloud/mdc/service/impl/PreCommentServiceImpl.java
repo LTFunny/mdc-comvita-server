@@ -71,7 +71,11 @@ public class PreCommentServiceImpl implements PreCommentService {
         }*/
         PreCommentInfo  preCommentInfo =new PreCommentInfo();
         preCommentInfo.setCommentatorId(infoResult.getId());
-        preCommentInfo.setCommentator(infoResult.getRealName());
+        if(StrUtil.isBlank(infoResult.getRealName())){
+            preCommentInfo.setCommentator(infoResult.getNickName());
+        }else{
+            preCommentInfo.setCommentator(infoResult.getRealName());
+        }
         preCommentInfo.setActivityId(param.getActivityId());
         preCommentInfo.setActivityName(param.getActivityName());
         preCommentInfo.setComContent(param.getComContent());
