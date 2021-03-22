@@ -195,13 +195,28 @@ public class PreActivityServiceImpl implements PreActivityService {
         );
         if(CollUtil.isNotEmpty(commentInfoList)){
             List<PreCommentListResult> listResults=new ArrayList<>();
-            for(PreCommentInfo preCommentInfo:commentInfoList){
-                PreCommentListResult preCommentListResult=new PreCommentListResult();
+            for(PreCommentInfo preCommentInfo : commentInfoList){
+                PreCommentListResult preCommentListResult = new PreCommentListResult();
                 MemberInfo member= memberInfoMapper.selectById(preCommentInfo.getCommentatorId());
                 BeanUtil.copyProperties(preCommentInfo, preCommentListResult);
                 preCommentListResult.setAvatarUrl(member.getAvatarUrl());
-
                 listResults.add(preCommentListResult);
+                //补充点评回复信息列表
+                List<PreCommentInfo> replyInfoList = preCommentInfoMapper.selectList(Wrappers.<PreCommentInfo>lambdaQuery()
+                        .eq(PreCommentInfo::getParentId,preCommentInfo.getId())
+                        .orderByDesc(PreCommentInfo::getCreateTime)
+                );
+                if(CollUtil.isNotEmpty(replyInfoList)){
+                    List<PreCommentResult> replyResults = new ArrayList<>();
+                    preCommentListResult.setCommentReplyList(replyResults);
+                    for(PreCommentInfo replyInfo : replyInfoList){
+                        PreCommentResult preCommentResult = new PreCommentResult();
+                        replyResults.add(preCommentResult);
+                        MemberInfo member2= memberInfoMapper.selectById(replyInfo.getCommentatorId());
+                        BeanUtil.copyProperties(replyInfo, preCommentResult);
+                        preCommentResult.setAvatarUrl(member2.getAvatarUrl());
+                    }
+                }
             }
             result.setCommentList(listResults);
         }
