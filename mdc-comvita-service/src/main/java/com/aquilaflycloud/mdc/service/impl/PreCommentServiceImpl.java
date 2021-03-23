@@ -71,6 +71,7 @@ public class PreCommentServiceImpl implements PreCommentService {
             throw new ServiceException("已点评该活动");
         }*/
         PreCommentInfo  preCommentInfo =new PreCommentInfo();
+        MdcUtil.setMemberInfo(preCommentInfo, infoResult);
         preCommentInfo.setCommentatorId(infoResult.getId());
         if(StrUtil.isBlank(infoResult.getRealName())){
             preCommentInfo.setCommentator(infoResult.getNickName());
