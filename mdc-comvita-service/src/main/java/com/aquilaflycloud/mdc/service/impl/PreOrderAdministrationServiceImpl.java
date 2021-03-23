@@ -109,7 +109,13 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 if(orderGoods < 0){
                     throw new ServiceException("修改状态失败。");
                 }
-
+                PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
+                        .eq(PrePickingCard::getPickingCode, preOrderGoods.getCardCode())
+                );
+                if (prePickingCard != null) {
+                    prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
+                    prePickingCardMapper.updateById(prePickingCard);
+                }
             }
         }
     }
