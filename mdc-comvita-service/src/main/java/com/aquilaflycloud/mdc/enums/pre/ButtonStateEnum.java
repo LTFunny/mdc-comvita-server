@@ -28,7 +28,7 @@ public enum ButtonStateEnum {
     /**
      * 点评
      */
-    COMMENT(4, "点评"),
+    COMMENT(4, "写点评"),
     /**
      * 参加人数已达到上限
      */
