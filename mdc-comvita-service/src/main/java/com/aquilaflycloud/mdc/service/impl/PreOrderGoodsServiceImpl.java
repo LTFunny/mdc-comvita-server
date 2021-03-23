@@ -132,7 +132,7 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
         if (count == 0) {
             wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(orderInfo.getAppId())
                             .setOpenId(orderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERCHANGE, null,
-                    orderInfo.getOrderCode(), "已成功预约商品。届时请留意快递信息。", DateTime.now().toString("yyyy年MM月dd日HH时mm分"), "订单已全部预约商品。");
+                    orderInfo.getOrderCode(), "已成功预约商品。届时请留意快递信息。", DateTime.now().toString("yyyy年MM月dd日 HH:mm"), "订单已全部预约商品。");
         }
     }
 

@@ -650,7 +650,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         //发送微信订阅消息
         wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(preOrderInfo.getAppId())
                         .setOpenId(preOrderInfo.getOpenId())), MiniMessageTypeEnum.PREORDERREFUNDAUDIT, null,
-                preOrderInfo.getOrderCode(), preRefundOrderInfo.getRefundPrice().toString(), "审核通过，已成功退货。",
+                preOrderInfo.getOrderCode(), preRefundOrderInfo.getRefundPrice().toString(), "审核通过",
                 "退款将于7个工作日内退回到您的付款账户。");
     }
 
