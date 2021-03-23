@@ -219,6 +219,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                     preCommentListResult.setCommentReplyList(replyResults);
                     for(PreCommentInfo replyInfo : replyInfoList){
                         PreCommentResult preCommentResult = new PreCommentResult();
+                        BeanUtil.copyProperties(replyInfo, preCommentResult);
                         replyResults.add(preCommentResult);
                         //回复用户是系统登录用户 没有头像 设置默认值
                         preCommentResult.setAvatarUrl("");

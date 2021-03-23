@@ -70,6 +70,8 @@ public class PreCommentInfo implements Serializable {
 
     /**
      * 点评(回复)人
+     * 点评人为小程序端的会员名 会员名为空即用会员昵称
+     * 回复人为后台管理的登录用户名 该用户没有头像
      */
     @TableField(value = "commentator")
     @ApiModelProperty(value = "点评(回复)人")
@@ -77,6 +79,8 @@ public class PreCommentInfo implements Serializable {
 
     /**
      * 点评(回复)人Id
+     * 点评人ID为小程序端的会员ID
+     * 回复人ID为后台管理的登录用户ID
      */
     @TableField(value = "commentator_id")
     @ApiModelProperty(value = "点评(回复)人Id")
@@ -111,10 +115,10 @@ public class PreCommentInfo implements Serializable {
     private Date auditTime;
 
     /**
-     * 回复记录的父记录id 为空表示开始的第一条点评
+     * 回复记录的父记录id 为空表示该条记录是点评
      */
     @TableField(value = "parent_id")
-    @ApiModelProperty(value = "复记录的父记录ID")
+    @ApiModelProperty(value = "回复记录的父记录ID")
     private Long parentId;
 
     /**
