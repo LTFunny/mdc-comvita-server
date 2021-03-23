@@ -1,7 +1,5 @@
 package com.aquilaflycloud.mdc.result.pre;
 
-import com.aquilaflycloud.mdc.model.pre.PreCommentInfo;
-import com.aquilaflycloud.mdc.model.pre.PreCommentReplyInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -14,12 +12,17 @@ import java.util.List;
  */
 @Accessors(chain = true)
 @Data
-public class PreCommentListResult extends PreCommentInfo {
-    @ApiModelProperty(value = "会员头像")
-    private String avatarUrl;
+public class PreCommentListResult extends PreCommentResult {
+
+    /**
+     * 是否点赞
+     */
+    @ApiModelProperty(value = "是否点赞")
+    private boolean isLiked;
+
     /**
      * 回复列表
      */
     @ApiModelProperty(value = "回复列表")
-    private List<PreCommentReplyInfo> commentReplyList;
+    private List<PreCommentResult> commentReplyList;
 }

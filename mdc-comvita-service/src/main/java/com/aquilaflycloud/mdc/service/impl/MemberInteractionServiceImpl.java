@@ -96,6 +96,25 @@ public class MemberInteractionServiceImpl implements MemberInteractionService {
     }
 
     @Override
+    public Boolean getIsInteraction(MemberInteractionParam param) {
+        boolean isInteraction = false;
+        serviceParamValidator.validateBizParam(param);
+        Long memberId = MdcUtil.getCurrentMemberId();
+        if (memberId != null) {
+            boolean flag = loadNum(param);
+            if (flag) {
+                String key = "interactionNum_" + param.getBusinessType() + param.getInteractionType() + param.getBusinessId();
+                if (RedisUtil.hashRedis().hasKey(key, memberId)) {
+                    isInteraction = true;
+                }
+            } else {
+                throw new ServiceException("获取互动数失败");
+            }
+        }
+        return isInteraction;
+    }
+
+    @Override
     public Long getInteractionNum(MemberInteractionParam param) {
         serviceParamValidator.validateBizParam(param);
         boolean flag = loadNum(param);

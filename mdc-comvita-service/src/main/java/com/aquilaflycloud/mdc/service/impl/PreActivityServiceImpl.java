@@ -12,6 +12,8 @@ import com.aliyun.oss.model.OSSObject;
 import com.aquilaflycloud.dataAuth.common.BaseResult;
 import com.aquilaflycloud.mdc.enums.member.BusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.member.EventTypeEnum;
+import com.aquilaflycloud.mdc.enums.member.InteractionBusinessTypeEnum;
+import com.aquilaflycloud.mdc.enums.member.InteractionTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.*;
 import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.*;
@@ -20,11 +22,13 @@ import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.member.MemberEventStatisticsParam;
+import com.aquilaflycloud.mdc.param.member.MemberInteractionParam;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.member.MemberEventStatisticsResult;
 import com.aquilaflycloud.mdc.result.pre.*;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.service.MemberEventLogService;
+import com.aquilaflycloud.mdc.service.MemberInteractionService;
 import com.aquilaflycloud.mdc.service.PreActivityService;
 import com.aquilaflycloud.mdc.util.MdcUtil;
 import com.aquilaflycloud.result.OssResult;
@@ -72,6 +76,8 @@ public class PreActivityServiceImpl implements PreActivityService {
     private WechatMiniService wechatMiniService;
     @Resource
     private MemberEventLogService memberEventLogService;
+    @Resource
+    private MemberInteractionService memberInteractionService;
     @Resource
     private PreCommentInfoMapper preCommentInfoMapper;
     @Resource
@@ -195,13 +201,29 @@ public class PreActivityServiceImpl implements PreActivityService {
         );
         if(CollUtil.isNotEmpty(commentInfoList)){
             List<PreCommentListResult> listResults=new ArrayList<>();
-            for(PreCommentInfo preCommentInfo:commentInfoList){
-                PreCommentListResult preCommentListResult=new PreCommentListResult();
+            for(PreCommentInfo preCommentInfo : commentInfoList){
+                PreCommentListResult preCommentListResult = new PreCommentListResult();
                 MemberInfo member= memberInfoMapper.selectById(preCommentInfo.getCommentatorId());
                 BeanUtil.copyProperties(preCommentInfo, preCommentListResult);
                 preCommentListResult.setAvatarUrl(member.getAvatarUrl());
-
+                preCommentListResult.setLiked(memberInteractionService.getIsInteraction(new MemberInteractionParam().setBusinessId(preCommentInfo.getId())
+                        .setBusinessType(InteractionBusinessTypeEnum.COMMENT).setInteractionType(InteractionTypeEnum.LIKE)));
                 listResults.add(preCommentListResult);
+                //补充点评回复信息列表
+                List<PreCommentInfo> replyInfoList = preCommentInfoMapper.selectList(Wrappers.<PreCommentInfo>lambdaQuery()
+                        .eq(PreCommentInfo::getParentId,preCommentInfo.getId())
+                        .orderByDesc(PreCommentInfo::getCreateTime)
+                );
+                if(CollUtil.isNotEmpty(replyInfoList)){
+                    List<PreCommentResult> replyResults = new ArrayList<>();
+                    preCommentListResult.setCommentReplyList(replyResults);
+                    for(PreCommentInfo replyInfo : replyInfoList){
+                        PreCommentResult preCommentResult = new PreCommentResult();
+                        replyResults.add(preCommentResult);
+                        //回复用户是系统登录用户 没有头像 设置默认值
+                        preCommentResult.setAvatarUrl("");
+                    }
+                }
             }
             result.setCommentList(listResults);
         }

@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.auth.bean.User;
 import com.aquilaflycloud.dataAuth.common.PageParam;
@@ -17,7 +18,6 @@ import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInteraction;
 import com.aquilaflycloud.mdc.model.pre.PreActivityInfo;
 import com.aquilaflycloud.mdc.model.pre.PreCommentInfo;
-import com.aquilaflycloud.mdc.model.pre.PreCommentReplyInfo;
 import com.aquilaflycloud.mdc.param.member.MemberInteractionParam;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
@@ -50,8 +50,6 @@ public class PreCommentServiceImpl implements PreCommentService {
     @Resource
     private PreCommentInfoMapper preCommentInfoMapper;
     @Resource
-    private PreCommentReplyInfoMapper preCommentReplyInfoMapper;
-    @Resource
     private MemberInteractionMapper memberInteractionMapper;
     @Resource
     private MemberInteractionService memberInteractionService;
@@ -74,7 +72,11 @@ public class PreCommentServiceImpl implements PreCommentService {
         }*/
         PreCommentInfo  preCommentInfo =new PreCommentInfo();
         preCommentInfo.setCommentatorId(infoResult.getId());
-        preCommentInfo.setCommentator(infoResult.getRealName());
+        if(StrUtil.isBlank(infoResult.getRealName())){
+            preCommentInfo.setCommentator(infoResult.getNickName());
+        }else{
+            preCommentInfo.setCommentator(infoResult.getRealName());
+        }
         preCommentInfo.setActivityId(param.getActivityId());
         preCommentInfo.setActivityName(param.getActivityName());
         preCommentInfo.setComContent(param.getComContent());
@@ -93,6 +95,8 @@ public class PreCommentServiceImpl implements PreCommentService {
         return preCommentInfoMapper.selectPage(param.page(), Wrappers.<PreCommentInfo>lambdaQuery()
                 .eq(PreCommentInfo::getCommentatorId, infoResult.getId())
                 .eq(PreCommentInfo::getComState, param.getComState())
+                //回复记录的父记录id 为空表示开始的第一条点评 否则即回复内容
+                .isNull(PreCommentInfo::getParentId)
         );
     }
 
@@ -129,12 +133,14 @@ public class PreCommentServiceImpl implements PreCommentService {
             throw new ServiceException("活动点评主键id为空" );
         }
         PreCommentInfo preCommentInfo =  preCommentInfoMapper.selectById(param.getId());
+        PreCommentInfo newCommentInfo = new PreCommentInfo();
+        BeanUtil.copyProperties(param,newCommentInfo);
         if(ActivityCommentViewStateEnum.HIDE == preCommentInfo.getComViewState()){
-            preCommentInfo.setComViewState(ActivityCommentViewStateEnum.OPEN);
+            newCommentInfo.setComViewState(ActivityCommentViewStateEnum.OPEN);
         }else if(ActivityCommentViewStateEnum.OPEN == preCommentInfo.getComViewState()){
-            preCommentInfo.setComViewState(ActivityCommentViewStateEnum.HIDE);
+            newCommentInfo.setComViewState(ActivityCommentViewStateEnum.HIDE);
         }
-        int count = preCommentInfoMapper.updateById(preCommentInfo);
+        int count = preCommentInfoMapper.updateById(newCommentInfo);
         if (count <= 0) {
             throw new ServiceException("改变展示状态(隐藏/公开)失败");
         }
@@ -156,26 +162,28 @@ public class PreCommentServiceImpl implements PreCommentService {
         }
         folksonomyService.saveFolksonomyBusinessRel(BusinessTypeEnum.ACTIVITYCOMMENT, param.getId(), param.getFolksonomyIds());
         log.info("处理标签完成");
-        PreCommentInfo preCommentInfo =  preCommentInfoMapper.selectById(param.getId());
+
+        PreCommentInfo newCommentInfo = new PreCommentInfo();
+        BeanUtil.copyProperties(param,newCommentInfo);
         User user = MdcUtil.getCurrentUser();
-        preCommentInfo.setAuditor(user.getUsername());
-        preCommentInfo.setAuditorId(user.getId());
+        newCommentInfo.setAuditor(user.getUsername());
+        newCommentInfo.setAuditorId(user.getId());
         if(ActivityCommentStateEnum.PASS == param.getAuditOperateType()){
-            preCommentInfo.setAuditRemark(param.getAuditFeedback());
-            preCommentInfo.setComViewState(ActivityCommentViewStateEnum.OPEN);
-            preCommentInfo.setComState(ActivityCommentStateEnum.PASS);
+            newCommentInfo.setAuditRemark(param.getAuditFeedback());
+            newCommentInfo.setComViewState(ActivityCommentViewStateEnum.OPEN);
+            newCommentInfo.setComState(ActivityCommentStateEnum.PASS);
         }else if(ActivityCommentStateEnum.NO_PASS == param.getAuditOperateType()){
             if(StrUtil.isBlank(param.getAuditFeedback())){
                 throw new ServiceException("请填写审核反馈");
             }
-            preCommentInfo.setAuditRemark(param.getAuditFeedback());
-            preCommentInfo.setComViewState(ActivityCommentViewStateEnum.HIDE);
-            preCommentInfo.setComState(ActivityCommentStateEnum.NO_PASS);
+            newCommentInfo.setAuditRemark(param.getAuditFeedback());
+            newCommentInfo.setComViewState(ActivityCommentViewStateEnum.HIDE);
+            newCommentInfo.setComState(ActivityCommentStateEnum.NO_PASS);
         }else{
             throw new ServiceException("无效的参数" );
         }
-
-        int count = preCommentInfoMapper.updateById(preCommentInfo);
+        newCommentInfo.setAuditTime(DateTime.now());
+        int count = preCommentInfoMapper.updateById(newCommentInfo);
         if (count <= 0) {
             throw new ServiceException("处理审核点评失败");
         }
@@ -227,17 +235,17 @@ public class PreCommentServiceImpl implements PreCommentService {
      */
     private List<PreCommentPageResult.CommentReply> getCommentReply(Long commentId) {
         List<PreCommentPageResult.CommentReply> result = new ArrayList<>();
-        QueryWrapper<PreCommentReplyInfo> qw = new QueryWrapper<>();
-        qw.eq("comment_id", commentId);
+        QueryWrapper<PreCommentInfo> qw = new QueryWrapper<>();
+        qw.eq("parent_id", commentId);
         qw.orderByDesc("create_time");
-        List<PreCommentReplyInfo> preCommentReplyInfos = preCommentReplyInfoMapper.selectList(qw);
-        if(CollUtil.isNotEmpty(preCommentReplyInfos)){
-            preCommentReplyInfos.forEach(f -> {
+        List<PreCommentInfo> preCommentInfos = preCommentInfoMapper.selectList(qw);
+        if(CollUtil.isNotEmpty(preCommentInfos)){
+            preCommentInfos.forEach(f -> {
                 PreCommentPageResult.CommentReply commentReply = new PreCommentPageResult.CommentReply();
                 commentReply.setReplyId(f.getId());
-                commentReply.setContent(f.getContent());
-                commentReply.setPicture(f.getPicture());
-                commentReply.setReplier(f.getReplier());
+                commentReply.setContent(f.getComContent());
+                commentReply.setPicture(f.getComPicture());
+                commentReply.setReplier(f.getCommentator());
                 commentReply.setReplyTime(f.getCreateTime());
                 result.add(commentReply);
             });
@@ -261,8 +269,10 @@ public class PreCommentServiceImpl implements PreCommentService {
                 .eq(param.getComViewState() != null, PreCommentInfo::getComViewState, param.getComViewState())
                 .ge(param.getCommentStartTime() != null, PreCommentInfo::getCreateTime, param.getCommentStartTime())
                 .le(param.getCommentEndTime() != null, PreCommentInfo::getCreateTime, param.getCommentEndTime())
-                .ge(param.getAuditStartTime() != null, PreCommentInfo::getLastUpdateTime, param.getAuditStartTime())
-                .le(param.getAuditEndTime() != null, PreCommentInfo::getLastUpdateTime, param.getAuditEndTime())
+                .ge(param.getAuditStartTime() != null, PreCommentInfo::getAuditTime, param.getAuditStartTime())
+                .le(param.getAuditEndTime() != null, PreCommentInfo::getAuditTime, param.getAuditEndTime())
+                //回复记录的父记录id为空表示开始的第一条点评 有值即为回复
+                .isNull(PreCommentInfo::getParentId)
                 .orderByDesc(PreCommentInfo::getCreateTime)
         ).convert(this::dataConvertResult);
     }
@@ -272,13 +282,16 @@ public class PreCommentServiceImpl implements PreCommentService {
         if(param.getCommentId()==null) {
             throw new ServiceException("活动点评主键id为空" );
         }
-        PreCommentReplyInfo preCommentReplyInfo =new PreCommentReplyInfo();
-        preCommentReplyInfo.setCommentId(param.getCommentId());
-        preCommentReplyInfo.setContent(param.getContent());
-        preCommentReplyInfo.setPicture(param.getPicture());
+        PreCommentInfo  preCommentInfo =new PreCommentInfo();
+        preCommentInfo.setParentId(param.getCommentId());
         User user = MdcUtil.getCurrentUser();
-        preCommentReplyInfo.setReplier(user.getUsername());
-        int preComment =  preCommentReplyInfoMapper.insert(preCommentReplyInfo);
+        preCommentInfo.setCommentatorId(user.getId());
+        preCommentInfo.setCommentator(user.getUsername());
+        preCommentInfo.setActivityId(param.getActivityId());
+        preCommentInfo.setActivityName(param.getActivityName());
+        preCommentInfo.setComContent(param.getContent());
+        preCommentInfo.setComPicture(param.getPicture());
+        int preComment =  preCommentInfoMapper.insert(preCommentInfo);
         if(preComment < 0){
             throw new ServiceException("点评回复失败");
         }
