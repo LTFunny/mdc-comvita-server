@@ -97,6 +97,7 @@ public class PreCommentServiceImpl implements PreCommentService {
                 .eq(PreCommentInfo::getComState, param.getComState())
                 //回复记录的父记录id 为空表示开始的第一条点评 否则即回复内容
                 .isNull(PreCommentInfo::getParentId)
+                .orderByDesc(PreCommentInfo::getCreateTime)
         );
     }
 
