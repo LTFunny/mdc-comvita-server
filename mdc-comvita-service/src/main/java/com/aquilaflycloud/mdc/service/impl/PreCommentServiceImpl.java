@@ -2,6 +2,7 @@ package com.aquilaflycloud.mdc.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
 import com.aquilaflycloud.auth.bean.User;
 import com.aquilaflycloud.dataAuth.common.PageParam;
@@ -181,7 +182,7 @@ public class PreCommentServiceImpl implements PreCommentService {
         }else{
             throw new ServiceException("无效的参数" );
         }
-
+        newCommentInfo.setAuditTime(DateTime.now());
         int count = preCommentInfoMapper.updateById(newCommentInfo);
         if (count <= 0) {
             throw new ServiceException("处理审核点评失败");
