@@ -68,6 +68,9 @@ public class OrderPageResult {
     @ApiModelProperty(value = "产品名称")
     private String goodsName;
 
+    @ApiModelProperty(value = "配送卡号")
+    private String cardCode;
+
     @ApiModelProperty(value = "销售数量")
     private Integer orderNumber;
 

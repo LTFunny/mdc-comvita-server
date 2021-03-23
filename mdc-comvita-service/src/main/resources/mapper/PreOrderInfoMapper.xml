@@ -221,7 +221,8 @@
                 a.goods_name goodsName,
                 count(a.id) orderNumber,
                 a.goods_price goodsPrice,
-                a.goods_price unitPrice
+                a.goods_price unitPrice,
+                a.card_code cardCode
             from
             pre_order_goods a
             left join pre_order_info b on b.id=a.order_id
