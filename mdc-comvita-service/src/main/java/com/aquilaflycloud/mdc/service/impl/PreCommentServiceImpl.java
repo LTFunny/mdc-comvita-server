@@ -118,7 +118,14 @@ public class PreCommentServiceImpl implements PreCommentService {
     @Override
     public IPage<PreCommentInfo> pageLikeComment(PageParam<MemberInteraction> param) {
         Long memberId = MdcUtil.getRequireCurrentMemberId();
-        return memberInteractionMapper.selectInteractionCommentPage(param.page(), Wrappers.<MemberInteraction>lambdaQuery()
+        return memberInteractionMapper.selectInteractionCommentPage(param.page(), Wrappers.<MemberInteraction>query()
+                .eq("member_interaction.member_id", memberId)
+                .nested(i->i.eq("pre_comment.com_state", ActivityCommentStateEnum.PASS)
+                        .eq("pre_comment.com_view_state", ActivityCommentViewStateEnum.OPEN)
+                        .or()
+                        .eq("pre_comment::commentator_id", memberId)
+                )
+                .lambda()
                 .eq(MemberInteraction::getBusinessType, InteractionBusinessTypeEnum.COMMENT)
                 .eq(MemberInteraction::getInteractionType, InteractionTypeEnum.LIKE)
                 .eq(MemberInteraction::getIsCancel, WhetherEnum.NO)

@@ -5,7 +5,10 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.*;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.aliyun.oss.model.OSSObject;
@@ -19,7 +22,6 @@ import com.aquilaflycloud.mdc.extra.wechat.service.WechatMiniService;
 import com.aquilaflycloud.mdc.mapper.*;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
-import com.aquilaflycloud.mdc.model.member.MemberInfo;
 import com.aquilaflycloud.mdc.model.pre.*;
 import com.aquilaflycloud.mdc.param.member.MemberEventStatisticsParam;
 import com.aquilaflycloud.mdc.param.member.MemberInteractionParam;
@@ -125,7 +127,7 @@ public class PreActivityServiceImpl implements PreActivityService {
 
     @Override
     public PreActivityInfoApiResult getPreActivity(PreActivityGetParam param) {
-        MemberInfo memberInfo = MdcUtil.getCurrentMember();
+        Long memberId = MdcUtil.getCurrentMemberId();
         PreActivityInfo info = preActivityInfoMapper.selectById(param.getId());
         info = stateHandler(info);
         PreActivityInfoApiResult result = BeanUtil.copyProperties(info, PreActivityInfoApiResult.class);
@@ -133,10 +135,10 @@ public class PreActivityServiceImpl implements PreActivityService {
             result.setRewardRuleList(JSONUtil.toList(JSONUtil.parseArray(info.getRewardRuleContent()), PreActivityRewardParam.class));
         }
         PreFlashOrderInfo orderInfo = null;
-        if (memberInfo != null) {
+        if (memberId != null) {
             orderInfo = preFlashOrderInfoMapper.selectOne(Wrappers.<PreFlashOrderInfo>lambdaQuery()
                     .eq(PreFlashOrderInfo::getActivityInfoId, result.getId())
-                    .eq(PreFlashOrderInfo::getMemberId, memberInfo.getId())
+                    .eq(PreFlashOrderInfo::getMemberId, memberId)
             );
             if (orderInfo != null) {
                 result.setShopId(orderInfo.getShopId());
@@ -146,7 +148,7 @@ public class PreActivityServiceImpl implements PreActivityService {
         if (info.getActivityType() == ActivityTypeEnum.FLASH) {
             if (result.getActivityState() == ActivityStateEnum.IN_PROGRESS) {
                 result.setButtonState(ButtonStateEnum.JOIN);
-                if (memberInfo != null) {
+                if (memberId != null) {
                     if (orderInfo == null) {
                         int orderCount = preFlashOrderInfoMapper.selectCount(Wrappers.<PreFlashOrderInfo>lambdaQuery()
                                 .eq(PreFlashOrderInfo::getActivityInfoId, result.getId())
@@ -168,7 +170,7 @@ public class PreActivityServiceImpl implements PreActivityService {
                 }
             } else if (result.getActivityState() == ActivityStateEnum.FINISHED || result.getActivityState() == ActivityStateEnum.CANCELED) {
                 result.setButtonState(ButtonStateEnum.FINISHED);
-                if (memberInfo != null) {
+                if (memberId != null) {
                     if (orderInfo != null) {
                         if (orderInfo.getFlashOrderState() == FlashOrderInfoStateEnum.WRITTENOFF) {
                             result.setButtonState(ButtonStateEnum.COMMENT);
@@ -194,40 +196,48 @@ public class PreActivityServiceImpl implements PreActivityService {
             }).collect(Collectors.toList());
             result.setShopList(shopInfoList);
         }
-        List<PreCommentInfo> commentInfoList=preCommentInfoMapper.selectList(Wrappers.<PreCommentInfo>lambdaQuery()
-                .eq(PreCommentInfo::getActivityId,info.getId())
-                .eq(PreCommentInfo::getComViewState,ActivityCommentViewStateEnum.OPEN)
+        List<PreCommentInfo> commentInfoList = preCommentInfoMapper.selectList(Wrappers.<PreCommentInfo>query()
+                .orderByAsc("parent_id")
+                .orderByDesc(memberId != null, "commentator_id=" + memberId)
+                .lambda()
+                .eq(PreCommentInfo::getActivityId, info.getId())
+                .nested(memberId == null, i -> i.eq(PreCommentInfo::getComState, ActivityCommentStateEnum.PASS)
+                        .eq(PreCommentInfo::getComViewState, ActivityCommentViewStateEnum.OPEN))
+                .nested(memberId != null, i -> i.eq(PreCommentInfo::getComState, ActivityCommentStateEnum.PASS)
+                        .eq(PreCommentInfo::getComViewState, ActivityCommentViewStateEnum.OPEN)
+                        .or()
+                        .eq(PreCommentInfo::getCommentatorId, memberId)
+                )
                 .orderByDesc(PreCommentInfo::getCreateTime)
         );
-        if(CollUtil.isNotEmpty(commentInfoList)){
-            List<PreCommentListResult> listResults=new ArrayList<>();
-            for(PreCommentInfo preCommentInfo : commentInfoList){
-                PreCommentListResult preCommentListResult = new PreCommentListResult();
-                MemberInfo member= memberInfoMapper.selectById(preCommentInfo.getCommentatorId());
-                BeanUtil.copyProperties(preCommentInfo, preCommentListResult);
-                preCommentListResult.setAvatarUrl(member.getAvatarUrl());
-                preCommentListResult.setLiked(memberInteractionService.getIsInteraction(new MemberInteractionParam().setBusinessId(preCommentInfo.getId())
-                        .setBusinessType(InteractionBusinessTypeEnum.COMMENT).setInteractionType(InteractionTypeEnum.LIKE)));
-                listResults.add(preCommentListResult);
-                //补充点评回复信息列表
-                List<PreCommentInfo> replyInfoList = preCommentInfoMapper.selectList(Wrappers.<PreCommentInfo>lambdaQuery()
-                        .eq(PreCommentInfo::getParentId,preCommentInfo.getId())
-                        .orderByDesc(PreCommentInfo::getCreateTime)
-                );
-                if(CollUtil.isNotEmpty(replyInfoList)){
-                    List<PreCommentResult> replyResults = new ArrayList<>();
-                    preCommentListResult.setCommentReplyList(replyResults);
-                    for(PreCommentInfo replyInfo : replyInfoList){
-                        PreCommentResult preCommentResult = new PreCommentResult();
-                        BeanUtil.copyProperties(replyInfo, preCommentResult);
-                        replyResults.add(preCommentResult);
-                        //回复用户是系统登录用户 没有头像 设置默认值
-                        preCommentResult.setAvatarUrl("");
+        List<PreCommentResult> commentResultList = commentInfoList.stream().filter(commentInfo -> commentInfo.getParentId() == null)
+                .map(commentInfo -> covert(commentInfo, commentInfoList))
+                .sorted((o1, o2) -> {
+                    if (memberId != null) {
+                        if (!memberId.equals(o1.getCommentatorId()) && !memberId.equals(o2.getCommentatorId())) {
+                            return -1;
+                        } else if (!memberId.equals(o1.getCommentatorId()) && memberId.equals(o2.getCommentatorId())) {
+                            return 1;
+                        } else if (memberId.equals(o1.getCommentatorId()) && memberId.equals(o2.getCommentatorId())) {
+                            return o2.getLikeNum().compareTo(o1.getLikeNum());
+                        }
                     }
-                }
-            }
-            result.setCommentList(listResults);
-        }
+                    return o2.getLikeNum().compareTo(o1.getLikeNum());
+                }).collect(Collectors.toList());
+        result.setCommentList(commentResultList);
+        return result;
+    }
+
+    private PreCommentResult covert(PreCommentInfo commentInfo, List<PreCommentInfo> commentInfoList) {
+        PreCommentResult result = BeanUtil.copyProperties(commentInfo, PreCommentResult.class);
+        MemberInteractionParam interactionParam = new MemberInteractionParam().setBusinessId(commentInfo.getId())
+                .setBusinessType(InteractionBusinessTypeEnum.COMMENT).setInteractionType(InteractionTypeEnum.LIKE);
+        result.setLiked(memberInteractionService.getIsInteraction(interactionParam));
+        result.setLikeNum(memberInteractionService.getInteractionNum(interactionParam));
+        List<PreCommentResult> children = commentInfoList.stream()
+                .filter(child -> commentInfo.getId().equals(child.getParentId()))
+                .map(child -> covert(child, commentInfoList)).collect(Collectors.toList());
+        result.setCommentReplyList(children);
         return result;
     }
 

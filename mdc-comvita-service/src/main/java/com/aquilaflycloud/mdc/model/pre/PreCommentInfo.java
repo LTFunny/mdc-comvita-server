@@ -27,6 +27,55 @@ public class PreCommentInfo implements Serializable {
     private Long id;
 
     /**
+     * 会员id
+     */
+    @TableField(value = "member_id")
+    @ApiModelProperty(value = "会员id")
+    private Long memberId;
+
+    /**
+     * 手机号
+     */
+    @TableField(value = "phone_number")
+    @ApiModelProperty(value = "手机号")
+    private String phoneNumber;
+
+    /**
+     * 微信或支付宝appId
+     */
+    @TableField(value = "app_id")
+    @ApiModelProperty(value = "微信或支付宝appId")
+    private String appId;
+
+    /**
+     * 微信用户id
+     */
+    @TableField(value = "open_id")
+    @ApiModelProperty(value = "微信用户id")
+    private String openId;
+
+    /**
+     * 支付宝用户id
+     */
+    @TableField(value = "user_id")
+    @ApiModelProperty(value = "支付宝用户id")
+    private String userId;
+
+    /**
+     * 微信或支付宝昵称
+     */
+    @TableField(value = "nick_name")
+    @ApiModelProperty(value = "微信或支付宝昵称")
+    private String nickName;
+
+    /**
+     * 微信或支付宝头像
+     */
+    @TableField(value = "avatar_url")
+    @ApiModelProperty(value = "微信或支付宝头像")
+    private String avatarUrl;
+
+    /**
      * 点评(回复)内容
      */
     @TableField(value = "com_content")

@@ -37,7 +37,7 @@ public class PreActivityInfoApiResult extends PreActivityInfo {
     private List<ShopInfo> shopList;
 
     @ApiModelProperty(value = "点评")
-    private List<PreCommentListResult> commentList;
+    private List<PreCommentResult> commentList;
     @Data
     public static class ShopInfo {
         @ApiModelProperty(value = "可选门店id")
