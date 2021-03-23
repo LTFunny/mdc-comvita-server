@@ -50,8 +50,11 @@ public class OrderPageResult {
     @ApiModelProperty(value = "买家姓名")
     private String buyerName;
 
-    @ApiModelProperty(value = "买家手机")
-    private String buyerPhone;
+    @ApiModelProperty(value = "预约人姓名")
+    private String reserveName;
+
+    @ApiModelProperty(value = "预约人手机")
+    private String reservePhone;
 
     @ApiModelProperty(value = "销售门店名称")
     private String shopName;
