@@ -123,13 +123,12 @@ public class PreCommentServiceImpl implements PreCommentService {
                 .nested(i->i.eq("pre_comment.com_state", ActivityCommentStateEnum.PASS)
                         .eq("pre_comment.com_view_state", ActivityCommentViewStateEnum.OPEN)
                         .or()
-                        .eq("pre_comment::commentator_id", memberId)
+                        .eq("pre_comment.commentator_id", memberId)
                 )
                 .lambda()
                 .eq(MemberInteraction::getBusinessType, InteractionBusinessTypeEnum.COMMENT)
                 .eq(MemberInteraction::getInteractionType, InteractionTypeEnum.LIKE)
                 .eq(MemberInteraction::getIsCancel, WhetherEnum.NO)
-                .eq(MemberInteraction::getMemberId, memberId)
                 .orderByDesc(MemberInteraction::getInteractionTime)
         );
     }
