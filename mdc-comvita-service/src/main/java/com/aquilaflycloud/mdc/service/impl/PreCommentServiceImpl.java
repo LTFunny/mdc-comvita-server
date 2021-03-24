@@ -25,6 +25,7 @@ import com.aquilaflycloud.mdc.param.member.MemberInteractionParam;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.member.MemberInfoResult;
 import com.aquilaflycloud.mdc.result.pre.PreCommentInfoResult;
+import com.aquilaflycloud.mdc.result.pre.PreCommentLikeResult;
 import com.aquilaflycloud.mdc.result.pre.PreCommentPageResult;
 import com.aquilaflycloud.mdc.service.FolksonomyService;
 import com.aquilaflycloud.mdc.service.MemberInteractionService;
@@ -121,7 +122,7 @@ public class PreCommentServiceImpl implements PreCommentService {
     }
 
     @Override
-    public IPage<PreCommentInfo> pageLikeComment(PageParam<MemberInteraction> param) {
+    public IPage<PreCommentLikeResult> pageLikeComment(PageParam<MemberInteraction> param) {
         Long memberId = MdcUtil.getRequireCurrentMemberId();
         return memberInteractionMapper.selectInteractionCommentPage(param.page(), Wrappers.<MemberInteraction>query()
                 .eq("member_interaction.member_id", memberId)

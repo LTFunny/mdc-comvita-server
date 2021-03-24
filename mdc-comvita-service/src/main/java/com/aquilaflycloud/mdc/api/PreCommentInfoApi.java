@@ -7,6 +7,7 @@ import com.aquilaflycloud.mdc.param.pre.CommentDetailsParam;
 import com.aquilaflycloud.mdc.param.pre.CommentPageParam;
 import com.aquilaflycloud.mdc.param.pre.CommentParam;
 import com.aquilaflycloud.mdc.result.pre.PreCommentInfoResult;
+import com.aquilaflycloud.mdc.result.pre.PreCommentLikeResult;
 import com.aquilaflycloud.mdc.service.PreCommentService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gitee.sop.servercommon.annotation.ApiMapping;
@@ -47,7 +48,7 @@ public class PreCommentInfoApi {
 
     @ApiOperation(value = "获取我的点赞评论列表(分页)", notes = "获取我的点赞评论列表(分页)")
     @ApiMapping(value = "comvita.comment.like.page", method = RequestMethod.POST)
-    public IPage<PreCommentInfo> pageLikeComment(PageParam<MemberInteraction> param) {
+    public IPage<PreCommentLikeResult> pageLikeComment(PageParam<MemberInteraction> param) {
         return preCommentService.pageLikeComment(param);
     }
 }
