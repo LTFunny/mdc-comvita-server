@@ -12,7 +12,10 @@ import com.aquilaflycloud.mdc.enums.member.InteractionBusinessTypeEnum;
 import com.aquilaflycloud.mdc.enums.member.InteractionTypeEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityCommentStateEnum;
 import com.aquilaflycloud.mdc.enums.pre.ActivityCommentViewStateEnum;
-import com.aquilaflycloud.mdc.mapper.*;
+import com.aquilaflycloud.mdc.mapper.FolksonomyBusinessRelMapper;
+import com.aquilaflycloud.mdc.mapper.MemberInteractionMapper;
+import com.aquilaflycloud.mdc.mapper.PreActivityInfoMapper;
+import com.aquilaflycloud.mdc.mapper.PreCommentInfoMapper;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyBusinessRel;
 import com.aquilaflycloud.mdc.model.folksonomy.FolksonomyInfo;
 import com.aquilaflycloud.mdc.model.member.MemberInteraction;
@@ -287,20 +290,23 @@ public class PreCommentServiceImpl implements PreCommentService {
 
     @Override
     public void reply(PreCommentReplyParam param) {
-        if(param.getCommentId()==null) {
-            throw new ServiceException("活动点评主键id为空" );
+        PreCommentInfo commentInfo = preCommentInfoMapper.selectById(param.getCommentId());
+        if (commentInfo == null) {
+            throw new ServiceException("评论不存在");
         }
-        PreCommentInfo  preCommentInfo =new PreCommentInfo();
-        preCommentInfo.setParentId(param.getCommentId());
+        PreCommentInfo preCommentInfo = new PreCommentInfo();
+        preCommentInfo.setParentId(commentInfo.getId());
         User user = MdcUtil.getCurrentUser();
         preCommentInfo.setCommentatorId(user.getId());
         preCommentInfo.setCommentator(user.getUsername());
-        preCommentInfo.setActivityId(param.getActivityId());
-        preCommentInfo.setActivityName(param.getActivityName());
+        preCommentInfo.setActivityId(commentInfo.getActivityId());
+        preCommentInfo.setActivityName(commentInfo.getActivityName());
         preCommentInfo.setComContent(param.getContent());
         preCommentInfo.setComPicture(param.getPicture());
-        int preComment =  preCommentInfoMapper.insert(preCommentInfo);
-        if(preComment < 0){
+        preCommentInfo.setComState(ActivityCommentStateEnum.PASS);
+        preCommentInfo.setComViewState(ActivityCommentViewStateEnum.OPEN);
+        int preComment = preCommentInfoMapper.insert(preCommentInfo);
+        if (preComment < 0) {
             throw new ServiceException("点评回复失败");
         }
         log.info("回复点评完成");

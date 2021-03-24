@@ -3,6 +3,7 @@ package com.aquilaflycloud.mdc.param.pre;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -11,21 +12,6 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 public class PreCommentReplyParam {
-
-    /**
-     * 活动id
-     */
-    @ApiModelProperty(value = "activityId", required = true)
-    @NotNull(message = "活动id不能为空")
-    private Long activityId;
-
-    /**
-     * 活动名称
-     */
-    @ApiModelProperty(value = "activityName", required = true)
-    @NotNull(message = "活动名称不能为空")
-    private String activityName;
-
     /**
      * 活动点评id
      */
@@ -37,7 +23,7 @@ public class PreCommentReplyParam {
      * 回复内容
      */
     @ApiModelProperty(value = "content", required = true)
-    @NotNull(message = "回复内容不能为空")
+    @NotEmpty(message = "回复内容不能为空")
     private String content;
 
     /**
