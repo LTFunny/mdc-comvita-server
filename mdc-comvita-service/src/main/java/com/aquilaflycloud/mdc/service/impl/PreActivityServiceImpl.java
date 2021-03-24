@@ -214,12 +214,10 @@ public class PreActivityServiceImpl implements PreActivityService {
                 .map(commentInfo -> covert(commentInfo, commentInfoList))
                 .sorted((o1, o2) -> {
                     if (memberId != null) {
-                        if (!memberId.equals(o1.getCommentatorId()) && !memberId.equals(o2.getCommentatorId())) {
+                        if (memberId.equals(o1.getCommentatorId()) && !memberId.equals(o2.getCommentatorId())) {
                             return -1;
                         } else if (!memberId.equals(o1.getCommentatorId()) && memberId.equals(o2.getCommentatorId())) {
                             return 1;
-                        } else if (memberId.equals(o1.getCommentatorId()) && memberId.equals(o2.getCommentatorId())) {
-                            return o2.getLikeNum().compareTo(o1.getLikeNum());
                         }
                     }
                     return o2.getLikeNum().compareTo(o1.getLikeNum());
