@@ -86,14 +86,16 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     public void completeButton(PreOrderGetParam param) {
         String name= MdcUtil.getCurrentUserName();
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
-        preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+        PreOrderInfo newOrderInfo = new PreOrderInfo();
+        newOrderInfo.setId(preOrderInfo.getId());
+        newOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
         MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
         Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord
                 (memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
         if (CollUtil.isNotEmpty(map) && map.get(RewardTypeEnum.SCORE) != null) {
-            preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+            newOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
         }
-        int order = preOrderInfoMapper.updateById(preOrderInfo);
+        int order = preOrderInfoMapper.updateById(newOrderInfo);
         if (order < 0) {
             throw new ServiceException("签收订单失败。");
         }
@@ -104,8 +106,10 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                 .eq(PreOrderGoods::getOrderId,preOrderInfo.getId()));
         if(CollUtil.isNotEmpty(preOrderGoodsList)){
             for(PreOrderGoods preOrderGoods:preOrderGoodsList){
-                preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
-                int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+                PreOrderGoods newOrderGoods = new PreOrderGoods();
+                newOrderGoods.setId(preOrderGoods.getId());
+                newOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
+                int orderGoods = preOrderGoodsMapper.updateById(newOrderGoods);
                 if(orderGoods < 0){
                     throw new ServiceException("修改状态失败。");
                 }
@@ -113,8 +117,10 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                         .eq(PrePickingCard::getPickingCode, preOrderGoods.getCardCode())
                 );
                 if (prePickingCard != null) {
-                    prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
-                    prePickingCardMapper.updateById(prePickingCard);
+                    PrePickingCard newPickingCard = new PrePickingCard();
+                    newPickingCard.setId(prePickingCard.getId());
+                    newPickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
+                    prePickingCardMapper.updateById(newPickingCard);
                 }
             }
         }
@@ -214,6 +220,8 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         }
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(info.getOrderId());
             if(preOrderInfo.getFlashId()==null){
+                PreOrderInfo newOrderInfo = new PreOrderInfo();
+                newOrderInfo.setId(preOrderInfo.getId());
                 boolean allGoodsSend = false;
                 if (GoodsTypeEnum.GIFTS.equals(info.getGoodsType())) { //填赠品的时候是否所有商品都发货了
                     List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
@@ -225,13 +233,13 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     if (list.size() > 0) {
                         throw new ServiceException("存在商品没有发货，请填写完商品再填写赠品的快递单号");
                     }
-                    preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
-                    preOrderInfo.setDeliveryTime(new DateTime());
+                    newOrderInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
+                    newOrderInfo.setDeliveryTime(new DateTime());
                     //当赠品录入快递时,反填快递信息给订单
-                    preOrderInfo.setExpressOrder(param.getExpressOrder());
-                    preOrderInfo.setExpressName(param.getExpressName());
-                    preOrderInfo.setExpressCode(param.getExpressCode());
-                    preOrderInfoMapper.updateById(preOrderInfo);
+                    newOrderInfo.setExpressOrder(param.getExpressOrder());
+                    newOrderInfo.setExpressName(param.getExpressName());
+                    newOrderInfo.setExpressCode(param.getExpressCode());
+                    preOrderInfoMapper.updateById(newOrderInfo);
                 } else {//不是赠品。判断是否有
                     //查询是否有赠品
                     List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
@@ -250,44 +258,50 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
                     }
                     if (CollUtil.isEmpty(list)) {//没有赠品，查询是否这是最后一个商品，是的话填写订单表商品状态和发货时间
                         if (allGoodsSend) {//是空则商品都发完了，更新订单表
-                            preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
-                            preOrderInfo.setDeliveryTime(new DateTime());
+                            newOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+                            newOrderInfo.setDeliveryTime(new DateTime());
                             MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
                             Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
                             if (CollUtil.isNotEmpty(map) && map.get(RewardTypeEnum.SCORE) != null) {
-                                preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+                                newOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
                             }
-                            preOrderInfoMapper.updateById(preOrderInfo);
+                            preOrderInfoMapper.updateById(newOrderInfo);
                         }
                     } else {//待发货状态
                         if (allGoodsSend) {
-                            preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
-                            preOrderInfoMapper.updateById(preOrderInfo);
+                            newOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
+                            preOrderInfoMapper.updateById(newOrderInfo);
                             PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
                                     .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
                                     .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
-                            preOrderGoods.setGiftsSymbol(GiftsSymbolEnum.AFTER);
-                            int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+                            PreOrderGoods newOrderGoods = new PreOrderGoods();
+                            newOrderGoods.setId(preOrderGoods.getId());
+                            newOrderGoods.setGiftsSymbol(GiftsSymbolEnum.AFTER);
+                            int orderGoods = preOrderGoodsMapper.updateById(newOrderGoods);
                             if(orderGoods < 0){
                                 throw new ServiceException("修改赠品标识失败。");
                             }
                         }
                     }
                 }
-                info.setExpressName(param.getExpressName());
-                info.setExpressOrderCode(param.getExpressOrder());
-                info.setExpressCode(param.getExpressCode());
-                info.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
-                info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
-                info.setDeliveryTime(new DateTime());
-                preOrderGoodsMapper.updateById(info);
+                PreOrderGoods newInfo = new PreOrderGoods();
+                newInfo.setId(info.getId());
+                newInfo.setExpressName(param.getExpressName());
+                newInfo.setExpressOrderCode(param.getExpressOrder());
+                newInfo.setExpressCode(param.getExpressCode());
+                newInfo.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
+                newInfo.setPickingCardState(PickingCardStateEnum.VERIFICATE);
+                newInfo.setDeliveryTime(new DateTime());
+                preOrderGoodsMapper.updateById(newInfo);
 
                 PrePickingCard prePickingCard = prePickingCardMapper.selectOne(Wrappers.<PrePickingCard>lambdaQuery()
                         .eq(PrePickingCard::getPickingCode, info.getCardCode())
                 );
                 if (prePickingCard != null) {
-                    prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
-                    prePickingCardMapper.updateById(prePickingCard);
+                    PrePickingCard newPickingCard = new PrePickingCard();
+                    newPickingCard.setId(prePickingCard.getId());
+                    newPickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
+                    prePickingCardMapper.updateById(newPickingCard);
                 }
             }else{
                 //快闪活动快递单号录入
@@ -326,21 +340,25 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
         );
         if(CollUtil.isNotEmpty(list)){
             for(PreOrderGoods preOrderGoods:list){
-                preOrderGoods.setExpressOrderCode(param.getExpressOrder());
-                preOrderGoods.setExpressCode(param.getExpressCode());
-                preOrderGoods.setExpressName(param.getExpressName());
-                preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
-                preOrderGoods.setPickingCardState(PickingCardStateEnum.VERIFICATE);
-                preOrderGoods.setDeliveryTime(new DateTime());
-                preOrderGoodsMapper.updateById(preOrderGoods);
+                PreOrderGoods newOrderGoods = new PreOrderGoods();
+                newOrderGoods.setId(preOrderGoods.getId());
+                newOrderGoods.setExpressOrderCode(param.getExpressOrder());
+                newOrderGoods.setExpressCode(param.getExpressCode());
+                newOrderGoods.setExpressName(param.getExpressName());
+                newOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
+                newOrderGoods.setPickingCardState(PickingCardStateEnum.VERIFICATE);
+                newOrderGoods.setDeliveryTime(new DateTime());
+                preOrderGoodsMapper.updateById(newOrderGoods);
             }
         }
-        info.setExpressCode(param.getExpressCode());
-        info.setExpressOrder(param.getExpressOrder());
-        info.setExpressName(param.getExpressName());
-        info.setOrderState(OrderInfoStateEnum.STAYSIGN);
-        info.setDeliveryTime(new DateTime());
-        preOrderInfoMapper.updateById(info);
+        PreOrderInfo newInfo = new PreOrderInfo();
+        newInfo.setId(info.getId());
+        newInfo.setExpressCode(param.getExpressCode());
+        newInfo.setExpressOrder(param.getExpressOrder());
+        newInfo.setExpressName(param.getExpressName());
+        newInfo.setOrderState(OrderInfoStateEnum.STAYSIGN);
+        newInfo.setDeliveryTime(new DateTime());
+        preOrderInfoMapper.updateById(newInfo);
         //快闪订单核销
         changeFlashState(info.getId(),info.getExpressOrder());
         //添加操作记录
@@ -350,13 +368,15 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
     }
 
     private void changeFlashState(InputOrderNumberParam param, PreOrderInfo preOrderInfo, PreOrderGoods info){
-        info.setExpressName(param.getExpressName());
-        info.setExpressOrderCode(param.getExpressOrder());
-        info.setExpressCode(param.getExpressCode());
-        info.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
-        info.setPickingCardState(PickingCardStateEnum.VERIFICATE);
-        info.setDeliveryTime(new DateTime());
-        preOrderGoodsMapper.updateById(info);
+        PreOrderGoods newOrderGoods = new PreOrderGoods();
+        newOrderGoods.setId(info.getId());
+        newOrderGoods.setExpressName(param.getExpressName());
+        newOrderGoods.setExpressOrderCode(param.getExpressOrder());
+        newOrderGoods.setExpressCode(param.getExpressCode());
+        newOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.ALSENDGOODS);
+        newOrderGoods.setPickingCardState(PickingCardStateEnum.VERIFICATE);
+        newOrderGoods.setDeliveryTime(new DateTime());
+        preOrderGoodsMapper.updateById(newOrderGoods);
 
     }
     @Override
@@ -743,9 +763,11 @@ public class PreOrderAdministrationServiceImpl implements PreOrderAdministration
             if(preOrderInfo.getFlashId()!=null){
                 PreFlashOrderInfo preFlashOrderInfo = flashOrderInfoMapper.selectById(preOrderInfo.getFlashId());
                 if(preFlashOrderInfo!=null){
-                    preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.WRITTENOFF);
-                    preFlashOrderInfo.setExpressOrder(code);
-                    int orderInfo=flashOrderInfoMapper.updateById(preFlashOrderInfo);
+                    PreFlashOrderInfo newFlashOrderInfo = new PreFlashOrderInfo();
+                    newFlashOrderInfo.setId(preFlashOrderInfo.getId());
+                    newFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.WRITTENOFF);
+                    newFlashOrderInfo.setExpressOrder(code);
+                    int orderInfo=flashOrderInfoMapper.updateById(newFlashOrderInfo);
                     if(orderInfo < 0){
                         throw new ServiceException("核销失败。");
                     }
