@@ -568,7 +568,9 @@ public class PreActivityServiceImpl implements PreActivityService {
         if (CollUtil.isNotEmpty(param.getRefGoods())) {
             activityInfo.setRefGoods(JSONUtil.toJsonStr(param.getRefGoods()));
         }
-        int count = preActivityInfoMapper.updateById(activityInfo);
+        PreActivityInfo info = new PreActivityInfo();
+        BeanUtil.copyProperties(activityInfo,info);
+        int count = preActivityInfoMapper.updateById(info);
         if (count <= 0) {
             throw new ServiceException("编辑活动失败");
         }
@@ -647,7 +649,9 @@ public class PreActivityServiceImpl implements PreActivityService {
             //下架
             activityInfo.setActivityState(ActivityStateEnum.CANCELED);
         }
-        preActivityInfoMapper.updateById(activityInfo);
+        PreActivityInfo update=new PreActivityInfo();
+        BeanUtil.copyProperties(activityInfo,update);
+        preActivityInfoMapper.updateById(update);
     }
 
     @Override
