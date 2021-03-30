@@ -161,11 +161,13 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
         Long id = preOrderInfo.getGuideId();
-        BeanUtil.copyProperties(param,preOrderInfo);
-        preOrderInfo.setGuideId(id);
-        preOrderInfo.setFailSymbol(FailSymbolEnum.YES_NO);
-        preOrderInfo.setReason("");
-        int orderInfo = preOrderInfoMapper.updateById(preOrderInfo);
+        PreOrderInfo newOrderInfo = new PreOrderInfo();
+        BeanUtil.copyProperties(param,newOrderInfo);
+        newOrderInfo.setId(preOrderInfo.getId());
+        newOrderInfo.setGuideId(id);
+        newOrderInfo.setFailSymbol(FailSymbolEnum.YES_NO);
+        newOrderInfo.setReason("");
+        int orderInfo = preOrderInfoMapper.updateById(newOrderInfo);
         if(orderInfo < 0){
             throw new ServiceException("修改待确认订单失败。");
         }
@@ -181,11 +183,12 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if (null == preOrderInfo) {
             throw new ServiceException("找不到此订单");
         }
-        BeanUtil.copyProperties(param, preOrderInfo);
+        PreOrderInfo newOrderInfo = new PreOrderInfo();
+        BeanUtil.copyProperties(param, newOrderInfo);
         if (param.getIsThrough() == 0) {
-            preOrderInfo.setOrderState(OrderInfoStateEnum.STAYRESERVATION);
+            newOrderInfo.setOrderState(OrderInfoStateEnum.STAYRESERVATION);
         }else {
-            preOrderInfo.setFailSymbol(FailSymbolEnum.YES);
+            newOrderInfo.setFailSymbol(FailSymbolEnum.YES);
         }
         List<PreOrderGoods> orderGoodsList = new ArrayList<>();
         if (param.getIsThrough() == 0) {
@@ -205,9 +208,11 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 if (prePickingCard == null) {
                     throw new ServiceException("其中提货卡有误，无法提交。");
                 }
-                prePickingCard.setPickingState(PickingCardStateEnum.SALE);
+                PrePickingCard newPickingCard = new PrePickingCard();
+                newPickingCard.setId(prePickingCard.getId());
+                newPickingCard.setPickingState(PickingCardStateEnum.SALE);
                 //更改提货卡状态
-                int updateCard = prePickingCardMapper.updateById(prePickingCard);
+                int updateCard = prePickingCardMapper.updateById(newPickingCard);
                 if (updateCard < 0) {
                     throw new ServiceException("提货卡更改状态失败。");
                 }
@@ -242,9 +247,9 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                 }
             }
             //计算总金额
-            preOrderInfo.setTotalPrice(orderGoodsList.get(0).getGoodsPrice().multiply(new BigDecimal(orderGoodsList.size())));
-            preOrderInfo.setFailSymbol(FailSymbolEnum.NO);
-            preOrderInfo.setConfirmTime(new Date());
+            newOrderInfo.setTotalPrice(orderGoodsList.get(0).getGoodsPrice().multiply(new BigDecimal(orderGoodsList.size())));
+            newOrderInfo.setFailSymbol(FailSymbolEnum.NO);
+            newOrderInfo.setConfirmTime(new Date());
             //新增规则需当同一个活动同一个用户不存在赠品且售后订单存在该订单才可新增赠品信息
             int giftsCount = preOrderInfoMapper.countOrderInfoGiftsInfo(preOrderInfo.getMemberId(),preOrderInfo.getActivityInfoId());
             if(giftsCount <= 0) {
@@ -285,7 +290,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             }
             preOrderGoodsMapper.insertAllBatch(orderGoodsList);
         }
-        int updateOrder = preOrderInfoMapper.updateById(preOrderInfo);
+        int updateOrder = preOrderInfoMapper.updateById(newOrderInfo);
         if(updateOrder < 0){
             throw new ServiceException("订单操作失败。");
         }
@@ -318,44 +323,50 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if(prePickingCard == null){
             throw new ServiceException("该兑换码有异常,请重新输入。");
         }
-        prePickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
-        int updateCard = prePickingCardMapper.updateById(prePickingCard);
+        PrePickingCard newPickingCard = new PrePickingCard();
+        newPickingCard.setId(prePickingCard.getId());
+        newPickingCard.setPickingState(PickingCardStateEnum.VERIFICATE);
+        int updateCard = prePickingCardMapper.updateById(newPickingCard);
         if(updateCard < 0){
             throw new ServiceException("核销失败");
         }
         PreOrderGoods orderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
         .eq(PreOrderGoods::getCardId,prePickingCard.getId()));
-        orderGoods.setVerificaterId(param.getVerificaterId());
-        orderGoods.setVerificaterName(param.getVerificaterName());
-        orderGoods.setVerificaterOrgIds(param.getVerificaterOrgIds());
-        orderGoods.setVerificaterOrgNames(param.getVerificaterOrgNames());
-        orderGoods.setTakeTime(new Date());
-        preOrderGoodsMapper.updateById(orderGoods);
+        PreOrderGoods newOrderGoods = new PreOrderGoods();
+        newOrderGoods.setId(orderGoods.getId());
+        newOrderGoods.setVerificaterId(param.getVerificaterId());
+        newOrderGoods.setVerificaterName(param.getVerificaterName());
+        newOrderGoods.setVerificaterOrgIds(param.getVerificaterOrgIds());
+        newOrderGoods.setVerificaterOrgNames(param.getVerificaterOrgNames());
+        newOrderGoods.setTakeTime(new Date());
+        preOrderGoodsMapper.updateById(newOrderGoods);
         List<PreOrderGoods> preOrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
             .eq(PreOrderGoods::getOrderId,orderGoods.getOrderId())
             .notIn(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
 
         int result = preOrderGoodsMapper.pickingCardGet(orderGoods.getOrderId(), PickingCardStateEnum.VERIFICATE);
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(orderGoods.getOrderId());
+        PreOrderInfo newOrderInfo = new PreOrderInfo();
+        newOrderInfo.setId(preOrderInfo.getId());
         List<PreOrderGoods> OrderGoodsList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .eq(PreOrderGoods::getOrderId,orderGoods.getOrderId())
                 .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
         if(preOrderGoodsList.size() == result){
-            preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.STATELESS);
+            newOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.STATELESS);
             if(OrderGoodsList.size() > 0) {
-                preOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
+                newOrderInfo.setOrderState(OrderInfoStateEnum.STAYSENDGOODS);
             }else {
-                preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+                newOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
             }
         }else {
-            preOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
+            newOrderInfo.setChildOrderState(ChildOrderInfoStateEnum.RESERVATION_DELIVERY);
             MemberInfo memberInfo = memberInfoMapper.selectById(preOrderInfo.getMemberId());
             Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord(memberInfo,null,preOrderInfo.getId(),preOrderInfo.getTotalPrice(),true);
             if (CollUtil.isNotEmpty(map) && map.get(RewardTypeEnum.SCORE) != null) {
-                preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+                newOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
             }
         }
-        int order = preOrderInfoMapper.updateById(preOrderInfo);
+        int order = preOrderInfoMapper.updateById(newOrderInfo);
         if(order < 0){
             throw new ServiceException("核销提货卡失败。");
         }
@@ -480,13 +491,15 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Override
     public void confirmReceiptOrderGoods(Long orderGoodsId, String operatorName) {
         PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(orderGoodsId);
+        PreOrderGoods newOrderGoods = new PreOrderGoods();
+        newOrderGoods.setId(preOrderGoods.getId());
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
-        preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
-        preOrderGoods.setVerificaterId(preOrderInfo.getGuideId());
-        preOrderGoods.setVerificaterName(preOrderInfo.getGuideName());
-        preOrderGoods.setVerificaterOrgIds(preOrderInfo.getCreatorOrgIds());
-        preOrderGoods.setVerificaterOrgNames(preOrderInfo.getCreatorOrgNames());
-        int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+        newOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
+        newOrderGoods.setVerificaterId(preOrderInfo.getGuideId());
+        newOrderGoods.setVerificaterName(preOrderInfo.getGuideName());
+        newOrderGoods.setVerificaterOrgIds(preOrderInfo.getCreatorOrgIds());
+        newOrderGoods.setVerificaterOrgNames(preOrderInfo.getCreatorOrgNames());
+        int orderGoods = preOrderGoodsMapper.updateById(newOrderGoods);
         if (orderGoods < 0) {
             throw new ServiceException("确认签收操作失败。");
         }
@@ -505,14 +518,16 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     public void confirmReceiptOrder(PreOrderGetParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
-        preOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
+        PreOrderInfo newOrderInfo = new PreOrderInfo();
+        newOrderInfo.setId(preOrderInfo.getId());
+        newOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
         MemberInfo memberInfo = memberInfoMapper.selectById(infoResult.getId());
         Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord
                 (memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
         if (CollUtil.isNotEmpty(map) && map.get(RewardTypeEnum.SCORE) != null) {
-            preOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
+            newOrderInfo.setScore(new BigDecimal(map.get(RewardTypeEnum.SCORE).getRewardValue()));
         }
-        int order = preOrderInfoMapper.updateById(preOrderInfo);
+        int order = preOrderInfoMapper.updateById(newOrderInfo);
         if (order < 0) {
             throw new ServiceException("签收订单失败。");
         }
@@ -521,8 +536,10 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     .eq(PreOrderGoods::getOrderId,preOrderInfo.getId())
                     .eq(PreOrderGoods::getGoodsType,GoodsTypeEnum.GIFTS));
             if(preOrderGoods != null) {
-                preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
-                int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+                PreOrderGoods newOrderGoods = new PreOrderGoods();
+                newOrderGoods.setId(preOrderGoods.getId());
+                newOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
+                int orderGoods = preOrderGoodsMapper.updateById(newOrderGoods);
                 if (orderGoods < 0) {
                     throw new ServiceException("更改商品明细状态失败。");
                 }
@@ -537,8 +554,10 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                     .eq(PreOrderGoods::getOrderId,preOrderInfo.getId()));
             if(CollUtil.isNotEmpty(list)) {
                 for(PreOrderGoods preOrderGoods:list ){
-                    preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
-                    int orderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+                    PreOrderGoods newOrderGoods = new PreOrderGoods();
+                    newOrderGoods.setId(preOrderGoods.getId());
+                    newOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.TAKEN);
+                    int orderGoods = preOrderGoodsMapper.updateById(newOrderGoods);
                     if (orderGoods < 0) {
                         throw new ServiceException("更改商品明细状态失败。");
                     }
@@ -612,15 +631,30 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             throw new ServiceException("登记售后失败");
         }
         //更新订单商品状态
-        PreOrderGoods update = new PreOrderGoods();
-        update.setOrderGoodsState(OrderGoodsStateEnum.REFUND);
-        update.setPickingCardState(PickingCardStateEnum.NO_SALE);
-        count = preOrderGoodsMapper.update(update, Wrappers.<PreOrderGoods>lambdaUpdate()
-                .eq(PreOrderGoods::getOrderId, param.getOrderId())
-        );
-        if (count <= 0) {
-            throw new ServiceException("登记售后失败");
+//        PreOrderGoods update = new PreOrderGoods();
+//        update.setOrderGoodsState(OrderGoodsStateEnum.REFUND);
+//        update.setPickingCardState(PickingCardStateEnum.NO_SALE);
+//        count = preOrderGoodsMapper.update(update, Wrappers.<PreOrderGoods>lambdaUpdate()
+//                .eq(PreOrderGoods::getOrderId, param.getOrderId())
+//        );
+//        if (count <= 0) {
+//            throw new ServiceException("登记售后失败");
+//        }
+        List<PreOrderGoods> list = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
+                .eq(PreOrderGoods::getOrderId,param.getOrderId()));
+        if(CollUtil.isNotEmpty(list)) {
+            for(PreOrderGoods preOrderGoods : list ){
+                PreOrderGoods update = new PreOrderGoods();
+                update.setId(preOrderGoods.getId());
+                update.setOrderGoodsState(OrderGoodsStateEnum.REFUND);
+                update.setPickingCardState(PickingCardStateEnum.NO_SALE);
+                count = preOrderGoodsMapper.updateById(update);
+                if (count <= 0) {
+                    throw new ServiceException("登记售后失败");
+                }
+            }
         }
+
         //获取订单商品对应提货卡id
         List<Long> cardIdList = preOrderGoodsMapper.selectList(Wrappers.<PreOrderGoods>lambdaQuery()
                 .select(PreOrderGoods::getCardId)
@@ -629,19 +663,48 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         ).stream().map(PreOrderGoods::getCardId).collect(Collectors.toList());
         if (CollUtil.isNotEmpty(cardIdList)) {
             //更新提货卡状态
-            PrePickingCard cardUpdate = new PrePickingCard();
-            cardUpdate.setPickingState(PickingCardStateEnum.NO_SALE);
+//            PrePickingCard cardUpdate = new PrePickingCard();
+//            cardUpdate.setPickingState(PickingCardStateEnum.NO_SALE);
             //已出售更新为未出售
-            prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+//            prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+//                    .in(PrePickingCard::getId, cardIdList)
+//                    .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
+//            );
+            List<PrePickingCard> cards = prePickingCardMapper.selectList(Wrappers.<PrePickingCard>lambdaQuery()
                     .in(PrePickingCard::getId, cardIdList)
-                    .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE)
-            );
-            cardUpdate.setPickingState(PickingCardStateEnum.CANCEL);
+                    .eq(PrePickingCard::getPickingState, PickingCardStateEnum.SALE));
+            if(CollUtil.isNotEmpty(cards)) {
+                for(PrePickingCard card : cards){
+                    PrePickingCard cardUpdate = new PrePickingCard();
+                    cardUpdate.setId(card.getId());
+                    cardUpdate.setPickingState(PickingCardStateEnum.NO_SALE);
+                    count = prePickingCardMapper.updateById(cardUpdate);
+                    if (count <= 0) {
+                        throw new ServiceException("登记提货卡失败");
+                    }
+                }
+            }
+
+//            cardUpdate.setPickingState(PickingCardStateEnum.CANCEL);
             //非已出售更新为已作废
-            prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+//            prePickingCardMapper.update(cardUpdate, Wrappers.<PrePickingCard>lambdaUpdate()
+//                    .in(PrePickingCard::getId, cardIdList)
+//                    .ne(PrePickingCard::getPickingState, PickingCardStateEnum.NO_SALE)
+//            );
+            List<PrePickingCard> cards2 = prePickingCardMapper.selectList(Wrappers.<PrePickingCard>lambdaQuery()
                     .in(PrePickingCard::getId, cardIdList)
-                    .ne(PrePickingCard::getPickingState, PickingCardStateEnum.NO_SALE)
-            );
+                    .eq(PrePickingCard::getPickingState, PickingCardStateEnum.NO_SALE));
+            if(CollUtil.isNotEmpty(cards2)) {
+                for(PrePickingCard card : cards2){
+                    PrePickingCard cardUpdate = new PrePickingCard();
+                    cardUpdate.setId(card.getId());
+                    cardUpdate.setPickingState(PickingCardStateEnum.CANCEL);
+                    count = prePickingCardMapper.updateById(cardUpdate);
+                    if (count <= 0) {
+                        throw new ServiceException("登记提货卡失败");
+                    }
+                }
+            }
         }
         //退回订单奖励
         memberRewardService.refundRewardRecord(preOrderInfo.getMemberId(), preOrderInfo.getId());
