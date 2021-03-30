@@ -231,6 +231,8 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         if(preFlashOrderInfo==null){
             throw new ServiceException("核销码有误");
         }
+        PreFlashOrderInfo newFlashOrderInfo = new PreFlashOrderInfo();
+        newFlashOrderInfo.setId(preFlashOrderInfo.getId());
         PreActivityInfo activityInfo=preActivityInfoMapper.selectById(preFlashOrderInfo.getActivityInfoId());
         if(ActivityGettingWayEnum.OFF_LINE.equals(activityInfo.getActivityGettingWay())){
             if(ActivityStateEnum.CANCELED.equals(activityInfo.getActivityState())){
@@ -246,8 +248,8 @@ public class FlashOrderServiceImpl implements FlashOrderService {
         if(FlashOrderInfoStateEnum.WRITTENOFF.equals(preFlashOrderInfo.getFlashOrderState())){
             throw new ServiceException("该码已核销");
         }
-        preFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.WRITTENOFF);
-        int orderInfo=flashOrderInfoMapper.updateById(preFlashOrderInfo);
+        newFlashOrderInfo.setFlashOrderState(FlashOrderInfoStateEnum.WRITTENOFF);
+        int orderInfo = flashOrderInfoMapper.updateById(newFlashOrderInfo);
         if(orderInfo < 0){
             throw new ServiceException("核销失败");
         }
