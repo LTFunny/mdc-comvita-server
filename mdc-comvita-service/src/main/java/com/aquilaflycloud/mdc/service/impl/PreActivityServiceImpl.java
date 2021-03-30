@@ -633,22 +633,22 @@ public class PreActivityServiceImpl implements PreActivityService {
             throw new ServiceException("上架(下架)的活动主键id为空" );
         }
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
+        PreActivityInfo update = new PreActivityInfo();
+        update.setId(activityInfo.getId());
         if(activityInfo.getActivityState() == ActivityStateEnum.CANCELED){
             //根据时间 判断上架状态
             DateTime now = DateTime.now();
             if (now.isAfterOrEquals(activityInfo.getBeginTime()) && now.isBeforeOrEquals(activityInfo.getEndTime())) {
-                activityInfo.setActivityState(ActivityStateEnum.IN_PROGRESS);
+                update.setActivityState(ActivityStateEnum.IN_PROGRESS);
             } else if (now.isBefore(activityInfo.getBeginTime())) {
-                activityInfo.setActivityState(ActivityStateEnum.NOT_STARTED);
+                update.setActivityState(ActivityStateEnum.NOT_STARTED);
             } else if (now.isAfter(activityInfo.getEndTime())) {
-                activityInfo.setActivityState(ActivityStateEnum.FINISHED);
+                update.setActivityState(ActivityStateEnum.FINISHED);
             }
         }else{
             //下架
-            activityInfo.setActivityState(ActivityStateEnum.CANCELED);
+            update.setActivityState(ActivityStateEnum.CANCELED);
         }
-        PreActivityInfo update=new PreActivityInfo();
-        BeanUtil.copyProperties(activityInfo,update);
         preActivityInfoMapper.updateById(update);
     }
 
