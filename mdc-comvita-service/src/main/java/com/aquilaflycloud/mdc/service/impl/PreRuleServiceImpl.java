@@ -112,26 +112,31 @@ public class PreRuleServiceImpl implements PreRuleService {
     @Override
     public void update(PreRuleUpdateParam param) {
         PreRuleInfo info =  preRuleInfoMapper.selectById(param.getId());
+        PreRuleInfo newInfo = new PreRuleInfo();
+        BeanUtil.copyProperties(param,newInfo);
         if(info.getRuleType() == RuleTypeEnum.ORDER_DISCOUNT){
             String jsonStr = JSONUtil.toJsonStr(param.getOrderDiscount());
             if(!info.getTypeDetail().equals(jsonStr)){
-                info.setTypeDetail(JSONUtil.toJsonStr(param.getOrderDiscount()));
+                newInfo.setTypeDetail(JSONUtil.toJsonStr(param.getOrderDiscount()));
             }
         }
         if(info.getRuleType() == RuleTypeEnum.ORDER_FULL_REDUCE){
             String jsonStr = JSONUtil.toJsonStr(param.getOrderFullReduce());
             if(!info.getTypeDetail().equals(jsonStr)){
-                info.setTypeDetail(JSONUtil.toJsonStr(param.getOrderFullReduce()));
+                newInfo.setTypeDetail(JSONUtil.toJsonStr(param.getOrderFullReduce()));
             }
         }
         if(info.getRuleType() == RuleTypeEnum.ORDER_GIFTS){
             String jsonStr = JSONUtil.toJsonStr(param.getRefGoods());
             if(!info.getTypeDetail().equals(jsonStr)){
-                info.setTypeDetail(JSONUtil.toJsonStr(param.getRefGoods()));
+                newInfo.setTypeDetail(JSONUtil.toJsonStr(param.getRefGoods()));
             }
         }
-        BeanUtil.copyProperties(param, info,"id","typeDetail");
-        preRuleInfoMapper.updateById(info);
+        int count = preRuleInfoMapper.updateById(newInfo);
+        if (count <= 0) {
+            throw new ServiceException("更新规则失败");
+        }
+        log.info("更新规则完成");
     }
 
     @Override
@@ -140,13 +145,20 @@ public class PreRuleServiceImpl implements PreRuleService {
             throw new ServiceException("规则主键id为空" );
         }
         PreRuleInfo info =  preRuleInfoMapper.selectById(param.getId());
+        PreRuleInfo newInfo = new PreRuleInfo();
+        BeanUtil.copyProperties(param,newInfo);
         if(RuleStateEnum.DISABLE == info.getRuleState()){
-            info.setRuleState(RuleStateEnum.ENABLE);
+            newInfo.setRuleState(RuleStateEnum.ENABLE);
         }else if(RuleStateEnum.ENABLE == info.getRuleState()){
             checkRef(param.getId());
-            info.setRuleState(RuleStateEnum.DISABLE);
+            newInfo.setRuleState(RuleStateEnum.DISABLE);
         }
-        preRuleInfoMapper.updateById(info);
+
+        int count = preRuleInfoMapper.updateById(newInfo);
+        if (count <= 0) {
+            throw new ServiceException("更新规则状态失败");
+        }
+        log.info("更新规则状态完成");
     }
 
     /**
@@ -190,13 +202,23 @@ public class PreRuleServiceImpl implements PreRuleService {
         PreRuleInfo oldInfo =  preRuleInfoMapper.selectOne(Wrappers.<PreRuleInfo>lambdaQuery()
                 .eq(PreRuleInfo::getIsDefault,RuleDefaultEnum.DEFAULT));
         if(null != oldInfo){
-            oldInfo.setIsDefault(RuleDefaultEnum.NOT_DEFAULT);
-            preRuleInfoMapper.updateById(oldInfo);
+            PreRuleInfo newInfo = new PreRuleInfo();
+            BeanUtil.copyProperties(param,newInfo);
+            newInfo.setIsDefault(RuleDefaultEnum.NOT_DEFAULT);
+            int count = preRuleInfoMapper.updateById(newInfo);
+            if (count <= 0) {
+                throw new ServiceException("默认撤销失败");
+            }
             log.info("默认撤销成功!");
         }
-        PreRuleInfo info =  preRuleInfoMapper.selectById(param.getId());
-        info.setIsDefault(RuleDefaultEnum.DEFAULT);
-        preRuleInfoMapper.updateById(info);
+
+        PreRuleInfo newInfo = new PreRuleInfo();
+        BeanUtil.copyProperties(param,newInfo);
+        newInfo.setIsDefault(RuleDefaultEnum.DEFAULT);
+        int count = preRuleInfoMapper.updateById(newInfo);
+        if (count <= 0) {
+            throw new ServiceException("默认设置失败");
+        }
         log.info("默认设置成功!");
     }
 
