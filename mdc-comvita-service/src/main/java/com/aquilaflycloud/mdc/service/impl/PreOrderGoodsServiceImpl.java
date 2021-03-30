@@ -88,31 +88,38 @@ public class PreOrderGoodsServiceImpl implements PreOrderGoodsService {
             preOrderGoods = preOrderGoodsMapper.selectOne(Wrappers.<PreOrderGoods>lambdaQuery()
                     .eq(PreOrderGoods::getId,param.getOrderGoodsId()));
         }
+        PreOrderGoods newOrderGoods = new PreOrderGoods();
+        newOrderGoods.setId(preOrderGoods.getId());
         if(param.getIsUpdate().equals(IsUpdateEnum.NO)) {
             //更改提货卡状态
-            prePickingCard.setPickingState(PickingCardStateEnum.RESERVE);
-            int cardCount = prePickingCardMapper.updateById(prePickingCard);
+            PrePickingCard newPickingCard = new PrePickingCard();
+            newPickingCard.setId(prePickingCard.getId());
+            newPickingCard.setPickingState(PickingCardStateEnum.RESERVE);
+            int cardCount = prePickingCardMapper.updateById(newPickingCard);
             if(cardCount < 0){
                 throw new ServiceException("提货卡状态修改失败。");
             }
-            preOrderGoods.setCardPsw(param.getPassword());
-            preOrderGoods.setIsUpdate(IsUpdateEnum.NO);
-            preOrderGoods.setReserveStartTime(new Date());
+            newOrderGoods.setCardPsw(param.getPassword());
+            newOrderGoods.setIsUpdate(IsUpdateEnum.NO);
+            newOrderGoods.setReserveStartTime(new Date());
         }else {
             preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
-            preOrderGoods.setIsUpdate(IsUpdateEnum.YES);
+            newOrderGoods.setId(preOrderGoods.getId());
+            newOrderGoods.setIsUpdate(IsUpdateEnum.YES);
         }
-        BeanUtil.copyProperties(param,preOrderGoods);
-        preOrderGoods.setReserveId(infoResult.getId());
-        preOrderGoods.setPickingCardState(PickingCardStateEnum.RESERVE);
-        preOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
-        int updateOrderGoods = preOrderGoodsMapper.updateById(preOrderGoods);
+//        BeanUtil.copyProperties(param,preOrderGoods);
+        newOrderGoods.setReserveId(infoResult.getId());
+        newOrderGoods.setPickingCardState(PickingCardStateEnum.RESERVE);
+        newOrderGoods.setOrderGoodsState(OrderGoodsStateEnum.PRETAKE);
+        int updateOrderGoods = preOrderGoodsMapper.updateById(newOrderGoods);
         if(updateOrderGoods < 0){
             throw new ServiceException("预约失败。");
         }
         PreOrderInfo orderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
-        orderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
-        preOrderInfoMapper.updateById(orderInfo);
+        PreOrderInfo newOrderInfo = new PreOrderInfo();
+        newOrderInfo.setId(orderInfo.getId());
+        newOrderInfo.setOrderState(OrderInfoStateEnum.WAITINGDELIVERY);
+        preOrderInfoMapper.updateById(newOrderInfo);
         //记录日志
         if(param.getIsUpdate().equals(IsUpdateEnum.NO)) {
             String content = preOrderGoods.getReserveName() + DateUtil.format(new Date(), "yyyy-MM-dd") + " 对" +
