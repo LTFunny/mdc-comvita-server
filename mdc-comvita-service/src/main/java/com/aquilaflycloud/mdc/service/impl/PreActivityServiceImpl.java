@@ -538,6 +538,8 @@ public class PreActivityServiceImpl implements PreActivityService {
             throw new ServiceException("编辑的活动主键id为空" );
         }
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
+        PreActivityInfo info = new PreActivityInfo();
+        info.setId(activityInfo.getId());
         Date beginTime = param.getBeginTime();
         Date endTime = param.getEndTime();
         if(null == beginTime){
@@ -548,26 +550,24 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
         checkTimeParam(beginTime,endTime);
         checkNameParam(param.getId(),param.getActivityName(), param.getActivityType());
-        BeanUtil.copyProperties(param, activityInfo,"id","activityState","refGoods");
+        BeanUtil.copyProperties(param, info,"id","activityState","refGoods");
         //时间有更新的话 同步更新状态 但是已下架状态的要先上架
         if(null != activityInfo.getActivityState() && activityInfo.getActivityState() != ActivityStateEnum.CANCELED){
             DateTime now = DateTime.now();
             if (now.isAfterOrEquals(beginTime) && now.isBeforeOrEquals(endTime)) {
-                activityInfo.setActivityState(ActivityStateEnum.IN_PROGRESS);
+                info.setActivityState(ActivityStateEnum.IN_PROGRESS);
             } else if (now.isBefore(beginTime)) {
-                activityInfo.setActivityState(ActivityStateEnum.NOT_STARTED);
+                info.setActivityState(ActivityStateEnum.NOT_STARTED);
             } else if (now.isAfter(endTime)) {
-                activityInfo.setActivityState(ActivityStateEnum.FINISHED);
+                info.setActivityState(ActivityStateEnum.FINISHED);
             }
         }
         if (CollUtil.isNotEmpty(param.getRewardRuleList())) {
-            activityInfo.setRewardRuleContent(JSONUtil.toJsonStr(param.getRewardRuleList()));
+            info.setRewardRuleContent(JSONUtil.toJsonStr(param.getRewardRuleList()));
         }
         if (CollUtil.isNotEmpty(param.getRefGoods())) {
-            activityInfo.setRefGoods(JSONUtil.toJsonStr(param.getRefGoods()));
+            info.setRefGoods(JSONUtil.toJsonStr(param.getRefGoods()));
         }
-        PreActivityInfo info = new PreActivityInfo();
-        BeanUtil.copyProperties(activityInfo,info);
         int count = preActivityInfoMapper.updateById(info);
         if (count <= 0) {
             throw new ServiceException("编辑活动失败");
