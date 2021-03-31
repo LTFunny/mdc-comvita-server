@@ -538,8 +538,6 @@ public class PreActivityServiceImpl implements PreActivityService {
             throw new ServiceException("编辑的活动主键id为空" );
         }
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
-        PreActivityInfo updateInfo = new PreActivityInfo();
-        updateInfo.setId(activityInfo.getId());
         Date beginTime = param.getBeginTime();
         Date endTime = param.getEndTime();
         if(null == beginTime){
@@ -550,27 +548,27 @@ public class PreActivityServiceImpl implements PreActivityService {
         }
         checkTimeParam(beginTime,endTime);
         checkNameParam(param.getId(),param.getActivityName(), param.getActivityType());
-        BeanUtil.copyProperties(param, updateInfo,"id","activityState","refGoods");
+        BeanUtil.copyProperties(param, activityInfo,"id","activityState","refGoods");
         //时间有更新的话 同步更新状态 但是已下架状态的要先上架
         if(null != activityInfo.getActivityState() && activityInfo.getActivityState() != ActivityStateEnum.CANCELED){
             DateTime now = DateTime.now();
             if (now.isAfterOrEquals(beginTime) && now.isBeforeOrEquals(endTime)) {
-                updateInfo.setActivityState(ActivityStateEnum.IN_PROGRESS);
+                activityInfo.setActivityState(ActivityStateEnum.IN_PROGRESS);
             } else if (now.isBefore(beginTime)) {
-                updateInfo.setActivityState(ActivityStateEnum.NOT_STARTED);
+                activityInfo.setActivityState(ActivityStateEnum.NOT_STARTED);
             } else if (now.isAfter(endTime)) {
-                updateInfo.setActivityState(ActivityStateEnum.FINISHED);
+                activityInfo.setActivityState(ActivityStateEnum.FINISHED);
             }
         }
         if (CollUtil.isNotEmpty(param.getRewardRuleList())) {
-            updateInfo.setRewardRuleContent(JSONUtil.toJsonStr(param.getRewardRuleList()));
+            activityInfo.setRewardRuleContent(JSONUtil.toJsonStr(param.getRewardRuleList()));
         }
         if (CollUtil.isNotEmpty(param.getRefGoods())) {
-            updateInfo.setRefGoods(JSONUtil.toJsonStr(param.getRefGoods()));
+            activityInfo.setRefGoods(JSONUtil.toJsonStr(param.getRefGoods()));
         }
-
-
-        int count = preActivityInfoMapper.updateById(updateInfo);
+        PreActivityInfo info = new PreActivityInfo();
+        BeanUtil.copyProperties(activityInfo,info);
+        int count = preActivityInfoMapper.updateById(info);
         if (count <= 0) {
             throw new ServiceException("编辑活动失败");
         }
@@ -635,7 +633,7 @@ public class PreActivityServiceImpl implements PreActivityService {
             throw new ServiceException("上架(下架)的活动主键id为空" );
         }
         PreActivityInfo activityInfo =  preActivityInfoMapper.selectById(param.getId());
-        PreActivityInfo update=new PreActivityInfo();
+        PreActivityInfo update = new PreActivityInfo();
         update.setId(activityInfo.getId());
         if(activityInfo.getActivityState() == ActivityStateEnum.CANCELED){
             //根据时间 判断上架状态
