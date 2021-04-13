@@ -274,6 +274,7 @@
         a.total_price totaGoodsPrice
         from
         pre_order_info a
+        left join pre_activity_info c on c.id=a.activity_info_id
         left join (select count(c.id) num,c.order_id orderId,  b.goods_price goodsPrice,
         b.goods_price unitPrice,b.goods_code goodsCode,c.goods_name
         from pre_order_goods c
@@ -282,6 +283,9 @@
         where a.id is not null
         <if test="param.shopId != null and param.shopId != ''">
             and a.shop_id= #{param.shopId}
+        </if>
+        <if test="param.activityName != null and param.activityName != ''">
+            and c.activity_name like CONCAT('%',#{param.activityName},'%')
         </if>
         <if test="param.guideName != null and param.guideName != ''">
             and  a.guide_name= #{param.guideName}
