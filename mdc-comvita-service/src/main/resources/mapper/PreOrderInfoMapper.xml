@@ -238,7 +238,7 @@
             and  a.guide_name= #{param.guideName}
         </if>
         <if test="param.orderState != null and param.orderState != ''">
-            and  b.order_state= #{param.orderState.type}
+            and  b.order_state= #{param.orderState}
         </if>
         <if test="param.orderCode != null and param.orderCode != ''">
             and  a.order_code= #{param.orderCode}
@@ -291,7 +291,7 @@
             and  a.guide_name= #{param.guideName}
         </if>
         <if test="param.orderState != null and param.orderState != ''">
-            and  a.order_state= #{param.orderState.type}
+            and  a.order_state= #{param.orderState}
         </if>
         <if test="param.orderCode != null and param.orderCode != ''">
             and  a.order_code= #{param.orderCode}
