@@ -42,7 +42,7 @@ public class PreOrderGoodsAutoSignJob extends JavaProcessor {
             for (PreOrderGoods preOrderGoods : preOrderGoodsList) {
                 ServiceContext.getCurrentContext().set(DataAuthConstant.TENANT_ID, preOrderGoods.getTenantId());
                 ServiceContext.getCurrentContext().set(DataAuthConstant.SUB_TENANT_ID, preOrderGoods.getSubTenantId());
-                preOrderInfoService.confirmReceiptOrderGoods(preOrderGoods.getGoodsId(), "系统自动签收");
+                preOrderInfoService.confirmReceiptOrderGoods(preOrderGoods.getId(), "系统自动签收");
             }
             processResult = new ProcessResult(true);
         } catch (Exception e) {
