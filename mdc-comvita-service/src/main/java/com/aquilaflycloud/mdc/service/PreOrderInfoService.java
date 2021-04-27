@@ -1,5 +1,6 @@
 package com.aquilaflycloud.mdc.service;
 
+import com.aquilaflycloud.mdc.model.pre.PreOrderGoods;
 import com.aquilaflycloud.mdc.param.pre.*;
 import com.aquilaflycloud.mdc.result.pre.PreOrderGoodsGetResult;
 import com.aquilaflycloud.mdc.result.pre.PreOrderInfoPageResult;
@@ -74,14 +75,14 @@ public interface PreOrderInfoService{
      */
     void confirmReceiptOrderGoods(PreOrderGoodsGetParam param);
 
-    void confirmReceiptOrderGoods(Long orderGoodsId, String operatorName);
-
     /**
      * 订单确认签收
      * @param param
      * @return
      */
     void confirmReceiptOrder(PreOrderGetParam param);
+
+    void autoConfirmReceiptOrder(PreOrderGoods orderGoods, String operatorName);
 
 
     /**

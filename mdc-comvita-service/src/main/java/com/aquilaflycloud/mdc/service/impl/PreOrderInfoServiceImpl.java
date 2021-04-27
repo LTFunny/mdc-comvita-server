@@ -484,13 +484,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Override
     public void confirmReceiptOrderGoods(PreOrderGoodsGetParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
-        confirmReceiptOrderGoods(param.getOrderGoodsId(), infoResult.getRealName());
-    }
-
-    @Transactional
-    @Override
-    public void confirmReceiptOrderGoods(Long orderGoodsId, String operatorName) {
-        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(orderGoodsId);
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
         PreOrderGoods newOrderGoods = new PreOrderGoods();
         newOrderGoods.setId(preOrderGoods.getId());
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
@@ -504,7 +498,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             throw new ServiceException("确认签收操作失败。");
         }
         String content = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss") + "进行了商品签收。";
-        orderOperateRecordService.addOrderOperateRecordLog(operatorName, preOrderInfo.getId(), content);
+        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getRealName(), preOrderInfo.getId(), content);
         //签收预售商品,发送微信订阅消息
         MemberInfo memberInfo = memberInfoMapper.selectById(preOrderGoods.getReserveId());
         wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(memberInfo.getWxAppId())
@@ -574,6 +568,18 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了订单签收。";
         orderOperateRecordService.addOrderOperateRecordLog(infoResult.getRealName(),preOrderInfo.getId(),content);
+    }
+
+    @Transactional
+    @Override
+    public void autoConfirmReceiptOrder(PreOrderGoods orderGoods, String operatorName) {
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(orderGoods.getOrderId());
+        if (preOrderInfo.getActivityType() == ActivityTypeEnum.PRE_SALES
+                && orderGoods.getGoodsType() != GoodsTypeEnum.GIFTS) {
+            //预售活动订单明细
+            confirmReceiptOrderGoods(new PreOrderGoodsGetParam().setOrderGoodsId(orderGoods.getId()));
+        }
+        confirmReceiptOrder(new PreOrderGetParam().setOrderId(orderGoods.getOrderId()));
     }
 
     @Override
