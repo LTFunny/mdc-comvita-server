@@ -484,7 +484,11 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Override
     public void confirmReceiptOrderGoods(PreOrderGoodsGetParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
-        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(param.getOrderGoodsId());
+        confirmReceiptOrderGoods(param.getOrderGoodsId(), infoResult.getRealName());
+    }
+
+    private void confirmReceiptOrderGoods(Long orderGoodsId, String operatorName) {
+        PreOrderGoods preOrderGoods = preOrderGoodsMapper.selectById(orderGoodsId);
         PreOrderGoods newOrderGoods = new PreOrderGoods();
         newOrderGoods.setId(preOrderGoods.getId());
         PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(preOrderGoods.getOrderId());
@@ -498,7 +502,7 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
             throw new ServiceException("确认签收操作失败。");
         }
         String content = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss") + "进行了商品签收。";
-        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getRealName(), preOrderInfo.getId(), content);
+        orderOperateRecordService.addOrderOperateRecordLog(operatorName, preOrderInfo.getId(), content);
         //签收预售商品,发送微信订阅消息
         MemberInfo memberInfo = memberInfoMapper.selectById(preOrderGoods.getReserveId());
         wechatMiniProgramSubscribeMessageService.sendMiniMessage(CollUtil.newArrayList(new MiniMemberInfo().setAppId(memberInfo.getWxAppId())
@@ -511,11 +515,14 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
     @Override
     public void confirmReceiptOrder(PreOrderGetParam param) {
         MemberInfoResult infoResult = MdcUtil.getRequireCurrentMember();
-        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(param.getOrderId());
+        confirmReceiptOrder(param.getOrderId(), infoResult);
+    }
+
+    private void confirmReceiptOrder(Long orderId, MemberInfo memberInfo) {
+        PreOrderInfo preOrderInfo = preOrderInfoMapper.selectById(orderId);
         PreOrderInfo newOrderInfo = new PreOrderInfo();
         newOrderInfo.setId(preOrderInfo.getId());
         newOrderInfo.setOrderState(OrderInfoStateEnum.BEENCOMPLETED);
-        MemberInfo memberInfo = memberInfoMapper.selectById(infoResult.getId());
         Map<RewardTypeEnum, MemberScanRewardResult> map = memberRewardService.addScanRewardRecord
                 (memberInfo, null, preOrderInfo.getId(), preOrderInfo.getTotalPrice(), true);
         if (CollUtil.isNotEmpty(map) && map.get(RewardTypeEnum.SCORE) != null) {
@@ -561,13 +568,11 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
                             preOrderInfo.getOrderCode(), preOrderGoods.getGoodsName(), preOrderGoods.getExpressName(),
                             preOrderGoods.getExpressOrderCode(), "商品已签收。感谢您对康维他的支持。");
                 }
-
             }
         }
-
         String content = DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss")
                 + "对订单：(" + preOrderInfo.getOrderCode() + ")进行了订单签收。";
-        orderOperateRecordService.addOrderOperateRecordLog(infoResult.getRealName(),preOrderInfo.getId(),content);
+        orderOperateRecordService.addOrderOperateRecordLog(memberInfo.getRealName(),preOrderInfo.getId(),content);
     }
 
     @Transactional
@@ -577,9 +582,10 @@ public class PreOrderInfoServiceImpl implements PreOrderInfoService {
         if (preOrderInfo.getActivityType() == ActivityTypeEnum.PRE_SALES
                 && orderGoods.getGoodsType() != GoodsTypeEnum.GIFTS) {
             //预售活动订单明细
-            confirmReceiptOrderGoods(new PreOrderGoodsGetParam().setOrderGoodsId(orderGoods.getId()));
+            confirmReceiptOrderGoods(orderGoods.getId(), operatorName);
         }
-        confirmReceiptOrder(new PreOrderGetParam().setOrderId(orderGoods.getOrderId()));
+        MemberInfo memberInfo = memberInfoMapper.selectById(orderGoods.getReserveId());
+        confirmReceiptOrder(orderGoods.getOrderId(), memberInfo);
     }
 
     @Override
